@@ -44,6 +44,8 @@ Fehlt Node.js 22, eine Startmöglichkeit oder der Host-Header bleibt nicht erhal
 
 `deploy:plesk` installiert mit `--frozen-lockfile` und `--prod=false` die exakt festgeschriebenen Laufzeit- und Buildabhängigkeiten. Danach führt es die Plesk-Laufzeittests, den Produktions-Build, das SQL-Schema-Bundle, die Zusammenstellung des Standalone-Builds und dessen Strukturprüfung aus. Bei einer falschen Node-Version oder einem Buildfehler bricht der Vorgang ab. Der Build entsteht dadurch direkt auf dem Linux-Zielsystem und passt zu dessen Architektur. `deploy/plesk/deploy-from-git.sh` bleibt nur für Systeme mit echtem, nicht eingeschränktem Shell-Zugriff als Alternative erhalten.
 
+Bei einem HTTP-500-Fehler vor Erreichen der Next.js-Routen wird im Node.js-Toolkit das Paket-Skript `diagnose:plesk` ausgeführt. Es prüft Node-Version, Arbeitsverzeichnis, Buildpfade, Installationsstatus und die Produktionskonfiguration. Es gibt ausschließlich Regeln und Variablennamen aus, niemals Secret-Werte.
+
 Der manuell startbare GitHub-Actions-Workflow `Plesk-Artefakt` bleibt als optionaler Prüf- und Downloadweg bestehen. Für das direkte Plesk-Git-Deployment ist er nicht erforderlich.
 
 ## Plesk-Einstellungen
