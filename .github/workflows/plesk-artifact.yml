@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Repository auschecken
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Node.js einrichten
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -48,10 +48,12 @@ jobs:
         run: |
           pnpm build:plesk
           pnpm verify:plesk
-          tar -C dist/plesk -czf "../fahrseiten-plesk-${GITHUB_SHA::12}.tar.gz" .
+          archive_path="$GITHUB_WORKSPACE/dist/fahrseiten-plesk-${GITHUB_SHA::12}.tar.gz"
+          tar -C dist/plesk -czf "$archive_path" .
+          test -s "$archive_path"
 
       - name: Plesk-Artefakt bereitstellen
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fahrseiten-plesk-${{ github.sha }}
           path: dist/fahrseiten-plesk-*.tar.gz
