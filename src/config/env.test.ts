@@ -14,6 +14,11 @@ describe("parseServerEnv", () => {
       APP_HOSTS: "app.localhost,app.fahrseiten.de",
       DEMO_HOSTS: "demo.localhost,demo.fahrseiten.de,demo.fahrseiten.local",
       DEMO_DATA_MODE: "fixture",
+      SMTP_MODE: "catch",
+      SMTP_HOST: "localhost",
+      SMTP_PORT: 1025,
+      SMTP_SECURE: false,
+      SMTP_FROM: "FahrSeiten Lokal <noreply@fahrseiten.local>",
     });
   });
 

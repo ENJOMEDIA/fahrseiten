@@ -50,6 +50,13 @@
       "when": 1789634897140,
       "tag": "0006_little_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1789635171644,
+      "tag": "0007_left_groot",
+      "breakpoints": true
     }
   ]
 }

@@ -830,6 +830,86 @@ export const tenantInternalNotes = mysqlTable(
   ],
 );
 
+export const jobStatusValues = [
+  "pending",
+  "running",
+  "retry",
+  "completed",
+  "failed",
+] as const;
+export const notificationTemplates = mysqlTable(
+  "notification_templates",
+  {
+    id: id("id").primaryKey(),
+    key: varchar("key", { length: 100 }).notNull(),
+    version: int("version").notNull(),
+    subjectTemplate: varchar("subject_template", { length: 240 }).notNull(),
+    textTemplate: text("text_template").notNull(),
+    htmlTemplate: text("html_template").notNull(),
+    active: boolean("active").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("notification_templates_key_version_unique").on(
+      table.key,
+      table.version,
+    ),
+  ],
+);
+export const backgroundJobs = mysqlTable(
+  "background_jobs",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    type: varchar("type", { length: 100 }).notNull(),
+    idempotencyKey: varchar("idempotency_key", { length: 190 }).notNull(),
+    payload: json("payload").$type<Record<string, unknown>>().notNull(),
+    status: mysqlEnum("status", jobStatusValues).default("pending").notNull(),
+    attempts: int("attempts").default(0).notNull(),
+    maxAttempts: int("max_attempts").default(4).notNull(),
+    runAt: timestamp("run_at", { mode: "date", fsp: 3 }).defaultNow().notNull(),
+    lockedAt: timestamp("locked_at", { mode: "date", fsp: 3 }),
+    completedAt: timestamp("completed_at", { mode: "date", fsp: 3 }),
+    lastErrorCode: varchar("last_error_code", { length: 80 }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("background_jobs_idempotency_unique").on(table.idempotencyKey),
+    index("background_jobs_due_idx").on(table.status, table.runAt),
+  ],
+);
+export const notificationDeliveries = mysqlTable(
+  "notification_deliveries",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    jobId: id("job_id")
+      .notNull()
+      .references(() => backgroundJobs.id, { onDelete: "cascade" }),
+    idempotencyKey: varchar("idempotency_key", { length: 190 }).notNull(),
+    channel: mysqlEnum("channel", ["email"]).notNull(),
+    templateKey: varchar("template_key", { length: 100 }).notNull(),
+    templateVersion: int("template_version").notNull(),
+    recipientHash: varchar("recipient_hash", { length: 64 }).notNull(),
+    status: mysqlEnum("status", ["reserved", "sent", "failed"])
+      .default("reserved")
+      .notNull(),
+    sentAt: timestamp("sent_at", { mode: "date", fsp: 3 }),
+    errorCode: varchar("error_code", { length: 80 }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("notification_deliveries_idempotency_unique").on(
+      table.idempotencyKey,
+    ),
+    index("notification_deliveries_job_idx").on(table.jobId),
+  ],
+);
+
 export const plans = mysqlTable(
   "plans",
   {

@@ -26,7 +26,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 | 11      | C           | Kunden-Backend vollständig machen                              | Abgeschlossen  | Kundenabläufe; Abnahmeabhängigkeiten OD-09 zuerst klären                                         |
 | 12      | C           | Kontaktformulare, Leads und einfaches Kunden-CRM               | Abgeschlossen  | Anfrage beim richtigen Mandanten mit Benachrichtigung; OD-09                                     |
 | 13      | C           | Plattform-Admin und Akquise-CRM                                | Abgeschlossen  | Akquise, Kundenanlage und Onboarding mit Rollenprüfung                                           |
-| 14      | C           | E-Mail, Benachrichtigungen und Hintergrundjobs                 | Nicht begonnen | Idempotenz, Retry und sicherer Testbetrieb nachgewiesen                                          |
+| 14      | C           | E-Mail, Benachrichtigungen und Hintergrundjobs                 | Abgeschlossen  | Idempotenz, Retry und sicherer Testbetrieb nachgewiesen                                          |
 | 15      | C           | Tarife, Feature-Flags und kommende Funktionen                  | Nicht begonnen | Serverseitige Freigaben nach Tarif und Mandant                                                   |
 | 16      | C           | FahrSeiten-Vertriebswebsite                                    | Nicht begonnen | Navigierbar, ehrlich formuliert und an Akquise angebunden                                        |
 | 17      | C           | Datenschutz-, Consent- und Rechtsgrundlagen technisch umsetzen | Nicht begonnen | Optionale Dienste blockiert, getrennte Mandantentexte pflegbar                                   |
@@ -39,7 +39,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 14 folgt als Nächstes. Plattformverwaltung, Akquise, Onboarding und lesende Supportdiagnose sind serverseitig nach Plattformrolle getrennt.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 15 folgt als Nächstes. Versionierte E-Mail-Vorlagen, SMTP-/Catch-Transport, idempotente Zustellungen, begrenzte Retries und ein einzelner geschützter Cron-Einstieg sind vorbereitet.
 
 ## Abhängigkeiten und Fortschreibung
 
