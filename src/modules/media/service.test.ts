@@ -1,0 +1,110 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  archiveImage,
+  selectTenantImage,
+  uploadImage,
+  type MediaAssetRecord,
+  type MediaRepository,
+} from "./service";
+import type { MediaStorage } from "./storage";
+
+const png = new Uint8Array([
+  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 2, 0,
+  0, 0, 3,
+]);
+function harness(usages = 0) {
+  const assets = new Map<string, MediaAssetRecord>();
+  const storage: MediaStorage = {
+    async write() {},
+    async read() {
+      return png;
+    },
+  };
+  const repository: MediaRepository = {
+    async create(asset) {
+      assets.set(asset.id, asset);
+    },
+    async find(tenantId, id) {
+      const asset = assets.get(id);
+      return asset?.tenantId === tenantId ? asset : null;
+    },
+    async usageCount() {
+      return usages;
+    },
+    async archive(tenantId, id) {
+      const asset = assets.get(id);
+      if (asset?.tenantId === tenantId) asset.archivedAt = new Date();
+    },
+  };
+  return { assets, storage, repository };
+}
+
+describe("media service", () => {
+  it("validates signatures and stores tenant-partitioned images", async () => {
+    const { storage, repository } = harness();
+    const asset = await uploadImage({
+      tenantId: "tenant-a",
+      bytes: png,
+      metadata: {
+        originalName: "demo.png",
+        claimedMimeType: "image/png",
+        altText: "Demo",
+      },
+      storage,
+      repository,
+    });
+    expect(asset.storageKey).toMatch(/^tenant-a\/[\w-]+\.png$/);
+    expect(asset).toMatchObject({ width: 2, height: 3 });
+  });
+  it("rejects disguised executable content", async () => {
+    const { storage, repository } = harness();
+    await expect(
+      uploadImage({
+        tenantId: "tenant-a",
+        bytes: new TextEncoder().encode("<script>alert(1)</script>"),
+        metadata: {
+          originalName: "x.png",
+          claimedMimeType: "image/png",
+          altText: "",
+        },
+        storage,
+        repository,
+      }),
+    ).rejects.toThrow();
+  });
+  it("prevents cross-tenant selection", async () => {
+    const { storage, repository } = harness();
+    const asset = await uploadImage({
+      tenantId: "tenant-a",
+      bytes: png,
+      metadata: {
+        originalName: "demo.png",
+        claimedMimeType: "image/png",
+        altText: "Demo",
+      },
+      storage,
+      repository,
+    });
+    await expect(
+      selectTenantImage("tenant-b", asset.id, repository),
+    ).rejects.toThrow(/nicht gefunden/);
+  });
+  it("warns before archiving used media", async () => {
+    const { storage, repository } = harness(2);
+    const asset = await uploadImage({
+      tenantId: "tenant-a",
+      bytes: png,
+      metadata: {
+        originalName: "demo.png",
+        claimedMimeType: "image/png",
+        altText: "Demo",
+      },
+      storage,
+      repository,
+    });
+    await expect(
+      archiveImage("tenant-a", asset.id, repository),
+    ).rejects.toThrow(/2-mal/);
+  });
+});

@@ -1,0 +1,1 @@
+ALTER TABLE `sales_leads` ADD `privacy_text_version` varchar(80);
