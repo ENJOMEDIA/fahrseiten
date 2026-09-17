@@ -71,7 +71,7 @@ In Plesk für `fahrseiten.de` eintragen:
 
 Als Paketmanager `pnpm` auswählen. Danach über **Skript ausführen** das Skript `deploy:plesk` starten. Es installiert die festgeschriebenen Laufzeit- und Buildabhängigkeiten selbst. Nur fortfahren, wenn der Lauf mit `Plesk-Artefakt geprüft` erfolgreich endet. Anschließend muss unter `fahrseiten.de/dist/plesk` der vollständige Build mit `app.mjs`, `server.js`, `public/`, `.next/`, `drizzle/` und `schema/` liegen.
 
-Antwortet die Domain danach bereits vor der Next.js-Routenauflösung mit HTTP 500, über **Skript ausführen** `diagnose:plesk` starten. Die Ausgabe nennt fehlende Buildpfade oder ungültige Variablennamen, ohne Secret-Werte auszugeben. Erst nach einer erfolgreichen Diagnose die Anwendung erneut starten.
+Antwortet die Domain danach bereits vor der Next.js-Routenauflösung mit HTTP 500, über **Skript ausführen** `diagnose:plesk` starten. Die Ausgabe prüft Build und Pfade; Plesk reicht die Anwendungsvariablen je nach Version nicht an Paket-Skripte weiter. Nach **Restart App** enthält `fahrseiten.de/plesk-startup-error.log` die bereinigte Startursache. Die Datei liegt außerhalb des Document Root, erhält Modus `0600` und enthält keine Secret-Werte. Erst nach Behebung der dort genannten Ursache erneut starten.
 
 Die Werte aus `ENVIRONMENT.example.txt` einzeln als geschützte Plesk-Umgebungsvariablen anlegen. `FAHRSEITEN_CONFIG_FILE` erhält den zuvor festgelegten absoluten persistenten Pfad. Wird die Variable ausgelassen, verwendet die Produktion `$HOME/.fahrseiten/runtime.json`. Für zwei getrennte Zufallswerte kann lokal jeweils folgender Befehl verwendet werden:
 

@@ -51,15 +51,29 @@ const effectiveEnvironment = {
   DATABASE_URL: runtimeConfig?.databaseUrl ?? process.env.DATABASE_URL,
 };
 
-errors.push(
-  ...validateProductionEnvironment(effectiveEnvironment, {
-    allowDatabaseBootstrap:
-      !runtimeConfig && Boolean(process.env.INSTALL_TOKEN),
-  }),
-);
+const applicationEnvironmentVisible = [
+  "APP_BASE_URL",
+  "DEMO_DATA_MODE",
+  "MARKETING_HOSTS",
+  "APP_HOSTS",
+  "SMTP_MODE",
+].some((name) => Boolean(process.env[name]));
 
-if (!runtimeConfig && !process.env.INSTALL_TOKEN) {
-  errors.push("Vor der Browserinstallation muss INSTALL_TOKEN gesetzt sein.");
+if (applicationEnvironmentVisible) {
+  errors.push(
+    ...validateProductionEnvironment(effectiveEnvironment, {
+      allowDatabaseBootstrap:
+        !runtimeConfig && Boolean(process.env.INSTALL_TOKEN),
+    }),
+  );
+
+  if (!runtimeConfig && !process.env.INSTALL_TOKEN) {
+    errors.push("Vor der Browserinstallation muss INSTALL_TOKEN gesetzt sein.");
+  }
+} else {
+  console.info(
+    "Hinweis: Plesk übergibt die Anwendungsvariablen nicht an diese Paket-Skriptumgebung. Sie werden hier deshalb nicht bewertet.",
+  );
 }
 
 if (errors.length > 0) {
@@ -69,5 +83,7 @@ if (errors.length > 0) {
 }
 
 console.info(
-  "Plesk-Startdiagnose erfolgreich. Build und Produktionskonfiguration sind startbereit.",
+  applicationEnvironmentVisible
+    ? "Plesk-Startdiagnose erfolgreich. Build und Produktionskonfiguration sind startbereit."
+    : "Plesk-Builddiagnose erfolgreich. Die Anwendungsvariablen werden erst beim Passenger-Start geprüft.",
 );

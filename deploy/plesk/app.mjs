@@ -11,11 +11,12 @@ const errors = validateProductionEnvironment(effectiveEnvironment, {
 });
 
 if (errors.length > 0) {
-  console.error(
-    "FahrSeiten wurde wegen ungültiger Produktionskonfiguration nicht gestartet:",
+  throw new Error(
+    [
+      "FahrSeiten wurde wegen ungültiger Produktionskonfiguration nicht gestartet:",
+      ...errors.map((error) => `- ${error}`),
+    ].join("\n"),
   );
-  for (const error of errors) console.error(`- ${error}`);
-  process.exit(1);
 }
 
 await import("./server.js");

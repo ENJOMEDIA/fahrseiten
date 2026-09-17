@@ -24,6 +24,7 @@ coverage
 playwright-report/
 test-results/
 .local-storage/
+plesk-startup-error.log
 
 # nyc test coverage
 .nyc_output
