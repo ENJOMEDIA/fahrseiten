@@ -20,7 +20,9 @@ Stand: 17. September 2026. Die Schritte 1 bis 19 des Laufplans sind lokal umgese
 
 Eingesetzt werden Next.js mit App Router, React, TypeScript Strict Mode, Tailwind CSS, ein eigenes Designsystem sowie MySQL/MariaDB mit Drizzle ORM und versionierten Migrationen. Die Architektur ist ein modularer Monolith. Serverseitige Tenant- und Rechteprüfung, SMTP- und Cron-Adapter, kontrollierter Block-Builder, Consent-Steuerung und austauschbarer Speicher gehören zum Fundament.
 
-netcup Webhosting 8000 ist das erste Hostingziel. Seine Eignung für die konkrete Konfiguration ist noch zu prüfen; eine spätere VPS-Migration soll ohne Neuentwicklung der Fachlogik möglich sein.
+Ein Linux-Plesk-System ist das aktuelle erste Deploymentziel. Seine konkrete Node.js-, Proxy-, Datenbank- und Speicherumgebung muss noch am Zielsystem geprüft werden; eine spätere VPS-Migration soll ohne Neuentwicklung der Fachlogik möglich sein.
+
+Für ein Plesk-System kann mit `pnpm build:plesk` ein geprüftes Next.js-Standalone-Artefakt erstellt werden. Konfiguration, Migration, Healthcheck und Rollback beschreibt die [Plesk-Deployment-Anleitung](docs/deployment-plesk.md). Die Anleitung nimmt selbst keine Hosting-, DNS- oder SSL-Änderungen vor.
 
 ## Lokales Setup
 

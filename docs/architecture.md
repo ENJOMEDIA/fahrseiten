@@ -59,7 +59,7 @@ Passwort-Reset in Schritt 4 und Anfragebenachrichtigungen in Schritt 12 benötig
 
 ## Betrieb, Speicher und VPS-Migration
 
-netcup Webhosting 8000 ist ein Kompatibilitätsziel, noch kein geprüfter Betriebsnachweis. Vor Einführung der Laufzeit sind Node-/Next.js-Kompatibilität und Startmechanismus zu prüfen; Schritt 20 validiert den tatsächlichen Stagingbetrieb. Domain-/SSL-Limits, Proxy-Verhalten, Cron, Schreibrechte, Uploadspeicher und Ressourcen sind offene Prüfgegenstände (OD-03, OD-06 und OD-14).
+Der ursprüngliche Plan nannte netcup Webhosting 8000 als erstes Kompatibilitätsziel. Mit dem Auftrag vom 17. September 2026 ist ein Linux-Plesk-System das aktuelle erste Deploymentziel. Ein Next.js-Standalone-Artefakt und Plesk-Einstiegspunkte sind vorbereitet; Node-/Plesk-Version, Proxy-Verhalten, Domain-/SSL-Limits, Cron, Schreibrechte, Uploadspeicher und Ressourcen bleiben bis zur Prüfung am Zielsystem offene Punkte (OD-03, OD-06 und OD-14).
 
 Konfiguration wird aus der Umgebung bezogen. Ein Storage-Adapter kapselt zunächst Dateisystem-/Webhosting-Speicher und später optional S3-kompatiblen Speicher. Fachlogik darf weder WCP-Verzeichnisse noch einen bestimmten Hoster voraussetzen. Beim späteren VPS-Umzug werden Laufzeit, Datenbank, Medien, Cron/Worker und Routing migriert; die Mandanten- und Geschäftslogik bleibt erhalten. Der konkrete Umzugs- und Rollbackplan ist noch nicht festgelegt.
 

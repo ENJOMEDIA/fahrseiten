@@ -1,6 +1,8 @@
 # Release-Readiness
 
-Stand: 17. September 2026. Geprüfter Umfang: lokale Entwicklungsbasis der Schritte 1 bis 19. Dieser Bericht ist keine Produktionsfreigabe. Staging, netcup-Betrieb und Pilotkunde gehören ausdrücklich zu den nicht ausgeführten Schritten 20 und 21.
+Stand: 17. September 2026. Geprüfter Umfang: lokale Entwicklungsbasis der Schritte 1 bis 19. Dieser Bericht ist keine Produktionsfreigabe. Reales Plesk-Staging und Pilotkunde wurden nicht ausgeführt.
+
+Nach Abschluss der Schritte 1 bis 19 wurde zusätzlich ein Plesk-Standalone-Artefakt vorbereitet. `pnpm build:plesk` erzeugt einen Application Root mit validierender Startdatei, Migration und Cron-Runner; `pnpm verify:plesk` prüft Struktur, Runtime-Abhängigkeiten und den Ausschluss von Env-Dateien. Die reale Plesk-, Proxy-, Datenbank-, DNS- und SSL-Abnahme bleibt ausstehend und ist in [deployment-plesk.md](deployment-plesk.md) beschrieben.
 
 ## Ergebnis
 
@@ -22,14 +24,14 @@ Für den lokal prüfbaren Umfang bestehen keine bekannten offenen kritischen Sic
 | Datenbankindizes                | Bestanden, Schema        | Tenant-, Status-, Ablauf-, Job- und Referenzabfragen besitzen gezielte Indizes                                | Keine produktiven Query-Pläne oder Lastwerte, mittel                      | Slow-Query-Analyse mit Stagingdaten durchführen                                                 |
 | Mobile und Barrierearmut        | Bestanden, lokal         | Responsive Layouts, mobile Navigation, semantische Labels, Live-Regionen, Fokus-/Tastatur-E2E                 | Formale WCAG-Konformitätsprüfung und Zielniveau offen, mittel             | Manuelle Screenreader-/Kontrastprüfung und verbindliches Ziel vor Freigabe                      |
 | Tests und Abdeckung             | Bestanden                | 73 Tests; Coverage: 82,85 % Statements, 64,64 % Branches, 85,98 % Funktionen, 83,98 % Zeilen                  | Schwächere Zweigabdeckung bei UI, Mail und Medien, niedrig bis mittel     | Risikobasierte Tests bei jeder Änderung ergänzen; keine Prozentoptimierung ohne fachlichen Wert |
-| Build und Zielruntime           | Bestanden mit Abweichung | Next.js-Produktions-Build erfolgreich                                                                         | Lokal Node 24.19 statt Ziel Node 22; netcup-Runtime unbestätigt, mittel   | CI auf Node 22 und Staging auf tatsächlicher Hostingruntime ausführen                           |
+| Build und Zielruntime           | Bestanden mit Abweichung | Next.js-Produktions- und Plesk-Standalone-Build erfolgreich                                                   | Lokal Node 24.19 statt Ziel Node 22; Plesk-Runtime unbestätigt, mittel    | Linux-Artefaktworkflow auf Node 22 und Staging auf tatsächlicher Hostingruntime ausführen       |
 
 ## Bewusst nicht ausgeführt
 
 - Keine produktiven Zugangsdaten, DNS-, SSL-, Hosting- oder Deploymentänderungen.
 - Keine echte MySQL-/MariaDB-Migration, weil lokal keine Instanz verfügbar war.
 - Keine SMTP-Zustellung oder externe Monitoring-, Karten-, Analyse- oder Marketingdienste.
-- Kein Backup-/Restore-Test, Lasttest, netcup-Staging oder Pilotbetrieb.
+- Kein Backup-/Restore-Test, Lasttest, Plesk-Staging oder Pilotbetrieb.
 - Keine rechtliche Freigabe von Impressum, Datenschutz, Consent, Aufbewahrung oder Unterauftragnehmern.
 
 ## Freigabekriterium für den nächsten Meilenstein

@@ -1,12 +1,21 @@
 # Architecture Decision Records
 
-Dieses Verzeichnis ist die Grundlage für Architecture Decision Records (ADRs). In Schritt 1 wird nur das Verfahren dokumentiert; es gibt noch keine freigegebenen ADRs oder ausgewählten Bibliotheksversionen.
+Dieses Verzeichnis enthält die Architecture Decision Records (ADRs) des Projekts.
+
+## Vorhandene ADRs
+
+- [0001 – Runtime und Projektbasis](0001-runtime-und-projektbasis.md)
+- [0002 – Datenbank und Migrationen](0002-datenbank-und-migrationen.md)
+- [0003 – Authentifizierung und Sitzungen](0003-authentifizierung-und-sitzungen.md)
+- [0004 – Domain- und Hostauflösung](0004-domain-und-hostaufloesung.md)
+- [0005 – CMS-Versionen und lokale Demo](0005-cms-versionen-und-lokale-demo.md)
+- [0006 – Plesk-Bereitstellung als Standalone-Artefakt](0006-plesk-standalone-deployment.md)
 
 ## Zweck und Ablage
 
 Ein ADR beschreibt eine konkrete technische Entscheidung, ihre Gründe und Folgen. Die verbindlichen Produktgrenzen aus [Masterprompt](../FahrSeiten-Codex-Masterprompt.md), [Laufplan](../FahrSeiten-Codex-Laufplan.md) und [Product Scope](../product-scope.md) werden dadurch nicht stillschweigend verändert. Noch ungeklärte Punkte stehen in [Offene Entscheidungen](../open-decisions.md).
 
-Dateien erhalten fortlaufende Nummern und sprechende Namen, beispielsweise `0001-laufzeit-und-framework.md`. Diese Beispieldatei existiert noch nicht. Zulässige Statuswerte sind vorgeschlagen, angenommen, verworfen und ersetzt. „Angenommen“ darf erst nach dokumentierter Entscheidung und erforderlicher Prüfung verwendet werden.
+Dateien erhalten fortlaufende Nummern und sprechende Namen. Zulässige Statuswerte sind vorgeschlagen, angenommen, verworfen und ersetzt. „Angenommen“ darf erst nach dokumentierter Entscheidung und erforderlicher Prüfung verwendet werden.
 
 ## Inhalt eines ADR
 
