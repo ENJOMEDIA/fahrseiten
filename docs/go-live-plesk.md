@@ -82,7 +82,7 @@ Die Werte aus `ENVIRONMENT.example.txt` einzeln als geschützte Plesk-Umgebungsv
 openssl rand -hex 32
 ```
 
-Einen Wert als `CRON_SECRET`, den anderen als vorübergehenden `INSTALL_TOKEN` hinterlegen. `APP_BASE_URL` bleibt bereits `https://fahrseiten.de`, auch wenn das Zertifikat erst nach dem DNS-Wechsel ausgestellt wird. Die App darf gestartet werden; `/setup` wird bis zum funktionierenden HTTPS noch nicht benutzt.
+Einen Wert als `CRON_SECRET`, den anderen als vorübergehenden `INSTALL_TOKEN` hinterlegen. `APP_BASE_URL` bleibt bereits `https://fahrseiten.de`, auch wenn das Zertifikat erst nach dem DNS-Wechsel ausgestellt wird. Die App darf gestartet werden. Auf ausdrücklichen Wunsch kann `/setup` schon über HTTP verwendet werden; Installationscode, Admin-Passwort und Stammdaten werden dabei unverschlüsselt übertragen.
 
 `CONSENT_FUNCTIONAL_SERVICES`, `CONSENT_STATISTICS_SERVICES` und `CONSENT_MARKETING_SERVICES` bleiben leer, solange kein entsprechender optionaler Dienst technisch eingebunden ist. Dadurch erscheint kein unnötiges Consent-Banner.
 
@@ -132,15 +132,15 @@ Ein Wildcard-Zertifikat ist für diesen ersten Start nicht nötig. netcup weist 
 
 ## 9. Plattform einmalig installieren
 
-1. `https://fahrseiten.de/api/health` aufrufen; erwartet wird `status: ok`.
-2. `https://fahrseiten.de/setup` öffnen.
+1. Vor der SSL-Freigabe `http://fahrseiten.de/api/health`, danach `https://fahrseiten.de/api/health` aufrufen; erwartet wird `status: ok`.
+2. Für den gewünschten Vorabstart `http://fahrseiten.de/setup` öffnen. Sobald SSL funktioniert, ausschließlich `https://fahrseiten.de/setup` verwenden. HTTP nur von einem vertrauenswürdigen eigenen Gerät und Netz aus benutzen.
 3. Den nur in Plesk hinterlegten `INSTALL_TOKEN` sowie die echten Plattform- und Owner-Daten eingeben.
 4. Wartungsvorschautext und Markenfarben festlegen.
 5. Rechtliche Grunddaten vollständig eintragen. Die erzeugten Texte bleiben Entwürfe und sind keine Rechtsberatung.
 6. Installation absenden. Der Assistent legt Schema und Grunddaten atomar an.
-7. Danach `https://fahrseiten.de/api/ready` prüfen; erwartet werden `status: ready` und `database: ok`.
-8. `INSTALL_TOKEN` sofort aus Plesk entfernen und die Node.js-Anwendung neu starten.
-9. Ein zweiter Aufruf von `/setup` darf keine zweite Plattforminstallation erzeugen.
+7. Danach zunächst über dasselbe Protokoll `/api/ready` prüfen; erwartet werden `status: ready` und `database: ok`.
+8. Der angelegte `platform_owner` sperrt den Installer automatisch für weitere Installationen. Die Anwendung kann die Plesk-Umgebungsvariable selbst nicht löschen. `INSTALL_TOKEN` bei Gelegenheit im Panel entfernen und die Node.js-Anwendung neu starten.
+9. Ein zweiter Aufruf von `/setup` darf auch mit dem weiterhin gesetzten Token keine zweite Plattforminstallation erzeugen.
 
 Falls `/setup` technisch nicht nutzbar ist, vorübergehend `INSTALL_OWNER_EMAIL`, `INSTALL_OWNER_NAME` und `INSTALL_OWNER_PASSWORD` als geschützte Plesk-Variablen setzen und im Application Root `node install.mjs` ausführen. Der Shell-Installer migriert das Schema und legt ausschließlich den ersten Plattform-Owner an. Danach die drei Variablen sofort entfernen und die Anwendung neu starten. Plattformstammdaten, Design, Wartungstext und Rechtstextentwürfe werden auf diesem Notfallweg nicht angelegt; deshalb bleibt der Browserassistent der vorgesehene Installationsweg. Der SQL-Fallback wird nur für eine leere Datenbank verwendet.
 

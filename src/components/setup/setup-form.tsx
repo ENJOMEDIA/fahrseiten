@@ -57,7 +57,7 @@ export function PlatformSetupForm() {
       response.ok
         ? result.status === "already_installed"
           ? "FahrSeiten ist bereits eingerichtet. Du kannst dich anmelden."
-          : "Installation abgeschlossen. Entferne jetzt INSTALL_TOKEN in Plesk und melde dich an."
+          : "Installation abgeschlossen. Der Installer ist für weitere Installationen gesperrt. Du kannst dich jetzt anmelden."
         : (result.message ?? "Installation fehlgeschlagen."),
     );
   }

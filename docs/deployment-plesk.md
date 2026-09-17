@@ -16,7 +16,7 @@ Stand: 17. September 2026. Diese Anleitung bereitet FahrSeiten für ein Plesk-De
 
 Das Artefakt enthält keine `.env`-Datei. Secrets werden ausschließlich als geschützte Plesk-Umgebungsvariablen hinterlegt.
 
-Die vollständige Bedienreihenfolge für den ersten netcup-Livegang steht in der [Livegang-Checkliste](go-live-plesk.md). Insbesondere wird `/setup` erst nach erfolgreicher DNS-Auflösung und funktionierendem HTTPS verwendet.
+Die vollständige Bedienreihenfolge für den ersten netcup-Livegang steht in der [Livegang-Checkliste](go-live-plesk.md). Der Installer funktioniert auch vor der SSL-Ausstellung über HTTP. In diesem Fall werden Installationscode, Admin-Passwort und Stammdaten unverschlüsselt übertragen; dies ist nur die ausdrücklich gewählte Übergangslösung bis zur netcup-DNS- und SSL-Freigabe.
 
 ## Voraussetzungen in Plesk
 
@@ -101,17 +101,20 @@ Nach dem ersten isolierten Stagingstart sind `Host` und `X-Forwarded-Host` mit e
 
 ## Erstinstallation der Plattform im Browser
 
-`INSTALL_TOKEN` wird vorübergehend als geschützte Plesk-Umgebungsvariable gesetzt. Der Wert muss kryptografisch zufällig sein, mindestens 32 Zeichen haben und darf weder im Repository noch in einer URL stehen. Nach dem Start der Anwendung wird einmalig aufgerufen:
+`INSTALL_TOKEN` wird vorübergehend als geschützte Plesk-Umgebungsvariable gesetzt. Der Wert muss kryptografisch zufällig sein, mindestens 32 Zeichen haben und darf weder im Repository noch in einer URL stehen. Nach dem Start der Anwendung wird einmalig eine der beiden Adressen aufgerufen:
 
 ```text
 https://fahrseiten.de/setup
+http://fahrseiten.de/setup
 ```
+
+HTTPS bleibt der bevorzugte Weg. Für den ausdrücklich gewünschten Vorabstart kann HTTP verwendet werden, solange Plesk noch kein Zertifikat ausstellen kann. Der Aufruf sollte dann nur über ein vertrauenswürdiges eigenes Netz und Gerät erfolgen; öffentliche WLANs sind ungeeignet.
 
 Der Assistent fragt den Installationscode, die FahrSeiten-Anbieter- und Kontaktdaten, den ersten Plattform-Owner mit Passwort, Primär- und Akzentfarbe, den Vorschautext sowie rechtliche Grundangaben ab. Beim Absenden werden alle ausstehenden Migrationen angewendet. Anschließend werden der erste Plattform-Owner, die Plattformstammdaten und ein Audit-Eintrag angelegt. Ein bereits vorhandener Plattform-Owner verhindert eine zweite Installation.
 
 Die öffentliche Hauptseite startet im Wartungsmodus. Auch wenn die Datenbank vor dem Setup noch nicht erreichbar ist, zeigt der Produktionsbetrieb bei `DEMO_DATA_MODE=database` auf `/` nur die neutrale FahrSeiten-Vorschau. Nach dem Login kann der Plattform-Owner Text und Freigabe unter `/admin/einstellungen` steuern. Der Installer, Login und die Administrationsrouten bleiben unabhängig davon erreichbar.
 
-Nach erfolgreichem Abschluss muss `INSTALL_TOKEN` sofort in Plesk entfernt und die Anwendung neu gestartet werden. Die Route bleibt erreichbar, kann ohne den serverseitigen Code aber keine Installation ausführen. Sie ist von Suchmaschinen ausgeschlossen und durch Same-Origin-Prüfung sowie Drosselung geschützt.
+Nach erfolgreichem Abschluss verhindert der bereits angelegte `platform_owner` serverseitig eine zweite Installation. Die laufende Anwendung kann `INSTALL_TOKEN` nicht selbst aus der Plesk-Konfiguration löschen, weil sie keinen administrativen Zugriff auf das Hosting-Panel besitzt. Der Token ist für weitere Installationen wirkungslos und sollte bei Gelegenheit in Plesk entfernt werden; danach wird die Anwendung neu gestartet. Die Route ist von Suchmaschinen ausgeschlossen und durch Same-Origin-Prüfung sowie Drosselung geschützt.
 
 ## Alternative Erstinstallation per Shell
 
