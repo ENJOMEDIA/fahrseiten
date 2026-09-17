@@ -27,6 +27,7 @@ for (const file of [
   "install.mjs",
   "migrate.mjs",
   "password.mjs",
+  "runtime-config.mjs",
   "validate-env.mjs",
 ]) {
   await cp(resolve(root, "deploy/plesk", file), resolve(output, file));

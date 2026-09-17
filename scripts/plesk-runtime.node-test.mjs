@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { test } from "node:test";
 
 import {
@@ -6,6 +9,10 @@ import {
   validateBootstrapInput,
 } from "../deploy/plesk/install.mjs";
 import { hashInstallerPassword } from "../deploy/plesk/password.mjs";
+import {
+  readRuntimeConfig,
+  resolveDatabaseUrl,
+} from "../deploy/plesk/runtime-config.mjs";
 import { validateProductionEnvironment } from "../deploy/plesk/validate-env.mjs";
 import { verifyPassword } from "../src/modules/auth/password.ts";
 
@@ -27,6 +34,40 @@ const validEnvironment = {
 
 test("accepts a complete production environment", () => {
   assert.deepEqual(validateProductionEnvironment(validEnvironment), []);
+});
+
+test("allows the one-time database bootstrap when the install token exists", () => {
+  const withoutDatabase = { ...validEnvironment };
+  delete withoutDatabase.DATABASE_URL;
+  assert.deepEqual(
+    validateProductionEnvironment(withoutDatabase, {
+      allowDatabaseBootstrap: true,
+    }),
+    [],
+  );
+});
+
+test("loads the persistent database URL for later starts and migrations", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "fahrseiten-plesk-"));
+  const file = path.join(directory, "runtime.json");
+  const config = {
+    version: 1,
+    installationCompletedAt: "2026-09-17T12:00:00.000Z",
+    databaseUrl: "mysql://user:password@db.internal:3306/fahrseiten",
+  };
+  await writeFile(file, JSON.stringify(config), { mode: 0o600 });
+
+  const source = { FAHRSEITEN_CONFIG_FILE: file };
+  assert.deepEqual(readRuntimeConfig(source), config);
+  assert.equal(resolveDatabaseUrl(source), config.databaseUrl);
+});
+
+test("rejects a runtime configuration path inside the release", () => {
+  const errors = validateProductionEnvironment({
+    ...validEnvironment,
+    FAHRSEITEN_CONFIG_FILE: path.join(process.cwd(), "runtime.json"),
+  });
+  assert.ok(errors.some((error) => error.includes("Application Root")));
 });
 
 test("rejects local defaults and missing production settings", () => {

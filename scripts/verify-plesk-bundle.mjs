@@ -9,6 +9,7 @@ const required = [
   "install.mjs",
   "migrate.mjs",
   "password.mjs",
+  "runtime-config.mjs",
   "validate-env.mjs",
   "server.js",
   "package.json",

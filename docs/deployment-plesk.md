@@ -14,7 +14,7 @@ Stand: 17. September 2026. Diese Anleitung bereitet FahrSeiten für ein Plesk-De
 - `GO-LIVE.md`, `DEPLOYMENT.md` und `ENVIRONMENT.example.txt` geben dem hochgeladenen Release die Schrittfolge, technische Betriebsanleitung und eine geheimnisfreie Variablenvorlage mit.
 - `DEPLOYMENT.json` beschreibt Runtime und Startdatei des Artefakts.
 
-Das Artefakt enthält keine `.env`-Datei. Secrets werden ausschließlich als geschützte Plesk-Umgebungsvariablen hinterlegt.
+Das Artefakt enthält keine `.env`-Datei. Allgemeine Betriebswerte und der erste Installationscode werden als geschützte Plesk-Umgebungsvariablen hinterlegt. Der Webinstaller speichert die geprüfte Datenbankverbindung in `FAHRSEITEN_CONFIG_FILE` außerhalb des Release-Verzeichnisses mit Dateimodus `0600`. Ohne expliziten Pfad verwendet die Produktion `$HOME/.fahrseiten/runtime.json`.
 
 Die vollständige Bedienreihenfolge für den ersten netcup-Livegang steht in der [Livegang-Checkliste](go-live-plesk.md). Der Installer funktioniert auch vor der SSL-Ausstellung über HTTP. In diesem Fall werden Installationscode, Admin-Passwort und Stammdaten unverschlüsselt übertragen; dies ist nur die ausdrücklich gewählte Übergangslösung bis zur netcup-DNS- und SSL-Freigabe.
 
@@ -72,7 +72,7 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 | ----------------------------- | --------------------------------------------------------------------------- |
 | `NODE_ENV`                    | `production`                                                                |
 | `APP_BASE_URL`                | `https://fahrseiten.de`                                                     |
-| `DATABASE_URL`                | MySQL-URL mit ausschließlich dort hinterlegten Zugangsdaten                 |
+| `FAHRSEITEN_CONFIG_FILE`      | Absoluter persistenter Pfad außerhalb des Release- und Document-Root        |
 | `DEMO_DATA_MODE`              | `database`                                                                  |
 | `MARKETING_HOSTS`             | `fahrseiten.de,www.fahrseiten.de`                                           |
 | `APP_HOSTS`                   | `app.fahrseiten.de`                                                         |
@@ -91,7 +91,7 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 | `CONSENT_STATISTICS_SERVICES` | Namen tatsächlich aktiver Statistikdienste oder leer                        |
 | `CONSENT_MARKETING_SERVICES`  | Namen tatsächlich aktiver Marketingdienste oder leer                        |
 
-`PORT` und gegebenenfalls `HOSTNAME` werden von Plesk beziehungsweise seiner Node.js-Laufzeit verwaltet. Sie dürfen nicht hart im Repository eingetragen werden. Die Startvalidierung nennt ausschließlich fehlerhafte Variablennamen oder Regeln und gibt keine Secret-Werte aus.
+`DATABASE_URL` wird bei der normalen Browserinstallation nicht vorab gesetzt. Host, Port, Datenbankname, Benutzer und Passwort werden in `/setup` erfasst. `PORT` und gegebenenfalls `HOSTNAME` werden von Plesk beziehungsweise seiner Node.js-Laufzeit verwaltet. Sie dürfen nicht hart im Repository eingetragen werden. Die Startvalidierung nennt ausschließlich fehlerhafte Variablennamen oder Regeln und gibt keine Secret-Werte aus.
 
 ## Domain- und Proxy-Prüfung
 
@@ -110,15 +110,15 @@ http://fahrseiten.de/setup
 
 HTTPS bleibt der bevorzugte Weg. Für den ausdrücklich gewünschten Vorabstart kann HTTP verwendet werden, solange Plesk noch kein Zertifikat ausstellen kann. Der Aufruf sollte dann nur über ein vertrauenswürdiges eigenes Netz und Gerät erfolgen; öffentliche WLANs sind ungeeignet.
 
-Der Assistent fragt den Installationscode, die FahrSeiten-Anbieter- und Kontaktdaten, den ersten Plattform-Owner mit Passwort, Primär- und Akzentfarbe, den Vorschautext sowie rechtliche Grundangaben ab. Beim Absenden werden alle ausstehenden Migrationen angewendet. Anschließend werden der erste Plattform-Owner, die Plattformstammdaten und ein Audit-Eintrag angelegt. Ein bereits vorhandener Plattform-Owner verhindert eine zweite Installation.
+Der Assistent fragt den Installationscode, MySQL-/MariaDB-Host oder IP, Port, Datenbankname, Datenbankbenutzer und Datenbankpasswort sowie die FahrSeiten-Anbieter- und Kontaktdaten, den ersten Plattform-Owner mit Passwort, Primär- und Akzentfarbe, den Vorschautext und rechtliche Grundangaben ab. Beim Absenden prüft er die Datenbankverbindung und wendet alle ausstehenden Migrationen an. Anschließend werden der erste Plattform-Owner, die Plattformstammdaten und ein Audit-Eintrag angelegt.
 
 Die öffentliche Hauptseite startet im Wartungsmodus. Auch wenn die Datenbank vor dem Setup noch nicht erreichbar ist, zeigt der Produktionsbetrieb bei `DEMO_DATA_MODE=database` auf `/` nur die neutrale FahrSeiten-Vorschau. Nach dem Login kann der Plattform-Owner Text und Freigabe unter `/admin/einstellungen` steuern. Der Installer, Login und die Administrationsrouten bleiben unabhängig davon erreichbar.
 
-Nach erfolgreichem Abschluss verhindert der bereits angelegte `platform_owner` serverseitig eine zweite Installation. Die laufende Anwendung kann `INSTALL_TOKEN` nicht selbst aus der Plesk-Konfiguration löschen, weil sie keinen administrativen Zugriff auf das Hosting-Panel besitzt. Der Token ist für weitere Installationen wirkungslos und sollte bei Gelegenheit in Plesk entfernt werden; danach wird die Anwendung neu gestartet. Die Route ist von Suchmaschinen ausgeschlossen und durch Same-Origin-Prüfung sowie Drosselung geschützt.
+Nach erfolgreichem Abschluss schreibt der Installer ausschließlich Datenbank-URL, Konfigurationsversion und Abschlusszeitpunkt atomar in die persistente Runtime-Datei. Der `INSTALL_TOKEN` wird weder dort noch in der Datenbank gespeichert. Bei jedem späteren Aufruf erkennt die Anwendung den Abschluss vor der Tokenprüfung und verweigert eine weitere Installation; damit ist der Token anwendungsseitig verworfen, selbst wenn die Plesk-Variable noch vorhanden ist. Anschließend muss die Node.js-Anwendung einmal neu gestartet werden, damit alle Module die neue Verbindung laden. Die Route ist von Suchmaschinen ausgeschlossen und durch Same-Origin-Prüfung sowie Drosselung geschützt.
 
 ## Alternative Erstinstallation per Shell
 
-Wenn der Browserassistent nicht verwendet werden kann, werden stattdessen vorübergehend drei Plesk-Umgebungsvariablen gesetzt:
+Wenn der Browserassistent nicht verwendet werden kann, werden stattdessen vorübergehend `DATABASE_URL` sowie drei Plesk-Umgebungsvariablen für den ersten Owner gesetzt. Dieser Fallback erzeugt selbst keine persistente Runtime-Datei:
 
 | Variable                 | Inhalt                                                 |
 | ------------------------ | ------------------------------------------------------ |
@@ -136,6 +136,8 @@ Der Shell-Installer wendet alle Migrationen an und erzeugt nur dann einen Benutz
 
 Nach erfolgreichem Lauf müssen die drei `INSTALL_OWNER_*`-Variablen sofort aus Plesk entfernt werden. Sie gehören nicht zur normalen Anwendungslaufzeit. Der Installer kann danach erneut ausgeführt werden; bei vorhandenem Plattform-Owner aktualisiert er nur das Schema.
 
+Solange keine Runtime-Datei durch den Browserinstaller vorhanden ist, muss `DATABASE_URL` für Start und Migration in Plesk gesetzt bleiben. Dieser Weg ist deshalb nur für Wiederherstellung und technische Notfälle vorgesehen.
+
 Alternativ kann `schema/fahrseiten-schema.sql` über die Datenbankverwaltung in eine nachweislich leere Datenbank importiert werden. Anschließend wird `node install.mjs` trotzdem einmal ausgeführt, damit der erste Plattform-Owner sicher angelegt wird. Das SQL-Gesamtschema darf niemals in eine bestehende Datenbank importiert werden.
 
 Der lokale Demo-Seed wird in Staging und Produktion niemals ausgeführt.
@@ -148,7 +150,7 @@ Vor jeder Migration:
 2. Zeitstempel, Datenbankname und Artefaktversion aus `DEPLOYMENT.json` protokollieren.
 3. Backup-Datei außerhalb des öffentlich erreichbaren Document Root ablegen und Zugriff beschränken.
 4. Wiederherstellbarkeit des Backups nach dem betrieblichen Verfahren bestätigen.
-5. Im neuen Application Root mit gesetzter `DATABASE_URL` ausführen:
+5. Im neuen Application Root ausführen; `migrate.mjs` liest die Verbindung automatisch aus der persistenten Runtime-Datei:
 
 ```bash
 node migrate.mjs

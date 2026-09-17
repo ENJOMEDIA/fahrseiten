@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PlatformSetupForm } from "@/components/setup/setup-form";
+import { readRuntimeConfig } from "@/config/runtime-config";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -9,7 +10,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function SetupPage() {
+export default async function SetupPage() {
+  const installed = Boolean(await readRuntimeConfig());
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-12">
       <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10">
@@ -20,7 +22,19 @@ export default function SetupPage() {
           ersten Plattform-Owner an und speichert die grundlegenden Anbieter-
           und Designangaben.
         </p>
-        <PlatformSetupForm />
+        {installed ? (
+          <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-950">
+            <p className="font-semibold">
+              FahrSeiten ist bereits eingerichtet.
+            </p>
+            <p className="mt-2 text-sm leading-6">
+              Der Installationscode wurde verworfen und der Assistent ist
+              dauerhaft gesperrt.
+            </p>
+          </div>
+        ) : (
+          <PlatformSetupForm />
+        )}
         <p className="mt-8 text-sm text-slate-500">
           Bereits eingerichtet?{" "}
           <Link className="font-semibold text-cyan-800" href="/login">

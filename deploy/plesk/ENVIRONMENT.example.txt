@@ -4,7 +4,7 @@
 
 NODE_ENV=production
 APP_BASE_URL=https://fahrseiten.de
-DATABASE_URL=mysql://<DB-BENUTZER>:<URL-KODIERTES-DB-PASSWORT>@<INTERNER-MYSQL-HOST>:3306/<DB-NAME>
+FAHRSEITEN_CONFIG_FILE=<ABSOLUTER-PERSISTENTER-PFAD>/fahrseiten-runtime.json
 DEMO_DATA_MODE=database
 MARKETING_HOSTS=fahrseiten.de,www.fahrseiten.de
 APP_HOSTS=app.fahrseiten.de

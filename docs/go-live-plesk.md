@@ -4,7 +4,7 @@ Stand: 17. September 2026. Diese Checkliste beschreibt die einmalige Plattformin
 
 ## Was der Installer übernimmt
 
-Der Browserassistent unter `https://fahrseiten.de/setup` verbindet sich über die bereits in Plesk hinterlegte `DATABASE_URL` mit MySQL/MariaDB. Er wendet alle versionierten Migrationen an und legt den ersten Plattform-Owner, Plattformstammdaten, Design, Wartungsmodus sowie Entwürfe für Impressum und Datenschutz an.
+Der Browserassistent unter `/setup` fragt MySQL-/MariaDB-Host beziehungsweise IP, Port, Datenbankname, Benutzer und Passwort ab. Er prüft die Verbindung, wendet alle versionierten Migrationen an und legt den ersten Plattform-Owner, Plattformstammdaten, Design, Wartungsmodus sowie Entwürfe für Impressum und Datenschutz an. Die Verbindung wird anschließend mit Dateimodus `0600` in einer persistenten Runtime-Datei außerhalb des Release-Verzeichnisses gespeichert.
 
 Das vollständige Schema liegt zusätzlich als `schema/fahrseiten-schema.sql` im Deployment-Artefakt. Es ist nur ein Fallback für eine nachweislich leere Datenbank. Bei der normalen Erstinstallation wird es nicht manuell importiert. Bei Updates darf es niemals importiert werden; dort wird ausschließlich `node migrate.mjs` ausgeführt.
 
@@ -45,14 +45,8 @@ Kein auf macOS erzeugtes `.next/standalone` auf das Linux-Webhosting kopieren.
 2. Eine leere Datenbank, beispielsweise `fahrseiten_prod`, anlegen. Plesk kann dem Namen einen Kontopräfix voranstellen; anschließend immer den tatsächlich angezeigten Namen verwenden.
 3. Gleichzeitig einen eigenen Datenbankbenutzer nur für diese Datenbank anlegen und ein zufälliges Passwort erzeugen.
 4. Den **internen MySQL-Host** aus der netcup-Webhostingübersicht verwenden. Nicht ungeprüft `localhost` einsetzen.
-5. Die Verbindungs-URL nur lokal zusammensetzen:
-
-   ```text
-   mysql://DB-BENUTZER:URL-KODIERTES-PASSWORT@INTERNER-MYSQL-HOST:3306/DB-NAME
-   ```
-
-6. Sonderzeichen im Benutzernamen, Passwort und Datenbanknamen URL-kodieren. Die URL anschließend ausschließlich als geschützte Plesk-Umgebungsvariable `DATABASE_URL` speichern.
-7. Noch keinen Demo-Seed und keinen SQL-Import ausführen.
+5. Host beziehungsweise IP, Port, vollständigen Datenbanknamen, Benutzer und Passwort für den späteren Setup-Dialog bereithalten. Der Installer kodiert daraus selbst die MySQL-Verbindungs-URL.
+6. Noch keinen Demo-Seed und keinen SQL-Import ausführen.
 
 ## 4. Release-Verzeichnis hochladen
 
@@ -62,7 +56,8 @@ Jedes Deployment kommt in ein neues Verzeichnis. Dadurch überschreibt ein spät
 2. Das innere `fahrseiten-plesk-<kurzer-hash>.tar.gz` dort hochladen und genau in dieses Verzeichnis entpacken.
 3. Prüfen, dass dort direkt `app.mjs`, `server.js`, `public/`, `.next/`, `drizzle/`, `schema/`, `GO-LIVE.md` und `ENVIRONMENT.example.txt` liegen.
 4. Keine `.env`-Datei hochladen und keine Secrets in Dateien im Release-Verzeichnis schreiben.
-5. Das vorherige Release bei späteren Updates zunächst behalten.
+5. Außerhalb von `releases/` und des öffentlich erreichbaren Document Root einen persistenten, für den Hosting-Systembenutzer beschreibbaren Pfad festlegen, beispielsweise `<Hosting-Home>/.fahrseiten/runtime.json`.
+6. Das vorherige Release bei späteren Updates zunächst behalten.
 
 ## 5. Node.js-Anwendung konfigurieren
 
@@ -76,7 +71,7 @@ In Plesk für `fahrseiten.de` eintragen:
 | Document Root    | `releases/fahrseiten-<kurzer-commit-hash>/public` |
 | Startup File     | `app.mjs`                                         |
 
-Die Werte aus `ENVIRONMENT.example.txt` einzeln als geschützte Plesk-Umgebungsvariablen anlegen. Für zwei getrennte Zufallswerte kann lokal jeweils folgender Befehl verwendet werden:
+Die Werte aus `ENVIRONMENT.example.txt` einzeln als geschützte Plesk-Umgebungsvariablen anlegen. `FAHRSEITEN_CONFIG_FILE` erhält den zuvor festgelegten absoluten persistenten Pfad. Wird die Variable ausgelassen, verwendet die Produktion `$HOME/.fahrseiten/runtime.json`. Für zwei getrennte Zufallswerte kann lokal jeweils folgender Befehl verwendet werden:
 
 ```bash
 openssl rand -hex 32
@@ -134,13 +129,14 @@ Ein Wildcard-Zertifikat ist für diesen ersten Start nicht nötig. netcup weist 
 
 1. Vor der SSL-Freigabe `http://fahrseiten.de/api/health`, danach `https://fahrseiten.de/api/health` aufrufen; erwartet wird `status: ok`.
 2. Für den gewünschten Vorabstart `http://fahrseiten.de/setup` öffnen. Sobald SSL funktioniert, ausschließlich `https://fahrseiten.de/setup` verwenden. HTTP nur von einem vertrauenswürdigen eigenen Gerät und Netz aus benutzen.
-3. Den nur in Plesk hinterlegten `INSTALL_TOKEN` sowie die echten Plattform- und Owner-Daten eingeben.
-4. Wartungsvorschautext und Markenfarben festlegen.
-5. Rechtliche Grunddaten vollständig eintragen. Die erzeugten Texte bleiben Entwürfe und sind keine Rechtsberatung.
-6. Installation absenden. Der Assistent legt Schema und Grunddaten atomar an.
-7. Danach zunächst über dasselbe Protokoll `/api/ready` prüfen; erwartet werden `status: ready` und `database: ok`.
-8. Der angelegte `platform_owner` sperrt den Installer automatisch für weitere Installationen. Die Anwendung kann die Plesk-Umgebungsvariable selbst nicht löschen. `INSTALL_TOKEN` bei Gelegenheit im Panel entfernen und die Node.js-Anwendung neu starten.
-9. Ein zweiter Aufruf von `/setup` darf auch mit dem weiterhin gesetzten Token keine zweite Plattforminstallation erzeugen.
+3. Den nur in Plesk hinterlegten `INSTALL_TOKEN` eingeben.
+4. Internen Datenbankhost beziehungsweise IP, Port, vollständigen Datenbanknamen, Benutzer und Passwort aus Plesk eingeben.
+5. Plattform- und Owner-Daten, Wartungsvorschautext, Markenfarben sowie rechtliche Grunddaten eintragen. Die erzeugten Rechtstexte bleiben prüfpflichtige Entwürfe.
+6. Installation absenden. Der Assistent prüft die Verbindung, migriert die leere Datenbank und legt Grunddaten atomar an.
+7. Bei Erfolg enthält die persistente Runtime-Datei nur die Datenbankverbindung, Konfigurationsversion und Abschlusszeit. Der `INSTALL_TOKEN` wird nicht übernommen und ist wegen der Installationssperre dauerhaft verworfen.
+8. Die Node.js-Anwendung in Plesk einmal neu starten, damit alle Servermodule die neue Datenbankverbindung laden.
+9. Danach zunächst über dasselbe Protokoll `/api/ready` prüfen; erwartet werden `status: ready` und `database: ok`.
+10. Ein zweiter Aufruf von `/setup` darf auch mit dem weiterhin in Plesk gesetzten Token keine zweite Installation erzeugen. Die Umgebungsvariable kann später zur Ordnung entfernt werden, ist dafür aber nicht mehr sicherheitsentscheidend.
 
 Falls `/setup` technisch nicht nutzbar ist, vorübergehend `INSTALL_OWNER_EMAIL`, `INSTALL_OWNER_NAME` und `INSTALL_OWNER_PASSWORD` als geschützte Plesk-Variablen setzen und im Application Root `node install.mjs` ausführen. Der Shell-Installer migriert das Schema und legt ausschließlich den ersten Plattform-Owner an. Danach die drei Variablen sofort entfernen und die Anwendung neu starten. Plattformstammdaten, Design, Wartungstext und Rechtstextentwürfe werden auf diesem Notfallweg nicht angelegt; deshalb bleibt der Browserassistent der vorgesehene Installationsweg. Der SQL-Fallback wird nur für eine leere Datenbank verwendet.
 
@@ -200,14 +196,14 @@ Ein Git-Push ändert auf dem Server zunächst nichts. Erst ein bewusst herunterg
 1. Vor jedem Update einen Plesk-Datenbankexport außerhalb des Document Root erstellen.
 2. Neues GitHub-Actions-Artefakt in ein **neues** `releases/fahrseiten-<hash>`-Verzeichnis entpacken.
 3. Die bisherige Anwendung weiterlaufen lassen.
-4. Im neuen Release mit der bestehenden `DATABASE_URL` einmal `node migrate.mjs` ausführen.
+4. Im neuen Release einmal `node migrate.mjs` ausführen. Das Skript liest die Datenbankverbindung aus `FAHRSEITEN_CONFIG_FILE` beziehungsweise dem persistenten Standardpfad.
 5. Bei einem Migrationsfehler sofort stoppen; Application Root nicht umstellen.
 6. Erst danach Plesk Application Root und Document Root auf das neue Release umstellen und die App neu starten.
 7. Health, Readiness, Login, Wartungsvorschau und Scheduler prüfen.
 8. Bei einem reinen Codefehler auf das vorherige Release zurückschalten. Bei einer nicht rückwärtskompatiblen Migration ist zusätzlich das unmittelbar davor erstellte Datenbankbackup erforderlich.
 9. Alte Releases erst nach einer festgelegten Aufbewahrungsfrist löschen.
 
-Die Datenbank liegt außerhalb der Release-Verzeichnisse und wird nicht durch einen Push überschrieben. Das SQL-Gesamtschema wird bei Updates nicht importiert. Produktive Medienuploads bleiben bis zur Freigabe eines persistenten Speicheradapters deaktiviert beziehungsweise außerhalb des Release-Verzeichnisses zu planen; `.local-storage` ist nur für lokale Entwicklung vorgesehen.
+Die Datenbank und ihre geschützte Runtime-Konfiguration liegen außerhalb der Release-Verzeichnisse und werden nicht durch einen Push überschrieben. Das SQL-Gesamtschema wird bei Updates nicht importiert. Produktive Medienuploads bleiben bis zur Freigabe eines persistenten Speicheradapters deaktiviert beziehungsweise außerhalb des Release-Verzeichnisses zu planen; `.local-storage` ist nur für lokale Entwicklung vorgesehen.
 
 ## Offizielle Referenzen
 

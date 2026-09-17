@@ -6,6 +6,11 @@ describe("setup schemas", () => {
   it("normalizes a complete platform setup", () => {
     const result = platformSetupSchema.parse({
       installToken: "x".repeat(32),
+      databaseHost: "db.internal",
+      databasePort: "3306",
+      databaseName: "fahrseiten_prod",
+      databaseUser: "fahrseiten_user",
+      databasePassword: "database-password",
       brandName: "FahrSeiten",
       companyName: "ENJO MEDIA",
       ownerName: "Erika Beispiel",
@@ -20,6 +25,7 @@ describe("setup schemas", () => {
       hostingProvider: "Beispiel Hosting GmbH",
     });
     expect(result.email).toBe("owner@fahrseiten.de");
+    expect(result.databasePort).toBe(3306);
   });
 
   it("rejects incomplete tenant data and invalid colors", () => {

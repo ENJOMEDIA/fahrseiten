@@ -43,6 +43,7 @@ test("exposes the protected setup and tenant onboarding forms", async ({
     "type",
     "password",
   );
+  await expect(page.getByLabel("Datenbankhost oder IP-Adresse")).toBeVisible();
 
   await page.goto(`/onboarding/${"x".repeat(43)}`);
   await expect(

@@ -1,3 +1,5 @@
+import path from "node:path";
+
 const PLACEHOLDER_MARKERS = [
   "replace-with",
   "change-me",
@@ -17,11 +19,31 @@ function parseHostList(value) {
     .filter(Boolean);
 }
 
-export function validateProductionEnvironment(source = process.env) {
+export function validateProductionEnvironment(
+  source = process.env,
+  options = {},
+) {
   const errors = [];
 
   if (source.NODE_ENV !== "production") {
     errors.push("NODE_ENV muss production sein.");
+  }
+
+  if (source.FAHRSEITEN_CONFIG_FILE) {
+    const configPath = source.FAHRSEITEN_CONFIG_FILE;
+    if (!path.isAbsolute(configPath) || hasPlaceholder(configPath)) {
+      errors.push(
+        "FAHRSEITEN_CONFIG_FILE muss ein absoluter Pfad ohne Platzhalter sein.",
+      );
+    } else if (
+      path
+        .resolve(configPath)
+        .startsWith(`${path.resolve(process.cwd())}${path.sep}`)
+    ) {
+      errors.push(
+        "FAHRSEITEN_CONFIG_FILE muss außerhalb des Application Root liegen.",
+      );
+    }
   }
 
   try {
@@ -33,16 +55,18 @@ export function validateProductionEnvironment(source = process.env) {
     errors.push("APP_BASE_URL muss eine gültige HTTPS-URL sein.");
   }
 
-  try {
-    const databaseUrl = new URL(source.DATABASE_URL ?? "");
-    if (databaseUrl.protocol !== "mysql:") {
-      errors.push("DATABASE_URL muss das mysql-Protokoll verwenden.");
+  if (!options.allowDatabaseBootstrap) {
+    try {
+      const databaseUrl = new URL(source.DATABASE_URL ?? "");
+      if (databaseUrl.protocol !== "mysql:") {
+        errors.push("DATABASE_URL muss das mysql-Protokoll verwenden.");
+      }
+      if (hasPlaceholder(source.DATABASE_URL ?? "")) {
+        errors.push("DATABASE_URL enthält einen erkennbaren Platzhalter.");
+      }
+    } catch {
+      errors.push("DATABASE_URL muss eine gültige MySQL-Verbindungs-URL sein.");
     }
-    if (hasPlaceholder(source.DATABASE_URL ?? "")) {
-      errors.push("DATABASE_URL enthält einen erkennbaren Platzhalter.");
-    }
-  } catch {
-    errors.push("DATABASE_URL muss eine gültige MySQL-Verbindungs-URL sein.");
   }
 
   if (source.DEMO_DATA_MODE !== "database") {

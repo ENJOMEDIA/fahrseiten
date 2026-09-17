@@ -26,7 +26,7 @@ Für ein Plesk-System kann mit `pnpm build:plesk` ein geprüftes Next.js-Standal
 
 Die konkrete Reihenfolge für netcup/Plesk von Datenbank und Artefakt über DNS und SSL bis zu Installer, SMTP, Scheduler und späteren Updates steht in der [Livegang-Checkliste](docs/go-live-plesk.md). Das erzeugte Artefakt enthält zusätzlich `GO-LIVE.md`, die SQL-Fallbackdatei und eine geheimnisfreie Variablenvorlage.
 
-Das vollständige SQL-Schema entsteht mit `pnpm db:schema:bundle` aus allen versionierten Migrationen. Nach dem Upload des Plesk-Artefakts führt `/setup` durch die einmalige Initialisierung der Datenbank, des ersten Plattform-Owners und der FahrSeiten-Stammdaten. `node install.mjs` bleibt als Shell-Alternative verfügbar.
+Das vollständige SQL-Schema entsteht mit `pnpm db:schema:bundle` aus allen versionierten Migrationen. Nach dem Upload des Plesk-Artefakts fragt `/setup` die Zugangsdaten einer zuvor in Plesk angelegten leeren Datenbank ab und führt durch deren einmalige Initialisierung, den ersten Plattform-Owner und die FahrSeiten-Stammdaten. Die Datenbankverbindung wird mit restriktiven Dateirechten außerhalb des austauschbaren Release-Verzeichnisses gespeichert. `node install.mjs` bleibt als Shell-Alternative verfügbar.
 
 Gebuchte Fahrschulen erhalten keine eigene Anwendung und keine eigene Datenbank. Ein Plattform-Owner erzeugt unter `/admin/mandanten/neu` einen sieben Tage gültigen Einmal-Link. Darüber legt die Fahrschule ihre Stammdaten, Inhaber- und Zugangsdaten, gewünschte Domain sowie Primär- und Akzentfarbe fest. Der Assistent erzeugt den neuen Mandanten atomar in der gemeinsamen Datenbank; die Domain bleibt bis zur separaten DNS- und SSL-Prüfung im Status `pending`.
 

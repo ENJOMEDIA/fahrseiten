@@ -6,6 +6,7 @@ import { migrate } from "drizzle-orm/mysql2/migrator";
 import mysql from "mysql2/promise";
 
 import { hashInstallerPassword } from "./password.mjs";
+import { resolveDatabaseUrl } from "./runtime-config.mjs";
 
 export function validateBootstrapInput(source) {
   const email = source.INSTALL_OWNER_EMAIL?.trim().toLowerCase() ?? "";
@@ -27,7 +28,7 @@ export function validateBootstrapInput(source) {
 }
 
 export async function installPlatform(source = process.env) {
-  const databaseUrl = source.DATABASE_URL;
+  const databaseUrl = resolveDatabaseUrl(source);
   if (!databaseUrl) throw new Error("DATABASE_URL fehlt.");
 
   const parsedDatabaseUrl = new URL(databaseUrl);

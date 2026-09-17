@@ -57,7 +57,7 @@ export function PlatformSetupForm() {
       response.ok
         ? result.status === "already_installed"
           ? "FahrSeiten ist bereits eingerichtet. Du kannst dich anmelden."
-          : "Installation abgeschlossen. Der Installer ist für weitere Installationen gesperrt. Du kannst dich jetzt anmelden."
+          : "Installation abgeschlossen und Installationscode verworfen. Starte die Anwendung jetzt einmal in Plesk neu und melde dich danach an."
         : (result.message ?? "Installation fehlgeschlagen."),
     );
   }
@@ -73,6 +73,51 @@ export function PlatformSetupForm() {
           type="password"
         />
       </div>
+      <fieldset className="grid gap-5 rounded-2xl border border-slate-200 p-5 sm:col-span-2 sm:grid-cols-2">
+        <legend className="px-2 font-semibold">MySQL/MariaDB</legend>
+        <p className="text-sm leading-6 text-slate-600 sm:col-span-2">
+          Trage die Daten der zuvor in Plesk angelegten leeren Datenbank ein.
+          FahrSeiten prüft die Verbindung, legt das Schema an und speichert die
+          Verbindung geschützt außerhalb des Release-Verzeichnisses.
+        </p>
+        <Input
+          autoComplete="off"
+          label="Datenbankhost oder IP-Adresse"
+          name="databaseHost"
+          placeholder="interner MySQL-Host aus Plesk"
+          required
+        />
+        <Input
+          defaultValue="3306"
+          label="Datenbankport"
+          max="65535"
+          min="1"
+          name="databasePort"
+          required
+          type="number"
+        />
+        <Input
+          autoComplete="off"
+          label="Datenbankname"
+          name="databaseName"
+          required
+        />
+        <Input
+          autoComplete="username"
+          label="Datenbankbenutzer"
+          name="databaseUser"
+          required
+        />
+        <div className="sm:col-span-2">
+          <Input
+            autoComplete="current-password"
+            label="Datenbankpasswort"
+            name="databasePassword"
+            required
+            type="password"
+          />
+        </div>
+      </fieldset>
       <Input
         defaultValue="FahrSeiten"
         label="Markenname"

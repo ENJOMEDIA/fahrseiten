@@ -15,7 +15,7 @@ Next.js wird mit `output: "standalone"` gebaut. Ein reproduzierbarer Packschritt
 
 Das Artefakt wird auf Linux mit Node.js 22 erstellt. Der manuell ausgelöste GitHub-Actions-Workflow führt die Prüfungen aus und stellt ein komprimiertes Artefakt bereit, nimmt aber kein Deployment vor. Alternativ darf auf einem kompatiblen Linux-Zielsystem gebaut werden.
 
-Secrets werden nicht in das Artefakt geschrieben. Plesk stellt sie zur Laufzeit als Umgebungsvariablen bereit. `PORT` und `HOSTNAME` bleiben unter Kontrolle der Hostinglaufzeit.
+Secrets werden nicht in das Artefakt geschrieben. Plesk stellt allgemeine Laufzeitwerte, SMTP-Zugang und den einmaligen Installationscode als Umgebungsvariablen bereit. Der Browserinstaller erfasst die Zugangsdaten der leeren Datenbank und schreibt die daraus erzeugte Verbindungs-URL atomar mit Dateimodus `0600` in eine persistente Runtime-Datei außerhalb des Release-Verzeichnisses. Die Abschlussmarkierung in derselben Datei verwirft den Installationscode anwendungsseitig. `PORT` und `HOSTNAME` bleiben unter Kontrolle der Hostinglaufzeit.
 
 ## Gründe
 
@@ -29,6 +29,7 @@ Secrets werden nicht in das Artefakt geschrieben. Plesk stellt sie zur Laufzeit 
 - Application Root ist der entpackte Inhalt des Artefakts; Document Root ist dessen `public`-Unterverzeichnis.
 - Native Runtime-Abhängigkeiten erfordern einen Linux-Build passend zur Zielarchitektur.
 - Migrationen bleiben ein bewusster Schritt nach einem Datenbankbackup.
+- Die persistente Runtime-Datei muss bei Deployments erhalten, in Backups geschützt und bei einer Zugangsdatenrotation kontrolliert aktualisiert werden.
 - Reverse Proxy, Host-Header, SSL, Datenbank, persistenter Medienspeicher, Cron-Umgebung und Restart-Verhalten müssen am realen Plesk-System geprüft werden.
 - Eine spätere VPS-Migration kann dasselbe Standalone-Artefakt oder einen Container verwenden, ohne die Fachlogik neu zu entwickeln.
 

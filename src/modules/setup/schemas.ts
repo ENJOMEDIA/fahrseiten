@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 import { z } from "zod";
 
 const hexColor = z
@@ -5,6 +7,19 @@ const hexColor = z
   .regex(/^#[0-9a-fA-F]{6}$/, "Bitte eine sechsstellige Hex-Farbe angeben.");
 
 const optionalLegalText = z.string().trim().max(200).optional();
+const databaseHost = z
+  .string()
+  .trim()
+  .min(1)
+  .max(253)
+  .refine(
+    (value) =>
+      isIP(value) > 0 ||
+      /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(
+        value,
+      ),
+    "Ungültiger Datenbankhost.",
+  );
 const legalFields = {
   legalForm: optionalLegalText,
   registerCourt: optionalLegalText,
@@ -18,6 +33,11 @@ const legalFields = {
 
 export const platformSetupSchema = z.object({
   installToken: z.string().min(32).max(300),
+  databaseHost,
+  databasePort: z.coerce.number().int().min(1).max(65_535),
+  databaseName: z.string().trim().min(1).max(64),
+  databaseUser: z.string().trim().min(1).max(128),
+  databasePassword: z.string().min(1).max(500),
   brandName: z.string().trim().min(2).max(160),
   companyName: z.string().trim().min(2).max(160),
   ownerName: z.string().trim().min(2).max(160),

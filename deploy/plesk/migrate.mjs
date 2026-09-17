@@ -2,8 +2,10 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { migrate } from "drizzle-orm/mysql2/migrator";
 import mysql from "mysql2/promise";
 
+import { resolveDatabaseUrl } from "./runtime-config.mjs";
+
 async function main() {
-  const databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = resolveDatabaseUrl();
   if (!databaseUrl) throw new Error("DATABASE_URL fehlt.");
 
   const parsed = new URL(databaseUrl);
