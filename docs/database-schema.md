@@ -22,6 +22,8 @@ erDiagram
 
 - `tenants`: Fahrschulen mit stabilem UUID-Bezeichner, Slug und deaktivierbarem Status.
 - `users`: Plattformweite Identitäten; Plattformrolle und Tenant-Mitgliedschaften bleiben getrennt.
+- `platform_settings`: einmalige Anbieter-, Kontakt- und Designstammdaten der zentralen FahrSeiten-Plattform.
+- `tenant_onboarding_tokens`: nur als Hash gespeicherte, ablaufende und einmal verwendbare Einrichtungslinks für neue Mandanten.
 - `sessions`, `password_reset_tokens`, `auth_rate_limits`: gehashte Authentifizierungstokens, Ablauf und vorbereitete persistente Drosselung.
 - `tenant_memberships`: aktive Rolle eines Benutzers innerhalb genau eines Mandanten.
 - `domains`: normalisierte, global eindeutige Hostnamen und Onboarding-/SSL-Status.
@@ -54,6 +56,6 @@ Eine lokale Datenbank war in der Codex-Umgebung nicht verfügbar. Migration und 
 
 ## Installation und spätere Mandanten
 
-Es gibt genau eine zentrale FahrSeiten-Installation mit einer gemeinsamen Datenbank. Der Plesk-Installer initialisiert diese Plattform einmalig und legt den ersten `platform_owner` an. Eine Fahrschule wird anschließend als Tenant mit eigener `tenant_id`, Site, Domainzuordnung, Benutzermitgliedschaften und freigeschalteten Funktionen provisioniert. Dafür wird weder das Schema erneut importiert noch eine weitere Anwendungskopie angelegt.
+Es gibt genau eine zentrale FahrSeiten-Installation mit einer gemeinsamen Datenbank. Der geschützte Webinstaller unter `/setup` wendet die Migrationen an und legt einmalig den ersten `platform_owner` sowie die Anbieter- und Designstammdaten an. Sein Installationscode kommt ausschließlich aus der Serverumgebung und wird nach erfolgreichem Abschluss entfernt. Der Shell-Installer bleibt als Alternative verfügbar.
 
-Ein späterer Provisionierungsablauf muss Mandant, Eigentümer, Site, Domainstatus, Tarif und Audit-Eintrag atomar anlegen. Noch offene Tarif-, Domain- und Einladungsentscheidungen werden dabei nicht durch Installationsdefaults vorweggenommen.
+Eine Fahrschule wird anschließend über einen vom Plattform-Owner erzeugten Einmal-Link als Tenant provisioniert. Die Transaktion legt Mandant, `tenant_owner`, Mitgliedschaft, Site, Theme, Hauptstandort, Kontaktformular, Startseite, Navigation, Domain im Status `pending` und Audit-Eintrag an. Der Link ist sieben Tage gültig, wird in der Datenbank nur gehasht gespeichert und nach Verwendung gesperrt. Dafür wird weder das Schema erneut importiert noch eine weitere Anwendungskopie angelegt. Tarif, Rechtstexte und Domainfreigabe bleiben bewusst außerhalb dieses initialen Assistenten, bis die offenen fachlichen und betrieblichen Entscheidungen getroffen sind.

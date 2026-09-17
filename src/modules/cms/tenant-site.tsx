@@ -18,6 +18,7 @@ export function TenantSite({
       style={
         {
           "--tenant-primary": website.theme.primaryColor,
+          "--tenant-accent": website.theme.accentColor,
         } as React.CSSProperties
       }
     >
@@ -48,8 +49,11 @@ export function TenantSite({
         <BlockRenderer blocks={page.blocks} />
         {afterContent}
       </main>
-      <footer className="border-t border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-600">
-        Fiktive Demo-Website · keine echten Kunden- oder Kontaktdaten
+      <footer
+        className="border-t px-6 py-10 text-center text-sm text-white"
+        style={{ backgroundColor: "var(--tenant-accent)" }}
+      >
+        © {new Date().getFullYear()} {website.name}
       </footer>
     </div>
   );

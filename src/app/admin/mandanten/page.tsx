@@ -15,9 +15,12 @@ export default async function TenantsPage() {
           className="min-w-72 rounded-xl border bg-white p-3"
           placeholder="Name oder Domain"
         />
-        <button className="rounded-xl bg-cyan-600 px-4 py-3 font-semibold text-white">
+        <Link
+          className="rounded-xl bg-cyan-600 px-4 py-3 font-semibold text-white"
+          href="/admin/mandanten/neu"
+        >
           Mandant anlegen
-        </button>
+        </Link>
       </div>
       <Card className="mt-5">
         <div className="flex flex-wrap items-center justify-between gap-3">

@@ -19,10 +19,16 @@ function Block({ block }: { block: StoredBlock }) {
   switch (value.type) {
     case "hero":
       return (
-        <section className="bg-slate-950 px-6 py-24 text-white">
+        <section
+          className="px-6 py-24 text-white"
+          style={{ backgroundColor: "var(--tenant-accent, #0f172a)" }}
+        >
           <div className="mx-auto max-w-6xl">
             {value.eyebrow ? (
-              <p className="text-sm font-semibold tracking-[0.18em] text-cyan-300 uppercase">
+              <p
+                className="text-sm font-semibold tracking-[0.18em] uppercase"
+                style={{ color: "var(--tenant-primary, #22d3ee)" }}
+              >
                 {value.eyebrow}
               </p>
             ) : null}
@@ -34,8 +40,9 @@ function Block({ block }: { block: StoredBlock }) {
             </p>
             {value.actionLabel && value.actionHref ? (
               <Link
-                className="mt-8 inline-flex rounded-full bg-cyan-500 px-5 py-3 font-semibold text-slate-950"
+                className="mt-8 inline-flex rounded-full px-5 py-3 font-semibold text-white"
                 href={value.actionHref}
+                style={{ backgroundColor: "var(--tenant-primary, #0891b2)" }}
               >
                 {value.actionLabel}
               </Link>
@@ -83,7 +90,10 @@ function Block({ block }: { block: StoredBlock }) {
     case "cta":
       return (
         <section className="px-6 py-16">
-          <div className="mx-auto max-w-6xl rounded-[var(--radius-card)] bg-cyan-600 p-8 text-white sm:p-12">
+          <div
+            className="mx-auto max-w-6xl rounded-[var(--radius-card)] p-8 text-white sm:p-12"
+            style={{ backgroundColor: "var(--tenant-primary, #0891b2)" }}
+          >
             <h2 className="text-3xl font-semibold">{value.heading}</h2>
             <p className="mt-3 max-w-2xl text-cyan-50">{value.text}</p>
             <Link

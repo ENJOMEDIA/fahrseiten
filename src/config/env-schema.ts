@@ -37,6 +37,7 @@ const serverEnvSchema = z.object({
     .min(3)
     .default("FahrSeiten Lokal <noreply@fahrseiten.local>"),
   CRON_SECRET: z.string().min(24).optional(),
+  INSTALL_TOKEN: z.string().min(32).optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

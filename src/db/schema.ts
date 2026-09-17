@@ -78,6 +78,45 @@ export const users = mysqlTable(
   (table) => [uniqueIndex("users_email_unique").on(table.email)],
 );
 
+export const platformSettings = mysqlTable("platform_settings", {
+  id: id("id").primaryKey(),
+  brandName: varchar("brand_name", { length: 160 }).notNull(),
+  companyName: varchar("company_name", { length: 160 }).notNull(),
+  ownerName: varchar("owner_name", { length: 160 }).notNull(),
+  contactEmail: varchar("contact_email", { length: 254 }).notNull(),
+  phone: varchar("phone", { length: 40 }),
+  street: varchar("street", { length: 180 }).notNull(),
+  postalCode: varchar("postal_code", { length: 20 }).notNull(),
+  city: varchar("city", { length: 120 }).notNull(),
+  primaryColor: varchar("primary_color", { length: 7 }).notNull(),
+  accentColor: varchar("accent_color", { length: 7 }).notNull(),
+  setupCompletedAt: timestamp("setup_completed_at", {
+    mode: "date",
+    fsp: 3,
+  }).notNull(),
+  ...timestamps,
+});
+
+export const tenantOnboardingTokens = mysqlTable(
+  "tenant_onboarding_tokens",
+  {
+    id: id("id").primaryKey(),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    createdByUserId: id("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }).notNull(),
+    usedAt: timestamp("used_at", { mode: "date", fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("tenant_onboarding_tokens_hash_unique").on(table.tokenHash),
+    index("tenant_onboarding_tokens_expiry_idx").on(table.expiresAt),
+  ],
+);
+
 export const sessions = mysqlTable(
   "sessions",
   {

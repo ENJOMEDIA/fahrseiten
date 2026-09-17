@@ -24,7 +24,9 @@ Ein Linux-Plesk-System ist das aktuelle erste Deploymentziel. Seine konkrete Nod
 
 Für ein Plesk-System kann mit `pnpm build:plesk` ein geprüftes Next.js-Standalone-Artefakt erstellt werden. Konfiguration, Migration, Healthcheck und Rollback beschreibt die [Plesk-Deployment-Anleitung](docs/deployment-plesk.md). Die Anleitung nimmt selbst keine Hosting-, DNS- oder SSL-Änderungen vor.
 
-Das vollständige SQL-Schema entsteht mit `pnpm db:schema:bundle` aus allen versionierten Migrationen. Im Plesk-Artefakt initialisiert `node install.mjs` eine leere Datenbank und legt den ersten Plattform-Owner an. Fahrschulen werden später als Mandanten innerhalb dieser zentralen Installation provisioniert.
+Das vollständige SQL-Schema entsteht mit `pnpm db:schema:bundle` aus allen versionierten Migrationen. Nach dem Upload des Plesk-Artefakts führt `/setup` durch die einmalige Initialisierung der Datenbank, des ersten Plattform-Owners und der FahrSeiten-Stammdaten. `node install.mjs` bleibt als Shell-Alternative verfügbar.
+
+Gebuchte Fahrschulen erhalten keine eigene Anwendung und keine eigene Datenbank. Ein Plattform-Owner erzeugt unter `/admin/mandanten/neu` einen sieben Tage gültigen Einmal-Link. Darüber legt die Fahrschule ihre Stammdaten, Inhaber- und Zugangsdaten, gewünschte Domain sowie Primär- und Akzentfarbe fest. Der Assistent erzeugt den neuen Mandanten atomar in der gemeinsamen Datenbank; die Domain bleibt bis zur separaten DNS- und SSL-Prüfung im Status `pending`.
 
 ## Lokales Setup
 

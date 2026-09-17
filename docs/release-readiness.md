@@ -2,7 +2,7 @@
 
 Stand: 17. September 2026. Geprüfter Umfang: lokale Entwicklungsbasis der Schritte 1 bis 19. Dieser Bericht ist keine Produktionsfreigabe. Reales Plesk-Staging und Pilotkunde wurden nicht ausgeführt.
 
-Nach Abschluss der Schritte 1 bis 19 wurde zusätzlich ein Plesk-Standalone-Artefakt vorbereitet. `pnpm build:plesk` erzeugt einen Application Root mit validierender Startdatei, Migration und Cron-Runner; `pnpm verify:plesk` prüft Struktur, Runtime-Abhängigkeiten und den Ausschluss von Env-Dateien. Die reale Plesk-, Proxy-, Datenbank-, DNS- und SSL-Abnahme bleibt ausstehend und ist in [deployment-plesk.md](deployment-plesk.md) beschrieben.
+Nach Abschluss der Schritte 1 bis 19 wurde zusätzlich ein Plesk-Standalone-Artefakt vorbereitet. `pnpm build:plesk` erzeugt einen Application Root mit validierender Startdatei, Migration und Cron-Runner; `pnpm verify:plesk` prüft Struktur, Runtime-Abhängigkeiten und den Ausschluss von Env-Dateien. Ein geschützter Webinstaller und einmal verwendbare Mandanten-Onboarding-Links sind implementiert. Die reale Plesk-, Proxy-, Datenbank-, DNS- und SSL-Abnahme bleibt ausstehend und ist in [deployment-plesk.md](deployment-plesk.md) beschrieben.
 
 ## Ergebnis
 

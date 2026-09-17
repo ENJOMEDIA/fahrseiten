@@ -83,6 +83,7 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 | `SMTP_PASSWORD`       | SMTP-Passwort, falls benötigt                                               |
 | `SMTP_FROM`           | Freigegebener Absender, beispielsweise `FahrSeiten <noreply@fahrseiten.de>` |
 | `CRON_SECRET`         | Kryptografisch zufälliger Wert mit mindestens 24 Zeichen                    |
+| `INSTALL_TOKEN`       | Nur zur Erstinstallation: zufälliger Wert mit mindestens 32 Zeichen         |
 
 `PORT` und gegebenenfalls `HOSTNAME` werden von Plesk beziehungsweise seiner Node.js-Laufzeit verwaltet. Sie dürfen nicht hart im Repository eingetragen werden. Die Startvalidierung nennt ausschließlich fehlerhafte Variablennamen oder Regeln und gibt keine Secret-Werte aus.
 
@@ -92,9 +93,21 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 
 Nach dem ersten isolierten Stagingstart sind `Host` und `X-Forwarded-Host` mit einer Testdomain zu prüfen. `TRUST_PROXY_HEADERS=false` bleibt die sichere Voreinstellung. Eine Umstellung auf `true` ist nur zulässig, wenn Plesk eingehende Forwarded-Header überschreibt und ausschließlich den verifizierten öffentlichen Host weitergibt.
 
-## Erstinstallation der Plattform
+## Erstinstallation der Plattform im Browser
 
-Für die erste Installation werden zusätzlich vorübergehend drei Plesk-Umgebungsvariablen gesetzt:
+`INSTALL_TOKEN` wird vorübergehend als geschützte Plesk-Umgebungsvariable gesetzt. Der Wert muss kryptografisch zufällig sein, mindestens 32 Zeichen haben und darf weder im Repository noch in einer URL stehen. Nach dem Start der Anwendung wird einmalig aufgerufen:
+
+```text
+https://fahrseiten.de/setup
+```
+
+Der Assistent fragt den Installationscode, die FahrSeiten-Anbieter- und Kontaktdaten, den ersten Plattform-Owner mit Passwort sowie Primär- und Akzentfarbe ab. Beim Absenden werden alle ausstehenden Migrationen angewendet. Anschließend werden der erste Plattform-Owner, die Plattformstammdaten und ein Audit-Eintrag angelegt. Ein bereits vorhandener Plattform-Owner verhindert eine zweite Installation.
+
+Nach erfolgreichem Abschluss muss `INSTALL_TOKEN` sofort in Plesk entfernt und die Anwendung neu gestartet werden. Die Route bleibt erreichbar, kann ohne den serverseitigen Code aber keine Installation ausführen. Sie ist von Suchmaschinen ausgeschlossen und durch Same-Origin-Prüfung sowie Drosselung geschützt.
+
+## Alternative Erstinstallation per Shell
+
+Wenn der Browserassistent nicht verwendet werden kann, werden stattdessen vorübergehend drei Plesk-Umgebungsvariablen gesetzt:
 
 | Variable                 | Inhalt                                                 |
 | ------------------------ | ------------------------------------------------------ |
@@ -108,7 +121,7 @@ Danach im Application Root über die Plesk-Skriptfunktion oder Shell ausführen:
 node install.mjs
 ```
 
-Der Installer wendet alle Migrationen an und erzeugt nur dann einen Benutzer, wenn noch kein aktiver `platform_owner` vorhanden ist. Eine bereits verwendete E-Mail wird niemals automatisch mit höheren Rechten versehen. Das Passwort wird vor dem Speichern mit demselben scrypt-Verfahren wie die Anwendung gehasht.
+Der Shell-Installer wendet alle Migrationen an und erzeugt nur dann einen Benutzer, wenn noch kein aktiver `platform_owner` vorhanden ist. Eine bereits verwendete E-Mail wird niemals automatisch mit höheren Rechten versehen. Das Passwort wird vor dem Speichern mit demselben scrypt-Verfahren wie die Anwendung gehasht. Er erfasst keine Plattformstammdaten und ist deshalb als Wiederherstellungs- und Fallback-Weg gedacht.
 
 Nach erfolgreichem Lauf müssen die drei `INSTALL_OWNER_*`-Variablen sofort aus Plesk entfernt werden. Sie gehören nicht zur normalen Anwendungslaufzeit. Der Installer kann danach erneut ausgeführt werden; bei vorhandenem Plattform-Owner aktualisiert er nur das Schema.
 
@@ -134,7 +147,15 @@ Bei einem Fehler wird nicht gestartet oder neu migriert, bis die konkrete Ursach
 
 ## Mandanten statt Einzelinstanzen
 
-Neue Fahrschulen erhalten keine eigene FahrSeiten-Installation. Nach der einmaligen Plattforminstallation werden sie innerhalb derselben Anwendung als getrennte Mandanten provisioniert. Der künftige Onboardingablauf legt Tenant, Eigentümermitgliedschaft, Site, noch nicht aktive Domainzuordnung, Tarif und Audit-Eintrag kontrolliert an. Offene Tarif- und Domainentscheidungen verhindern derzeit bewusst einen unbeaufsichtigten Produktions-Provisioner.
+Neue Fahrschulen erhalten keine eigene FahrSeiten-Installation und keine eigene Datenbank. Nach der einmaligen Plattforminstallation werden sie innerhalb derselben Anwendung als getrennte Mandanten provisioniert:
+
+1. Ein angemeldeter Plattform-Owner öffnet `/admin/mandanten/neu` und erzeugt einen Einmal-Link.
+2. Der Link ist sieben Tage gültig und wird nur bei seiner Erzeugung vollständig angezeigt. In der Datenbank liegt ausschließlich sein SHA-256-Hash.
+3. Die Fahrschule trägt Name, Inhaber beziehungsweise Ansprechpartner, Zugangsdaten, Adresse, Telefon, Wunschdomain sowie Primär- und Akzentfarbe ein.
+4. Der Assistent legt in einer Transaktion Tenant, `tenant_owner`, Mitgliedschaft, Website, Theme, Hauptstandort, Kontaktformular, Startseite, Navigation und Audit-Eintrag an.
+5. Die Wunschdomain bleibt `pending`. DNS-Ziel, Inhabernachweis, Plesk-Alias und SSL müssen vor ihrer Aktivierung separat geprüft werden.
+
+Tarifzuordnung, freigegebene Rechtstexte und weitere Designoptionen werden nicht stillschweigend vorbelegt. Diese Punkte bleiben bis zur fachlichen Entscheidung offen. Der Assistent ist ein kontrolliertes Onboarding durch die Plattformverwaltung und kein öffentliches Self-Service-Bestellsystem.
 
 ## Start und Healthcheck
 

@@ -33,6 +33,26 @@ test("protects admin areas and exposes accessible login fields", async ({
   await expect(page.getByLabel("Passwort")).toHaveAttribute("type", "password");
 });
 
+test("exposes the protected setup and tenant onboarding forms", async ({
+  page,
+}) => {
+  await page.goto("/setup");
+  await expect(
+    page.getByRole("heading", { name: "FahrSeiten einrichten" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Installationscode")).toHaveAttribute(
+    "type",
+    "password",
+  );
+
+  await page.goto(`/onboarding/${"x".repeat(43)}`);
+  await expect(
+    page.getByRole("heading", { name: "Fahrschulseite vorbereiten" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Gewünschte Domain")).toBeVisible();
+  await expect(page.getByLabel("Primärfarbe")).toHaveAttribute("type", "color");
+});
+
 test("navigates the validated demo page tree", async ({ page }) => {
   await page.goto("/demo");
   await keepNecessaryConsent(page);
