@@ -13,7 +13,7 @@ FahrSeiten soll zunächst auf einem Linux-Plesk-System betrieben werden. Plesk e
 
 Next.js wird mit `output: "standalone"` gebaut. Ein reproduzierbarer Packschritt ergänzt öffentliche und statische Assets, Datenbankmigrationen sowie drei kleine Plesk-Einstiegspunkte für Start, Migration und Scheduler. Die Startdatei validiert produktionskritische Umgebungsvariablen, bevor sie den von Next.js erzeugten Server lädt.
 
-Plesk zieht den Branch `main` im manuellen Deploymentmodus direkt aus GitHub. Eine versionierte zusätzliche Deployment-Aktion baut das Standalone-Verzeichnis auf dem Linux-Zielsystem mit Node.js 22. Der manuell ausgelöste GitHub-Actions-Workflow kann weiterhin ein geprüftes komprimiertes Artefakt bereitstellen, ist aber nur ein Fallback und nimmt kein Deployment vor.
+Plesk zieht den Branch `main` im manuellen Deploymentmodus direkt aus GitHub. Wegen der möglichen chroot-Beschränkung führt der Git-Deploy keine Node-Befehle aus. Das Plesk-Node.js-Toolkit installiert mit der ausgewählten Node.js-22-Laufzeit die Abhängigkeiten und startet das versionierte Paket-Skript `deploy:plesk`, das den Standalone-Build auf dem Linux-Zielsystem erzeugt und prüft. Der manuell ausgelöste GitHub-Actions-Workflow kann weiterhin ein geprüftes komprimiertes Artefakt bereitstellen, ist aber nur ein Fallback und nimmt kein Deployment vor.
 
 Secrets werden nicht in das Artefakt geschrieben. Plesk stellt allgemeine Laufzeitwerte, SMTP-Zugang und den einmaligen Installationscode als Umgebungsvariablen bereit. Der Browserinstaller erfasst die Zugangsdaten der leeren Datenbank und schreibt die daraus erzeugte Verbindungs-URL atomar mit Dateimodus `0600` in eine persistente Runtime-Datei außerhalb des Release-Verzeichnisses. Die Abschlussmarkierung in derselben Datei verwirft den Installationscode anwendungsseitig. `PORT` und `HOSTNAME` bleiben unter Kontrolle der Hostinglaufzeit.
 
@@ -27,7 +27,7 @@ Secrets werden nicht in das Artefakt geschrieben. Plesk stellt allgemeine Laufze
 
 ## Folgen und Grenzen
 
-- Das Git-Repository liegt im Plesk-Quellverzeichnis; Application Root ist dessen erzeugtes `dist/plesk`, Document Root das darin enthaltene `public`-Unterverzeichnis.
+- Das Git-Repository ist der Plesk-Application-Root und sein `public`-Verzeichnis der Document Root. Die Startdatei `plesk-start.mjs` lädt den erzeugten Server aus `dist/plesk`.
 - Native Runtime-Abhängigkeiten erfordern einen Linux-Build passend zur Zielarchitektur.
 - Migrationen bleiben ein bewusster Schritt nach einem Datenbankbackup.
 - Die persistente Runtime-Datei muss bei Deployments erhalten, in Backups geschützt und bei einer Zugangsdatenrotation kontrolliert aktualisiert werden.
@@ -44,4 +44,4 @@ Secrets werden nicht in das Artefakt geschrieben. Plesk stellt allgemeine Laufze
 
 ## Rücknahmeweg
 
-`output: "standalone"`, die Plesk-Einstiegspunkte, das Git-Deployskript und der optionale Artefaktworkflow können entfernt werden, ohne Datenmodell oder Fachmodule zu ändern. Ein alternatives Ziel muss weiterhin Node.js 22, Host-basierte Tenant-Auflösung, Umgebungsvariablen, Migrationen, Scheduler und persistenten Speicher bereitstellen.
+`output: "standalone"`, die Plesk-Einstiegspunkte, das Paket-Skript `deploy:plesk`, die Root-Startdatei und der optionale Artefaktworkflow können entfernt werden, ohne Datenmodell oder Fachmodule zu ändern. Ein alternatives Ziel muss weiterhin Node.js 22, Host-basierte Tenant-Auflösung, Umgebungsvariablen, Migrationen, Scheduler und persistenten Speicher bereitstellen.

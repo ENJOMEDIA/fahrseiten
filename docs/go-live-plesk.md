@@ -36,14 +36,8 @@ Keine Zugangsdaten in Git, GitHub Actions, den Build, Screenshots oder diese Dok
 3. **Remote Git hosting** auswählen und `https://github.com/ENJOMEDIA/fahrseiten.git` eintragen.
 4. Als aktiven Branch `main` und als Deploymentpfad `fahrseiten-source` wählen.
 5. **Manual deployment** einstellen. Ein Git-Push soll die laufende Seite nicht automatisch verändern.
-6. Unter **Additional deployment actions** exakt eintragen:
-
-   ```bash
-   bash deploy/plesk/deploy-from-git.sh
-   ```
-
-7. **Pull Updates** und anschließend **Deploy from Repository** anklicken.
-8. Nur fortfahren, wenn die Deployment-Aktion mit `FahrSeiten wurde erfolgreich` endet und `dist/plesk/app.mjs` vorhanden ist.
+6. **Additional deployment actions** deaktivieren beziehungsweise das Feld leer lassen. Bei gesperrtem SSH-Zugriff führt Plesk diese Aktionen in einer chroot-Umgebung ohne Zugriff auf die Node.js-Toolkit-Binärdatei aus.
+7. **Pull Updates** und anschließend **Deploy from Repository** anklicken. Dieser Schritt überträgt nur die versionierten Dateien.
 
 Der GitHub-Workflow **Plesk-Artefakt** ist für diesen Weg nicht erforderlich. Er bleibt als optionaler Fallback verfügbar. Der produktive Build entsteht direkt auf dem Linux-Webhosting und nicht auf dem Mac.
 
@@ -58,23 +52,24 @@ Der GitHub-Workflow **Plesk-Artefakt** ist für diesen Weg nicht erforderlich. E
 
 ## 4. Build und persistenten Pfad prüfen
 
-1. Im Plesk-Dateimanager den Git-Deploymentpfad `fahrseiten-source` öffnen.
-2. Prüfen, dass unter `fahrseiten-source/dist/plesk` direkt `app.mjs`, `server.js`, `public/`, `.next/`, `drizzle/`, `schema/`, `GO-LIVE.md` und `ENVIRONMENT.example.txt` liegen.
-3. Keine `.env`-Datei anlegen und keine Secrets in Dateien innerhalb von `fahrseiten-source` schreiben.
-4. Außerhalb des Git- und Application-Root einen persistenten, für den Hosting-Systembenutzer beschreibbaren Pfad verwenden. Ohne abweichende Konfiguration nutzt FahrSeiten `<Hosting-Home>/.fahrseiten/runtime.json`.
-5. Dieser Pfad und die Datenbank werden durch spätere Git-Pulls und Builds nicht überschrieben.
+1. Im Plesk-Dateimanager den Git-Deploymentpfad `fahrseiten-source` öffnen und prüfen, dass dort `package.json`, `pnpm-lock.yaml` und `plesk-start.mjs` liegen.
+2. Keine `.env`-Datei anlegen und keine Secrets in Dateien innerhalb von `fahrseiten-source` schreiben.
+3. Außerhalb des Git- und Application-Root einen persistenten, für den Hosting-Systembenutzer beschreibbaren Pfad verwenden. Ohne abweichende Konfiguration nutzt FahrSeiten `<Hosting-Home>/.fahrseiten/runtime.json`.
+4. Dieser Pfad und die Datenbank werden durch spätere Git-Pulls und Builds nicht überschrieben.
 
 ## 5. Node.js-Anwendung konfigurieren
 
 In Plesk für `fahrseiten.de` eintragen:
 
-| Feld             | Wert                                  |
-| ---------------- | ------------------------------------- |
-| Node.js-Version  | `22.x`                                |
-| Application Mode | `production`                          |
-| Application Root | `fahrseiten-source/dist/plesk`        |
-| Document Root    | `fahrseiten-source/dist/plesk/public` |
-| Startup File     | `app.mjs`                             |
+| Feld             | Wert                       |
+| ---------------- | -------------------------- |
+| Node.js-Version  | `22.x`                     |
+| Application Mode | `production`               |
+| Application Root | `fahrseiten-source`        |
+| Document Root    | `fahrseiten-source/public` |
+| Startup File     | `plesk-start.mjs`          |
+
+Als Paketmanager `pnpm` auswählen. Danach über **Skript ausführen** das Skript `deploy:plesk` starten. Es installiert die festgeschriebenen Laufzeit- und Buildabhängigkeiten selbst. Nur fortfahren, wenn der Lauf mit `Plesk-Artefakt geprüft` erfolgreich endet. Anschließend muss unter `fahrseiten-source/dist/plesk` der vollständige Build mit `app.mjs`, `server.js`, `public/`, `.next/`, `drizzle/` und `schema/` liegen.
 
 Die Werte aus `ENVIRONMENT.example.txt` einzeln als geschützte Plesk-Umgebungsvariablen anlegen. `FAHRSEITEN_CONFIG_FILE` erhält den zuvor festgelegten absoluten persistenten Pfad. Wird die Variable ausgelassen, verwendet die Produktion `$HOME/.fahrseiten/runtime.json`. Für zwei getrennte Zufallswerte kann lokal jeweils folgender Befehl verwendet werden:
 
@@ -143,7 +138,7 @@ Ein Wildcard-Zertifikat ist für diesen ersten Start nicht nötig. netcup weist 
 9. Danach zunächst über dasselbe Protokoll `/api/ready` prüfen; erwartet werden `status: ready` und `database: ok`.
 10. Ein zweiter Aufruf von `/setup` darf auch mit dem weiterhin in Plesk gesetzten Token keine zweite Installation erzeugen. Die Umgebungsvariable kann später zur Ordnung entfernt werden, ist dafür aber nicht mehr sicherheitsentscheidend.
 
-Falls `/setup` technisch nicht nutzbar ist, vorübergehend `INSTALL_OWNER_EMAIL`, `INSTALL_OWNER_NAME` und `INSTALL_OWNER_PASSWORD` als geschützte Plesk-Variablen setzen und im Application Root `node install.mjs` ausführen. Der Shell-Installer migriert das Schema und legt ausschließlich den ersten Plattform-Owner an. Danach die drei Variablen sofort entfernen und die Anwendung neu starten. Plattformstammdaten, Design, Wartungstext und Rechtstextentwürfe werden auf diesem Notfallweg nicht angelegt; deshalb bleibt der Browserassistent der vorgesehene Installationsweg. Der SQL-Fallback wird nur für eine leere Datenbank verwendet.
+Falls `/setup` technisch nicht nutzbar ist, vorübergehend `INSTALL_OWNER_EMAIL`, `INSTALL_OWNER_NAME` und `INSTALL_OWNER_PASSWORD` als geschützte Plesk-Variablen setzen und im erzeugten Verzeichnis `fahrseiten-source/dist/plesk` `node install.mjs` ausführen. Der Shell-Installer migriert das Schema und legt ausschließlich den ersten Plattform-Owner an. Danach die drei Variablen sofort entfernen und die Anwendung neu starten. Plattformstammdaten, Design, Wartungstext und Rechtstextentwürfe werden auf diesem Notfallweg nicht angelegt; deshalb bleibt der Browserassistent der vorgesehene Installationsweg. Der SQL-Fallback wird nur für eine leere Datenbank verwendet.
 
 ## 10. SMTP für Akquise und Systemmails einrichten
 
@@ -201,11 +196,12 @@ Ein Git-Push ändert auf dem Server zunächst nichts. Erst **Pull Updates** und 
 1. Vor jedem Update einen Plesk-Datenbankexport außerhalb des Document Root erstellen.
 2. Prüfen, dass die GitHub-Checks des gewünschten `main`-Commits erfolgreich sind.
 3. In Plesk **Pull Updates** und danach **Deploy from Repository** ausführen.
-4. Nur fortfahren, wenn `deploy-from-git.sh` erfolgreich endet.
-5. Im Verzeichnis `fahrseiten-source/dist/plesk` einmal `node migrate.mjs` ausführen. Das Skript liest die Datenbankverbindung aus `FAHRSEITEN_CONFIG_FILE` beziehungsweise dem persistenten Standardpfad.
-6. Bei einem Migrationsfehler sofort stoppen und die Anwendung nicht neu starten.
-7. Die Node.js-Anwendung neu starten und Health, Readiness, Login, Wartungsvorschau und Scheduler prüfen.
-8. Bei einem reinen Codefehler den betroffenen Commit ohne Force-Push mit `git revert` rückgängig machen, erneut pullen, deployen und neu starten. Bei einer nicht rückwärtskompatiblen Migration ist zusätzlich das unmittelbar davor erstellte Datenbankbackup erforderlich.
+4. Im Node.js-Toolkit über **Skript ausführen** `deploy:plesk` starten.
+5. Nur fortfahren, wenn das Node.js-Toolkit-Skript erfolgreich endet.
+6. Im Verzeichnis `fahrseiten-source/dist/plesk` einmal `node migrate.mjs` ausführen. Das Skript liest die Datenbankverbindung aus `FAHRSEITEN_CONFIG_FILE` beziehungsweise dem persistenten Standardpfad.
+7. Bei einem Migrationsfehler sofort stoppen und die Anwendung nicht neu starten.
+8. Die Node.js-Anwendung neu starten und Health, Readiness, Login, Wartungsvorschau und Scheduler prüfen.
+9. Bei einem reinen Codefehler den betroffenen Commit ohne Force-Push mit `git revert` rückgängig machen, erneut pullen, deployen und neu starten. Bei einer nicht rückwärtskompatiblen Migration ist zusätzlich das unmittelbar davor erstellte Datenbankbackup erforderlich.
 
 Die Datenbank und ihre geschützte Runtime-Konfiguration liegen außerhalb von `fahrseiten-source` und werden nicht durch einen Pull oder Build überschrieben. Das SQL-Gesamtschema wird bei Updates nicht importiert. Produktive Medienuploads bleiben bis zur Freigabe eines persistenten Speicheradapters deaktiviert beziehungsweise außerhalb des Git-Verzeichnisses zu planen; `.local-storage` ist nur für lokale Entwicklung vorgesehen.
 
