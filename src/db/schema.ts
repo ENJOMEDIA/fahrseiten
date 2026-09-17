@@ -725,6 +725,7 @@ export const salesLeads = mysqlTable(
     phone: varchar("phone", { length: 40 }),
     website: varchar("website", { length: 500 }),
     source: varchar("source", { length: 100 }),
+    privacyTextVersion: varchar("privacy_text_version", { length: 80 }),
     status: mysqlEnum("status", leadStatusValues).default("new").notNull(),
     ownerUserId: id("owner_user_id").references(() => users.id, {
       onDelete: "set null",

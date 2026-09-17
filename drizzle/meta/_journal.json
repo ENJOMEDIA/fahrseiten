@@ -57,6 +57,13 @@
       "when": 1789635171644,
       "tag": "0007_left_groot",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1789635832673,
+      "tag": "0008_tiny_mister_sinister",
+      "breakpoints": true
     }
   ]
 }

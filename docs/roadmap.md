@@ -28,7 +28,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 | 13      | C           | Plattform-Admin und Akquise-CRM                                | Abgeschlossen  | Akquise, Kundenanlage und Onboarding mit Rollenprüfung                                           |
 | 14      | C           | E-Mail, Benachrichtigungen und Hintergrundjobs                 | Abgeschlossen  | Idempotenz, Retry und sicherer Testbetrieb nachgewiesen                                          |
 | 15      | C           | Tarife, Feature-Flags und kommende Funktionen                  | Abgeschlossen  | Serverseitige Freigaben nach Tarif und Mandant                                                   |
-| 16      | C           | FahrSeiten-Vertriebswebsite                                    | Nicht begonnen | Navigierbar, ehrlich formuliert und an Akquise angebunden                                        |
+| 16      | C           | FahrSeiten-Vertriebswebsite                                    | Abgeschlossen  | Navigierbar, ehrlich formuliert und an Akquise angebunden                                        |
 | 17      | C           | Datenschutz-, Consent- und Rechtsgrundlagen technisch umsetzen | Nicht begonnen | Optionale Dienste blockiert, getrennte Mandantentexte pflegbar                                   |
 | 18      | D           | Fehlerberichte, Monitoring und Support                         | Nicht begonnen | Nachvollziehbare Fehler ohne sensible Logdaten                                                   |
 | 19      | D           | Sicherheit, Qualität und Barrierefreiheit härten               | Nicht begonnen | Release-Readiness ohne kritische offene Punkte                                                   |
@@ -39,7 +39,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 16 folgt als Nächstes. Features werden zentral aus Tenant-Override, Plan und Standard aufgelöst und zusätzlich zur UI serverseitig geschützt.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 17 folgt als Nächstes. Die Vertriebswebsite ist vollständig navigierbar, trennt verfügbare und geplante Funktionen und führt Beratung direkt in das Akquise-CRM.
 
 ## Abhängigkeiten und Fortschreibung
 

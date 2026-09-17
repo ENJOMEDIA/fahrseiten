@@ -73,17 +73,15 @@ export const dbFeatureOverrideRepository: FeatureOverrideRepository = {
         .onDuplicateKeyUpdate({
           set: { status: input.status, reason: input.reason },
         });
-      await tx
-        .insert(auditLogs)
-        .values({
-          id: createId(),
-          tenantId: input.tenantId,
-          actorUserId: input.actorUserId,
-          action: "feature.override_changed",
-          entityType: "feature",
-          entityId: feature[0].id,
-          metadata: { status: input.status, reason: input.reason },
-        });
+      await tx.insert(auditLogs).values({
+        id: createId(),
+        tenantId: input.tenantId,
+        actorUserId: input.actorUserId,
+        action: "feature.override_changed",
+        entityType: "feature",
+        entityId: feature[0].id,
+        metadata: { status: input.status, reason: input.reason },
+      });
     });
   },
 };
