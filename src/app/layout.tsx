@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://fahrseiten.de"),
   title: { default: "FahrSeiten – by ENJO MEDIA", template: "%s · FahrSeiten" },
   description: "Websites und digitale Werkzeuge für moderne Fahrschulen.",
+  icons: {
+    icon: [{ url: "/api/favicon", type: "image/svg+xml" }],
+    shortcut: "/api/favicon",
+  },
   openGraph: {
     title: "FahrSeiten – by ENJO MEDIA",
     description: "Die mandantenfähige Website-Plattform für Fahrschulen.",

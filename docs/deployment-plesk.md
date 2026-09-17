@@ -186,6 +186,43 @@ CDN oder Reverse Proxy genau diese öffentliche Route als Origin verwenden.
 Eine DNS- oder CDN-Änderung wird nicht automatisch durch die Anwendung
 ausgeführt.
 
+Seitenlogo und Favicon werden getrennt gespeichert. SVG, PNG, JPEG und WebP
+sind zulässig; SVG-Dateien werden auf aktive Inhalte, externe Referenzen und
+unsichere Attribute geprüft. Das Favicon wird hostabhängig über `/api/favicon`
+aufgelöst, sodass FahrSeiten und jede aktive Kundendomain ein eigenes Symbol
+verwenden können.
+
+## Subdomains für die zentrale Anwendung
+
+`app.fahrseiten.de` ist für die vorgesehene Trennung zwischen Marketing und
+Verwaltung erforderlich, verwendet aber dieselbe Anwendung, denselben Code und
+dieselbe Datenbank wie `fahrseiten.de`. In Plesk ist dafür bevorzugt ein
+Domain-Alias für `fahrseiten.de` anzulegen:
+
+1. Aliasname `app.fahrseiten.de`, Ziel `fahrseiten.de`.
+2. Webservice aktivieren, Mailservice deaktivieren.
+3. Keine 301-Weiterleitung auf `fahrseiten.de` aktivieren, damit der Hostname
+   `app.fahrseiten.de` an Next.js erhalten bleibt.
+4. Falls Plesk die DNS-Zone verwaltet, DNS-Synchronisierung aktivieren;
+   andernfalls im zuständigen DNS einen A/AAAA-Eintrag auf dieselbe Hosting-IP
+   oder einen CNAME auf `fahrseiten.de` setzen.
+5. Das Zertifikat anschließend neu ausstellen und `app.fahrseiten.de`
+   einschließen.
+6. `APP_HOSTS=app.fahrseiten.de` beibehalten und die Node-Anwendung neu
+   starten.
+
+Falls Plesk den Aliasnamen als Subdomain nicht akzeptiert, wird stattdessen
+`app` über **Add Subdomain** angelegt und auf denselben Application Root sowie
+dieselbe Node-Startdatei geroutet. Es darf keine zweite Codekopie und kein
+separater Installer verwendet werden.
+
+`media.fahrseiten.de` ist optional. Ohne diese Subdomain werden Medien über
+`https://fahrseiten.de/media/<UUID>` ausgeliefert. Für eine spätere
+Medien-Subdomain gelten dieselben Alias-, DNS- und SSL-Schritte; zusätzlich wird
+vor dem Build
+`MEDIA_PUBLIC_BASE_URL=https://media.fahrseiten.de/media` gesetzt. Solange die
+Subdomain nicht eingerichtet ist, bleibt `MEDIA_PUBLIC_BASE_URL` leer.
+
 ## Mandanten statt Einzelinstanzen
 
 Neue Fahrschulen erhalten keine eigene FahrSeiten-Installation und keine eigene Datenbank. Nach der einmaligen Plattforminstallation werden sie innerhalb derselben Anwendung als getrennte Mandanten provisioniert:

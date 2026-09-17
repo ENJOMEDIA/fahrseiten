@@ -98,13 +98,33 @@ export async function setTenantLogo(tenantId: string, mediaId: string) {
     .where(eq(themeSettings.tenantId, tenantId));
 }
 
-export async function findTenantLogoId(tenantId: string) {
+export async function setTenantFavicon(tenantId: string, mediaId: string) {
+  const asset = await databaseMediaRepository.find(tenantId, mediaId);
+  if (!asset || asset.archivedAt)
+    throw new Error("Das Favicon gehört nicht zu diesem Mandanten.");
+  await db
+    .update(themeSettings)
+    .set({ faviconMediaId: mediaId })
+    .where(eq(themeSettings.tenantId, tenantId));
+}
+
+export async function findTenantBrandingIds(tenantId: string) {
   const [row] = await db
-    .select({ logoMediaId: themeSettings.logoMediaId })
+    .select({
+      logoMediaId: themeSettings.logoMediaId,
+      faviconMediaId: themeSettings.faviconMediaId,
+    })
     .from(themeSettings)
     .where(eq(themeSettings.tenantId, tenantId))
     .limit(1);
-  return row?.logoMediaId ?? null;
+  return {
+    logoMediaId: row?.logoMediaId ?? null,
+    faviconMediaId: row?.faviconMediaId ?? null,
+  };
+}
+
+export async function findTenantLogoId(tenantId: string) {
+  return (await findTenantBrandingIds(tenantId)).logoMediaId;
 }
 
 export async function setPlatformLogo(mediaId: string) {
@@ -121,6 +141,22 @@ export async function setPlatformLogo(mediaId: string) {
     .limit(1);
   if (!asset) throw new Error("Das Logo gehört nicht zur Plattform.");
   await db.update(platformSettings).set({ logoMediaId: mediaId });
+}
+
+export async function setPlatformFavicon(mediaId: string) {
+  const [asset] = await db
+    .select({ id: mediaAssets.id })
+    .from(mediaAssets)
+    .where(
+      and(
+        eq(mediaAssets.id, mediaId),
+        isNull(mediaAssets.tenantId),
+        isNull(mediaAssets.archivedAt),
+      ),
+    )
+    .limit(1);
+  if (!asset) throw new Error("Das Favicon gehört nicht zur Plattform.");
+  await db.update(platformSettings).set({ faviconMediaId: mediaId });
 }
 
 export async function findPlatformLogoId() {

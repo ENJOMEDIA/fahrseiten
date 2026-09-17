@@ -16,6 +16,8 @@ export async function GET(
       "Content-Type": asset.mimeType,
       "Content-Length": String(asset.byteSize),
       "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+      "Content-Security-Policy":
+        "default-src 'none'; style-src 'unsafe-inline'; sandbox",
       "X-Content-Type-Options": "nosniff",
     },
   });

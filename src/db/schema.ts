@@ -91,6 +91,7 @@ export const platformSettings = mysqlTable("platform_settings", {
   primaryColor: varchar("primary_color", { length: 7 }).notNull(),
   accentColor: varchar("accent_color", { length: 7 }).notNull(),
   logoMediaId: id("logo_media_id"),
+  faviconMediaId: id("favicon_media_id"),
   maintenanceMode: boolean("maintenance_mode").default(true).notNull(),
   maintenanceMessage: varchar("maintenance_message", { length: 500 })
     .default(
@@ -381,6 +382,7 @@ export const themeSettings = mysqlTable(
       .default("system_sans")
       .notNull(),
     logoMediaId: id("logo_media_id"),
+    faviconMediaId: id("favicon_media_id"),
     ...timestamps,
   },
   (table) => [uniqueIndex("theme_settings_site_unique").on(table.siteId)],

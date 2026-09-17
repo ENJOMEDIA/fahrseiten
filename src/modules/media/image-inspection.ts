@@ -1,11 +1,13 @@
 export type InspectedImage = {
-  mimeType: "image/png" | "image/jpeg" | "image/webp";
-  extension: "png" | "jpg" | "webp";
+  mimeType: "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";
+  extension: "png" | "jpg" | "webp" | "svg";
   width: number;
   height: number;
 };
 
 export function inspectImage(bytes: Uint8Array): InspectedImage {
+  const svg = inspectSvg(bytes);
+  if (svg) return svg;
   if (bytes.length < 24) throw new Error("Die Bilddatei ist unvollständig.");
   if (matches(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
     return {
@@ -55,7 +57,59 @@ export function inspectImage(bytes: Uint8Array): InspectedImage {
       offset += length + 2;
     }
   }
-  throw new Error("Nur geprüfte PNG-, JPEG- und WebP-Bilder sind zulässig.");
+  throw new Error(
+    "Nur geprüfte SVG-, PNG-, JPEG- und WebP-Bilder sind zulässig.",
+  );
+}
+
+function inspectSvg(bytes: Uint8Array): InspectedImage | null {
+  let source: string;
+  try {
+    source = new TextDecoder("utf-8", { fatal: true }).decode(bytes).trim();
+  } catch {
+    return null;
+  }
+  if (!/^(?:<\?xml[^>]*>\s*)?<svg[\s>]/iu.test(source)) return null;
+  const forbidden = [
+    /<!DOCTYPE/iu,
+    /<!ENTITY/iu,
+    /<(?:script|foreignObject|iframe|object|embed|audio|video|style|animate|animateMotion|animateTransform|set)\b/iu,
+    /\son[a-z]+\s*=/iu,
+    /(?:javascript|vbscript|data):/iu,
+    /@import/iu,
+    /(?:href|xlink:href)\s*=\s*["'](?!#)[^"']+/iu,
+    /url\(\s*["']?(?!#)/iu,
+  ];
+  if (forbidden.some((pattern) => pattern.test(source)))
+    throw new Error(
+      "Das SVG enthält externe, ausführbare oder nicht unterstützte Inhalte.",
+    );
+
+  const openingTag = source.match(/<svg\b[^>]*>/iu)?.[0] ?? "";
+  const viewBox = openingTag.match(
+    /\bviewBox\s*=\s*["']\s*[-\d.]+\s+[-\d.]+\s+([\d.]+)\s+([\d.]+)\s*["']/iu,
+  );
+  const width = numericSvgLength(openingTag, "width") ?? Number(viewBox?.[1]);
+  const height = numericSvgLength(openingTag, "height") ?? Number(viewBox?.[2]);
+  if (!Number.isFinite(width) || !Number.isFinite(height))
+    throw new Error("Das SVG benötigt width/height oder eine gültige viewBox.");
+
+  return {
+    mimeType: "image/svg+xml",
+    extension: "svg",
+    width: Math.round(width),
+    height: Math.round(height),
+  };
+}
+
+function numericSvgLength(source: string, attribute: "width" | "height") {
+  const value = source.match(
+    new RegExp(
+      `\\b${attribute}\\s*=\\s*["']\\s*([\\d.]+)(?:px)?\\s*["']`,
+      "iu",
+    ),
+  )?.[1];
+  return value ? Number(value) : undefined;
 }
 
 function matches(bytes: Uint8Array, expected: number[]) {

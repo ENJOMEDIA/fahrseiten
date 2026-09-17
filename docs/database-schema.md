@@ -32,7 +32,7 @@ erDiagram
 - `feature_flags`, `plan_features`, `tenant_features`: zentrale Features, Planstandard und Mandanten-Override.
 - `legal_profiles`: validierte Anbieter- und Datenschutzangaben sowie aktivierte Rechtsmodule; Plattformprofil und Tenant-Profile bleiben über Scope und `tenant_id` getrennt.
 - `media_assets` und `media_usages`: geprüfte Bildmetadaten, stabile Speicherschlüssel und Verwendungen; Tenant-Medien tragen immer ihre `tenant_id`, Plattformmedien verwenden ausschließlich den ausdrücklich geprüften Plattformkontext.
-- `platform_settings.logo_media_id` und `theme_settings.logo_media_id`: zentral ausgewählte Logos für FahrSeiten beziehungsweise den jeweiligen Mandanten.
+- `platform_settings.logo_media_id`/`favicon_media_id` und `theme_settings.logo_media_id`/`favicon_media_id`: getrennt ausgewählte Seitenlogos und Browser-Symbole für FahrSeiten beziehungsweise den jeweiligen Mandanten.
 - `legal_documents`: versionierte, aus dem jeweiligen Rechtsprofil erzeugte Entwürfe und veröffentlichte Snapshots für Impressum und Datenschutz.
 - `audit_logs`: append-orientierte sicherheitsrelevante Ereignisse; mandantenübergreifende Plattformereignisse dürfen `tenant_id = NULL` verwenden.
 

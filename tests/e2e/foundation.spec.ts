@@ -6,6 +6,9 @@ async function keepNecessaryConsent(page: import("@playwright/test").Page) {
 }
 
 test("renders the local marketing foundation", async ({ page }) => {
+  const favicon = await page.request.get("/api/favicon");
+  expect(favicon.ok()).toBe(true);
+  expect(favicon.headers()["content-type"]).toContain("image/svg+xml");
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Digital auf der Überholspur",

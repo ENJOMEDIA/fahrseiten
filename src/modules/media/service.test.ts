@@ -73,6 +73,42 @@ describe("media service", () => {
       }),
     ).rejects.toThrow();
   });
+  it("accepts a self-contained SVG logo", async () => {
+    const { storage, repository } = harness();
+    const asset = await uploadImage({
+      tenantId: "tenant-a",
+      bytes: new TextEncoder().encode(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80"><path fill="#000" d="M0 0h320v80H0z"/></svg>',
+      ),
+      metadata: {
+        originalName: "logo.svg",
+        claimedMimeType: "image/svg+xml",
+        altText: "Logo",
+      },
+      storage,
+      repository,
+    });
+    expect(asset.storageKey).toMatch(/^tenant-a\/[\w-]+\.svg$/);
+    expect(asset).toMatchObject({ width: 320, height: 80 });
+  });
+  it("rejects active or externally linked SVG content", async () => {
+    const { storage, repository } = harness();
+    await expect(
+      uploadImage({
+        tenantId: "tenant-a",
+        bytes: new TextEncoder().encode(
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><script>alert(1)</script></svg>',
+        ),
+        metadata: {
+          originalName: "unsafe.svg",
+          claimedMimeType: "image/svg+xml",
+          altText: "Logo",
+        },
+        storage,
+        repository,
+      }),
+    ).rejects.toThrow(/ausführbare/);
+  });
   it("prevents cross-tenant selection", async () => {
     const { storage, repository } = harness();
     const asset = await uploadImage({

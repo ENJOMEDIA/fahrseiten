@@ -3,10 +3,17 @@ import Image from "next/image";
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
 import { getSessionIdentity } from "@/modules/auth/session";
-import { findTenantLogoId, listTenantMedia } from "@/modules/media/repository";
+import {
+  findTenantBrandingIds,
+  listTenantMedia,
+} from "@/modules/media/repository";
 import { mediaPublicUrl } from "@/modules/media/public-url";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
-import { chooseTenantLogo, uploadTenantMedia } from "./actions";
+import {
+  chooseTenantFavicon,
+  chooseTenantLogo,
+  uploadTenantMedia,
+} from "./actions";
 
 export default async function MediaPage() {
   const identity = await getSessionIdentity();
@@ -19,17 +26,17 @@ export default async function MediaPage() {
           activeTenantIds: identity.memberships.map((item) => item.tenantId),
         })
       : null;
-  const [assets, logoId] = context
+  const [assets, branding] = context
     ? await Promise.all([
         listTenantMedia(context.tenantId),
-        findTenantLogoId(context.tenantId),
+        findTenantBrandingIds(context.tenantId),
       ])
-    : [[], null];
+    : [[], { logoMediaId: null, faviconMediaId: null }];
 
   return (
     <CustomerPage
-      title="Medien & Logo"
-      description="Bilder einmal hochladen und sicher in Website, Baukasten und Logo verwenden."
+      title="Medien & Markenauftritt"
+      description="Bilder verwalten und Seitenlogo sowie Browser-Favicon getrennt festlegen."
     >
       <div className="grid gap-5 xl:grid-cols-[1fr_23rem]">
         <div>
@@ -61,15 +68,18 @@ export default async function MediaPage() {
                       <p className="truncate font-semibold">
                         {asset.originalName}
                       </p>
-                      {logoId === asset.id ? (
+                      {branding.logoMediaId === asset.id ? (
                         <StatusBadge tone="success">Logo</StatusBadge>
+                      ) : null}
+                      {branding.faviconMediaId === asset.id ? (
+                        <StatusBadge tone="info">Favicon</StatusBadge>
                       ) : null}
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
                       {asset.width} × {asset.height} px ·{" "}
                       {Math.ceil(asset.byteSize / 1024)} KB
                     </p>
-                    {logoId !== asset.id ? (
+                    {branding.logoMediaId !== asset.id ? (
                       <form action={chooseTenantLogo} className="mt-3">
                         <input name="mediaId" type="hidden" value={asset.id} />
                         <button
@@ -77,6 +87,17 @@ export default async function MediaPage() {
                           type="submit"
                         >
                           Als Logo verwenden
+                        </button>
+                      </form>
+                    ) : null}
+                    {branding.faviconMediaId !== asset.id ? (
+                      <form action={chooseTenantFavicon} className="mt-2">
+                        <input name="mediaId" type="hidden" value={asset.id} />
+                        <button
+                          className="text-sm font-semibold text-indigo-700"
+                          type="submit"
+                        >
+                          Als Favicon verwenden
                         </button>
                       </form>
                     ) : null}
@@ -92,7 +113,7 @@ export default async function MediaPage() {
             <label className="block text-sm font-semibold">
               Bilddatei
               <input
-                accept="image/png,image/jpeg,image/webp"
+                accept="image/svg+xml,image/png,image/jpeg,image/webp"
                 className="mt-2 block w-full text-sm"
                 name="file"
                 required
@@ -109,9 +130,19 @@ export default async function MediaPage() {
                 required
               />
             </label>
-            <label className="flex gap-3 rounded-xl bg-slate-50 p-3 text-sm">
-              <input name="useAsLogo" type="checkbox" />
-              <span>Direkt als Website-Logo verwenden</span>
+            <label className="block text-sm font-semibold">
+              Verwendung
+              <select
+                className="mt-2 w-full rounded-xl border p-3 font-normal"
+                defaultValue="library"
+                name="usage"
+              >
+                <option value="library">
+                  Nur in Medienbibliothek speichern
+                </option>
+                <option value="logo">Als Seitenlogo verwenden</option>
+                <option value="favicon">Als Favicon verwenden</option>
+              </select>
             </label>
             <button
               className="w-full rounded-xl bg-cyan-600 px-4 py-3 font-semibold text-white"
@@ -121,7 +152,7 @@ export default async function MediaPage() {
             </button>
           </form>
           <p className="mt-3 text-xs leading-5 text-slate-500">
-            PNG, JPEG oder WebP · maximal 8 MB. Dateien liegen persistent
+            SVG, PNG, JPEG oder WebP · maximal 8 MB. Dateien liegen persistent
             außerhalb des Git-Verzeichnisses.
           </p>
         </Card>

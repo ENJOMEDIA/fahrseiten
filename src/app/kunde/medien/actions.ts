@@ -7,6 +7,7 @@ import { hasTenantPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
 import {
   databaseMediaRepository,
+  setTenantFavicon,
   setTenantLogo,
 } from "@/modules/media/repository";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
@@ -46,8 +47,9 @@ export async function uploadTenantMedia(formData: FormData) {
     storage: getMediaStorage(),
     repository: databaseMediaRepository,
   });
-  if (formData.get("useAsLogo") === "on")
-    await setTenantLogo(context.tenantId, asset.id);
+  const usage = String(formData.get("usage") ?? "library");
+  if (usage === "logo") await setTenantLogo(context.tenantId, asset.id);
+  if (usage === "favicon") await setTenantFavicon(context.tenantId, asset.id);
   revalidatePath("/kunde/medien");
 }
 
@@ -55,4 +57,14 @@ export async function chooseTenantLogo(formData: FormData) {
   const context = await requireWritableTenant();
   await setTenantLogo(context.tenantId, String(formData.get("mediaId") ?? ""));
   revalidatePath("/kunde/medien");
+}
+
+export async function chooseTenantFavicon(formData: FormData) {
+  const context = await requireWritableTenant();
+  await setTenantFavicon(
+    context.tenantId,
+    String(formData.get("mediaId") ?? ""),
+  );
+  revalidatePath("/kunde/medien");
+  revalidatePath("/api/favicon");
 }
