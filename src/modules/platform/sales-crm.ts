@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import { salesActivities, salesLeads } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { salesStages, type LeadStatus } from "./sales-stages";
+import type { SalesCsvRow } from "./sales-csv";
 
 const createLeadSchema = z.object({
   companyName: z.string().trim().min(2).max(180),
@@ -104,4 +105,51 @@ export async function updateLead(input: {
       });
     }
   });
+}
+
+export async function importSalesLeads(
+  rows: SalesCsvRow[],
+  actorUserId: string,
+) {
+  const existing = await db
+    .select({ email: salesLeads.email })
+    .from(salesLeads);
+  const knownEmails = new Set(
+    existing.flatMap((row) => (row.email ? [row.email.toLowerCase()] : [])),
+  );
+  let imported = 0;
+  let skipped = 0;
+  await db.transaction(async (tx) => {
+    for (const row of rows) {
+      const normalizedEmail = row.email.toLowerCase();
+      if (normalizedEmail && knownEmails.has(normalizedEmail)) {
+        skipped += 1;
+        continue;
+      }
+      const id = createId();
+      await tx.insert(salesLeads).values({
+        id,
+        companyName: row.companyName,
+        contactName: row.contactName || null,
+        email: row.email || null,
+        phone: row.phone || null,
+        website: row.website || null,
+        source: "csv_import",
+        status: "new",
+        ownerUserId: actorUserId,
+        nextTaskAt: row.nextTaskAt,
+      });
+      if (row.note)
+        await tx.insert(salesActivities).values({
+          id: createId(),
+          leadId: id,
+          actorUserId,
+          activityType: "csv_import_note",
+          note: row.note,
+        });
+      if (normalizedEmail) knownEmails.add(normalizedEmail);
+      imported += 1;
+    }
+  });
+  return { imported, skipped };
 }

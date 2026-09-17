@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import type { StoredBlock } from "./block-schema";
 
@@ -20,10 +21,22 @@ function Block({ block }: { block: StoredBlock }) {
     case "hero":
       return (
         <section
-          className="px-6 py-24 text-white"
+          className="relative isolate min-h-[38rem] overflow-hidden px-6 py-24 text-white"
           style={{ backgroundColor: "var(--tenant-accent, #0f172a)" }}
         >
-          <div className="mx-auto max-w-6xl">
+          {value.imageUrl ? (
+            <Image
+              alt={value.imageAlt || ""}
+              className="-z-20 object-cover"
+              fill
+              priority
+              sizes="100vw"
+              src={value.imageUrl}
+              unoptimized
+            />
+          ) : null}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/10" />
+          <div className="mx-auto flex min-h-[26rem] max-w-6xl flex-col justify-center">
             {value.eyebrow ? (
               <p
                 className="text-sm font-semibold tracking-[0.18em] uppercase"
@@ -32,7 +45,7 @@ function Block({ block }: { block: StoredBlock }) {
                 {value.eyebrow}
               </p>
             ) : null}
-            <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl">
+            <h1 className="reveal-up mt-4 max-w-3xl text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">
               {value.heading}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
@@ -40,7 +53,7 @@ function Block({ block }: { block: StoredBlock }) {
             </p>
             {value.actionLabel && value.actionHref ? (
               <Link
-                className="mt-8 inline-flex rounded-full px-5 py-3 font-semibold text-white"
+                className="surface-lift mt-8 inline-flex w-fit rounded-full px-6 py-3 font-semibold text-white shadow-xl"
                 href={value.actionHref}
                 style={{ backgroundColor: "var(--tenant-primary, #0891b2)" }}
               >
@@ -62,10 +75,23 @@ function Block({ block }: { block: StoredBlock }) {
             ))}
           </div>
           <div
-            className="min-h-64 rounded-[var(--radius-card)] bg-gradient-to-br from-cyan-100 to-slate-200"
+            className="relative min-h-80 overflow-hidden rounded-[var(--radius-card)] bg-gradient-to-br from-cyan-100 to-slate-200 shadow-2xl"
             role="img"
             aria-label={value.imageAlt || "Dekorative Bildfläche"}
-          />
+          >
+            {value.imageUrl ? (
+              <Image
+                alt={value.imageAlt}
+                className="object-cover transition duration-700 hover:scale-105"
+                fill
+                sizes="(min-width: 768px) 50vw, 100vw"
+                src={value.imageUrl}
+                unoptimized
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,.9),transparent_45%)]" />
+            )}
+          </div>
         </section>
       );
     case "benefits":
@@ -76,7 +102,7 @@ function Block({ block }: { block: StoredBlock }) {
             <div className="mt-8 grid gap-5 md:grid-cols-3">
               {value.items.map((item) => (
                 <article
-                  className="rounded-[var(--radius-card)] border border-slate-200 p-6"
+                  className="surface-lift rounded-[var(--radius-card)] border border-slate-200 p-7 shadow-sm"
                   key={item.title}
                 >
                   <h3 className="font-semibold">{item.title}</h3>
@@ -252,15 +278,32 @@ function Block({ block }: { block: StoredBlock }) {
           {value.items
             .filter((item) => item.active)
             .map((item) => (
-              <article className="rounded-2xl bg-white p-6" key={item.id}>
-                <h3 className="text-xl font-semibold">{item.name}</h3>
-                <p className="mt-1 text-sm text-cyan-700">
-                  {item.category} ·{" "}
-                  {item.transmission === "automatic"
-                    ? "Automatik"
-                    : "Schaltung"}
-                </p>
-                <p className="mt-3 text-slate-600">{item.description}</p>
+              <article
+                className="group overflow-hidden rounded-3xl bg-white shadow-sm"
+                key={item.id}
+              >
+                {item.imageUrl ? (
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image
+                      alt={item.imageAlt || item.name}
+                      className="object-cover transition duration-700 group-hover:scale-105"
+                      fill
+                      sizes="(min-width: 1024px) 33vw, 100vw"
+                      src={item.imageUrl}
+                      unoptimized
+                    />
+                  </div>
+                ) : null}
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold">{item.name}</h3>
+                  <p className="mt-1 text-sm text-cyan-700">
+                    {item.category} ·{" "}
+                    {item.transmission === "automatic"
+                      ? "Automatik"
+                      : "Schaltung"}
+                  </p>
+                  <p className="mt-3 text-slate-600">{item.description}</p>
+                </div>
               </article>
             ))}
         </ContentSection>
@@ -329,9 +372,14 @@ function ContentSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-slate-50 px-6 py-20">
+    <section className="bg-slate-50 px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <h2 className="text-3xl font-semibold">{heading}</h2>
+        <p className="text-sm font-semibold tracking-[0.18em] text-cyan-700 uppercase">
+          Entdecken
+        </p>
+        <h2 className="mt-3 text-4xl font-semibold tracking-tight">
+          {heading}
+        </h2>
         <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {children}
         </div>

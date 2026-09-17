@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { Breadcrumbs } from "@/components/layout/app-shell";
 import { hasTenantPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
@@ -8,6 +9,7 @@ import {
 } from "@/modules/content/management";
 import { contentModules } from "@/modules/customer/navigation";
 import { ContentEntryForm, EntryVisibilityForm } from "./content-entry-form";
+import { listTenantMedia } from "@/modules/media/repository";
 export default async function ContentModulePage({
   params,
 }: {
@@ -20,10 +22,10 @@ export default async function ContentModulePage({
   const membership = identity?.memberships[0];
   if (!membership) notFound();
   const canWrite = hasTenantPermission(membership.role, "tenant.content.write");
-  const entries = await listTenantContentEntries(
-    membership.tenantId,
-    slug as ContentModuleKey,
-  );
+  const [entries, media] = await Promise.all([
+    listTenantContentEntries(membership.tenantId, slug as ContentModuleKey),
+    slug === "fahrzeuge" ? listTenantMedia(membership.tenantId) : [],
+  ]);
   return (
     <>
       <Breadcrumbs
@@ -54,6 +56,16 @@ export default async function ContentModulePage({
                   key={entry.id}
                 >
                   <div>
+                    {entry.imageUrl ? (
+                      <Image
+                        alt=""
+                        className="mb-3 h-24 w-40 rounded-xl object-cover"
+                        height={96}
+                        src={entry.imageUrl}
+                        unoptimized
+                        width={160}
+                      />
+                    ) : null}
                     <p className="font-semibold">{entry.title}</p>
                     {entry.subtitle ? (
                       <p className="mt-1 text-sm text-slate-500">
@@ -84,6 +96,10 @@ export default async function ContentModulePage({
         </section>
         {canWrite ? (
           <ContentEntryForm
+            media={media.map((asset) => ({
+              id: asset.id,
+              label: asset.altText || asset.originalName,
+            }))}
             module={slug as ContentModuleKey}
             singular={moduleConfig.singular}
           />

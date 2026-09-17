@@ -2,9 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 
-import { createManualLead, updateLead } from "@/modules/platform/sales-crm";
+import {
+  createManualLead,
+  importSalesLeads,
+  updateLead,
+} from "@/modules/platform/sales-crm";
 import type { LeadStatus } from "@/modules/platform/sales-stages";
 import { requirePlatformPermission } from "@/modules/platform/access";
+import { parseSalesCsv } from "@/modules/platform/sales-csv";
+import {
+  queueSalesOutreach,
+  saveSalesEmailTemplate,
+} from "@/modules/platform/sales-email";
 
 export type SalesActionState = { message: string; error: boolean };
 
@@ -34,6 +43,92 @@ export async function createLeadAction(
         error instanceof Error
           ? error.message
           : "Interessent konnte nicht angelegt werden.",
+      error: true,
+    };
+  }
+}
+
+export async function importSalesCsvAction(
+  _state: SalesActionState,
+  formData: FormData,
+): Promise<SalesActionState> {
+  const identity = await requirePlatformPermission("platform.sales.manage");
+  try {
+    const file = formData.get("file");
+    if (!(file instanceof File) || !file.size)
+      throw new Error("Bitte eine CSV-Datei auswählen.");
+    if (file.size > 2_000_000)
+      throw new Error("Die CSV-Datei darf höchstens 2 MB groß sein.");
+    const result = await importSalesLeads(
+      parseSalesCsv(await file.text()),
+      identity.id,
+    );
+    revalidatePath("/admin/akquise");
+    revalidatePath("/admin/akquise/kontakte");
+    return {
+      message: `${result.imported} Kontakte importiert${result.skipped ? `, ${result.skipped} Duplikate übersprungen` : ""}.`,
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error ? error.message : "CSV-Import fehlgeschlagen.",
+      error: true,
+    };
+  }
+}
+
+export async function saveSalesTemplateAction(
+  _state: SalesActionState,
+  formData: FormData,
+): Promise<SalesActionState> {
+  const identity = await requirePlatformPermission("platform.sales.manage");
+  try {
+    await saveSalesEmailTemplate(
+      {
+        name: formData.get("name"),
+        subjectTemplate: formData.get("subjectTemplate"),
+        bodyTemplate: formData.get("bodyTemplate"),
+        active: true,
+      },
+      identity.id,
+    );
+    revalidatePath("/admin/akquise/vorlagen");
+    return { message: "E-Mail-Vorlage wurde gespeichert.", error: false };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Vorlage konnte nicht gespeichert werden.",
+      error: true,
+    };
+  }
+}
+
+export async function startOutreachAction(
+  _state: SalesActionState,
+  formData: FormData,
+): Promise<SalesActionState> {
+  const identity = await requirePlatformPermission("platform.sales.manage");
+  try {
+    const count = await queueSalesOutreach({
+      leadIds: formData.getAll("leadIds").map(String),
+      templateId: String(formData.get("templateId")),
+      actorUserId: identity.id,
+    });
+    revalidatePath("/admin/akquise");
+    revalidatePath("/admin/akquise/kontakte");
+    return {
+      message: `${count} personalisierte E-Mail${count === 1 ? "" : "s"} wurden zum Versand eingeplant.`,
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Akquise konnte nicht gestartet werden.",
       error: true,
     };
   }

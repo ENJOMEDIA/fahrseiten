@@ -8,6 +8,7 @@ import {
   type LeadStatus,
 } from "@/modules/platform/sales-stages";
 import { CreateLeadForm, LeadControls } from "./sales-forms";
+import { SalesNav } from "./sales-nav";
 
 const formatter = new Intl.DateTimeFormat("de-DE", {
   dateStyle: "medium",
@@ -28,6 +29,7 @@ export default async function SalesPage() {
       title="Akquise-CRM"
       description="Echte Website-Anfragen und manuell erfasste Kontakte vom Erstkontakt bis zum Abschluss verwalten."
     >
+      <SalesNav />
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card className="surface-lift">
           <p className="text-sm text-slate-500">Interessenten</p>

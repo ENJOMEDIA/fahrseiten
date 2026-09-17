@@ -535,6 +535,9 @@ export const vehicles = mysqlTable(
     category: varchar("category", { length: 80 }).notNull(),
     transmission: mysqlEnum("transmission", ["manual", "automatic"]).notNull(),
     description: text("description"),
+    imageMediaId: id("image_media_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
   },
   (table) => [
     index("vehicles_tenant_position_idx").on(table.tenantId, table.position),
@@ -814,6 +817,21 @@ export const salesActivities = mysqlTable(
   (table) => [
     index("sales_activities_lead_idx").on(table.leadId, table.createdAt),
   ],
+);
+export const salesEmailTemplates = mysqlTable(
+  "sales_email_templates",
+  {
+    id: id("id").primaryKey(),
+    name: varchar("name", { length: 160 }).notNull(),
+    subjectTemplate: varchar("subject_template", { length: 240 }).notNull(),
+    bodyTemplate: text("body_template").notNull(),
+    active: boolean("active").default(true).notNull(),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [index("sales_email_templates_active_idx").on(table.active)],
 );
 export const platformTasks = mysqlTable(
   "platform_tasks",

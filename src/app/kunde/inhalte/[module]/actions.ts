@@ -11,6 +11,9 @@ import {
   type ContentModuleKey,
 } from "@/modules/content/management";
 import { contentModules } from "@/modules/customer/navigation";
+import { databaseMediaRepository } from "@/modules/media/repository";
+import { getMediaStorage } from "@/modules/media/runtime-storage";
+import { uploadImage } from "@/modules/media/service";
 
 export type ContentActionState = { message: string; error: boolean };
 
@@ -40,6 +43,35 @@ export async function createContentEntryAction(
   const membership = await writableMembership();
   try {
     const contentModule = checkedModule(formData.get("module"));
+    if (contentModule === "fahrzeuge") {
+      const file = formData.get("imageFile");
+      if (file instanceof File && file.size > 0) {
+        const asset = await uploadImage({
+          tenantId: membership.tenantId,
+          bytes: new Uint8Array(await file.arrayBuffer()),
+          metadata: {
+            originalName: file.name,
+            claimedMimeType: file.type,
+            altText:
+              String(formData.get("imageAlt") ?? "").trim() ||
+              `Fahrschulfahrzeug ${String(formData.get("title") ?? "").trim()}`,
+          },
+          storage: getMediaStorage(),
+          repository: databaseMediaRepository,
+        });
+        formData.set("imageMediaId", asset.id);
+      } else {
+        const mediaId = String(formData.get("imageMediaId") ?? "");
+        if (mediaId) {
+          const asset = await databaseMediaRepository.find(
+            membership.tenantId,
+            mediaId,
+          );
+          if (!asset)
+            throw new Error("Das ausgewählte Bild wurde nicht gefunden.");
+        }
+      }
+    }
     await createTenantContentEntry({
       tenantId: membership.tenantId,
       module: contentModule,

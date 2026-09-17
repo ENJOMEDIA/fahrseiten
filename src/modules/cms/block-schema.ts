@@ -26,6 +26,8 @@ const hero = z.object({
   text: z.string().max(600),
   actionLabel: z.string().max(80).optional(),
   actionHref: safeLink.optional(),
+  imageUrl: z.string().max(500).optional(),
+  imageAlt: z.string().max(180).optional(),
 });
 const textImage = z.object({
   type: z.literal("text_image"),

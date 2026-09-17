@@ -7,6 +7,7 @@ import {
   courses,
   licenseClasses,
   locations,
+  mediaUsages,
   priceGroups,
   teamMembers,
   vehicles,
@@ -26,6 +27,7 @@ export type ManagedContentEntry = {
   title: string;
   subtitle: string | null;
   active: boolean;
+  imageUrl?: string | null;
 };
 
 export async function listTenantContentEntries(
@@ -78,16 +80,22 @@ export async function listTenantContentEntries(
         .where(eq(teamMembers.tenantId, tenantId))
         .orderBy(asc(teamMembers.position));
     case "fahrzeuge":
-      return db
-        .select({
-          id: vehicles.id,
-          title: vehicles.name,
-          subtitle: vehicles.category,
-          active: vehicles.active,
-        })
-        .from(vehicles)
-        .where(eq(vehicles.tenantId, tenantId))
-        .orderBy(asc(vehicles.position));
+      return (
+        await db
+          .select({
+            id: vehicles.id,
+            title: vehicles.name,
+            subtitle: vehicles.category,
+            active: vehicles.active,
+            imageMediaId: vehicles.imageMediaId,
+          })
+          .from(vehicles)
+          .where(eq(vehicles.tenantId, tenantId))
+          .orderBy(asc(vehicles.position))
+      ).map((entry) => ({
+        ...entry,
+        imageUrl: entry.imageMediaId ? `/media/${entry.imageMediaId}` : null,
+      }));
     case "standorte":
       return db
         .select({
@@ -166,20 +174,31 @@ export async function createTenantContentEntry(input: {
       });
       break;
     case "fahrzeuge":
-      await db.insert(vehicles).values({
-        id,
-        tenantId: input.tenantId,
-        name: title,
-        category: requiredText(
-          input.formData,
-          "category",
-          "Die Fahrzeugkategorie",
-        ),
-        transmission:
-          text(input.formData, "transmission") === "automatic"
-            ? "automatic"
-            : "manual",
-        description: text(input.formData, "description") || null,
+      await db.transaction(async (tx) => {
+        const imageMediaId = text(input.formData, "imageMediaId") || null;
+        await tx.insert(vehicles).values({
+          id,
+          tenantId: input.tenantId,
+          name: title,
+          category: requiredText(
+            input.formData,
+            "category",
+            "Die Fahrzeugkategorie",
+          ),
+          transmission:
+            text(input.formData, "transmission") === "automatic"
+              ? "automatic"
+              : "manual",
+          description: text(input.formData, "description") || null,
+          imageMediaId,
+        });
+        if (imageMediaId)
+          await tx.insert(mediaUsages).values({
+            tenantId: input.tenantId,
+            mediaId: imageMediaId,
+            entityType: "vehicle",
+            entityId: id,
+          });
       });
       break;
     case "standorte":

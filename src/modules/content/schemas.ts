@@ -54,6 +54,9 @@ export const vehicleSchema = baseItem.extend({
   category: z.string().min(1).max(80),
   transmission: z.enum(["manual", "automatic"]),
   description: z.string().max(1_000),
+  imageMediaId: z.uuid().optional(),
+  imageUrl: z.string().max(500).optional(),
+  imageAlt: z.string().max(300).optional(),
 });
 export const locationSchema = baseItem.extend({
   name: z.string().min(1).max(160),

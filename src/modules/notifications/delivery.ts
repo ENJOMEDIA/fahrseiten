@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { JobRecord } from "@/modules/jobs/runner";
 import type { MailTransport } from "./mail-transport";
-import { renderEmailTemplate, type TemplateKey } from "./templates";
+import { renderEmailTemplate, type DeliveryTemplateKey } from "./templates";
 
 const payloadSchema = z.object({
   to: z.email(),
@@ -12,6 +12,7 @@ const payloadSchema = z.object({
     "password_reset",
     "user_invitation",
     "follow_up_due",
+    "sales_outreach",
   ]),
   values: z.record(z.string(), z.unknown()),
 });
@@ -35,7 +36,7 @@ export async function deliverEmailJob(
 ) {
   const payload = payloadSchema.parse(job.payload);
   const rendered = renderEmailTemplate(
-    payload.template as TemplateKey,
+    payload.template as DeliveryTemplateKey,
     payload.values,
   );
   const deliveryKey = `email:${job.idempotencyKey}`;

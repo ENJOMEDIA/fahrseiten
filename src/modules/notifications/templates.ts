@@ -5,6 +5,11 @@ const valuesSchema = z.object({
   actionUrl: z.url().optional(),
   reference: z.string().min(1).max(100),
 });
+const salesValuesSchema = z.object({
+  subject: z.string().min(1).max(240),
+  text: z.string().min(1).max(20_000),
+  html: z.string().min(1).max(50_000),
+});
 const definitions = {
   contact_inquiry_received: {
     version: 1,
@@ -40,7 +45,12 @@ const definitions = {
   },
 } as const;
 export type TemplateKey = keyof typeof definitions;
-export function renderEmailTemplate(key: TemplateKey, values: unknown) {
+export type DeliveryTemplateKey = TemplateKey | "sales_outreach";
+export function renderEmailTemplate(key: DeliveryTemplateKey, values: unknown) {
+  if (key === "sales_outreach") {
+    const parsed = salesValuesSchema.parse(values);
+    return { version: 1, ...parsed };
+  }
   const parsed = valuesSchema.parse(values);
   return {
     version: definitions[key].version,

@@ -25,9 +25,11 @@ function Result({ state }: { state: ContentActionState }) {
 export function ContentEntryForm({
   module,
   singular,
+  media = [],
 }: {
   module: ContentModuleKey;
   singular: string;
+  media?: { id: string; label: string }[];
 }) {
   const [state, action, pending] = useActionState(
     createContentEntryAction,
@@ -37,6 +39,7 @@ export function ContentEntryForm({
     <form
       action={action}
       className="rounded-2xl border border-slate-200 bg-white p-5"
+      encType="multipart/form-data"
     >
       <input name="module" type="hidden" value={module} />
       <h2 className="font-semibold">{singular} anlegen</h2>
@@ -93,6 +96,73 @@ export function ContentEntryForm({
         {module === "fahrzeuge" ? (
           <>
             <label className="block text-sm font-semibold">
+              Schnellvorlage
+              <select
+                className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue=""
+                onChange={(event) => {
+                  const form = event.currentTarget.form;
+                  const presets: Record<
+                    string,
+                    [string, string, string, string]
+                  > = {
+                    golf: [
+                      "VW Golf",
+                      "Pkw",
+                      "manual",
+                      "Wendiger Fahrschulwagen für die Klasse B.",
+                    ],
+                    id3: [
+                      "VW ID.3",
+                      "Elektro-Pkw",
+                      "automatic",
+                      "Leiser Elektro-Fahrschulwagen mit Automatik.",
+                    ],
+                    bmw1: [
+                      "BMW 1er",
+                      "Pkw",
+                      "automatic",
+                      "Kompakter Fahrschulwagen mit Automatikgetriebe.",
+                    ],
+                    aclass: [
+                      "Mercedes A-Klasse",
+                      "Pkw",
+                      "automatic",
+                      "Komfortabler Fahrschulwagen für die Klasse B.",
+                    ],
+                    bike: [
+                      "Motorrad",
+                      "Motorrad",
+                      "manual",
+                      "Ausbildungsfahrzeug für Motorradklassen.",
+                    ],
+                  };
+                  const preset = presets[event.currentTarget.value];
+                  if (!form || !preset) return;
+                  (form.elements.namedItem("title") as HTMLInputElement).value =
+                    preset[0];
+                  (
+                    form.elements.namedItem("category") as HTMLInputElement
+                  ).value = preset[1];
+                  (
+                    form.elements.namedItem("transmission") as HTMLSelectElement
+                  ).value = preset[2];
+                  (
+                    form.elements.namedItem(
+                      "description",
+                    ) as HTMLTextAreaElement
+                  ).value = preset[3];
+                }}
+              >
+                <option value="">Frei eingeben</option>
+                <option value="golf">VW Golf</option>
+                <option value="id3">VW ID.3</option>
+                <option value="bmw1">BMW 1er</option>
+                <option value="aclass">Mercedes A-Klasse</option>
+                <option value="bike">Motorrad</option>
+              </select>
+            </label>
+            <label className="block text-sm font-semibold">
               Kategorie
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
@@ -109,6 +179,41 @@ export function ContentEntryForm({
                 <option value="manual">Schaltung</option>
                 <option value="automatic">Automatik</option>
               </select>
+            </label>
+            <label className="block text-sm font-semibold">
+              Bild aus der Mediathek
+              <select
+                className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                name="imageMediaId"
+              >
+                <option value="">Kein vorhandenes Bild</option>
+                {media.map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm font-semibold">
+              Oder neues Fahrzeugfoto hochladen
+              <input
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="mt-1 block w-full text-sm font-normal"
+                name="imageFile"
+                type="file"
+              />
+              <span className="mt-1 block text-xs font-normal text-slate-500">
+                PNG, JPG, WebP oder SVG bis 8 MB. Der Upload landet automatisch
+                in der Mediathek.
+              </span>
+            </label>
+            <label className="block text-sm font-semibold">
+              Bildbeschreibung
+              <input
+                className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                name="imageAlt"
+                placeholder="Blauer Fahrschulwagen vor dem Standort"
+              />
             </label>
           </>
         ) : null}

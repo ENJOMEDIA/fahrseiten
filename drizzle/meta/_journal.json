@@ -141,6 +141,13 @@
       "when": 1789680209116,
       "tag": "0019_einrichtungspreise_anpassen",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1789681588835,
+      "tag": "0020_talented_nicolaos",
+      "breakpoints": true
     }
   ]
 }

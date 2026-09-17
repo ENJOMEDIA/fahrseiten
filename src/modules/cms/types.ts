@@ -26,6 +26,7 @@ export type TenantWebsite = {
   name: string;
   maintenanceMode: boolean;
   maintenanceMessage: string;
+  basePath?: string;
   navigation: SiteNavigationItem[];
   theme: {
     primaryColor: string;

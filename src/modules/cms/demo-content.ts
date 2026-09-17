@@ -6,6 +6,7 @@ export const demoWebsite: TenantWebsite = {
   name: "Fahrschule Morgenrot",
   maintenanceMode: false,
   maintenanceMessage: "Fiktive Vorschau",
+  basePath: "/demo",
   navigation: [
     { id: "nav-home", label: "Start", href: "/demo", position: 0 },
     {
@@ -43,6 +44,8 @@ const pages: PublishedPage[] = [
           text: "Persönliche Ausbildung, klare Abläufe und ein ruhiges Lernumfeld.",
           actionLabel: "Kontakt aufnehmen",
           actionHref: "/demo/kontakt",
+          imageUrl: "/demo/hero-driving-school.webp",
+          imageAlt: "Türkiser Fahrschulwagen in einer modernen Stadt",
         },
       },
       {
@@ -194,11 +197,25 @@ const pages: PublishedPage[] = [
               id: "vehicle-1",
               position: 0,
               active: true,
-              name: "Demo Kompakt",
+              name: "Morgenrot Blue",
               category: "Pkw",
+              transmission: "manual",
+              description:
+                "Übersichtlicher Schaltwagen mit modernen Assistenzsystemen – ideal für deine ersten Kilometer.",
+              imageUrl: "/demo/fleet-blue.webp",
+              imageAlt: "Blauer kompakter Fahrschulwagen",
+            },
+            {
+              id: "vehicle-2",
+              position: 1,
+              active: true,
+              name: "Morgenrot Electric",
+              category: "Elektro-Pkw",
               transmission: "automatic",
               description:
-                "Fiktives, elektrisch angetriebenes Schulungsfahrzeug.",
+                "Leises Automatik-Fahrzeug für eine entspannte Ausbildung und die B197-Ergänzung.",
+              imageUrl: "/demo/fleet-electric.webp",
+              imageAlt: "Weißer elektrischer Fahrschulwagen",
             },
           ],
         },
@@ -336,6 +353,56 @@ const pages: PublishedPage[] = [
           text: "Diese Kontaktdaten sind fiktiv und dienen nur der Demo.",
           actionLabel: "E-Mail schreiben",
           actionHref: "mailto:hallo@morgenrot.invalid",
+        },
+      },
+    ]),
+  },
+  {
+    tenantId: demoWebsite.tenantId,
+    slug: "impressum",
+    title: "Impressum",
+    version: 1,
+    seo: { title: "Impressum – Fahrschule Morgenrot", noIndex: true },
+    blocks: parseStoredBlocks([
+      {
+        id: "legal-imprint",
+        schemaVersion: 1,
+        position: 0,
+        visible: true,
+        properties: {
+          type: "text_image",
+          heading: "Impressum der Demo-Fahrschule",
+          paragraphs: [
+            "Fahrschule Morgenrot ist ein vollständig fiktives Anschauungsbeispiel. Beispielweg 1, 00000 Musterstadt.",
+            "Vertreten durch: Mara Beispiel. Kontakt: hallo@morgenrot.invalid. Es findet kein realer Geschäftsbetrieb statt.",
+          ],
+          imageAlt: "Fiktive rechtliche Angaben",
+          imagePosition: "right",
+        },
+      },
+    ]),
+  },
+  {
+    tenantId: demoWebsite.tenantId,
+    slug: "datenschutz",
+    title: "Datenschutz",
+    version: 1,
+    seo: { title: "Datenschutz – Fahrschule Morgenrot", noIndex: true },
+    blocks: parseStoredBlocks([
+      {
+        id: "legal-privacy",
+        schemaVersion: 1,
+        position: 0,
+        visible: true,
+        properties: {
+          type: "text_image",
+          heading: "Datenschutz in dieser Demo",
+          paragraphs: [
+            "Diese Vorschau verwendet ausschließlich fiktive Inhalte. Das Demo-Kontaktformular versendet keine Nachricht und speichert keine echten Anfragen.",
+            "Auf einer Kundenseite erzeugt FahrSeiten die Datenschutzbausteine passend zu den aktivierten Funktionen. Die verantwortliche Fahrschule prüft und veröffentlicht die Angaben.",
+          ],
+          imageAlt: "Datenschutz-Hinweis",
+          imagePosition: "right",
         },
       },
     ]),

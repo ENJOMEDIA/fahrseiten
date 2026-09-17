@@ -13,6 +13,8 @@ export function TenantSite({
   page: PublishedPage;
   afterContent?: React.ReactNode;
 }) {
+  const homeHref = website.basePath || "/";
+  const legalHref = (path: string) => `${website.basePath || ""}${path}`;
   return (
     <div
       className="min-h-screen bg-slate-50 text-slate-950"
@@ -23,9 +25,12 @@ export function TenantSite({
         } as React.CSSProperties
       }
     >
-      <header className="border-b border-slate-200 bg-white">
+      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
-          <Link className="flex items-center gap-3 text-lg font-bold" href="/">
+          <Link
+            className="flex items-center gap-3 text-lg font-bold"
+            href={homeHref}
+          >
             {website.theme.logoUrl ? (
               <Image
                 alt={`Logo ${website.name}`}
@@ -71,8 +76,8 @@ export function TenantSite({
           aria-label="Rechtliches"
           className="mt-3 flex justify-center gap-5"
         >
-          <Link href="/impressum">Impressum</Link>
-          <Link href="/datenschutz">Datenschutz</Link>
+          <Link href={legalHref("/impressum")}>Impressum</Link>
+          <Link href={legalHref("/datenschutz")}>Datenschutz</Link>
           <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
         </nav>
       </footer>
