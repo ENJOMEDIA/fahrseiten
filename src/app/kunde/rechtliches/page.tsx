@@ -1,5 +1,6 @@
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge as Badge } from "@/components/ui/card";
+import { LegalEditor } from "@/modules/legal/legal-editor";
 export default function LegalPage() {
   return (
     <CustomerPage
@@ -32,6 +33,9 @@ export default function LegalPage() {
             Einstellungen öffnen
           </button>
         </Card>
+      </div>
+      <div className="mt-6">
+        <LegalEditor />
       </div>
     </CustomerPage>
   );

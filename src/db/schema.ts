@@ -989,6 +989,146 @@ export const tenantFeatures = mysqlTable(
   (table) => [primaryKey({ columns: [table.tenantId, table.featureId] })],
 );
 
+export const legalDocumentScopeValues = ["platform", "tenant"] as const;
+export const legalDocumentTypeValues = ["imprint", "privacy"] as const;
+export const legalDocumentStatusValues = [
+  "draft",
+  "published",
+  "archived",
+] as const;
+export const legalDocuments = mysqlTable(
+  "legal_documents",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    scope: mysqlEnum("scope", legalDocumentScopeValues).notNull(),
+    documentType: mysqlEnum("document_type", legalDocumentTypeValues).notNull(),
+    version: int("version").notNull(),
+    status: mysqlEnum("status", legalDocumentStatusValues)
+      .default("draft")
+      .notNull(),
+    content: text("content").notNull(),
+    warningAcknowledgedAt: timestamp("warning_acknowledged_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    effectiveAt: timestamp("effective_at", { mode: "date", fsp: 3 }),
+    publishedAt: timestamp("published_at", { mode: "date", fsp: 3 }),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("legal_documents_scope_version_unique").on(
+      table.scope,
+      table.tenantId,
+      table.documentType,
+      table.version,
+    ),
+    index("legal_documents_tenant_status_idx").on(table.tenantId, table.status),
+  ],
+);
+
+export type ConsentChoices = {
+  necessary: true;
+  functional: boolean;
+  statistics: boolean;
+  marketing: boolean;
+};
+export const consentRecords = mysqlTable(
+  "consent_records",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "set null",
+    }),
+    subjectHash: varchar("subject_hash", { length: 64 }).notNull(),
+    noticeVersion: varchar("notice_version", { length: 80 }).notNull(),
+    choices: json("choices").$type<ConsentChoices>().notNull(),
+    sourceHost: varchar("source_host", { length: 253 }).notNull(),
+    withdrawnAt: timestamp("withdrawn_at", { mode: "date", fsp: 3 }),
+    expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("consent_records_subject_idx").on(table.subjectHash, table.createdAt),
+    index("consent_records_expiry_idx").on(table.expiresAt),
+  ],
+);
+
+export const privacyRequestTypeValues = ["export", "deletion"] as const;
+export const privacyRequestStatusValues = [
+  "received",
+  "identity_check",
+  "processing",
+  "completed",
+  "rejected",
+] as const;
+export const privacyRequests = mysqlTable(
+  "privacy_requests",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "set null",
+    }),
+    requestType: mysqlEnum("request_type", privacyRequestTypeValues).notNull(),
+    status: mysqlEnum("status", privacyRequestStatusValues)
+      .default("received")
+      .notNull(),
+    requesterEmailHash: varchar("requester_email_hash", {
+      length: 64,
+    }).notNull(),
+    dueAt: timestamp("due_at", { mode: "date", fsp: 3 }),
+    completedAt: timestamp("completed_at", { mode: "date", fsp: 3 }),
+    ...timestamps,
+  },
+  (table) => [
+    index("privacy_requests_tenant_status_idx").on(
+      table.tenantId,
+      table.status,
+    ),
+  ],
+);
+
+export const retentionPolicies = mysqlTable(
+  "retention_policies",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    dataCategory: varchar("data_category", { length: 100 }).notNull(),
+    retentionDays: int("retention_days").notNull(),
+    legalBasis: varchar("legal_basis", { length: 255 }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("retention_policies_tenant_category_unique").on(
+      table.tenantId,
+      table.dataCategory,
+    ),
+  ],
+);
+
+export const subprocessors = mysqlTable(
+  "subprocessors",
+  {
+    id: id("id").primaryKey(),
+    name: varchar("name", { length: 180 }).notNull(),
+    purpose: text("purpose").notNull(),
+    country: varchar("country", { length: 100 }),
+    privacyUrl: varchar("privacy_url", { length: 500 }),
+    active: boolean("active").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("subprocessors_name_unique").on(table.name)],
+);
+
 export const auditLogs = mysqlTable(
   "audit_logs",
   {

@@ -13,6 +13,13 @@ export default function PrivacyPage() {
           verwendet. Kontakt- und Beratungsformulare speichern Testangaben
           getrennt nach ihrem Zielkontext.
         </p>
+        <h2>Einwilligungsversion</h2>
+        <p>
+          Die aktuelle technische Auswahl verwendet die Version „consent-v1“.
+          Notwendige Funktionen sind dauerhaft aktiv; funktionale, Statistik-
+          und Marketingdienste bleiben ohne passende Zustimmung blockiert. Die
+          Auswahl kann über die Cookie-Einstellungen widerrufen werden.
+        </p>
         <h2>Vor Veröffentlichung offen</h2>
         <p>
           Verantwortlicher, Rechtsgrundlagen, Empfänger, Aufbewahrungsfristen,

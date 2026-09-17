@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+async function keepNecessaryConsent(page: import("@playwright/test").Page) {
+  const button = page.getByRole("button", { name: "Nur notwendige" });
+  await expect(button).toBeVisible();
+  await button.click();
+}
+
 test("renders the local marketing foundation", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -7,6 +13,14 @@ test("renders the local marketing foundation", async ({ page }) => {
   );
   await expect(
     page.getByRole("navigation", { name: "Marketing-Navigation" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("complementary", { name: "Einwilligungseinstellungen" }),
+  ).toBeVisible();
+  await keepNecessaryConsent(page);
+  await page.goto("/cookie-einstellungen");
+  await expect(
+    page.getByText("Beispiel für externe Karte ist blockiert"),
   ).toBeVisible();
 });
 
@@ -21,6 +35,7 @@ test("protects admin areas and exposes accessible login fields", async ({
 
 test("navigates the validated demo page tree", async ({ page }) => {
   await page.goto("/demo");
+  await keepNecessaryConsent(page);
   await expect(
     page.getByRole("heading", { level: 1, name: /Sicher ans Ziel/ }),
   ).toBeVisible();
@@ -35,6 +50,7 @@ test("edits, previews, publishes and restores in the controlled builder", async 
   page,
 }) => {
   await page.goto("/builder-demo");
+  await keepNecessaryConsent(page);
   await expect(
     page.getByRole("heading", { name: "Website-Builder" }),
   ).toBeVisible();
@@ -59,10 +75,13 @@ test("edits, previews, publishes and restores in the controlled builder", async 
 
 test("submits a validated local demo inquiry", async ({ page }) => {
   await page.goto("/demo/kontakt");
+  await keepNecessaryConsent(page);
   await page.getByLabel("Name").fill("Alex Beispiel");
   await page.getByLabel("E-Mail").fill("alex@example.invalid");
   await page.getByLabel("Nachricht").fill("Bitte um fiktive Informationen.");
-  await page.getByRole("checkbox").check();
+  await page
+    .getByRole("checkbox", { name: /fiktiven Datenschutzhinweis/ })
+    .check();
   await page.waitForTimeout(2100);
   await page.getByRole("button", { name: "Testanfrage senden" }).click();
   await expect(
