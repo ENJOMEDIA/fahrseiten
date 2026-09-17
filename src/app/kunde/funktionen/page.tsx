@@ -1,16 +1,15 @@
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
-import { featureCatalog, type FeatureKey } from "@/modules/features/catalog";
-const enabled = new Set<FeatureKey>(["website_builder"]);
+import { featureCatalog } from "@/modules/features/catalog";
 export default function CustomerFeaturesPage() {
   return (
     <CustomerPage
       title="Funktionen"
-      description="Verfügbare und geplante Funktionen deines lokalen Demo-Tarifs."
+      description="Bereits verfügbare Plattformfunktionen und transparent gekennzeichnete Erweiterungen."
     >
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {Object.entries(featureCatalog).map(([key, feature]) => {
-          const active = enabled.has(key as FeatureKey);
+          const active = feature.availability === "available";
           return (
             <Card key={key}>
               <div className="flex justify-between gap-3">

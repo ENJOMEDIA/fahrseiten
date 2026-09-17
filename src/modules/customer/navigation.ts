@@ -71,23 +71,19 @@ export const contentModules = {
   fuehrerscheinklassen: {
     title: "Führerscheinklassen",
     singular: "Führerscheinklasse",
-    example: "Klasse B",
   },
   preise: {
     title: "Preise",
     singular: "Preisposition",
-    example: "Grundbetrag Klasse B",
   },
-  kurse: { title: "Kurse", singular: "Kurs", example: "Theorie-Intensivkurs" },
-  team: { title: "Team", singular: "Teammitglied", example: "Mara Beispiel" },
+  kurse: { title: "Kurse", singular: "Kurs" },
+  team: { title: "Team", singular: "Teammitglied" },
   fahrzeuge: {
     title: "Fahrzeuge",
     singular: "Fahrzeug",
-    example: "Demo Kompakt",
   },
   standorte: {
     title: "Standorte & Öffnungszeiten",
     singular: "Standort",
-    example: "Morgenrot Lernstudio",
   },
 } as const;

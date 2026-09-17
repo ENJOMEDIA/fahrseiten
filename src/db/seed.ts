@@ -492,6 +492,7 @@ try {
         id: ids.localPlan,
         key: "local_demo",
         internalName: "Lokaler Demo-Plan",
+        publicName: "Lokaler Demo-Plan",
       })
       .onDuplicateKeyUpdate({ set: { active: true } });
 

@@ -89,7 +89,7 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-[#f3f6f8] lg:grid lg:grid-cols-[19rem_1fr]">
-      <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-white/5 bg-[#080d16] px-5 py-6 text-white lg:flex lg:flex-col">
+      <aside className="app-sidebar sticky top-0 hidden h-screen overflow-y-auto border-r border-white/5 bg-[#080d16] px-5 py-6 text-white lg:flex lg:flex-col">
         <Link className="flex items-center gap-3" href="/">
           {logoUrl ? (
             <span className="grid h-11 min-w-14 place-items-center rounded-2xl bg-white px-2 shadow-lg">
@@ -204,7 +204,7 @@ export function AppShell({
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[94rem] px-5 py-8 lg:px-10 lg:py-10">
+        <main className="page-enter mx-auto w-full max-w-[94rem] px-5 py-8 lg:px-10 lg:py-10">
           {children}
         </main>
       </div>

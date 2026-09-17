@@ -28,3 +28,19 @@ export async function findActiveTenantByDomain(
     .limit(1);
   return match ?? null;
 }
+
+export async function findTenantPrimaryDomain(tenantId: string) {
+  const [domain] = await db
+    .select({
+      id: domains.id,
+      hostname: domains.hostname,
+      status: domains.status,
+      sslStatus: domains.sslStatus,
+      verifiedAt: domains.verifiedAt,
+      updatedAt: domains.updatedAt,
+    })
+    .from(domains)
+    .where(and(eq(domains.tenantId, tenantId), eq(domains.primary, true)))
+    .limit(1);
+  return domain ?? null;
+}

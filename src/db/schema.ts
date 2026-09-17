@@ -971,6 +971,14 @@ export const plans = mysqlTable(
     id: id("id").primaryKey(),
     key: varchar("key", { length: 80 }).notNull(),
     internalName: varchar("internal_name", { length: 120 }).notNull(),
+    publicName: varchar("public_name", { length: 120 })
+      .default("Paket")
+      .notNull(),
+    description: text("description"),
+    monthlyPriceCents: int("monthly_price_cents"),
+    setupPriceCents: int("setup_price_cents"),
+    position: int("position").default(0).notNull(),
+    highlighted: boolean("highlighted").default(false).notNull(),
     active: boolean("active").default(true).notNull(),
     ...timestamps,
   },
@@ -1004,6 +1012,8 @@ export const featureFlags = mysqlTable(
     key: varchar("key", { length: 100 }).notNull(),
     title: varchar("title", { length: 160 }).notNull(),
     description: text("description"),
+    addonAvailable: boolean("addon_available").default(false).notNull(),
+    addonPriceCents: int("addon_price_cents"),
     defaultStatus: mysqlEnum("default_status", featureStatusValues)
       .default("unavailable")
       .notNull(),

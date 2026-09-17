@@ -46,6 +46,7 @@ export function MaintenancePage({
     >
       <meta content="noindex, nofollow" name="robots" />
       <div className="maintenance-grid" aria-hidden="true" />
+      <div className="maintenance-aurora" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl">
         <div className="flex items-center justify-between gap-4">
           <p className="flex items-center gap-3 text-sm font-semibold tracking-[0.16em] uppercase">
@@ -114,6 +115,7 @@ export function MaintenancePage({
                 <span className="ml-3 h-5 flex-1 rounded-full bg-white/5" />
               </div>
               <div className="overflow-hidden rounded-[1.35rem] bg-white text-slate-950">
+                <span className="maintenance-scan" aria-hidden="true" />
                 <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                   <strong className="flex items-center gap-2 text-sm">
                     {logoUrl ? (
@@ -162,7 +164,11 @@ export function MaintenancePage({
                 </div>
                 <div className="grid grid-cols-3 gap-2 p-3">
                   {previews.map(([title], index) => (
-                    <div className="rounded-xl bg-slate-100 p-3" key={title}>
+                    <div
+                      className="maintenance-preview-card rounded-xl bg-slate-100 p-3"
+                      key={title}
+                      style={{ animationDelay: `${index * 180}ms` }}
+                    >
                       <div
                         className="mb-7 size-6 rounded-lg opacity-25"
                         style={{ backgroundColor: primaryColor }}

@@ -6,6 +6,8 @@ import {
   domains,
   legalDocuments,
   sites,
+  subscriptions,
+  plans,
   tenantMemberships,
   tenants,
   users,
@@ -21,9 +23,11 @@ export async function listPlatformTenants() {
       createdAt: tenants.createdAt,
       domain: domains.hostname,
       domainStatus: domains.status,
+      sslStatus: domains.sslStatus,
       maintenanceMode: sites.maintenanceMode,
       ownerName: users.displayName,
       ownerEmail: users.email,
+      planName: plans.publicName,
     })
     .from(tenants)
     .leftJoin(
@@ -40,6 +44,14 @@ export async function listPlatformTenants() {
       ),
     )
     .leftJoin(users, eq(users.id, tenantMemberships.userId))
+    .leftJoin(
+      subscriptions,
+      and(
+        eq(subscriptions.tenantId, tenants.id),
+        eq(subscriptions.status, "active"),
+      ),
+    )
+    .leftJoin(plans, eq(plans.id, subscriptions.planId))
     .orderBy(desc(tenants.createdAt));
 }
 
@@ -53,6 +65,7 @@ export async function findPlatformTenant(id: string) {
       createdAt: tenants.createdAt,
       updatedAt: tenants.updatedAt,
       domain: domains.hostname,
+      domainId: domains.id,
       domainStatus: domains.status,
       sslStatus: domains.sslStatus,
       maintenanceMode: sites.maintenanceMode,
@@ -60,6 +73,7 @@ export async function findPlatformTenant(id: string) {
       ownerName: users.displayName,
       ownerEmail: users.email,
       ownerActive: users.active,
+      planName: plans.publicName,
     })
     .from(tenants)
     .leftJoin(
@@ -76,6 +90,14 @@ export async function findPlatformTenant(id: string) {
       ),
     )
     .leftJoin(users, eq(users.id, tenantMemberships.userId))
+    .leftJoin(
+      subscriptions,
+      and(
+        eq(subscriptions.tenantId, tenants.id),
+        eq(subscriptions.status, "active"),
+      ),
+    )
+    .leftJoin(plans, eq(plans.id, subscriptions.planId))
     .where(eq(tenants.id, id))
     .limit(1);
 

@@ -55,6 +55,12 @@ export default async function PlatformLayout({
     ...(hasPlatformPermission(identity.platformRole, "platform.security.manage")
       ? [
           {
+            href: "/admin/pakete",
+            label: "Pakete & Preise",
+            icon: "€",
+            description: "Leistungen und Aufpreise",
+          },
+          {
             href: "/admin/rechtliches",
             label: "Rechtliches",
             icon: "§",

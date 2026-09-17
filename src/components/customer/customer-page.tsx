@@ -13,9 +13,13 @@ export function CustomerPage({
       <Breadcrumbs
         items={[{ label: "Kundenbereich", href: "/kunde" }, { label: title }]}
       />
-      <h1 className="mt-6 text-3xl font-semibold">{title}</h1>
-      <p className="mt-3 max-w-3xl text-slate-600">{description}</p>
-      <div className="mt-8">{children}</div>
+      <div className="reveal-up">
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {title}
+        </h1>
+        <p className="mt-3 max-w-3xl text-slate-600">{description}</p>
+      </div>
+      <div className="reveal-up animation-delay-1 mt-8">{children}</div>
     </>
   );
 }

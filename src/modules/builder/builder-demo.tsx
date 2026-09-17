@@ -19,11 +19,11 @@ const initialBlocks: StoredBlock[] = [
     visible: true,
     properties: {
       type: "hero",
-      eyebrow: "Fiktive Vorschau",
+      eyebrow: "Deine Fahrschule",
       heading: "Sicher ans Ziel",
       text: "Bearbeite diesen Text und prüfe die direkte Vorschau.",
       actionLabel: "Kontakt",
-      actionHref: "/demo/kontakt",
+      actionHref: "/kontakt",
     },
   },
   {
@@ -36,7 +36,7 @@ const initialBlocks: StoredBlock[] = [
       heading: "Bereit für den nächsten Schritt?",
       text: "Diese Seite ist ein lokaler Builder-Test.",
       actionLabel: "Mehr erfahren",
-      actionHref: "/demo",
+      actionHref: "/",
     },
   },
 ];
@@ -124,7 +124,7 @@ export function BuilderDemo() {
         heading: "Neue Aktion",
         text: "Neuer Text",
         actionLabel: "Mehr erfahren",
-        actionHref: "/demo",
+        actionHref: "/",
       },
       faq: {
         type: "faq",
@@ -369,7 +369,7 @@ export function BuilderDemo() {
                 onChange={(event) => setLogo(event.target.value)}
               >
                 <option value="none">Kein Logo</option>
-                <option value="demo-media">Fiktives Demo-Medium</option>
+                <option value="">Noch kein Medium ausgewählt</option>
               </select>
             </label>
             <button
