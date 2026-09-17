@@ -11,9 +11,10 @@ export default async function ImprintPage() {
   ]);
   return (
     <SimpleMarketingPage
+      availableDuringMaintenance
       eyebrow="Rechtliches"
       title="Impressum"
-      text="Redaktioneller Platzhalter – vor Veröffentlichung rechtlich und inhaltlich zu vervollständigen."
+      text="Anbieterkennzeichnung und Kontaktinformationen der FahrSeiten-Plattform."
     >
       {document ? (
         <article className="rounded-3xl border bg-white p-8 leading-7 whitespace-pre-wrap text-slate-700">

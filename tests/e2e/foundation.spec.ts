@@ -8,7 +8,7 @@ async function keepNecessaryConsent(page: import("@playwright/test").Page) {
 test("renders the local marketing foundation", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Website-Plattform",
+    "Digital auf der Überholspur",
   );
   await expect(
     page.getByRole("navigation", { name: "Marketing-Navigation" }),

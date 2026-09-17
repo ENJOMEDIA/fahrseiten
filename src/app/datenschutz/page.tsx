@@ -9,9 +9,10 @@ export default async function PrivacyPage() {
   );
   return (
     <SimpleMarketingPage
+      availableDuringMaintenance
       eyebrow="Rechtliches"
       title="Datenschutz"
-      text="Technischer Entwurf – kein final freigegebener Rechtstext."
+      text="Informationen zur Verarbeitung personenbezogener Daten auf der FahrSeiten-Plattform."
     >
       {document ? (
         <article className="rounded-3xl border bg-white p-8 leading-7 whitespace-pre-wrap text-slate-700">

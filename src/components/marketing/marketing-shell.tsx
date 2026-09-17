@@ -5,20 +5,23 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
     <>
       <MarketingHeader />
       {children}
-      <footer className="border-t border-slate-200 bg-slate-950 px-6 py-12 text-slate-300">
-        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_auto]">
+      <footer className="border-t border-white/10 bg-[#070b12] px-6 py-14 text-slate-300">
+        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_auto]">
           <div>
-            <p className="font-semibold text-white">
-              FahrSeiten – by ENJO MEDIA
+            <p className="text-lg font-semibold tracking-tight text-white">
+              FahrSeiten
+              <span className="ml-2 text-xs font-medium tracking-wide text-slate-500">
+                by ENJO MEDIA
+              </span>
             </p>
-            <p className="mt-2 max-w-xl text-sm">
-              Mandantenfähige Websites und digitale Werkzeuge für Fahrschulen.
-              Aktuell in lokaler Entwicklung.
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-400">
+              Websites, Inhalte und digitale Kundenkontakte für Fahrschulen –
+              zentral, verständlich und auf der eigenen Domain.
             </p>
           </div>
           <nav
             aria-label="Footer-Navigation"
-            className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm"
+            className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm text-slate-400"
           >
             <Link href="/impressum">Impressum</Link>
             <Link href="/datenschutz">Datenschutz</Link>
@@ -42,15 +45,17 @@ export function MarketingHero({
   children?: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden bg-slate-950 px-6 py-20 text-white sm:py-28">
-      <div className="mx-auto max-w-7xl">
-        <p className="text-sm font-semibold tracking-[.18em] text-cyan-300 uppercase">
+    <section className="marketing-hero relative overflow-hidden bg-[#070b12] px-6 py-24 text-white sm:py-32">
+      <div className="hero-orb hero-orb-one" aria-hidden="true" />
+      <div className="hero-orb hero-orb-two" aria-hidden="true" />
+      <div className="relative mx-auto max-w-7xl">
+        <p className="text-sm font-semibold tracking-[.2em] text-cyan-300 uppercase">
           {eyebrow}
         </p>
-        <h1 className="mt-5 max-w-5xl text-4xl font-semibold tracking-tight sm:text-6xl">
+        <h1 className="mt-5 max-w-5xl text-5xl leading-[0.98] font-semibold tracking-[-0.045em] text-balance sm:text-7xl">
           {title}
         </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+        <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
           {text}
         </p>
         {children}

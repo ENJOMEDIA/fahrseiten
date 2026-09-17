@@ -6,6 +6,7 @@ export default function CookieSettingsPage() {
   const optionalServiceConfig = getOptionalServiceConfig();
   return (
     <SimpleMarketingPage
+      availableDuringMaintenance
       eyebrow="Datenschutz"
       title="Cookie-Einstellungen"
       text="Optionale Kategorien lassen sich jederzeit anpassen oder widerrufen."

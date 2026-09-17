@@ -10,25 +10,34 @@ export function MarketingHeader() {
   ] as const;
 
   return (
-    <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between px-6">
-        <Link className="font-semibold tracking-tight text-slate-950" href="/">
-          FahrSeiten{" "}
-          <span className="text-sm font-normal text-slate-500">
-            by ENJO MEDIA
+    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
+      <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between px-5 sm:px-6">
+        <Link
+          aria-label="FahrSeiten Startseite"
+          className="group flex items-center gap-3 font-semibold tracking-tight text-slate-950"
+          href="/"
+        >
+          <span className="grid size-9 place-items-center rounded-xl bg-slate-950 text-white shadow-lg shadow-slate-950/15 transition-transform group-hover:-rotate-3">
+            F
+          </span>
+          <span>
+            FahrSeiten
+            <span className="ml-2 hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">
+              by ENJO MEDIA
+            </span>
           </span>
         </Link>
         <nav
           aria-label="Marketing-Navigation"
-          className="hidden items-center gap-4 text-sm font-medium md:flex"
+          className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex"
         >
           {links.map(([label, href]) => (
-            <Link className="hover:text-cyan-700" href={href} key={href}>
+            <Link className="hover:text-slate-950" href={href} key={href}>
               {label}
             </Link>
           ))}
           <Link
-            className="rounded-full bg-slate-950 px-4 py-2 text-white"
+            className="rounded-full bg-slate-950 px-5 py-2.5 text-white shadow-lg shadow-slate-950/10 hover:-translate-y-0.5 hover:bg-cyan-700"
             href="/login"
           >
             Login
