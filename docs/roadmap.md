@@ -22,7 +22,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 | 7       | B           | Seiten-, Block- und Veröffentlichungssystem                    | Abgeschlossen  | Datengetriebene Demo, geschützte Entwürfe und Veröffentlichung                                   |
 | 8       | B           | Fahrschulspezifische Inhaltsmodule                             | Abgeschlossen  | MVP-Inhalte validiert und mandantengebunden darstellbar                                          |
 | 9       | B           | Medienverwaltung                                               | Abgeschlossen  | Geprüfte Uploads und isolierter Medienzugriff                                                    |
-| 10      | B           | Intuitiver Block-Builder                                       | Nicht begonnen | Bearbeiten, Vorschau, Veröffentlichung und Wiederherstellung geprüft                             |
+| 10      | B           | Intuitiver Block-Builder                                       | Abgeschlossen  | Bearbeiten, Vorschau, Veröffentlichung und Wiederherstellung geprüft                             |
 | 11      | C           | Kunden-Backend vollständig machen                              | Nicht begonnen | Kundenabläufe; Abnahmeabhängigkeiten OD-09 zuerst klären                                         |
 | 12      | C           | Kontaktformulare, Leads und einfaches Kunden-CRM               | Nicht begonnen | Anfrage beim richtigen Mandanten mit Benachrichtigung; OD-09                                     |
 | 13      | C           | Plattform-Admin und Akquise-CRM                                | Nicht begonnen | Akquise, Kundenanlage und Onboarding mit Rollenprüfung                                           |
@@ -39,7 +39,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 10 folgt als Nächstes. Medien werden serverseitig geprüft, tenantgebunden gespeichert und über einen austauschbaren Storage-Adapter verwaltet; die produktive Auslieferungsroute bleibt vom Hostingnachweis abhängig.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 11 folgt als Nächstes. Der kontrollierte Builder ist im geschützten Kundenpfad integriert und für lokale E2E-Prüfungen über eine ausschließlich im Entwicklungsmodus aktive Fixture-Route erreichbar.
 
 ## Abhängigkeiten und Fortschreibung
 
