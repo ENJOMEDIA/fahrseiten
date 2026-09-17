@@ -43,8 +43,17 @@ pnpm db:generate
 pnpm db:check
 pnpm db:migrate
 pnpm db:seed
+pnpm db:schema:bundle
 ```
 
-`db:migrate` und `db:seed` benötigen eine erreichbare lokale MySQL-/MariaDB-Datenbank aus `DATABASE_URL`. Der Seed ist idempotent und verwendet ausschließlich fiktive `.local`-Identitäten. Die Demo-Benutzer besitzen bis Phase 4 bewusst kein Passwort und sind noch nicht anmeldbar.
+`db:migrate` und `db:seed` benötigen eine erreichbare lokale MySQL-/MariaDB-Datenbank aus `DATABASE_URL`. Der Seed ist idempotent, ausschließlich für lokale Entwicklung bestimmt und verwendet nur fiktive `.local`-Identitäten. Er darf nicht auf Staging oder Produktion ausgeführt werden.
+
+`db:schema:bundle` erzeugt `dist/sql/fahrseiten-schema.sql` aus sämtlichen versionierten Migrationen. Die Datei ist ausschließlich für eine neue, leere Datenbank bestimmt und schreibt auch den Drizzle-Migrationsstand. Für bestehende Datenbanken werden immer die Migrationen verwendet. Der Produktionsinstaller führt dieselbe Migrationskette aus und erzeugt keine Demo-Daten.
 
 Eine lokale Datenbank war in der Codex-Umgebung nicht verfügbar. Migration und Seed sind reproduzierbar implementiert; die tatsächliche Anwendung gegen MySQL/MariaDB bleibt als dokumentierte lokale Prüfung offen.
+
+## Installation und spätere Mandanten
+
+Es gibt genau eine zentrale FahrSeiten-Installation mit einer gemeinsamen Datenbank. Der Plesk-Installer initialisiert diese Plattform einmalig und legt den ersten `platform_owner` an. Eine Fahrschule wird anschließend als Tenant mit eigener `tenant_id`, Site, Domainzuordnung, Benutzermitgliedschaften und freigeschalteten Funktionen provisioniert. Dafür wird weder das Schema erneut importiert noch eine weitere Anwendungskopie angelegt.
+
+Ein späterer Provisionierungsablauf muss Mandant, Eigentümer, Site, Domainstatus, Tarif und Audit-Eintrag atomar anlegen. Noch offene Tarif-, Domain- und Einladungsentscheidungen werden dabei nicht durch Installationsdefaults vorweggenommen.

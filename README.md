@@ -24,6 +24,8 @@ Ein Linux-Plesk-System ist das aktuelle erste Deploymentziel. Seine konkrete Nod
 
 Für ein Plesk-System kann mit `pnpm build:plesk` ein geprüftes Next.js-Standalone-Artefakt erstellt werden. Konfiguration, Migration, Healthcheck und Rollback beschreibt die [Plesk-Deployment-Anleitung](docs/deployment-plesk.md). Die Anleitung nimmt selbst keine Hosting-, DNS- oder SSL-Änderungen vor.
 
+Das vollständige SQL-Schema entsteht mit `pnpm db:schema:bundle` aus allen versionierten Migrationen. Im Plesk-Artefakt initialisiert `node install.mjs` eine leere Datenbank und legt den ersten Plattform-Owner an. Fahrschulen werden später als Mandanten innerhalb dieser zentralen Installation provisioniert.
+
 ## Lokales Setup
 
 Voraussetzungen sind Node.js 22 und pnpm 11. Die Entwicklung erfolgt lokal auf dem Mac; Linux und Windows mit WSL sind durch Next.js grundsätzlich unterstützt, aber noch nicht projektspezifisch geprüft.

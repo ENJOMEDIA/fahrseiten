@@ -7,8 +7,10 @@ Stand: 17. September 2026. Diese Anleitung bereitet FahrSeiten für ein Plesk-De
 `pnpm build:plesk` erzeugt unter `dist/plesk` ein eigenständig lauffähiges Next.js-Standalone-Artefakt. Es enthält den von Next.js erzeugten Minimalserver, statische Dateien, öffentliche Assets, Drizzle-Migrationen sowie folgende Plesk-Einstiegspunkte:
 
 - `app.mjs` validiert die Produktionskonfiguration und startet danach den erzeugten Next.js-Server.
+- `install.mjs` migriert eine neue Plattformdatenbank und legt einmalig den ersten Plattform-Owner an.
 - `migrate.mjs` wendet die versionierten Drizzle-Migrationen an.
 - `cron.mjs` ruft den geschützten Scheduler auf, ohne das Cron-Secret in die Kommandozeile zu schreiben.
+- `schema/fahrseiten-schema.sql` enthält das vollständige Schema für den optionalen Import in eine leere Datenbank.
 - `DEPLOYMENT.json` beschreibt Runtime und Startdatei des Artefakts.
 
 Das Artefakt enthält keine `.env`-Datei. Secrets werden ausschließlich als geschützte Plesk-Umgebungsvariablen hinterlegt.
@@ -90,7 +92,31 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 
 Nach dem ersten isolierten Stagingstart sind `Host` und `X-Forwarded-Host` mit einer Testdomain zu prüfen. `TRUST_PROXY_HEADERS=false` bleibt die sichere Voreinstellung. Eine Umstellung auf `true` ist nur zulässig, wenn Plesk eingehende Forwarded-Header überschreibt und ausschließlich den verifizierten öffentlichen Host weitergibt.
 
-## Datenbankmigration
+## Erstinstallation der Plattform
+
+Für die erste Installation werden zusätzlich vorübergehend drei Plesk-Umgebungsvariablen gesetzt:
+
+| Variable                 | Inhalt                                                 |
+| ------------------------ | ------------------------------------------------------ |
+| `INSTALL_OWNER_EMAIL`    | E-Mail-Adresse des ersten Plattform-Owners             |
+| `INSTALL_OWNER_NAME`     | Anzeigename des ersten Plattform-Owners                |
+| `INSTALL_OWNER_PASSWORD` | Ein nur dort gesetztes Passwort mit 12 bis 200 Zeichen |
+
+Danach im Application Root über die Plesk-Skriptfunktion oder Shell ausführen:
+
+```bash
+node install.mjs
+```
+
+Der Installer wendet alle Migrationen an und erzeugt nur dann einen Benutzer, wenn noch kein aktiver `platform_owner` vorhanden ist. Eine bereits verwendete E-Mail wird niemals automatisch mit höheren Rechten versehen. Das Passwort wird vor dem Speichern mit demselben scrypt-Verfahren wie die Anwendung gehasht.
+
+Nach erfolgreichem Lauf müssen die drei `INSTALL_OWNER_*`-Variablen sofort aus Plesk entfernt werden. Sie gehören nicht zur normalen Anwendungslaufzeit. Der Installer kann danach erneut ausgeführt werden; bei vorhandenem Plattform-Owner aktualisiert er nur das Schema.
+
+Alternativ kann `schema/fahrseiten-schema.sql` über die Datenbankverwaltung in eine nachweislich leere Datenbank importiert werden. Anschließend wird `node install.mjs` trotzdem einmal ausgeführt, damit der erste Plattform-Owner sicher angelegt wird. Das SQL-Gesamtschema darf niemals in eine bestehende Datenbank importiert werden.
+
+Der lokale Demo-Seed wird in Staging und Produktion niemals ausgeführt.
+
+## Datenbankmigration bei Updates
 
 Vor jeder Migration:
 
@@ -105,6 +131,10 @@ node migrate.mjs
 ```
 
 Bei einem Fehler wird nicht gestartet oder neu migriert, bis die konkrete Ursache geklärt ist. Der Demo-Seed wird niemals in Staging oder Produktion ausgeführt.
+
+## Mandanten statt Einzelinstanzen
+
+Neue Fahrschulen erhalten keine eigene FahrSeiten-Installation. Nach der einmaligen Plattforminstallation werden sie innerhalb derselben Anwendung als getrennte Mandanten provisioniert. Der künftige Onboardingablauf legt Tenant, Eigentümermitgliedschaft, Site, noch nicht aktive Domainzuordnung, Tarif und Audit-Eintrag kontrolliert an. Offene Tarif- und Domainentscheidungen verhindern derzeit bewusst einen unbeaufsichtigten Produktions-Provisioner.
 
 ## Start und Healthcheck
 

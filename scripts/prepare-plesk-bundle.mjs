@@ -17,14 +17,37 @@ await cp(resolve(root, "public"), resolve(output, "public"), {
 await cp(resolve(root, "drizzle"), resolve(output, "drizzle"), {
   recursive: true,
 });
+await cp(resolve(root, "dist/sql"), resolve(output, "schema"), {
+  recursive: true,
+});
 
-for (const file of ["app.mjs", "cron.mjs", "migrate.mjs", "validate-env.mjs"]) {
+for (const file of [
+  "app.mjs",
+  "cron.mjs",
+  "install.mjs",
+  "migrate.mjs",
+  "password.mjs",
+  "validate-env.mjs",
+]) {
   await cp(resolve(root, "deploy/plesk", file), resolve(output, file));
 }
 
 const packageJson = JSON.parse(
   await readFile(resolve(root, "package.json"), "utf8"),
 );
+const bundlePackagePath = resolve(output, "package.json");
+const bundlePackage = JSON.parse(await readFile(bundlePackagePath, "utf8"));
+bundlePackage.scripts = {
+  start: "node app.mjs",
+  "install:platform": "node install.mjs",
+  "db:migrate": "node migrate.mjs",
+  cron: "node cron.mjs",
+};
+await writeFile(
+  bundlePackagePath,
+  `${JSON.stringify(bundlePackage, null, 2)}\n`,
+);
+
 await writeFile(
   resolve(output, "DEPLOYMENT.json"),
   `${JSON.stringify(

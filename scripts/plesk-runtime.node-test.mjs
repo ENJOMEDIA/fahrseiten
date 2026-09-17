@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import {
+  installPlatform,
+  validateBootstrapInput,
+} from "../deploy/plesk/install.mjs";
+import { hashInstallerPassword } from "../deploy/plesk/password.mjs";
 import { validateProductionEnvironment } from "../deploy/plesk/validate-env.mjs";
+import { verifyPassword } from "../src/modules/auth/password.ts";
 
 const validEnvironment = {
   NODE_ENV: "production",
@@ -35,4 +41,29 @@ test("rejects local defaults and missing production settings", () => {
   assert.ok(errors.some((error) => error.includes("HTTPS")));
   assert.ok(errors.some((error) => error.includes("Platzhalter")));
   assert.ok(errors.some((error) => error.includes("database")));
+});
+
+test("creates password hashes compatible with application login", async () => {
+  const password = "Sicheres-Installationspasswort-2026!";
+  const hash = await hashInstallerPassword(password);
+
+  assert.equal(await verifyPassword(password, hash), true);
+  assert.equal(await verifyPassword("Falsches-Passwort-2026!", hash), false);
+});
+
+test("validates first-owner bootstrap input without exposing values", () => {
+  const valid = validateBootstrapInput({
+    INSTALL_OWNER_EMAIL: " OWNER@FAHRSEITEN.DE ",
+    INSTALL_OWNER_NAME: "ENJO MEDIA",
+    INSTALL_OWNER_PASSWORD: "Sicheres-Installationspasswort-2026!",
+  });
+  assert.deepEqual(valid.errors, []);
+  assert.equal(valid.email, "owner@fahrseiten.de");
+
+  const invalid = validateBootstrapInput({});
+  assert.equal(invalid.errors.length, 3);
+});
+
+test("requires DATABASE_URL before connecting", async () => {
+  await assert.rejects(() => installPlatform({}), /DATABASE_URL fehlt/);
 });

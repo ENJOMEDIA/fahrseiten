@@ -6,7 +6,9 @@ const output = resolve(process.cwd(), "dist/plesk");
 const required = [
   "app.mjs",
   "cron.mjs",
+  "install.mjs",
   "migrate.mjs",
+  "password.mjs",
   "validate-env.mjs",
   "server.js",
   "package.json",
@@ -15,6 +17,7 @@ const required = [
   ".next/static",
   ".next/server",
   "drizzle/meta/_journal.json",
+  "schema/fahrseiten-schema.sql",
 ];
 
 for (const path of required) await access(resolve(output, path));
@@ -36,6 +39,30 @@ if (manifest.startupFile !== "app.mjs") {
   throw new Error(
     "Das Deployment-Manifest nennt nicht app.mjs als Startdatei.",
   );
+}
+
+const bundlePackage = JSON.parse(
+  await readFile(resolve(output, "package.json"), "utf8"),
+);
+if (
+  bundlePackage.scripts?.start !== "node app.mjs" ||
+  bundlePackage.scripts?.["install:platform"] !== "node install.mjs"
+) {
+  throw new Error("Dem Plesk-Artefakt fehlen Start- oder Installationsskript.");
+}
+
+const journal = JSON.parse(
+  await readFile(resolve(output, "drizzle/meta/_journal.json"), "utf8"),
+);
+const bundledSchema = await readFile(
+  resolve(output, "schema/fahrseiten-schema.sql"),
+  "utf8",
+);
+const recordedMigrations = bundledSchema.match(
+  /INSERT INTO `__drizzle_migrations`/g,
+);
+if ((recordedMigrations?.length ?? 0) !== journal.entries.length) {
+  throw new Error("Das SQL-Gesamtschema enthält nicht alle Migrationen.");
 }
 
 const requireFromBundle = createRequire(resolve(output, "migrate.mjs"));
