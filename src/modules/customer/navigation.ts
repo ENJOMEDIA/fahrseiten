@@ -7,6 +7,7 @@ export const customerNavigation = [
   { href: "/kunde/benutzer", label: "Benutzer & Rollen" },
   { href: "/kunde/funktionen", label: "Funktionen" },
   { href: "/kunde/einstellungen", label: "Einstellungen" },
+  { href: "/kunde/fehler-melden", label: "Fehler melden" },
 ] as const;
 
 export const contentModules = {

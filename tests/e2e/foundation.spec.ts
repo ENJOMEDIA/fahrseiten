@@ -88,3 +88,14 @@ test("submits a validated local demo inquiry", async ({ page }) => {
     page.getByText(/fiktive Testanfrage wurde gespeichert/),
   ).toBeVisible();
 });
+
+test("creates a traceable local error report", async ({ page }) => {
+  await page.goto("/fehler-melden");
+  await keepNecessaryConsent(page);
+  await page.getByLabel("Kurztitel").fill("Lokale Vorschau bleibt leer");
+  await page
+    .getByLabel(/Beschreibung ohne/)
+    .fill("Nach einem fiktiven Speichervorgang bleibt die Vorschau leer.");
+  await page.getByRole("button", { name: "Fehlerbericht senden" }).click();
+  await expect(page.getByText(/Referenz-ID: FS-/)).toBeVisible();
+});

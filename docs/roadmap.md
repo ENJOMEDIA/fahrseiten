@@ -30,7 +30,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 | 15      | C           | Tarife, Feature-Flags und kommende Funktionen                  | Abgeschlossen  | Serverseitige Freigaben nach Tarif und Mandant                                                   |
 | 16      | C           | FahrSeiten-Vertriebswebsite                                    | Abgeschlossen  | Navigierbar, ehrlich formuliert und an Akquise angebunden                                        |
 | 17      | C           | Datenschutz-, Consent- und Rechtsgrundlagen technisch umsetzen | Abgeschlossen  | Optionale Dienste blockiert, getrennte Mandantentexte pflegbar                                   |
-| 18      | D           | Fehlerberichte, Monitoring und Support                         | Nicht begonnen | Nachvollziehbare Fehler ohne sensible Logdaten                                                   |
+| 18      | D           | Fehlerberichte, Monitoring und Support                         | Abgeschlossen  | Nachvollziehbare Fehler ohne sensible Logdaten                                                   |
 | 19      | D           | Sicherheit, Qualität und Barrierefreiheit härten               | Nicht begonnen | Release-Readiness ohne kritische offene Punkte                                                   |
 | 20      | D           | Netcup-Staging vorbereiten                                     | Nicht begonnen | Dokumentierter und freigegebener Ablauf nur mit Testdaten                                        |
 | 21      | D           | Pilotkunde und Produktivstart                                  | Nicht begonnen | Kontrollierter Pilot mit ausdrücklicher Produktionsfreigabe                                      |
@@ -39,7 +39,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 18 folgt als Nächstes. Versionierte Rechtstexte, widerrufbare Consent-Kategorien und technische Gates für optionale Inhalte sind vorbereitet; rechtliche Freigaben bleiben ausdrücklich offen.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 19 folgt als Nächstes. Fehlerberichte, Supporttickets, redigierte technische Logs, Health/Readiness und der lokale Monitoring-Adapter bilden die Betriebsgrundlage.
 
 ## Abhängigkeiten und Fortschreibung
 

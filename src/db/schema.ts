@@ -1129,6 +1129,132 @@ export const subprocessors = mysqlTable(
   (table) => [uniqueIndex("subprocessors_name_unique").on(table.name)],
 );
 
+export const errorReportStatusValues = [
+  "new",
+  "triaged",
+  "resolved",
+  "closed",
+] as const;
+export const errorReports = mysqlTable(
+  "error_reports",
+  {
+    id: id("id").primaryKey(),
+    referenceId: varchar("reference_id", { length: 40 }).notNull(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "set null",
+    }),
+    reporterUserId: id("reporter_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    surface: varchar("surface", { length: 40 }).notNull(),
+    summary: varchar("summary", { length: 180 }).notNull(),
+    description: text("description").notNull(),
+    status: mysqlEnum("status", errorReportStatusValues)
+      .default("new")
+      .notNull(),
+    resolvedAt: timestamp("resolved_at", { mode: "date", fsp: 3 }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("error_reports_reference_unique").on(table.referenceId),
+    index("error_reports_tenant_status_idx").on(table.tenantId, table.status),
+  ],
+);
+
+export const supportTicketStatusValues = [
+  "open",
+  "in_progress",
+  "waiting",
+  "resolved",
+  "closed",
+] as const;
+export const supportTicketPriorityValues = [
+  "low",
+  "normal",
+  "high",
+  "urgent",
+] as const;
+export const supportTickets = mysqlTable(
+  "support_tickets",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    assignedUserId: id("assigned_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    subject: varchar("subject", { length: 180 }).notNull(),
+    status: mysqlEnum("status", supportTicketStatusValues)
+      .default("open")
+      .notNull(),
+    priority: mysqlEnum("priority", supportTicketPriorityValues)
+      .default("normal")
+      .notNull(),
+    lastActivityAt: timestamp("last_activity_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("support_tickets_tenant_status_idx").on(table.tenantId, table.status),
+    index("support_tickets_priority_activity_idx").on(
+      table.priority,
+      table.lastActivityAt,
+    ),
+  ],
+);
+
+export const supportTicketMessages = mysqlTable(
+  "support_ticket_messages",
+  {
+    id: id("id").primaryKey(),
+    ticketId: id("ticket_id")
+      .notNull()
+      .references(() => supportTickets.id, { onDelete: "cascade" }),
+    authorUserId: id("author_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    body: text("body").notNull(),
+    internal: boolean("internal").default(false).notNull(),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("support_ticket_messages_ticket_idx").on(
+      table.ticketId,
+      table.createdAt,
+    ),
+  ],
+);
+
+export const technicalEvents = mysqlTable(
+  "technical_events",
+  {
+    id: id("id").primaryKey(),
+    referenceId: varchar("reference_id", { length: 40 }).notNull(),
+    level: mysqlEnum("level", ["info", "warning", "error"]).notNull(),
+    event: varchar("event", { length: 120 }).notNull(),
+    context:
+      json("context").$type<Record<string, string | number | boolean | null>>(),
+    resolvedAt: timestamp("resolved_at", { mode: "date", fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("technical_events_level_created_idx").on(
+      table.level,
+      table.createdAt,
+    ),
+    index("technical_events_reference_idx").on(table.referenceId),
+  ],
+);
+
 export const auditLogs = mysqlTable(
   "audit_logs",
   {
