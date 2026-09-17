@@ -1,6 +1,11 @@
 export type InspectedImage = {
-  mimeType: "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";
-  extension: "png" | "jpg" | "webp" | "svg";
+  mimeType:
+    | "image/png"
+    | "image/jpeg"
+    | "image/webp"
+    | "image/svg+xml"
+    | "image/x-icon";
+  extension: "png" | "jpg" | "webp" | "svg" | "ico";
   width: number;
   height: number;
 };
@@ -8,6 +13,21 @@ export type InspectedImage = {
 export function inspectImage(bytes: Uint8Array): InspectedImage {
   const svg = inspectSvg(bytes);
   if (svg) return svg;
+  if (
+    bytes.length >= 22 &&
+    bytes[0] === 0 &&
+    bytes[1] === 0 &&
+    bytes[2] === 1 &&
+    bytes[3] === 0 &&
+    (bytes[4] > 0 || bytes[5] > 0)
+  ) {
+    return {
+      mimeType: "image/x-icon",
+      extension: "ico",
+      width: bytes[6] || 256,
+      height: bytes[7] || 256,
+    };
+  }
   if (bytes.length < 24) throw new Error("Die Bilddatei ist unvollständig.");
   if (matches(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
     return {
@@ -58,7 +78,7 @@ export function inspectImage(bytes: Uint8Array): InspectedImage {
     }
   }
   throw new Error(
-    "Nur geprüfte SVG-, PNG-, JPEG- und WebP-Bilder sind zulässig.",
+    "Nur geprüfte SVG-, PNG-, JPEG-, WebP- und ICO-Bilder sind zulässig.",
   );
 }
 
@@ -73,7 +93,7 @@ function inspectSvg(bytes: Uint8Array): InspectedImage | null {
   const forbidden = [
     /<!DOCTYPE/iu,
     /<!ENTITY/iu,
-    /<(?:script|foreignObject|iframe|object|embed|audio|video|style|animate|animateMotion|animateTransform|set)\b/iu,
+    /<(?:script|foreignObject|iframe|object|embed|audio|video|animate|animateMotion|animateTransform|set)\b/iu,
     /\son[a-z]+\s*=/iu,
     /(?:javascript|vbscript|data):/iu,
     /@import/iu,

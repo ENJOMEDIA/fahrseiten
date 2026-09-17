@@ -10,7 +10,7 @@ import { findPlatformSettings } from "@/modules/setup/platform-settings";
 import { mediaPublicUrl } from "@/modules/media/public-url";
 
 import { savePlatformMaintenance } from "./actions";
-import { uploadPlatformBrandAsset } from "./branding-actions";
+import { BrandingUploadForm } from "./branding-upload-form";
 
 export default async function PlatformSettingsPage() {
   await requirePlatformPermission("platform.security.manage");
@@ -50,25 +50,7 @@ export default async function PlatformSettingsPage() {
                   />
                 </div>
               ) : null}
-              <form
-                action={uploadPlatformBrandAsset}
-                className="mt-5 space-y-4"
-              >
-                <input name="kind" type="hidden" value="logo" />
-                <input
-                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
-                  className="block w-full text-sm"
-                  name="file"
-                  required
-                  type="file"
-                />
-                <button
-                  className="w-full rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white"
-                  type="submit"
-                >
-                  Seitenlogo hochladen
-                </button>
-              </form>
+              <BrandingUploadForm kind="logo" />
             </Card>
             <Card>
               <h2 className="font-semibold">Favicon</h2>
@@ -87,27 +69,9 @@ export default async function PlatformSettingsPage() {
                   />
                 </div>
               ) : null}
-              <form
-                action={uploadPlatformBrandAsset}
-                className="mt-5 space-y-4"
-              >
-                <input name="kind" type="hidden" value="favicon" />
-                <input
-                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
-                  className="block w-full text-sm"
-                  name="file"
-                  required
-                  type="file"
-                />
-                <button
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 font-semibold"
-                  type="submit"
-                >
-                  Favicon hochladen
-                </button>
-              </form>
+              <BrandingUploadForm kind="favicon" />
               <p className="mt-3 text-xs text-slate-500">
-                SVG, PNG, JPEG oder WebP · maximal 8 MB
+                ICO, SVG, PNG, JPEG oder WebP · maximal 8 MB
               </p>
             </Card>
           </div>

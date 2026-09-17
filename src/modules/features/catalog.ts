@@ -7,7 +7,7 @@ export const featureCatalog = {
   website_builder: {
     title: "Website-Builder",
     description: "Seiten und kontrollierte Blöcke bearbeiten.",
-    availability: "available",
+    availability: "planned",
   },
   content_modules: {
     title: "Fahrschul-Inhalte",
@@ -18,7 +18,7 @@ export const featureCatalog = {
     title: "Anfragen & Kontakte",
     description:
       "Kontaktformular und einfache Bearbeitung eingehender Anfragen.",
-    availability: "available",
+    availability: "planned",
   },
   custom_domain: {
     title: "Eigene Domain",
@@ -28,6 +28,26 @@ export const featureCatalog = {
   legal_consent: {
     title: "Recht & Consent",
     description: "Geführte Rechtstexte und technische Consent-Steuerung.",
+    availability: "available",
+  },
+  maintenance_preview: {
+    title: "Wartungs- & Vorschauseite",
+    description: "Gebrandete Vorschauseite bis zur öffentlichen Freigabe.",
+    availability: "available",
+  },
+  media_branding: {
+    title: "Logo, Favicon & Medien",
+    description: "Eigener Markenauftritt mit sicher verwalteten Bilddateien.",
+    availability: "available",
+  },
+  multi_location: {
+    title: "Mehrere Standorte",
+    description: "Zusätzliche Fahrschulstandorte strukturiert verwalten.",
+    availability: "available",
+  },
+  priority_support: {
+    title: "Priorisierter Support",
+    description: "Anliegen werden im Betrieb bevorzugt bearbeitet.",
     availability: "available",
   },
   lesson_reminders: {

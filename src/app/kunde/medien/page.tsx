@@ -113,7 +113,7 @@ export default async function MediaPage() {
             <label className="block text-sm font-semibold">
               Bilddatei
               <input
-                accept="image/svg+xml,image/png,image/jpeg,image/webp"
+                accept=".ico,image/x-icon,image/vnd.microsoft.icon,image/svg+xml,image/png,image/jpeg,image/webp"
                 className="mt-2 block w-full text-sm"
                 name="file"
                 required
@@ -152,8 +152,8 @@ export default async function MediaPage() {
             </button>
           </form>
           <p className="mt-3 text-xs leading-5 text-slate-500">
-            SVG, PNG, JPEG oder WebP · maximal 8 MB. Dateien liegen persistent
-            außerhalb des Git-Verzeichnisses.
+            ICO, SVG, PNG, JPEG oder WebP · maximal 8 MB. Dateien liegen
+            persistent außerhalb des Git-Verzeichnisses.
           </p>
         </Card>
       </div>

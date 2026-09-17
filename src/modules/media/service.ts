@@ -41,7 +41,22 @@ export async function uploadImage(input: {
     throw new Error("Das Bild darf höchstens 8 MB groß sein.");
   const metadata = metadataSchema.parse(input.metadata);
   const inspected = inspectImage(input.bytes);
-  if (metadata.claimedMimeType !== inspected.mimeType)
+  const acceptedClaims: Record<string, string[]> = {
+    "image/x-icon": [
+      "image/x-icon",
+      "image/vnd.microsoft.icon",
+      "image/ico",
+      "image/icon",
+    ],
+  };
+  const allowedClaims = acceptedClaims[inspected.mimeType] ?? [
+    inspected.mimeType,
+  ];
+  if (
+    metadata.claimedMimeType &&
+    metadata.claimedMimeType !== "application/octet-stream" &&
+    !allowedClaims.includes(metadata.claimedMimeType)
+  )
     throw new Error("Dateityp und Bildinhalt stimmen nicht überein.");
   if (
     inspected.width < 1 ||

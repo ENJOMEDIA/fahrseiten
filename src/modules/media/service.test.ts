@@ -91,6 +91,30 @@ describe("media service", () => {
     expect(asset.storageKey).toMatch(/^tenant-a\/[\w-]+\.svg$/);
     expect(asset).toMatchObject({ width: 320, height: 80 });
   });
+  it("accepts a signature-checked ICO favicon with common MIME aliases", async () => {
+    const { storage, repository } = harness();
+    const ico = new Uint8Array([
+      0, 0, 1, 0, 1, 0, 32, 32, 0, 0, 1, 0, 32, 0, 4, 0, 0, 0, 22, 0, 0, 0, 0,
+      0, 0, 0,
+    ]);
+    const asset = await uploadImage({
+      tenantId: "tenant-a",
+      bytes: ico,
+      metadata: {
+        originalName: "favicon.ico",
+        claimedMimeType: "image/vnd.microsoft.icon",
+        altText: "Favicon",
+      },
+      storage,
+      repository,
+    });
+    expect(asset.storageKey).toMatch(/^tenant-a\/[\w-]+\.ico$/);
+    expect(asset).toMatchObject({
+      width: 32,
+      height: 32,
+      mimeType: "image/x-icon",
+    });
+  });
   it("rejects active or externally linked SVG content", async () => {
     const { storage, repository } = harness();
     await expect(

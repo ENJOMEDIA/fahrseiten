@@ -120,6 +120,13 @@
       "when": 1789677291194,
       "tag": "0016_conscious_northstar",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1789678683188,
+      "tag": "0017_standard_pakete",
+      "breakpoints": true
     }
   ]
 }
