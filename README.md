@@ -4,7 +4,7 @@ FahrSeiten wird eine eigenentwickelte, mandantenfähige SaaS-Plattform für Fahr
 
 ## Aktueller Stand
 
-Stand: 17. September 2026. Schritt 1 dokumentiert Produktspezifikation und Architekturgrundlage. Das Repository enthält noch keine ausführbare Anwendung, keine installierten Projektabhängigkeiten, Datenbankmigrationen oder Anwendungstests. Alle beschriebenen Produktfunktionen sind geplant. Der autonome Auftrag vom 17. September 2026 erlaubt die anschließende Bearbeitung der Schritte 2 bis 19 ohne einzelne Freigaben.
+Stand: 17. September 2026. Die Schritte 1 bis 19 des Laufplans sind lokal umgesetzt. Das Repository enthält die ausführbare Next.js-Anwendung, versionierte Drizzle-Migrationen, einen idempotenten Demo-Seed, lokale Fixture-Adapter, Unit-/Integrations- und Chromium-E2E-Tests sowie den [Release-Readiness-Bericht](docs/release-readiness.md). Schritte 20 und 21, reales Staging, DNS/SSL, Deployment und Pilotbetrieb wurden nicht begonnen.
 
 ## Geplante Bereiche
 
@@ -18,7 +18,7 @@ Stand: 17. September 2026. Schritt 1 dokumentiert Produktspezifikation und Archi
 
 ## Technischer Zielrahmen
 
-Geplant sind Next.js mit App Router, React, TypeScript Strict Mode, Tailwind CSS, ein eigenes Designsystem sowie MySQL/MariaDB mit Drizzle ORM und versionierten Migrationen. Die Architektur bleibt ein modularer Monolith. Serverseitige Tenant- und Rechteprüfung, SMTP, Cron-basierte Jobs und austauschbarer Speicher gehören zum Fundament.
+Eingesetzt werden Next.js mit App Router, React, TypeScript Strict Mode, Tailwind CSS, ein eigenes Designsystem sowie MySQL/MariaDB mit Drizzle ORM und versionierten Migrationen. Die Architektur ist ein modularer Monolith. Serverseitige Tenant- und Rechteprüfung, SMTP- und Cron-Adapter, kontrollierter Block-Builder, Consent-Steuerung und austauschbarer Speicher gehören zum Fundament.
 
 netcup Webhosting 8000 ist das erste Hostingziel. Seine Eignung für die konkrete Konfiguration ist noch zu prüfen; eine spätere VPS-Migration soll ohne Neuentwicklung der Fachlogik möglich sein.
 
@@ -34,7 +34,17 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Danach ist die Anwendung unter `http://localhost:3000` erreichbar. `.env.local` bleibt ignoriert und darf keine produktiven Zugangsdaten enthalten. Die vorhandene `.env.example` dokumentiert ausschließlich sichere Platzhalter.
+Danach ist die Anwendung unter `http://localhost:3000` erreichbar. Mit dem voreingestellten `DEMO_DATA_MODE=fixture` funktionieren Vertriebsseite, öffentliche Demo, Builder-Demo, Formulare und Consent lokal ohne MySQL. `.env.local` bleibt ignoriert und darf keine produktiven Zugangsdaten enthalten. Die vorhandene `.env.example` dokumentiert ausschließlich sichere Platzhalter.
+
+Für die datenbankgestützten Admin- und Kundenbereiche ist eine lokale MySQL-/MariaDB-Instanz erforderlich. Nach Anpassung der ausschließlich lokalen `DATABASE_URL`:
+
+```bash
+pnpm db:migrate
+pnpm db:seed
+pnpm dev
+```
+
+Der Seed legt ausschließlich fiktive lokale Konten an: `plattform@fahrseiten.local` und `inhaber@morgenrot.local`, jeweils mit `Demo-FahrSeiten-2026!`. Diese Zugangsdaten dürfen nie in einer öffentlich erreichbaren Umgebung eingesetzt werden.
 
 Die wichtigsten Prüfungen:
 
@@ -43,12 +53,15 @@ pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:coverage
 pnpm exec playwright install chromium
 pnpm test:e2e
+pnpm db:check
+pnpm audit --prod
 pnpm build
 ```
 
-`pnpm check` bündelt Formatierung, Linting, Typprüfung, Unit-Tests und Produktions-Build. Datenbank, Mail-Catcher und lokale Testdomains werden in den zuständigen Phasen ergänzt.
+`pnpm check` bündelt Formatierung, Linting, Typprüfung, Unit-Tests und Produktions-Build. Die lokale Demo ist außerdem direkt unter `http://localhost:3000/demo` und der kontrollierte Builder unter `http://localhost:3000/builder-demo` erreichbar. Für Host-Auflösungstests können `demo.localhost` und `app.localhost` verwendet werden, sofern das lokale System diese Namen auf `127.0.0.1` auflöst.
 
 ## Verbindliche Grundlagen und Dokumentation
 
@@ -69,4 +82,4 @@ Für die Schritte 1 bis 19 sind lokale Conventional Commits ausdrücklich beauft
 
 Nur aufgabenbezogene Dateien stagen. Niemals Force-Push verwenden oder fremde Änderungen verwerfen. Bei Konflikten oder fehlgeschlagenen Prüfungen stoppen und die Ursache melden. DNS-, Hosting- und Produktionsänderungen sind nicht freigegeben.
 
-Aktuell sind Vollständigkeit, Konsistenz, relative Dokumentationslinks, Markdown und Git-Diff zu prüfen. Linting, Typprüfung, Build und Anwendungstests werden erst mit dem technischen Grundgerüst verfügbar.
+Vor jedem weiteren Meilenstein sind mindestens Formatierung, Linting, Typprüfung, Unit-/Integrationstests, E2E-Tests, Drizzle-Schema und Produktions-Build zu prüfen. Produktive Migrationen, Hosting-, DNS- oder SSL-Aktionen benötigen einen späteren ausdrücklich freigegebenen Auftrag.
