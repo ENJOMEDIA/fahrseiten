@@ -170,7 +170,7 @@ export function BuilderDemo() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 sm:p-6">
+    <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
       <div className="mx-auto max-w-[1500px]">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -427,6 +427,6 @@ export function BuilderDemo() {
           </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
