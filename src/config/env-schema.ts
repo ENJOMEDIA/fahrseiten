@@ -9,6 +9,10 @@ const serverEnvSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   APP_BASE_URL: z.url().default("http://localhost:3000"),
+  DASHBOARD_BASE_URL: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.url().optional(),
+  ),
   DATABASE_URL: z
     .url()
     .default(

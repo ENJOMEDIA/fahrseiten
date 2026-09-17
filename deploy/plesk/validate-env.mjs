@@ -77,8 +77,13 @@ export function validateProductionEnvironment(
     errors.push("MARKETING_HOSTS muss fahrseiten.de enthalten.");
   }
 
-  if (!parseHostList(source.APP_HOSTS ?? "").includes("app.fahrseiten.de")) {
-    errors.push("APP_HOSTS muss app.fahrseiten.de enthalten.");
+  if (source.DASHBOARD_BASE_URL) {
+    try {
+      if (new URL(source.DASHBOARD_BASE_URL).protocol !== "https:")
+        errors.push("DASHBOARD_BASE_URL muss eine gültige HTTPS-URL sein.");
+    } catch {
+      errors.push("DASHBOARD_BASE_URL muss eine gültige HTTPS-URL sein.");
+    }
   }
 
   if (

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { dashboardUrl } from "@/config/dashboard-url";
+
 export function MaintenancePage({
   brandName,
   message,
@@ -217,6 +219,14 @@ export function MaintenancePage({
             <Link className="hover:text-white" href="/cookie-einstellungen">
               Cookie-Einstellungen
             </Link>
+            {platform ? (
+              <Link
+                className="rounded-full border border-white/15 px-4 py-2 font-semibold text-white hover:bg-white/10"
+                href={dashboardUrl()}
+              >
+                Kundenlogin
+              </Link>
+            ) : null}
           </nav>
         </footer>
       </div>

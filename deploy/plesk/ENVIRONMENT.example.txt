@@ -4,10 +4,13 @@
 
 NODE_ENV=production
 APP_BASE_URL=https://fahrseiten.de
+# Leer lassen: Login bleibt unter fahrseiten.de/login. Später optional https://app.fahrseiten.de
+DASHBOARD_BASE_URL=
 FAHRSEITEN_CONFIG_FILE=<ABSOLUTER-PERSISTENTER-PFAD>/fahrseiten-runtime.json
 DEMO_DATA_MODE=database
 MARKETING_HOSTS=fahrseiten.de,www.fahrseiten.de
-APP_HOSTS=app.fahrseiten.de
+# Leer lassen, solange keine getrennte Verwaltungs-Subdomain eingerichtet ist.
+APP_HOSTS=
 DEMO_HOSTS=
 TRUST_PROXY_HEADERS=false
 MEDIA_STORAGE_PATH=<ABSOLUTER-PERSISTENTER-PFAD>/.fahrseiten/media

@@ -17,6 +17,9 @@ test("renders the local marketing foundation", async ({ page }) => {
     page.getByRole("navigation", { name: "Marketing-Navigation" }),
   ).toBeVisible();
   await expect(
+    page.getByRole("link", { name: "Zum Kundenlogin" }),
+  ).toHaveAttribute("href", "/login");
+  await expect(
     page.getByRole("complementary", { name: "Einwilligungseinstellungen" }),
   ).toHaveCount(0);
   await keepNecessaryConsent(page);

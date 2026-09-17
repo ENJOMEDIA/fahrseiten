@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingHeader } from "@/components/layout/marketing-header";
+import { dashboardUrl } from "@/config/dashboard-url";
 export function MarketingShell({
   children,
   logoUrl,
@@ -34,6 +35,14 @@ export function MarketingShell({
             <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
             <Link href="/fehler-melden">Fehler melden</Link>
           </nav>
+          <div className="md:col-span-2 md:flex md:justify-end">
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10"
+              href={dashboardUrl()}
+            >
+              Zum Kundenlogin →
+            </Link>
+          </div>
         </div>
       </footer>
     </>

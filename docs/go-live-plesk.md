@@ -87,19 +87,19 @@ Einen Wert als `CRON_SECRET`, den anderen als vorübergehenden `INSTALL_TOKEN` h
 
 1. `fahrseiten.de` als Hauptdomain der Node.js-Anwendung verwenden.
 2. `www.fahrseiten.de` als Alias beziehungsweise zusätzliche Domain derselben Anwendung zuordnen.
-3. `app.fahrseiten.de` als Subdomain anlegen und ebenfalls auf dieselbe Anwendung beziehungsweise denselben Application Root führen.
-4. Keine HTTP-Weiterleitung von `app.fahrseiten.de` auf `fahrseiten.de` einrichten. Die Anwendung benötigt den ursprünglichen Hostnamen für die Bereichs- und spätere Tenant-Auflösung.
-5. Bei allen drei Hosts prüfen, dass Plesk den `Host`-Header erhält. `TRUST_PROXY_HEADERS` bleibt zunächst `false`.
+3. Login und Verwaltung zunächst unter `fahrseiten.de/login`, `/admin` und `/kunde` verwenden.
+4. `app.fahrseiten.de` erst später als optionalen Alias derselben Anwendung ergänzen; keine zweite Node.js-Installation anlegen.
+5. Bei den aktiven Hosts prüfen, dass Plesk den `Host`-Header erhält. `TRUST_PROXY_HEADERS` bleibt zunächst `false`.
 
 ## 7. DNS durch netcup setzen lassen
 
 Die Zielwerte stehen im CCP in der Webhostingübersicht. An netcup kann folgende Liste mit den echten Zielwerten übergeben werden:
 
-| Host  | Typ     | Ziel                        |
-| ----- | ------- | --------------------------- |
-| `@`   | `A`     | tatsächliche Webserver-IPv4 |
-| `www` | `CNAME` | `fahrseiten.de`             |
-| `app` | `CNAME` | `fahrseiten.de`             |
+| Host  | Typ     | Ziel                                                  |
+| ----- | ------- | ----------------------------------------------------- |
+| `@`   | `A`     | tatsächliche Webserver-IPv4                           |
+| `www` | `CNAME` | `fahrseiten.de`                                       |
+| `app` | `CNAME` | Erst bei späterer Einrichtung von `app.fahrseiten.de` |
 
 Falls netcup für das Produkt ausdrücklich IPv6 ausweist und sie korrekt auf dasselbe Webhosting zeigt, zusätzlich `AAAA` für `@`, `www` und `app` setzen. Keine alte oder unbestätigte IPv6-Adresse stehen lassen, weil ein Teil der Besucher sonst am neuen Server vorbeigeleitet werden kann.
 
@@ -110,7 +110,6 @@ Nach der Rückmeldung von netcup prüfen:
 ```bash
 dig +short fahrseiten.de A
 dig +short www.fahrseiten.de CNAME
-dig +short app.fahrseiten.de CNAME
 dig +short fahrseiten.de MX
 ```
 
@@ -120,8 +119,8 @@ Erst weitergehen, wenn die Webhosts auf das vorgesehene Webhosting zeigen und di
 
 1. Im WCP **Websites & Domains > fahrseiten.de > SSL/TLS Certificates** öffnen.
 2. Ein kostenloses Let’s-Encrypt-Basiszertifikat für `fahrseiten.de` installieren und `www` einschließen.
-3. Für `app.fahrseiten.de` über dessen SSL/TLS-Bereich ein eigenes Let’s-Encrypt-Zertifikat installieren.
-4. Im Browser jeden Host einzeln mit `https://` aufrufen und Zertifikatsname sowie Gültigkeit prüfen.
+3. `app.fahrseiten.de` erst dann in ein Zertifikat aufnehmen, wenn die optionale Subdomain tatsächlich eingerichtet wird.
+4. Im Browser jeden aktiven Host einzeln mit `https://` aufrufen und Zertifikatsname sowie Gültigkeit prüfen.
 5. Erst danach **Redirect from HTTP to HTTPS** aktivieren.
 6. HSTS erst aktivieren, wenn alle benötigten Hosts dauerhaft per HTTPS funktionieren; ein Fehler lässt sich für Besucher dann nicht mehr per HTTP umgehen.
 
@@ -183,7 +182,7 @@ Plesk führt Linux-Aufgaben je nach Tarif in einer eingeschränkten Umgebung aus
 - `/api/health` antwortet mit HTTP 200.
 - `/api/ready` antwortet mit HTTP 200 und Datenbankstatus `ok`.
 - `fahrseiten.de` und `www.fahrseiten.de` zeigen die Wartungsvorschau.
-- `app.fahrseiten.de/login` zeigt den Login und der Plattform-Owner kann sich anmelden.
+- `fahrseiten.de/login` zeigt den Login und der Plattform-Owner kann sich anmelden.
 - `/setup` kann keine zweite Installation erzeugen.
 - `/admin/akquise`, `/admin/einstellungen` und `/admin/rechtliches` sind nur mit passender Rolle erreichbar.
 - Impressum, Datenschutz und Cookie-Einstellungen sind aus der Vorschauseite erreichbar.

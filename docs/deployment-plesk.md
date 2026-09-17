@@ -70,10 +70,11 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 | ----------------------------- | --------------------------------------------------------------------------- |
 | `NODE_ENV`                    | `production`                                                                |
 | `APP_BASE_URL`                | `https://fahrseiten.de`                                                     |
+| `DASHBOARD_BASE_URL`          | Leer: Login unter `fahrseiten.de/login`; später optional eigene App-Domain  |
 | `FAHRSEITEN_CONFIG_FILE`      | Absoluter persistenter Pfad außerhalb des Release- und Document-Root        |
 | `DEMO_DATA_MODE`              | `database`                                                                  |
 | `MARKETING_HOSTS`             | `fahrseiten.de,www.fahrseiten.de`                                           |
-| `APP_HOSTS`                   | `app.fahrseiten.de`                                                         |
+| `APP_HOSTS`                   | Leer, solange keine eigene Verwaltungs-Subdomain eingerichtet ist           |
 | `DEMO_HOSTS`                  | Nur tatsächlich eingerichtete Testhosts oder ein bewusst leerer Wert        |
 | `TRUST_PROXY_HEADERS`         | Zunächst `false`; nur nach dokumentierter Proxy-Prüfung auf `true` setzen   |
 | `SMTP_MODE`                   | `smtp`                                                                      |
@@ -93,7 +94,13 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 
 ## Domain- und Proxy-Prüfung
 
-`fahrseiten.de` und `www.fahrseiten.de` gehören zur Marketingoberfläche. `app.fahrseiten.de` gehört zum Plattform- und Kunden-Backend. Externe Kundendomains werden später als eigene Domains oder Aliase auf dieselbe Anwendung geführt; sie dürfen nicht per HTTP-Weiterleitung auf `fahrseiten.de` umgebogen werden, weil die Tenant-Auflösung den ursprünglichen Host benötigt.
+`fahrseiten.de` und `www.fahrseiten.de` gehören zur Marketingoberfläche. Login,
+Plattformverwaltung und Kundenbereich sind zunächst über `/login`, `/admin` und
+`/kunde` auf der Hauptdomain erreichbar. Eine spätere `app.fahrseiten.de`
+gehört zum Plattform- und Kunden-Backend. Externe Kundendomains werden als
+eigene Domains oder Aliase auf dieselbe Anwendung geführt; sie dürfen nicht per
+HTTP-Weiterleitung auf `fahrseiten.de` umgebogen werden, weil die
+Tenant-Auflösung den ursprünglichen Host benötigt.
 
 Nach dem ersten isolierten Stagingstart sind `Host` und `X-Forwarded-Host` mit einer Testdomain zu prüfen. `TRUST_PROXY_HEADERS=false` bleibt die sichere Voreinstellung. Eine Umstellung auf `true` ist nur zulässig, wenn Plesk eingehende Forwarded-Header überschreibt und ausschließlich den verifizierten öffentlichen Host weitergibt.
 
@@ -194,10 +201,14 @@ verwenden können.
 
 ## Subdomains für die zentrale Anwendung
 
-`app.fahrseiten.de` ist für die vorgesehene Trennung zwischen Marketing und
-Verwaltung erforderlich, verwendet aber dieselbe Anwendung, denselben Code und
-dieselbe Datenbank wie `fahrseiten.de`. In Plesk ist dafür bevorzugt ein
-Domain-Alias für `fahrseiten.de` anzulegen:
+`app.fahrseiten.de` ist eine optionale spätere Trennung zwischen Marketing und
+Verwaltung. Ohne diese Subdomain bleiben alle Kunden- und Plattformfunktionen
+unter `https://fahrseiten.de/login` erreichbar. `DASHBOARD_BASE_URL` und
+`APP_HOSTS` bleiben bis dahin leer.
+
+Wenn die Subdomain später verfügbar ist, verwendet sie dieselbe Anwendung,
+denselben Code und dieselbe Datenbank wie `fahrseiten.de`. In Plesk ist dafür
+bevorzugt ein Domain-Alias für `fahrseiten.de` anzulegen:
 
 1. Aliasname `app.fahrseiten.de`, Ziel `fahrseiten.de`.
 2. Webservice aktivieren, Mailservice deaktivieren.
@@ -208,8 +219,9 @@ Domain-Alias für `fahrseiten.de` anzulegen:
    oder einen CNAME auf `fahrseiten.de` setzen.
 5. Das Zertifikat anschließend neu ausstellen und `app.fahrseiten.de`
    einschließen.
-6. `APP_HOSTS=app.fahrseiten.de` beibehalten und die Node-Anwendung neu
-   starten.
+6. `APP_HOSTS=app.fahrseiten.de` und
+   `DASHBOARD_BASE_URL=https://app.fahrseiten.de` setzen, neu bauen und die
+   Node-Anwendung neu starten.
 
 Falls Plesk den Aliasnamen als Subdomain nicht akzeptiert, wird stattdessen
 `app` über **Add Subdomain** angelegt und auf denselben Application Root sowie

@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { MarketingHero, MarketingShell } from "./marketing-shell";
 import { MaintenancePage } from "@/components/maintenance/maintenance-page";
 import { env } from "@/config/env";
+import { dashboardUrl } from "@/config/dashboard-url";
 import { findPlatformSettings } from "@/modules/setup/platform-settings";
 import { mediaPublicUrl } from "@/modules/media/public-url";
 
@@ -32,6 +33,9 @@ function MaintenanceLegalShell({
           <Link href="/impressum">Impressum</Link>
           <Link href="/datenschutz">Datenschutz</Link>
           <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
+          <Link className="font-semibold text-slate-950" href={dashboardUrl()}>
+            Kundenlogin
+          </Link>
         </div>
       </footer>
     </div>

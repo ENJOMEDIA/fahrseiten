@@ -27,5 +27,16 @@ describe("parseServerEnv", () => {
 
   it("rejects invalid URLs", () => {
     expect(() => parseServerEnv({ APP_BASE_URL: "not-a-url" })).toThrow();
+    expect(() => parseServerEnv({ DASHBOARD_BASE_URL: "not-a-url" })).toThrow();
+  });
+
+  it("accepts an optional dashboard host or an empty Plesk value", () => {
+    expect(parseServerEnv({ DASHBOARD_BASE_URL: "" }).DASHBOARD_BASE_URL).toBe(
+      undefined,
+    );
+    expect(
+      parseServerEnv({ DASHBOARD_BASE_URL: "https://app.fahrseiten.de" })
+        .DASHBOARD_BASE_URL,
+    ).toBe("https://app.fahrseiten.de");
   });
 });

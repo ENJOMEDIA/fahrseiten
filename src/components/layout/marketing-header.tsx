@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { dashboardUrl } from "@/config/dashboard-url";
+
 export function MarketingHeader({ logoUrl }: { logoUrl?: string }) {
   const links = [
     ["Funktionen", "/funktionen"],
@@ -52,7 +54,7 @@ export function MarketingHeader({ logoUrl }: { logoUrl?: string }) {
           ))}
           <Link
             className="rounded-full bg-slate-950 px-5 py-2.5 text-white shadow-lg shadow-slate-950/10 hover:-translate-y-0.5 hover:bg-cyan-700"
-            href="/login"
+            href={dashboardUrl()}
           >
             Login
           </Link>
@@ -76,7 +78,7 @@ export function MarketingHeader({ logoUrl }: { logoUrl?: string }) {
             ))}
             <Link
               className="rounded-lg bg-slate-950 px-3 py-2 text-white"
-              href="/login"
+              href={dashboardUrl()}
             >
               Login
             </Link>

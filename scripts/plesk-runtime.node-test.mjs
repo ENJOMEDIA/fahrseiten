@@ -36,6 +36,27 @@ test("accepts a complete production environment", () => {
   assert.deepEqual(validateProductionEnvironment(validEnvironment), []);
 });
 
+test("allows the dashboard on the main domain without an app subdomain", () => {
+  assert.deepEqual(
+    validateProductionEnvironment({
+      ...validEnvironment,
+      APP_HOSTS: "",
+      DASHBOARD_BASE_URL: "",
+    }),
+    [],
+  );
+});
+
+test("accepts a later HTTPS dashboard host", () => {
+  assert.deepEqual(
+    validateProductionEnvironment({
+      ...validEnvironment,
+      DASHBOARD_BASE_URL: "https://app.fahrseiten.de",
+    }),
+    [],
+  );
+});
+
 test("allows the one-time database bootstrap when the install token exists", () => {
   const withoutDatabase = { ...validEnvironment };
   delete withoutDatabase.DATABASE_URL;
