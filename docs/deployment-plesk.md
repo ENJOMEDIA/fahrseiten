@@ -35,7 +35,7 @@ Fehlt Node.js 22, eine Startmöglichkeit oder der Host-Header bleibt nicht erhal
 ## Direkt aus GitHub bereitstellen
 
 1. In **Websites & Domains > Git > Add Repository** `https://github.com/ENJOMEDIA/fahrseiten.git` als Remote-Repository eintragen.
-2. Den Branch `main` und einen Quellpfad wie `fahrseiten-source` wählen.
+2. Den Branch `main` und einen Quellpfad wie `fahrseiten.de` wählen.
 3. **Manual deployment** auswählen. Dadurch macht ein Push die Website nicht unkontrolliert live.
 4. **Additional deployment actions** deaktiviert beziehungsweise leer lassen. Bei gesperrtem SSH-Zugriff laufen diese Aktionen laut Plesk in einer chroot-Umgebung, in der die Node-Binärdatei des Toolkits nicht erreichbar sein kann.
 5. Zuerst **Pull Updates**, danach **Deploy from Repository** ausführen.
@@ -50,13 +50,13 @@ Der manuell startbare GitHub-Actions-Workflow `Plesk-Artefakt` bleibt als option
 
 Für die Domain `fahrseiten.de` sind folgende Werte vorgesehen:
 
-| Plesk-Feld               | Wert                       |
-| ------------------------ | -------------------------- |
-| Node.js-Version          | `22.x`                     |
-| Application Mode         | `production`               |
-| Application Root         | `fahrseiten-source`        |
-| Document Root            | `fahrseiten-source/public` |
-| Application Startup File | `plesk-start.mjs`          |
+| Plesk-Feld               | Wert                   |
+| ------------------------ | ---------------------- |
+| Node.js-Version          | `22.x`                 |
+| Application Mode         | `production`           |
+| Application Root         | `fahrseiten.de`        |
+| Document Root            | `fahrseiten.de/public` |
+| Application Startup File | `plesk-start.mjs`      |
 
 Die Plesk-Startdatei muss direkt im Application Root liegen. `plesk-start.mjs` lädt nach dem erfolgreichen Build `dist/plesk/app.mjs`; bei fehlendem Build beendet sie sich mit einer eindeutigen Meldung. Plesk beziehungsweise der vorgeschaltete Webserver übernimmt TLS und Reverse Proxy; der Node-Prozess lauscht ausschließlich auf dem von Plesk gesetzten `PORT`.
 
@@ -196,7 +196,7 @@ Das Git-Deployment bleibt bewusst manuell. Ein Push nach GitHub ändert die lauf
 2. Sicherstellen, dass der gewünschte Commit auf `main` liegt und seine GitHub-Prüfungen erfolgreich sind.
 3. In Plesk **Pull Updates** und anschließend **Deploy from Repository** ausführen.
 4. Im Node.js-Toolkit das Skript `deploy:plesk` ausführen. Es installiert die Abhängigkeiten selbst und muss erfolgreich enden.
-5. Im Verzeichnis `fahrseiten-source/dist/plesk` `node migrate.mjs` ausführen.
+5. Im Verzeichnis `fahrseiten.de/dist/plesk` `node migrate.mjs` ausführen.
 6. Bei einem Migrationsfehler sofort stoppen und die Anwendung nicht neu starten.
 7. Die Node.js-Anwendung neu starten und Health-/Readiness-Checks ausführen.
 
