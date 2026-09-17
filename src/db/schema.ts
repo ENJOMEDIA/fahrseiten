@@ -543,6 +543,51 @@ export const testimonials = mysqlTable(
   ],
 );
 
+export const mediaAssets = mysqlTable(
+  "media_assets",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    storageKey: varchar("storage_key", { length: 500 }).notNull(),
+    originalName: varchar("original_name", { length: 255 }).notNull(),
+    mimeType: varchar("mime_type", { length: 100 }).notNull(),
+    byteSize: int("byte_size").notNull(),
+    width: int("width").notNull(),
+    height: int("height").notNull(),
+    altText: varchar("alt_text", { length: 300 }).notNull(),
+    description: text("description"),
+    archivedAt: timestamp("archived_at", { mode: "date", fsp: 3 }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("media_assets_storage_key_unique").on(table.storageKey),
+    index("media_assets_tenant_idx").on(table.tenantId),
+  ],
+);
+
+export const mediaUsages = mysqlTable(
+  "media_usages",
+  {
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    mediaId: id("media_id")
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: "restrict" }),
+    entityType: varchar("entity_type", { length: 80 }).notNull(),
+    entityId: id("entity_id").notNull(),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.mediaId, table.entityType, table.entityId] }),
+    index("media_usages_tenant_idx").on(table.tenantId),
+  ],
+);
+
 export const plans = mysqlTable(
   "plans",
   {

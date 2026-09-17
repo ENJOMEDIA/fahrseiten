@@ -31,6 +31,7 @@ const textImage = z.object({
   type: z.literal("text_image"),
   heading: z.string().min(1).max(160),
   paragraphs: z.array(text).min(1).max(8),
+  mediaId: z.uuid().optional(),
   imageUrl: z.string().max(500).optional(),
   imageAlt: z.string().max(180).default(""),
   imagePosition: z.enum(["left", "right"]).default("right"),
