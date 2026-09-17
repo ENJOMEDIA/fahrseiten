@@ -138,5 +138,194 @@ function Block({ block }: { block: StoredBlock }) {
           </div>
         </section>
       );
+    case "license_classes":
+      return (
+        <ContentSection heading={value.heading}>
+          {value.items
+            .filter((item) => item.active)
+            .map((item) => (
+              <article
+                className="rounded-2xl border border-slate-200 bg-white p-6"
+                key={item.id}
+              >
+                <p className="text-sm font-bold text-cyan-700">
+                  Klasse {item.key}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold">{item.title}</h3>
+                <p className="mt-2 text-slate-600">{item.description}</p>
+                {item.minimumAge ? (
+                  <p className="mt-3 text-sm">
+                    Mindestalter: {item.minimumAge}
+                  </p>
+                ) : null}
+              </article>
+            ))}
+        </ContentSection>
+      );
+    case "prices":
+      return (
+        <ContentSection heading={value.heading}>
+          {value.groups
+            .filter((group) => group.active)
+            .map((group) => (
+              <article
+                className="rounded-2xl border border-slate-200 bg-white p-6"
+                key={group.id}
+              >
+                <h3 className="text-xl font-semibold">{group.title}</h3>
+                <dl className="mt-4 space-y-3">
+                  {group.items
+                    .filter((item) => item.active)
+                    .map((item) => (
+                      <div className="flex justify-between gap-4" key={item.id}>
+                        <dt>{item.label}</dt>
+                        <dd className="font-semibold">
+                          {new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: item.currency,
+                          }).format(Number(item.amount))}
+                          {item.unit ? ` / ${item.unit}` : ""}
+                        </dd>
+                      </div>
+                    ))}
+                </dl>
+              </article>
+            ))}
+        </ContentSection>
+      );
+    case "courses":
+      return (
+        <ContentSection heading={value.heading}>
+          {value.items
+            .filter((item) => item.active)
+            .map((item) => (
+              <article
+                className="rounded-2xl border border-slate-200 bg-white p-6"
+                key={item.id}
+              >
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p className="mt-2 text-slate-600">{item.description}</p>
+                {item.dates.map((date) => (
+                  <time
+                    className="mt-3 block text-sm font-medium"
+                    dateTime={date.startsAt}
+                    key={date.id}
+                  >
+                    {new Intl.DateTimeFormat("de-DE", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                      timeZone: date.timezone,
+                    }).format(new Date(date.startsAt))}
+                  </time>
+                ))}
+              </article>
+            ))}
+        </ContentSection>
+      );
+    case "team":
+      return (
+        <ContentSection heading={value.heading}>
+          {value.items
+            .filter((item) => item.active)
+            .map((item) => (
+              <article className="rounded-2xl bg-white p-6" key={item.id}>
+                <h3 className="text-xl font-semibold">{item.name}</h3>
+                <p className="text-cyan-700">{item.role}</p>
+                <p className="mt-3 text-slate-600">{item.bio}</p>
+              </article>
+            ))}
+        </ContentSection>
+      );
+    case "fleet":
+      return (
+        <ContentSection heading={value.heading}>
+          {value.items
+            .filter((item) => item.active)
+            .map((item) => (
+              <article className="rounded-2xl bg-white p-6" key={item.id}>
+                <h3 className="text-xl font-semibold">{item.name}</h3>
+                <p className="mt-1 text-sm text-cyan-700">
+                  {item.category} ·{" "}
+                  {item.transmission === "automatic"
+                    ? "Automatik"
+                    : "Schaltung"}
+                </p>
+                <p className="mt-3 text-slate-600">{item.description}</p>
+              </article>
+            ))}
+        </ContentSection>
+      );
+    case "locations":
+      return (
+        <ContentSection heading={value.heading}>
+          {value.items
+            .filter((item) => item.active)
+            .map((item) => (
+              <article
+                className="rounded-2xl bg-white p-6"
+                itemScope
+                itemType="https://schema.org/DrivingSchool"
+                key={item.id}
+              >
+                <h3 className="text-xl font-semibold" itemProp="name">
+                  {item.name}
+                </h3>
+                <address
+                  className="mt-3 text-slate-600 not-italic"
+                  itemProp="address"
+                >
+                  {item.street}
+                  <br />
+                  {item.postalCode} {item.city}
+                </address>
+                <ul className="mt-4 text-sm">
+                  {item.openingHours.map((hours) => (
+                    <li key={hours.weekday}>
+                      Tag {hours.weekday}:{" "}
+                      {hours.closed
+                        ? "geschlossen"
+                        : `${hours.opensAt}–${hours.closesAt}`}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+        </ContentSection>
+      );
+    case "testimonials":
+      return (
+        <ContentSection heading={value.heading}>
+          {value.items
+            .filter((item) => item.active)
+            .map((item) => (
+              <figure className="rounded-2xl bg-white p-6" key={item.id}>
+                <blockquote className="text-lg">„{item.quote}“</blockquote>
+                <figcaption className="mt-4 text-sm font-semibold">
+                  {item.displayName}
+                  {item.sourceLabel ? ` · ${item.sourceLabel}` : ""}
+                </figcaption>
+              </figure>
+            ))}
+        </ContentSection>
+      );
   }
+}
+
+function ContentSection({
+  heading,
+  children,
+}: {
+  heading: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="bg-slate-50 px-6 py-20">
+      <div className="mx-auto max-w-6xl">
+        <h2 className="text-3xl font-semibold">{heading}</h2>
+        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {children}
+        </div>
+      </div>
+    </section>
+  );
 }

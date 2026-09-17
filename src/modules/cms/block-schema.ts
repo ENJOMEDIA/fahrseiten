@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+import {
+  courseSchema,
+  licenseClassSchema,
+  locationSchema,
+  priceGroupSchema,
+  teamMemberSchema,
+  testimonialSchema,
+  vehicleSchema,
+} from "@/modules/content/schemas";
+
 const safeLink = z
   .string()
   .max(500)
@@ -60,6 +70,41 @@ const contactTeaser = z.object({
   phone: z.string().max(40).optional(),
   email: z.email().optional(),
 });
+const licenseClasses = z.object({
+  type: z.literal("license_classes"),
+  heading: z.string().min(1).max(160),
+  items: z.array(licenseClassSchema).max(30),
+});
+const prices = z.object({
+  type: z.literal("prices"),
+  heading: z.string().min(1).max(160),
+  groups: z.array(priceGroupSchema).max(20),
+});
+const courses = z.object({
+  type: z.literal("courses"),
+  heading: z.string().min(1).max(160),
+  items: z.array(courseSchema).max(30),
+});
+const team = z.object({
+  type: z.literal("team"),
+  heading: z.string().min(1).max(160),
+  items: z.array(teamMemberSchema).max(50),
+});
+const fleet = z.object({
+  type: z.literal("fleet"),
+  heading: z.string().min(1).max(160),
+  items: z.array(vehicleSchema).max(50),
+});
+const locations = z.object({
+  type: z.literal("locations"),
+  heading: z.string().min(1).max(160),
+  items: z.array(locationSchema).max(20),
+});
+const testimonials = z.object({
+  type: z.literal("testimonials"),
+  heading: z.string().min(1).max(160),
+  items: z.array(testimonialSchema).max(50),
+});
 
 export const blockPropertiesSchema = z.discriminatedUnion("type", [
   hero,
@@ -68,6 +113,13 @@ export const blockPropertiesSchema = z.discriminatedUnion("type", [
   cta,
   faq,
   contactTeaser,
+  licenseClasses,
+  prices,
+  courses,
+  team,
+  fleet,
+  locations,
+  testimonials,
 ]);
 export type BlockProperties = z.infer<typeof blockPropertiesSchema>;
 

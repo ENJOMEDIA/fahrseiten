@@ -6,22 +6,32 @@ import { hashPassword } from "@/modules/auth/password";
 
 import {
   auditLogs,
+  courseDates,
+  courses,
   domains,
   featureFlags,
+  licenseClasses,
+  locations,
   navigationItems,
+  openingHours,
   pageBlocks,
   pageVersions,
   plans,
   planFeatures,
+  priceGroups,
+  priceItems,
   seoSettings,
   sitePages,
   sites,
   subscriptions,
+  teamMembers,
   tenantFeatures,
   tenantMemberships,
   tenants,
+  testimonials,
   themeSettings,
   users,
+  vehicles,
 } from "./schema";
 
 const ids = {
@@ -333,6 +343,148 @@ try {
         },
       ])
       .onDuplicateKeyUpdate({ set: { noIndex: true } });
+
+    await tx
+      .insert(licenseClasses)
+      .values([
+        {
+          id: "85000000-0000-4000-8000-000000000001",
+          tenantId: ids.demoTenant,
+          key: "B",
+          title: "Pkw",
+          description: "Fiktive Beispielausbildung für Pkw.",
+          minimumAge: 18,
+          position: 0,
+        },
+        {
+          id: "85000000-0000-4000-8000-000000000002",
+          tenantId: ids.demoTenant,
+          key: "A",
+          title: "Motorrad",
+          description: "Fiktive Beispielausbildung für Motorräder.",
+          minimumAge: 24,
+          position: 1,
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(priceGroups)
+      .values({
+        id: "86000000-0000-4000-8000-000000000001",
+        tenantId: ids.demoTenant,
+        title: "Klasse B",
+      })
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(priceItems)
+      .values([
+        {
+          id: "86100000-0000-4000-8000-000000000001",
+          tenantId: ids.demoTenant,
+          priceGroupId: "86000000-0000-4000-8000-000000000001",
+          label: "Grundbetrag",
+          amount: "499.00",
+          currency: "EUR",
+          position: 0,
+        },
+        {
+          id: "86100000-0000-4000-8000-000000000002",
+          tenantId: ids.demoTenant,
+          priceGroupId: "86000000-0000-4000-8000-000000000001",
+          label: "Fahrstunde",
+          amount: "69.00",
+          currency: "EUR",
+          unit: "45 Minuten",
+          position: 1,
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(courses)
+      .values({
+        id: "87000000-0000-4000-8000-000000000001",
+        tenantId: ids.demoTenant,
+        title: "Theorie-Intensivkurs",
+        description: "Fiktiver Kompaktkurs ohne Buchungsfunktion.",
+      })
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(courseDates)
+      .values({
+        id: "87100000-0000-4000-8000-000000000001",
+        tenantId: ids.demoTenant,
+        courseId: "87000000-0000-4000-8000-000000000001",
+        startsAt: new Date("2026-10-12T14:00:00.000Z"),
+        endsAt: new Date("2026-10-12T17:00:00.000Z"),
+        timezone: "Europe/Berlin",
+      })
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(teamMembers)
+      .values({
+        id: "88000000-0000-4000-8000-000000000001",
+        tenantId: ids.demoTenant,
+        name: "Mara Beispiel",
+        role: "Fahrlehrerin",
+        bio: "Fiktive Person für die lokale Produktdemo.",
+        qualifications: ["Klassen A und B"],
+      })
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(vehicles)
+      .values({
+        id: "89000000-0000-4000-8000-000000000001",
+        tenantId: ids.demoTenant,
+        name: "Demo Kompakt",
+        category: "Pkw",
+        transmission: "automatic",
+        description: "Fiktives Schulungsfahrzeug.",
+      })
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(locations)
+      .values({
+        id: "8a000000-0000-4000-8000-000000000001",
+        tenantId: ids.demoTenant,
+        name: "Morgenrot Lernstudio",
+        street: "Beispielweg 1",
+        postalCode: "00000",
+        city: "Musterstadt",
+        phone: "+49 30 0000000",
+        email: "hallo@morgenrot.invalid",
+      })
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(openingHours)
+      .values([
+        {
+          id: "8a100000-0000-4000-8000-000000000001",
+          tenantId: ids.demoTenant,
+          locationId: "8a000000-0000-4000-8000-000000000001",
+          weekday: 1,
+          opensAt: "10:00",
+          closesAt: "18:00",
+        },
+        {
+          id: "8a100000-0000-4000-8000-000000000002",
+          tenantId: ids.demoTenant,
+          locationId: "8a000000-0000-4000-8000-000000000001",
+          weekday: 7,
+          closed: true,
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { active: true } });
+    await tx
+      .insert(testimonials)
+      .values({
+        id: "8b000000-0000-4000-8000-000000000001",
+        tenantId: ids.demoTenant,
+        displayName: "Alex Demo",
+        quote: "Die Abläufe waren klar und verständlich erklärt.",
+        rating: 5,
+        sourceLabel: "manuell gepflegte Demo",
+      })
+      .onDuplicateKeyUpdate({ set: { active: true } });
 
     await tx
       .insert(plans)

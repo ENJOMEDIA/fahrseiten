@@ -40,7 +40,7 @@ const pages: PublishedPage[] = [
           heading: "Sicher ans Ziel – Schritt für Schritt",
           text: "Persönliche Ausbildung, klare Abläufe und ein ruhiges Lernumfeld.",
           actionLabel: "Kontakt aufnehmen",
-          actionHref: "/kontakt",
+          actionHref: "/demo/kontakt",
         },
       },
       {
@@ -65,9 +65,199 @@ const pages: PublishedPage[] = [
         },
       },
       {
-        id: "home-faq",
+        id: "home-classes",
         schemaVersion: 1,
         position: 2,
+        visible: true,
+        properties: {
+          type: "license_classes",
+          heading: "Führerscheinklassen",
+          items: [
+            {
+              id: "class-b",
+              position: 0,
+              active: true,
+              key: "B",
+              title: "Pkw",
+              description: "Fiktive Beispielausbildung für Pkw.",
+              minimumAge: 18,
+            },
+            {
+              id: "class-a",
+              position: 1,
+              active: true,
+              key: "A",
+              title: "Motorrad",
+              description: "Fiktive Beispielausbildung für Motorräder.",
+              minimumAge: 24,
+            },
+          ],
+        },
+      },
+      {
+        id: "home-prices",
+        schemaVersion: 1,
+        position: 3,
+        visible: true,
+        properties: {
+          type: "prices",
+          heading: "Beispielpreise",
+          groups: [
+            {
+              id: "prices-b",
+              position: 0,
+              active: true,
+              title: "Klasse B",
+              items: [
+                {
+                  id: "price-base",
+                  position: 0,
+                  active: true,
+                  label: "Grundbetrag",
+                  amount: "499.00",
+                  currency: "EUR",
+                },
+                {
+                  id: "price-drive",
+                  position: 1,
+                  active: true,
+                  label: "Fahrstunde",
+                  amount: "69.00",
+                  currency: "EUR",
+                  unit: "45 Minuten",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "home-courses",
+        schemaVersion: 1,
+        position: 4,
+        visible: true,
+        properties: {
+          type: "courses",
+          heading: "Kurse",
+          items: [
+            {
+              id: "course-theory",
+              position: 0,
+              active: true,
+              title: "Theorie-Intensivkurs",
+              description: "Fiktiver Kompaktkurs ohne Buchungsfunktion.",
+              dates: [
+                {
+                  id: "date-1",
+                  startsAt: "2026-10-12T16:00:00+02:00",
+                  endsAt: "2026-10-12T19:00:00+02:00",
+                  timezone: "Europe/Berlin",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "home-team",
+        schemaVersion: 1,
+        position: 5,
+        visible: true,
+        properties: {
+          type: "team",
+          heading: "Unser Demo-Team",
+          items: [
+            {
+              id: "team-1",
+              position: 0,
+              active: true,
+              name: "Mara Beispiel",
+              role: "Fahrlehrerin",
+              bio: "Fiktive Person für die lokale Produktdemo.",
+              qualifications: ["Klassen A und B"],
+            },
+          ],
+        },
+      },
+      {
+        id: "home-fleet",
+        schemaVersion: 1,
+        position: 6,
+        visible: true,
+        properties: {
+          type: "fleet",
+          heading: "Fuhrpark",
+          items: [
+            {
+              id: "vehicle-1",
+              position: 0,
+              active: true,
+              name: "Demo Kompakt",
+              category: "Pkw",
+              transmission: "automatic",
+              description:
+                "Fiktives, elektrisch angetriebenes Schulungsfahrzeug.",
+            },
+          ],
+        },
+      },
+      {
+        id: "home-locations",
+        schemaVersion: 1,
+        position: 7,
+        visible: true,
+        properties: {
+          type: "locations",
+          heading: "Standort",
+          items: [
+            {
+              id: "location-1",
+              position: 0,
+              active: true,
+              name: "Morgenrot Lernstudio",
+              street: "Beispielweg 1",
+              postalCode: "00000",
+              city: "Musterstadt",
+              phone: "+49 30 0000000",
+              email: "hallo@morgenrot.invalid",
+              openingHours: [
+                {
+                  weekday: 1,
+                  opensAt: "10:00",
+                  closesAt: "18:00",
+                  closed: false,
+                },
+                { weekday: 7, closed: true },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "home-testimonials",
+        schemaVersion: 1,
+        position: 8,
+        visible: true,
+        properties: {
+          type: "testimonials",
+          heading: "Fiktive Stimmen",
+          items: [
+            {
+              id: "testimonial-1",
+              position: 0,
+              active: true,
+              displayName: "Alex Demo",
+              quote: "Die Abläufe waren klar und verständlich erklärt.",
+              rating: 5,
+              sourceLabel: "manuell gepflegte Demo",
+            },
+          ],
+        },
+      },
+      {
+        id: "home-faq",
+        schemaVersion: 1,
+        position: 9,
         visible: true,
         properties: {
           type: "faq",
@@ -89,7 +279,7 @@ const pages: PublishedPage[] = [
       {
         id: "home-contact",
         schemaVersion: 1,
-        position: 3,
+        position: 10,
         visible: true,
         properties: {
           type: "contact_teaser",

@@ -20,7 +20,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 | 5       | A           | Domain- und Tenant-Auflösung                                   | Abgeschlossen  | Testhosts laden ausschließlich den richtigen Mandanten                                           |
 | 6       | A           | Designsystem und Anwendungslayouts                             | Abgeschlossen  | Gemeinsame barrierearme und mobile Grundlagen                                                    |
 | 7       | B           | Seiten-, Block- und Veröffentlichungssystem                    | Abgeschlossen  | Datengetriebene Demo, geschützte Entwürfe und Veröffentlichung                                   |
-| 8       | B           | Fahrschulspezifische Inhaltsmodule                             | Nicht begonnen | MVP-Inhalte validiert und mandantengebunden darstellbar                                          |
+| 8       | B           | Fahrschulspezifische Inhaltsmodule                             | Abgeschlossen  | MVP-Inhalte validiert und mandantengebunden darstellbar                                          |
 | 9       | B           | Medienverwaltung                                               | Nicht begonnen | Geprüfte Uploads und isolierter Medienzugriff                                                    |
 | 10      | B           | Intuitiver Block-Builder                                       | Nicht begonnen | Bearbeiten, Vorschau, Veröffentlichung und Wiederherstellung geprüft                             |
 | 11      | C           | Kunden-Backend vollständig machen                              | Nicht begonnen | Kundenabläufe; Abnahmeabhängigkeiten OD-09 zuerst klären                                         |
@@ -39,7 +39,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 8 folgt als Nächstes. Das CMS rendert die fiktive, datengetriebene Website unter `/demo`; die lokale Demo nutzt mangels MySQL einen expliziten Fixture-Adapter mit denselben validierten Blocktypen.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 9 folgt als Nächstes. Das CMS rendert die fiktive, datengetriebene Website einschließlich aller vorgesehenen Fahrschulmodule unter `/demo`; die lokale Demo nutzt mangels MySQL einen expliziten Fixture-Adapter mit denselben validierten Blocktypen.
 
 ## Abhängigkeiten und Fortschreibung
 

@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  decimal,
   index,
   int,
   json,
@@ -352,6 +353,193 @@ export const seoSettings = mysqlTable(
   (table) => [
     uniqueIndex("seo_settings_page_unique").on(table.pageId),
     index("seo_settings_tenant_idx").on(table.tenantId),
+  ],
+);
+
+const tenantContentColumns = {
+  tenantId: id("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "cascade" }),
+  position: int("position").default(0).notNull(),
+  active: boolean("active").default(true).notNull(),
+  ...timestamps,
+};
+
+export const licenseClasses = mysqlTable(
+  "license_classes",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    key: varchar("key", { length: 30 }).notNull(),
+    title: varchar("title", { length: 120 }).notNull(),
+    description: text("description"),
+    minimumAge: int("minimum_age"),
+  },
+  (table) => [
+    uniqueIndex("license_classes_tenant_key_unique").on(
+      table.tenantId,
+      table.key,
+    ),
+  ],
+);
+
+export const priceGroups = mysqlTable(
+  "price_groups",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    title: varchar("title", { length: 140 }).notNull(),
+    description: text("description"),
+  },
+  (table) => [
+    index("price_groups_tenant_position_idx").on(
+      table.tenantId,
+      table.position,
+    ),
+  ],
+);
+
+export const priceItems = mysqlTable(
+  "price_items",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    priceGroupId: id("price_group_id")
+      .notNull()
+      .references(() => priceGroups.id, { onDelete: "cascade" }),
+    label: varchar("label", { length: 180 }).notNull(),
+    description: text("description"),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    currency: varchar("currency", { length: 3 }).default("EUR").notNull(),
+    unit: varchar("unit", { length: 80 }),
+  },
+  (table) => [
+    index("price_items_tenant_group_idx").on(
+      table.tenantId,
+      table.priceGroupId,
+    ),
+  ],
+);
+
+export const courses = mysqlTable(
+  "courses",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    title: varchar("title", { length: 160 }).notNull(),
+    description: text("description"),
+    locationId: id("location_id"),
+  },
+  (table) => [
+    index("courses_tenant_position_idx").on(table.tenantId, table.position),
+  ],
+);
+
+export const courseDates = mysqlTable(
+  "course_dates",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    courseId: id("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    startsAt: timestamp("starts_at", { mode: "date", fsp: 3 }).notNull(),
+    endsAt: timestamp("ends_at", { mode: "date", fsp: 3 }).notNull(),
+    timezone: varchar("timezone", { length: 64 })
+      .default("Europe/Berlin")
+      .notNull(),
+  },
+  (table) => [
+    index("course_dates_tenant_start_idx").on(table.tenantId, table.startsAt),
+  ],
+);
+
+export const teamMembers = mysqlTable(
+  "team_members",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    name: varchar("name", { length: 160 }).notNull(),
+    role: varchar("role", { length: 120 }).notNull(),
+    bio: text("bio"),
+    qualifications: json("qualifications").$type<string[]>().notNull(),
+  },
+  (table) => [
+    index("team_members_tenant_position_idx").on(
+      table.tenantId,
+      table.position,
+    ),
+  ],
+);
+
+export const vehicles = mysqlTable(
+  "vehicles",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    name: varchar("name", { length: 160 }).notNull(),
+    category: varchar("category", { length: 80 }).notNull(),
+    transmission: mysqlEnum("transmission", ["manual", "automatic"]).notNull(),
+    description: text("description"),
+  },
+  (table) => [
+    index("vehicles_tenant_position_idx").on(table.tenantId, table.position),
+  ],
+);
+
+export const locations = mysqlTable(
+  "locations",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    name: varchar("name", { length: 160 }).notNull(),
+    street: varchar("street", { length: 180 }).notNull(),
+    postalCode: varchar("postal_code", { length: 20 }).notNull(),
+    city: varchar("city", { length: 120 }).notNull(),
+    phone: varchar("phone", { length: 40 }),
+    email: varchar("email", { length: 254 }),
+  },
+  (table) => [
+    index("locations_tenant_position_idx").on(table.tenantId, table.position),
+  ],
+);
+
+export const openingHours = mysqlTable(
+  "opening_hours",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    locationId: id("location_id")
+      .notNull()
+      .references(() => locations.id, { onDelete: "cascade" }),
+    weekday: int("weekday").notNull(),
+    opensAt: varchar("opens_at", { length: 5 }),
+    closesAt: varchar("closes_at", { length: 5 }),
+    closed: boolean("closed").default(false).notNull(),
+  },
+  (table) => [
+    uniqueIndex("opening_hours_location_weekday_unique").on(
+      table.locationId,
+      table.weekday,
+    ),
+  ],
+);
+
+export const testimonials = mysqlTable(
+  "testimonials",
+  {
+    id: id("id").primaryKey(),
+    ...tenantContentColumns,
+    displayName: varchar("display_name", { length: 100 }).notNull(),
+    quote: text("quote").notNull(),
+    rating: int("rating"),
+    sourceLabel: varchar("source_label", { length: 100 }),
+  },
+  (table) => [
+    index("testimonials_tenant_position_idx").on(
+      table.tenantId,
+      table.position,
+    ),
   ],
 );
 
