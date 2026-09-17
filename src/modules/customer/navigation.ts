@@ -5,6 +5,7 @@ export const customerNavigation = [
   { href: "/kunde/medien", label: "Medien" },
   { href: "/kunde/anfragen", label: "Anfragen" },
   { href: "/kunde/benutzer", label: "Benutzer & Rollen" },
+  { href: "/kunde/funktionen", label: "Funktionen" },
   { href: "/kunde/einstellungen", label: "Einstellungen" },
 ] as const;
 

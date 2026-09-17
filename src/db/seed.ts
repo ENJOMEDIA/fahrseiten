@@ -506,8 +506,44 @@ try {
         },
         {
           id: ids.schedulingFeature,
-          key: "lesson_scheduling",
-          title: "Fahrstundenplanung",
+          key: "lesson_booking",
+          title: "Terminbuchung",
+          defaultStatus: "coming_soon",
+        },
+        {
+          id: "60000000-0000-4000-8000-000000000003",
+          key: "lesson_reminders",
+          title: "Fahrstundenerinnerungen",
+          defaultStatus: "coming_soon",
+        },
+        {
+          id: "60000000-0000-4000-8000-000000000004",
+          key: "advanced_crm",
+          title: "Erweitertes CRM",
+          defaultStatus: "coming_soon",
+        },
+        {
+          id: "60000000-0000-4000-8000-000000000005",
+          key: "sms",
+          title: "SMS",
+          defaultStatus: "coming_soon",
+        },
+        {
+          id: "60000000-0000-4000-8000-000000000006",
+          key: "whatsapp",
+          title: "WhatsApp",
+          defaultStatus: "coming_soon",
+        },
+        {
+          id: "60000000-0000-4000-8000-000000000007",
+          key: "payments",
+          title: "Online-Zahlungen",
+          defaultStatus: "coming_soon",
+        },
+        {
+          id: "60000000-0000-4000-8000-000000000008",
+          key: "analytics",
+          title: "Statistiken",
           defaultStatus: "coming_soon",
         },
       ])
