@@ -56,3 +56,16 @@ test("edits, previews, publishes and restores in the controlled builder", async 
     .click();
   await expect(heading).toHaveValue("Sicher und entspannt zum Führerschein");
 });
+
+test("submits a validated local demo inquiry", async ({ page }) => {
+  await page.goto("/demo/kontakt");
+  await page.getByLabel("Name").fill("Alex Beispiel");
+  await page.getByLabel("E-Mail").fill("alex@example.invalid");
+  await page.getByLabel("Nachricht").fill("Bitte um fiktive Informationen.");
+  await page.getByRole("checkbox").check();
+  await page.waitForTimeout(2100);
+  await page.getByRole("button", { name: "Testanfrage senden" }).click();
+  await expect(
+    page.getByText(/fiktive Testanfrage wurde gespeichert/),
+  ).toBeVisible();
+});

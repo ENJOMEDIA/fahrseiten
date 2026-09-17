@@ -588,6 +588,124 @@ export const mediaUsages = mysqlTable(
   ],
 );
 
+export const inquiryStatusValues = [
+  "new",
+  "in_progress",
+  "answered",
+  "completed",
+  "spam",
+] as const;
+export const contactForms = mysqlTable(
+  "contact_forms",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 160 }).notNull(),
+    privacyTextVersion: varchar("privacy_text_version", {
+      length: 80,
+    }).notNull(),
+    requiredFields: json("required_fields").$type<string[]>().notNull(),
+    active: boolean("active").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [index("contact_forms_tenant_idx").on(table.tenantId)],
+);
+export const contactInquiries = mysqlTable(
+  "contact_inquiries",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    formId: id("form_id")
+      .notNull()
+      .references(() => contactForms.id, { onDelete: "restrict" }),
+    status: mysqlEnum("status", inquiryStatusValues).default("new").notNull(),
+    contactName: varchar("contact_name", { length: 160 }).notNull(),
+    email: varchar("email", { length: 254 }).notNull(),
+    phone: varchar("phone", { length: 40 }),
+    licenseInterest: varchar("license_interest", { length: 100 }),
+    message: text("message").notNull(),
+    source: varchar("source", { length: 100 }).notNull(),
+    privacyTextVersion: varchar("privacy_text_version", {
+      length: 80,
+    }).notNull(),
+    assignedUserId: id("assigned_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    followUpAt: timestamp("follow_up_at", { mode: "date", fsp: 3 }),
+    deletedAt: timestamp("deleted_at", { mode: "date", fsp: 3 }),
+    notificationQueuedAt: timestamp("notification_queued_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index("contact_inquiries_tenant_status_idx").on(
+      table.tenantId,
+      table.status,
+    ),
+    index("contact_inquiries_follow_up_idx").on(
+      table.tenantId,
+      table.followUpAt,
+    ),
+  ],
+);
+export const contactNotes = mysqlTable(
+  "contact_notes",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    inquiryId: id("inquiry_id")
+      .notNull()
+      .references(() => contactInquiries.id, { onDelete: "cascade" }),
+    authorUserId: id("author_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    note: text("note").notNull(),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("contact_notes_tenant_inquiry_idx").on(
+      table.tenantId,
+      table.inquiryId,
+    ),
+  ],
+);
+export const contactStatusHistory = mysqlTable(
+  "contact_status_history",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    inquiryId: id("inquiry_id")
+      .notNull()
+      .references(() => contactInquiries.id, { onDelete: "cascade" }),
+    fromStatus: mysqlEnum("from_status", inquiryStatusValues),
+    toStatus: mysqlEnum("to_status", inquiryStatusValues).notNull(),
+    actorUserId: id("actor_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("contact_status_history_tenant_idx").on(
+      table.tenantId,
+      table.inquiryId,
+    ),
+  ],
+);
+
 export const plans = mysqlTable(
   "plans",
   {

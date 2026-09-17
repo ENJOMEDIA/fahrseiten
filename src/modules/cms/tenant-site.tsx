@@ -6,9 +6,11 @@ import type { PublishedPage, TenantWebsite } from "./types";
 export function TenantSite({
   website,
   page,
+  afterContent,
 }: {
   website: TenantWebsite;
   page: PublishedPage;
+  afterContent?: React.ReactNode;
 }) {
   return (
     <div
@@ -44,6 +46,7 @@ export function TenantSite({
       </header>
       <main>
         <BlockRenderer blocks={page.blocks} />
+        {afterContent}
       </main>
       <footer className="border-t border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-600">
         Fiktive Demo-Website · keine echten Kunden- oder Kontaktdaten

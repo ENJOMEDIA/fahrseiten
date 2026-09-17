@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { demoWebsite, findDemoPage } from "@/modules/cms/demo-content";
 import { TenantSite } from "@/modules/cms/tenant-site";
+import { DemoContactForm } from "@/modules/contacts/contact-form";
 
 export default async function TenantDemoSubpage({
   params,
@@ -11,5 +12,11 @@ export default async function TenantDemoSubpage({
   const { slug = [] } = await params;
   const page = findDemoPage(slug.join("/"));
   if (!page) notFound();
-  return <TenantSite page={page} website={demoWebsite} />;
+  return (
+    <TenantSite
+      afterContent={page.slug === "kontakt" ? <DemoContactForm /> : null}
+      page={page}
+      website={demoWebsite}
+    />
+  );
 }
