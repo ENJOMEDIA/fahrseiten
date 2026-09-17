@@ -24,9 +24,15 @@ Ein Linux-Plesk-System ist das aktuelle erste Deploymentziel. Seine konkrete Nod
 
 Für ein Plesk-System kann mit `pnpm build:plesk` ein geprüftes Next.js-Standalone-Artefakt erstellt werden. Konfiguration, Migration, Healthcheck und Rollback beschreibt die [Plesk-Deployment-Anleitung](docs/deployment-plesk.md). Die Anleitung nimmt selbst keine Hosting-, DNS- oder SSL-Änderungen vor.
 
+Die konkrete Reihenfolge für netcup/Plesk von Datenbank und Artefakt über DNS und SSL bis zu Installer, SMTP, Scheduler und späteren Updates steht in der [Livegang-Checkliste](docs/go-live-plesk.md). Das erzeugte Artefakt enthält zusätzlich `GO-LIVE.md`, die SQL-Fallbackdatei und eine geheimnisfreie Variablenvorlage.
+
 Das vollständige SQL-Schema entsteht mit `pnpm db:schema:bundle` aus allen versionierten Migrationen. Nach dem Upload des Plesk-Artefakts führt `/setup` durch die einmalige Initialisierung der Datenbank, des ersten Plattform-Owners und der FahrSeiten-Stammdaten. `node install.mjs` bleibt als Shell-Alternative verfügbar.
 
 Gebuchte Fahrschulen erhalten keine eigene Anwendung und keine eigene Datenbank. Ein Plattform-Owner erzeugt unter `/admin/mandanten/neu` einen sieben Tage gültigen Einmal-Link. Darüber legt die Fahrschule ihre Stammdaten, Inhaber- und Zugangsdaten, gewünschte Domain sowie Primär- und Akzentfarbe fest. Der Assistent erzeugt den neuen Mandanten atomar in der gemeinsamen Datenbank; die Domain bleibt bis zur separaten DNS- und SSL-Prüfung im Status `pending`.
+
+Nach der Installation startet die FahrSeiten-Hauptseite im Wartungsmodus mit einer kleinen Produktvorschau. Der Plattform-Owner kann sie unter `/admin/einstellungen` freigeben. Auch jede neu angelegte Fahrschulwebsite startet mit einer farblich angepassten Vorschauseite; der `tenant_owner` steuert Text und Freigabe im Kundenbereich unter `/kunde/einstellungen`.
+
+Der Installations- und Onboardingprozess erfasst außerdem rechtliche Grundangaben und erzeugt getrennte Entwürfe für Impressum und Datenschutz. Plattform und Fahrschulen können diese Texte im jeweiligen Backend bearbeiten; eine Freischaltung aus dem Wartungsmodus setzt veröffentlichte Fassungen voraus. Optionale Cookie-Kategorien werden nur angezeigt, wenn tatsächlich ein entsprechender Dienst konfiguriert ist.
 
 ## Lokales Setup
 
@@ -81,6 +87,7 @@ pnpm build
 - [Ausführungsstatus](docs/execution-status.md): Zeitpunkte, Commits, Prüfungen und Fortsetzungspunkt.
 - [Offene Entscheidungen](docs/open-decisions.md): ungeklärte Punkte und Dokumentationsabweichungen.
 - [Architecture Decision Records](docs/decisions/README.md): Verfahren für technische Entscheidungen.
+- [netcup/Plesk-Livegang](docs/go-live-plesk.md): ausführbare Reihenfolge für Domain, SSL, Datenbank, Installer, SMTP und Updates.
 
 ## Arbeitsweise und Prüfung
 

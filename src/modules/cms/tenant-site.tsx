@@ -53,7 +53,17 @@ export function TenantSite({
         className="border-t px-6 py-10 text-center text-sm text-white"
         style={{ backgroundColor: "var(--tenant-accent)" }}
       >
-        © {new Date().getFullYear()} {website.name}
+        <p>
+          © {new Date().getFullYear()} {website.name}
+        </p>
+        <nav
+          aria-label="Rechtliches"
+          className="mt-3 flex justify-center gap-5"
+        >
+          <Link href="/impressum">Impressum</Link>
+          <Link href="/datenschutz">Datenschutz</Link>
+          <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
+        </nav>
       </footer>
     </div>
   );

@@ -53,6 +53,8 @@ export async function findTenantWebsite(
   return {
     tenantId,
     name: row.tenant.name,
+    maintenanceMode: row.site.maintenanceMode,
+    maintenanceMessage: row.site.maintenanceMessage,
     navigation: navigation.map(({ item, pageSlug }) => ({
       id: item.id,
       label: item.label,

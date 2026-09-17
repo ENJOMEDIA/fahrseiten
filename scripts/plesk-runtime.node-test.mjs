@@ -18,6 +18,10 @@ const validEnvironment = {
   APP_HOSTS: "app.fahrseiten.de",
   CRON_SECRET: "a-random-secret-with-32-characters",
   SMTP_MODE: "smtp",
+  SMTP_HOST: "mx.test.invalid",
+  SMTP_PORT: "465",
+  SMTP_USER: "noreply@fahrseiten.de",
+  SMTP_PASSWORD: "smtp-test-password",
   SMTP_FROM: "FahrSeiten <noreply@fahrseiten.de>",
 };
 
@@ -34,13 +38,24 @@ test("rejects local defaults and missing production settings", () => {
     DEMO_DATA_MODE: "fixture",
     CRON_SECRET: "replace-with-a-secret",
     SMTP_MODE: "catch",
+    SMTP_HOST: "localhost",
+    SMTP_PORT: "invalid",
+    SMTP_USER: "",
+    SMTP_PASSWORD: "",
     SMTP_FROM: "FahrSeiten <noreply@fahrseiten.local>",
   });
 
-  assert.ok(errors.length >= 6);
-  assert.ok(errors.some((error) => error.includes("HTTPS")));
-  assert.ok(errors.some((error) => error.includes("Platzhalter")));
-  assert.ok(errors.some((error) => error.includes("database")));
+  assert.deepEqual(errors, [
+    "APP_BASE_URL muss eine HTTPS-URL sein.",
+    "DATABASE_URL enthält einen erkennbaren Platzhalter.",
+    "DEMO_DATA_MODE muss im Plesk-Betrieb database sein.",
+    "CRON_SECRET muss ein zufälliger Wert mit mindestens 24 Zeichen sein.",
+    "SMTP_MODE muss im Plesk-Betrieb smtp sein.",
+    "SMTP_HOST muss ein realer SMTP-Host sein.",
+    "SMTP_PORT muss ein gültiger Port sein.",
+    "SMTP_USER und SMTP_PASSWORD müssen gesetzt sein.",
+    "SMTP_FROM muss eine reale, freigegebene Absenderadresse sein.",
+  ]);
 });
 
 test("creates password hashes compatible with application login", async () => {

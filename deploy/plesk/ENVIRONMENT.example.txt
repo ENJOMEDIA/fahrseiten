@@ -1,0 +1,27 @@
+# Vorlage für die geschützten Plesk-Umgebungsvariablen.
+# Platzhalter ersetzen und Werte ausschließlich im Plesk-Panel speichern.
+# Diese Datei niemals mit echten Zugangsdaten befüllen.
+
+NODE_ENV=production
+APP_BASE_URL=https://fahrseiten.de
+DATABASE_URL=mysql://<DB-BENUTZER>:<URL-KODIERTES-DB-PASSWORT>@<INTERNER-MYSQL-HOST>:3306/<DB-NAME>
+DEMO_DATA_MODE=database
+MARKETING_HOSTS=fahrseiten.de,www.fahrseiten.de
+APP_HOSTS=app.fahrseiten.de
+DEMO_HOSTS=
+TRUST_PROXY_HEADERS=false
+
+SMTP_MODE=smtp
+SMTP_HOST=<SMTP-HOST-AUS-DEM-NETCUP-WCP>
+SMTP_PORT=<465-ODER-587-LAUT-WCP>
+SMTP_SECURE=<true-bei-465-oder-false-bei-STARTTLS>
+SMTP_USER=<VOLLSTAENDIGE-ABSENDERADRESSE>
+SMTP_PASSWORD=<SMTP-PASSWORT>
+SMTP_FROM=FahrSeiten <noreply@fahrseiten.de>
+
+CRON_SECRET=<MINDESTENS-32-ZUFAELLIGE-ZEICHEN>
+INSTALL_TOKEN=<MINDESTENS-32-ANDERE-ZUFAELLIGE-ZEICHEN>
+
+CONSENT_FUNCTIONAL_SERVICES=
+CONSENT_STATISTICS_SERVICES=
+CONSENT_MARKETING_SERVICES=

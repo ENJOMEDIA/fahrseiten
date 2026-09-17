@@ -2,8 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function keepNecessaryConsent(page: import("@playwright/test").Page) {
   const button = page.getByRole("button", { name: "Nur notwendige" });
-  await expect(button).toBeVisible();
-  await button.click();
+  if (await button.isVisible()) await button.click();
 }
 
 test("renders the local marketing foundation", async ({ page }) => {
@@ -16,7 +15,7 @@ test("renders the local marketing foundation", async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByRole("complementary", { name: "Einwilligungseinstellungen" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await keepNecessaryConsent(page);
   await page.goto("/cookie-einstellungen");
   await expect(

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ConsentManager } from "@/modules/consent/consent-manager";
+import { getOptionalServiceConfig } from "@/modules/consent/config";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function RootLayout({
     <html lang="de" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         {children}
-        <ConsentManager />
+        <ConsentManager optionalServices={getOptionalServiceConfig()} />
       </body>
     </html>
   );

@@ -6,8 +6,14 @@ import { migrate } from "drizzle-orm/mysql2/migrator";
 
 import { env } from "@/config/env";
 import { db } from "@/db/client";
-import { auditLogs, platformSettings, users } from "@/db/schema";
+import {
+  auditLogs,
+  legalDocuments,
+  platformSettings,
+  users,
+} from "@/db/schema";
 import { hashPassword } from "@/modules/auth/password";
+import { createLegalDrafts } from "@/modules/legal/documents";
 
 import { SetupInputError } from "./error";
 import { platformSetupSchema } from "./schemas";
@@ -49,6 +55,11 @@ export async function completePlatformSetup(input: unknown) {
 
   const ownerId = randomUUID();
   const passwordHash = await hashPassword(parsed.password);
+  const legalDrafts = createLegalDrafts({
+    ...parsed,
+    ownerName: parsed.ownerName,
+    email: parsed.email,
+  });
   await db.transaction(async (tx) => {
     await tx.insert(users).values({
       id: ownerId,
@@ -69,8 +80,30 @@ export async function completePlatformSetup(input: unknown) {
       city: parsed.city,
       primaryColor: parsed.primaryColor,
       accentColor: parsed.accentColor,
+      maintenanceMode: true,
+      maintenanceMessage: parsed.maintenanceMessage,
       setupCompletedAt: new Date(),
     });
+    await tx.insert(legalDocuments).values([
+      {
+        id: randomUUID(),
+        scope: "platform",
+        documentType: "imprint",
+        version: 1,
+        status: "draft",
+        content: legalDrafts.imprint,
+        createdByUserId: ownerId,
+      },
+      {
+        id: randomUUID(),
+        scope: "platform",
+        documentType: "privacy",
+        version: 1,
+        status: "draft",
+        content: legalDrafts.privacy,
+        createdByUserId: ownerId,
+      },
+    ]);
     await tx.insert(auditLogs).values({
       id: randomUUID(),
       actorUserId: ownerId,

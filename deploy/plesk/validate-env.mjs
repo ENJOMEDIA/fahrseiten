@@ -71,6 +71,23 @@ export function validateProductionEnvironment(source = process.env) {
     errors.push("SMTP_MODE muss im Plesk-Betrieb smtp sein.");
   }
 
+  if (
+    !source.SMTP_HOST ||
+    ["localhost", "127.0.0.1"].includes(source.SMTP_HOST.toLowerCase()) ||
+    hasPlaceholder(source.SMTP_HOST)
+  ) {
+    errors.push("SMTP_HOST muss ein realer SMTP-Host sein.");
+  }
+
+  const smtpPort = Number(source.SMTP_PORT);
+  if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65_535) {
+    errors.push("SMTP_PORT muss ein gültiger Port sein.");
+  }
+
+  if (!source.SMTP_USER || !source.SMTP_PASSWORD) {
+    errors.push("SMTP_USER und SMTP_PASSWORD müssen gesetzt sein.");
+  }
+
   if (!source.SMTP_FROM || source.SMTP_FROM.includes(".local")) {
     errors.push(
       "SMTP_FROM muss eine reale, freigegebene Absenderadresse sein.",

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { publicationWarnings, validateLegalPublication } from "./documents";
+import {
+  createLegalDrafts,
+  publicationWarnings,
+  validateLegalPublication,
+} from "./documents";
 
 describe("legal document publication", () => {
   it("warns before an incomplete tenant imprint is published", () => {
@@ -15,5 +19,20 @@ describe("legal document publication", () => {
           ),
       }),
     ).toThrow(/Pflichtbereich/);
+  });
+
+  it("creates editable legal drafts from onboarding data", () => {
+    const drafts = createLegalDrafts({
+      companyName: "Fahrschule Beispiel",
+      ownerName: "Erika Beispiel",
+      email: "kontakt@example.invalid",
+      street: "Beispielweg 1",
+      postalCode: "12345",
+      city: "Berlin",
+      hostingProvider: "Beispiel Hosting GmbH",
+    });
+    expect(drafts.imprint).toContain("Fahrschule Beispiel");
+    expect(drafts.imprint).toContain("[nicht angegeben – rechtlich prüfen]");
+    expect(drafts.privacy).toContain("Beispiel Hosting GmbH");
   });
 });

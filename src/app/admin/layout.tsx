@@ -23,6 +23,12 @@ export default async function PlatformLayout({
     )
       ? [{ href: "/admin/support", label: "Support" }]
       : []),
+    ...(hasPlatformPermission(identity.platformRole, "platform.security.manage")
+      ? [
+          { href: "/admin/rechtliches", label: "Rechtliches" },
+          { href: "/admin/einstellungen", label: "Einstellungen" },
+        ]
+      : []),
   ];
   return (
     <AppShell

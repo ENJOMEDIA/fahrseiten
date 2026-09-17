@@ -90,6 +90,12 @@ export const platformSettings = mysqlTable("platform_settings", {
   city: varchar("city", { length: 120 }).notNull(),
   primaryColor: varchar("primary_color", { length: 7 }).notNull(),
   accentColor: varchar("accent_color", { length: 7 }).notNull(),
+  maintenanceMode: boolean("maintenance_mode").default(true).notNull(),
+  maintenanceMessage: varchar("maintenance_message", { length: 500 })
+    .default(
+      "Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen.",
+    )
+    .notNull(),
   setupCompletedAt: timestamp("setup_completed_at", {
     mode: "date",
     fsp: 3,
@@ -235,6 +241,12 @@ export const sites = mysqlTable(
     locale: varchar("locale", { length: 10 }).default("de-DE").notNull(),
     timezone: varchar("timezone", { length: 64 })
       .default("Europe/Berlin")
+      .notNull(),
+    maintenanceMode: boolean("maintenance_mode").default(true).notNull(),
+    maintenanceMessage: varchar("maintenance_message", { length: 500 })
+      .default(
+        "Unsere neue Website entsteht gerade. Bald findest du hier alle wichtigen Informationen rund um unsere Fahrschule.",
+      )
       .notNull(),
     ...timestamps,
   },

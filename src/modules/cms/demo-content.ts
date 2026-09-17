@@ -4,6 +4,8 @@ import type { PublishedPage, TenantWebsite } from "./types";
 export const demoWebsite: TenantWebsite = {
   tenantId: "10000000-0000-4000-8000-000000000001",
   name: "Fahrschule Morgenrot",
+  maintenanceMode: false,
+  maintenanceMessage: "Fiktive Vorschau",
   navigation: [
     { id: "nav-home", label: "Start", href: "/demo", position: 0 },
     {

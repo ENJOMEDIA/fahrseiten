@@ -1,41 +1,57 @@
 import { CustomerPage } from "@/components/customer/customer-page";
-import { Card, StatusBadge as Badge } from "@/components/ui/card";
+import { getSessionIdentity } from "@/modules/auth/session";
 import { LegalEditor } from "@/modules/legal/legal-editor";
-export default function LegalPage() {
+import { findLatestTenantLegalDocuments } from "@/modules/legal/repository";
+import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
+import { saveLegalAction } from "./actions";
+
+export default async function LegalPage() {
+  const identity = await getSessionIdentity();
+  const membership = identity?.memberships[0];
+  const documents =
+    identity && membership
+      ? await findLatestTenantLegalDocuments(
+          createMembershipTenantContext({
+            requestedTenantId: membership.tenantId,
+            userId: identity.id,
+            activeTenantIds: identity.memberships.map((item) => item.tenantId),
+          }),
+        )
+      : [];
+  const latest = (type: "imprint" | "privacy") =>
+    documents.find((document) => document.documentType === type);
+
   return (
     <CustomerPage
       title="Rechtliches & Consent"
-      description="Mandanteneigene Rechtstexte und technische Einwilligungen werden hier gepflegt."
+      description="Vorbereitete Pflichttexte prüfen, vervollständigen und kontrolliert veröffentlichen."
     >
-      <div className="grid gap-5 md:grid-cols-2">
-        <Card>
-          <div className="flex justify-between gap-3">
-            <h2 className="font-semibold">Impressum</h2>
-            <Badge>Prüfung offen</Badge>
-          </div>
-          <p className="mt-3 text-slate-600">
-            Keine produktiven Unternehmens- oder Personendaten hinterlegt.
-          </p>
-          <button className="mt-5 rounded-xl border px-4 py-2 font-semibold">
-            Entwurf bearbeiten
-          </button>
-        </Card>
-        <Card>
-          <div className="flex justify-between gap-3">
-            <h2 className="font-semibold">Datenschutz & Consent</h2>
-            <Badge>Phase 17</Badge>
-          </div>
-          <p className="mt-3 text-slate-600">
-            Technische Kategorien sind vorbereitet; optionale Dienste bleiben
-            bis zur Einwilligung blockiert.
-          </p>
-          <button className="mt-5 rounded-xl border px-4 py-2 font-semibold">
-            Einstellungen öffnen
-          </button>
-        </Card>
-      </div>
-      <div className="mt-6">
-        <LegalEditor />
+      <p className="mb-6 max-w-3xl rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm leading-6">
+        Die beim Onboarding erzeugten Texte sind technische Entwürfe. Prüfe sie
+        anhand der tatsächlichen Rechtsform, Dienste, Verträge und Fristen und
+        hole bei Bedarf rechtlichen Rat ein.
+      </p>
+      <div className="grid gap-6">
+        {(["imprint", "privacy"] as const).map((type) => {
+          const document = latest(type);
+          return document ? (
+            <LegalEditor
+              content={document.content}
+              action={saveLegalAction}
+              key={type}
+              status={document.status}
+              type={type}
+            />
+          ) : (
+            <p
+              className="rounded-2xl border border-amber-300 bg-amber-50 p-5"
+              key={type}
+            >
+              Für {type === "imprint" ? "das Impressum" : "den Datenschutz"}
+              fehlt ein Entwurf.
+            </p>
+          );
+        })}
       </div>
     </CustomerPage>
   );

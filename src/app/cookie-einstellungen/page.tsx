@@ -1,7 +1,9 @@
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { OpenConsentSettingsButton } from "@/modules/consent/consent-manager";
 import { OptionalContent } from "@/modules/consent/optional-content";
+import { getOptionalServiceConfig } from "@/modules/consent/config";
 export default function CookieSettingsPage() {
+  const optionalServiceConfig = getOptionalServiceConfig();
   return (
     <SimpleMarketingPage
       eyebrow="Datenschutz"
@@ -15,13 +17,24 @@ export default function CookieSettingsPage() {
         </p>
         <h2 className="mt-8 text-xl font-semibold">Optionale Dienste</h2>
         <p className="mt-3 text-slate-600">
-          Derzeit sind keine optionalen Analyse-, Karten- oder Marketingdienste
-          aktiv. Künftige Dienste müssen die technische Freigabe ihrer Kategorie
-          prüfen, bevor sie Daten übertragen oder externe Inhalte laden.
+          {optionalServiceConfig.length === 0
+            ? "Derzeit sind keine optionalen Analyse-, Karten- oder Marketingdienste aktiv. Deshalb wird auch keine unnötige Einwilligung abgefragt."
+            : "Die nachfolgend aufgeführten Dienste werden erst nach einer passenden Einwilligung geladen."}
         </p>
-        <div className="mt-8">
-          <OpenConsentSettingsButton />
-        </div>
+        {optionalServiceConfig.length > 0 ? (
+          <ul className="mt-5 list-disc pl-6">
+            {optionalServiceConfig.map((item) => (
+              <li key={item.category}>
+                <strong>{item.label}:</strong> {item.services}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {optionalServiceConfig.length > 0 ? (
+          <div className="mt-8">
+            <OpenConsentSettingsButton />
+          </div>
+        ) : null}
         <div className="mt-8">
           <OptionalContent
             category="functional"

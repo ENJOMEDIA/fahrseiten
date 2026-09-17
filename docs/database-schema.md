@@ -22,12 +22,12 @@ erDiagram
 
 - `tenants`: Fahrschulen mit stabilem UUID-Bezeichner, Slug und deaktivierbarem Status.
 - `users`: Plattformweite Identitäten; Plattformrolle und Tenant-Mitgliedschaften bleiben getrennt.
-- `platform_settings`: einmalige Anbieter-, Kontakt- und Designstammdaten der zentralen FahrSeiten-Plattform.
+- `platform_settings`: Anbieter-, Kontakt-, Design- und Wartungsstatus der zentralen FahrSeiten-Plattform.
 - `tenant_onboarding_tokens`: nur als Hash gespeicherte, ablaufende und einmal verwendbare Einrichtungslinks für neue Mandanten.
 - `sessions`, `password_reset_tokens`, `auth_rate_limits`: gehashte Authentifizierungstokens, Ablauf und vorbereitete persistente Drosselung.
 - `tenant_memberships`: aktive Rolle eines Benutzers innerhalb genau eines Mandanten.
 - `domains`: normalisierte, global eindeutige Hostnamen und Onboarding-/SSL-Status.
-- `sites`: mandantengebundene Website-Grundeinstellungen.
+- `sites`: mandantengebundene Website-Grundeinstellungen einschließlich Wartungsstatus und Vorschautext.
 - `plans`, `subscriptions`: vorbereitete Tarifzuordnung ohne Zahlungsabwicklung.
 - `feature_flags`, `plan_features`, `tenant_features`: zentrale Features, Planstandard und Mandanten-Override.
 - `audit_logs`: append-orientierte sicherheitsrelevante Ereignisse; mandantenübergreifende Plattformereignisse dürfen `tenant_id = NULL` verwenden.

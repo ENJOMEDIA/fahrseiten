@@ -45,6 +45,7 @@ Diese Funktionen sind geplante Erweiterungen und werden in Schritt 1 ausschließ
 - Erweitertes CRM und E-Mail-Automationen über die MVP-Benachrichtigungen hinaus.
 - Digitale Dokumente, Bewertungs- und Google-Business-Integrationen.
 - Externe API und Webhooks als nutzbares Produktangebot.
+- Selbst verwaltete Anzeigenkampagnen aus dem Instanzdashboard einschließlich Werbekonten, Budgets, Freigaben und Conversion-Messung.
 
 Die spätere Implementierung benötigt jeweils einen eigenen Auftrag und eine Spezifikation. Es gibt keine zugesagten Veröffentlichungstermine. Geplante Funktionen dürfen nicht durch aktive, funktionslose Bedienelemente als verfügbar erscheinen.
 

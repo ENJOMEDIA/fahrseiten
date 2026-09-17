@@ -12,6 +12,7 @@ import {
   parseConsentCookie,
   serializeConsent,
 } from "./model";
+import type { OptionalService } from "./config";
 
 const hiddenPrefixes = ["/admin", "/kunde", "/login", "/passwort-"];
 
@@ -32,7 +33,11 @@ function browserSubjectId() {
   return created;
 }
 
-export function ConsentManager() {
+export function ConsentManager({
+  optionalServices,
+}: {
+  optionalServices: OptionalService[];
+}) {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [choices, setChoices] = useState<ConsentChoices>({ ...necessaryOnly });
@@ -48,7 +53,11 @@ export function ConsentManager() {
     return () => window.removeEventListener("fahrseiten:open-consent", open);
   }, []);
 
-  if (hiddenPrefixes.some((prefix) => pathname.startsWith(prefix)) || !visible)
+  if (
+    optionalServices.length === 0 ||
+    hiddenPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
+    !visible
+  )
     return null;
 
   async function save(nextChoices: typeof choices, withdrawn = false) {
@@ -88,13 +97,7 @@ export function ConsentManager() {
         .
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        {(
-          [
-            ["functional", "Funktional"],
-            ["statistics", "Statistik"],
-            ["marketing", "Marketing"],
-          ] as const
-        ).map(([key, label]) => (
+        {optionalServices.map(({ category: key, label, services }) => (
           <label
             className="flex items-center gap-2 rounded-xl border p-3"
             key={key}
@@ -106,7 +109,10 @@ export function ConsentManager() {
               }
               type="checkbox"
             />
-            {label}
+            <span>
+              {label}
+              <span className="block text-xs text-slate-500">{services}</span>
+            </span>
           </label>
         ))}
       </div>
@@ -128,9 +134,15 @@ export function ConsentManager() {
           onClick={() =>
             void save({
               necessary: true,
-              functional: true,
-              statistics: true,
-              marketing: true,
+              functional: optionalServices.some(
+                (item) => item.category === "functional",
+              ),
+              statistics: optionalServices.some(
+                (item) => item.category === "statistics",
+              ),
+              marketing: optionalServices.some(
+                (item) => item.category === "marketing",
+              ),
             })
           }
         >

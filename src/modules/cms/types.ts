@@ -24,6 +24,8 @@ export type SiteNavigationItem = {
 export type TenantWebsite = {
   tenantId: string;
   name: string;
+  maintenanceMode: boolean;
+  maintenanceMessage: string;
   navigation: SiteNavigationItem[];
   theme: {
     primaryColor: string;

@@ -4,6 +4,41 @@ import { useState } from "react";
 
 import { Input } from "@/components/ui/field";
 
+function LegalSetupFields() {
+  return (
+    <fieldset className="grid gap-5 rounded-2xl border border-slate-200 p-5 sm:col-span-2 sm:grid-cols-2">
+      <legend className="px-2 font-semibold">Rechtliche Grundangaben</legend>
+      <p className="text-sm leading-6 text-slate-600 sm:col-span-2">
+        Daraus entstehen bearbeitbare Entwürfe für Impressum und Datenschutz.
+        Optionale Angaben müssen ergänzt werden, wenn sie zutreffen.
+      </p>
+      <Input label="Rechtsform (optional)" name="legalForm" />
+      <Input label="Registergericht (optional)" name="registerCourt" />
+      <Input label="Registernummer (optional)" name="registerNumber" />
+      <Input label="Umsatzsteuer-ID (optional)" name="vatId" />
+      <Input
+        label="Zuständige Aufsichtsbehörde (optional)"
+        name="supervisoryAuthority"
+      />
+      <Input
+        label="Redaktionell verantwortlich (optional)"
+        name="editorialResponsible"
+      />
+      <Input
+        label="Datenschutz-Kontakt (optional)"
+        name="privacyContactEmail"
+        type="email"
+      />
+      <Input
+        hint="Den tatsächlich eingesetzten Anbieter eintragen und vor Veröffentlichung prüfen."
+        label="Hosting-Anbieter"
+        name="hostingProvider"
+        required
+      />
+    </fieldset>
+  );
+}
+
 export function PlatformSetupForm() {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -99,6 +134,16 @@ export function PlatformSetupForm() {
         required
         type="color"
       />
+      <div className="sm:col-span-2">
+        <Input
+          defaultValue="Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen."
+          hint="Dieser Text erscheint, solange die Hauptseite im Wartungsmodus ist."
+          label="Text für die Vorschauseite"
+          name="maintenanceMessage"
+          required
+        />
+      </div>
+      <LegalSetupFields />
       <div className="sm:col-span-2">
         <button
           className="rounded-xl bg-cyan-600 px-5 py-3 font-semibold text-white disabled:opacity-60"
@@ -202,6 +247,16 @@ export function TenantOnboardingForm({ token }: { token: string }) {
         required
         type="color"
       />
+      <div className="sm:col-span-2">
+        <Input
+          defaultValue="Unsere neue Website entsteht gerade. Bald findest du hier alle wichtigen Informationen rund um unsere Fahrschule."
+          hint="Dieser Text erscheint auf der Kundendomain bis zur Freischaltung der Website."
+          label="Text für die Vorschauseite"
+          name="maintenanceMessage"
+          required
+        />
+      </div>
+      <LegalSetupFields />
       <div className="sm:col-span-2">
         <button
           className="rounded-xl bg-cyan-600 px-5 py-3 font-semibold text-white disabled:opacity-60"

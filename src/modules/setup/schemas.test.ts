@@ -16,6 +16,8 @@ describe("setup schemas", () => {
       city: "Berlin",
       primaryColor: "#0891b2",
       accentColor: "#0f172a",
+      maintenanceMessage: "Unsere neue Plattform entsteht gerade.",
+      hostingProvider: "Beispiel Hosting GmbH",
     });
     expect(result.email).toBe("owner@fahrseiten.de");
   });

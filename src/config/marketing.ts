@@ -29,4 +29,5 @@ export const plannedMarketingFeatures = [
   "SMS und WhatsApp",
   "Online-Zahlungen",
   "Erweiterte Statistiken",
+  "Anzeigenkampagnen aus dem Kundenbereich",
 ] as const;

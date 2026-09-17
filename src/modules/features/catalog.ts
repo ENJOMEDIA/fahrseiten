@@ -28,6 +28,11 @@ export const featureCatalog = {
     title: "Statistiken",
     description: "Erweiterte Auswertungen und Berichte.",
   },
+  ad_campaigns: {
+    title: "Anzeigenkampagnen",
+    description:
+      "Werbekampagnen aus dem Kundenbereich vorbereiten und kontrolliert schalten.",
+  },
 } as const;
 export type FeatureKey = keyof typeof featureCatalog;
 export type FeatureStatus = "unavailable" | "coming_soon" | "beta" | "enabled";

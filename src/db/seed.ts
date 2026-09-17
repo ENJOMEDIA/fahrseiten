@@ -546,6 +546,12 @@ try {
           title: "Statistiken",
           defaultStatus: "coming_soon",
         },
+        {
+          id: "60000000-0000-4000-8000-000000000009",
+          key: "ad_campaigns",
+          title: "Anzeigenkampagnen",
+          defaultStatus: "coming_soon",
+        },
       ])
       .onDuplicateKeyUpdate({
         set: { description: "Lokale, vollständig fiktive Demo-Funktion" },

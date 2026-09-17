@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MaintenancePage } from "@/components/maintenance/maintenance-page";
 import {
   MarketingHero,
   MarketingShell,
@@ -7,7 +8,30 @@ import {
   availableMarketingFeatures,
   plannedMarketingFeatures,
 } from "@/config/marketing";
-export default function MarketingStartPage() {
+import { env } from "@/config/env";
+import { findPlatformSettings } from "@/modules/setup/platform-settings";
+
+export const dynamic = "force-dynamic";
+
+export default async function MarketingStartPage() {
+  const settings = await findPlatformSettings();
+  if (
+    settings?.maintenanceMode ||
+    (env.DEMO_DATA_MODE === "database" && !settings)
+  ) {
+    return (
+      <MaintenancePage
+        accentColor={settings?.accentColor ?? "#0f172a"}
+        brandName={settings?.brandName ?? "FahrSeiten – by ENJO MEDIA"}
+        message={
+          settings?.maintenanceMessage ??
+          "Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen."
+        }
+        primaryColor={settings?.primaryColor ?? "#0891b2"}
+        variant="platform"
+      />
+    );
+  }
   return (
     <MarketingShell>
       <main>

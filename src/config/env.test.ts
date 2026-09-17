@@ -19,6 +19,9 @@ describe("parseServerEnv", () => {
       SMTP_PORT: 1025,
       SMTP_SECURE: false,
       SMTP_FROM: "FahrSeiten Lokal <noreply@fahrseiten.local>",
+      CONSENT_FUNCTIONAL_SERVICES: "",
+      CONSENT_STATISTICS_SERVICES: "",
+      CONSENT_MARKETING_SERVICES: "",
     });
   });
 

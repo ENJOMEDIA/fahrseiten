@@ -51,6 +51,8 @@ Statuswerte werden anhand des tatsächlichen Standes gepflegt: Nicht begonnen, I
 
 Die im [Product Scope](product-scope.md) ausgeschlossenen Funktionen folgen erst nach erfolgreichem Pilotbetrieb und eigener Spezifikation mit Datenmodell, Rechten, Tests und kontrollierter Freigabe. Es werden keine Termine oder Prioritäten zugesagt.
 
+Hierzu gehören auch Anzeigenkampagnen aus dem Kunden-Dashboard. Vor einer Umsetzung müssen unterstützte Werbenetzwerke, Kontoverantwortung, Budget- und Freigabegrenzen, Abrechnung, Tracking/Consent, Zielgruppen, Rollen, Auditierung und rechtliche Verantwortlichkeiten spezifiziert werden. Der Feature-Schlüssel `ad_campaigns` ist lediglich als `coming_soon`-fähige Grundlage vorgesehen; es wird noch keine Kampagne an externe Plattformen übertragen.
+
 ## Manuelle Prüfung von Schritt 1
 
 1. README lesen und prüfen, dass Ziel-Setup und tatsächlicher Stand klar getrennt sind.

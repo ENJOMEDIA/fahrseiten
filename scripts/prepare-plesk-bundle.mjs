@@ -32,6 +32,16 @@ for (const file of [
   await cp(resolve(root, "deploy/plesk", file), resolve(output, file));
 }
 
+await cp(resolve(root, "docs/go-live-plesk.md"), resolve(output, "GO-LIVE.md"));
+await cp(
+  resolve(root, "docs/deployment-plesk.md"),
+  resolve(output, "DEPLOYMENT.md"),
+);
+await cp(
+  resolve(root, "deploy/plesk/ENVIRONMENT.example.txt"),
+  resolve(output, "ENVIRONMENT.example.txt"),
+);
+
 const packageJson = JSON.parse(
   await readFile(resolve(root, "package.json"), "utf8"),
 );
@@ -56,6 +66,7 @@ await writeFile(
       version: packageJson.version,
       node: packageJson.engines.node,
       createdAt: new Date().toISOString(),
+      sourceRevision: process.env.GITHUB_SHA ?? null,
       startupFile: "app.mjs",
     },
     null,

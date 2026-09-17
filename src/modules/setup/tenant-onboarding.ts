@@ -8,6 +8,7 @@ import {
   auditLogs,
   contactForms,
   domains,
+  legalDocuments,
   locations,
   navigationItems,
   pageBlocks,
@@ -23,6 +24,7 @@ import {
 import { hashPassword } from "@/modules/auth/password";
 import { createOpaqueToken, hashToken } from "@/modules/auth/tokens";
 import { normalizeHostname } from "@/modules/domains/hostname";
+import { createLegalDrafts } from "@/modules/legal/documents";
 
 import { SetupInputError } from "./error";
 import { tenantOnboardingSchema } from "./schemas";
@@ -111,6 +113,11 @@ export async function completeTenantOnboarding(input: unknown) {
     const pageId = randomUUID();
     const versionId = randomUUID();
     const passwordHash = await hashPassword(parsed.ownerPassword);
+    const legalDrafts = createLegalDrafts({
+      ...parsed,
+      ownerName: parsed.ownerName,
+      email: parsed.ownerEmail,
+    });
 
     await tx
       .insert(tenants)
@@ -124,9 +131,13 @@ export async function completeTenantOnboarding(input: unknown) {
     await tx
       .insert(tenantMemberships)
       .values({ tenantId, userId: ownerId, role: "tenant_owner" });
-    await tx
-      .insert(sites)
-      .values({ id: siteId, tenantId, name: `${parsed.companyName} Website` });
+    await tx.insert(sites).values({
+      id: siteId,
+      tenantId,
+      name: `${parsed.companyName} Website`,
+      maintenanceMode: true,
+      maintenanceMessage: parsed.maintenanceMessage,
+    });
     await tx.insert(themeSettings).values({
       tenantId,
       siteId,
@@ -157,6 +168,28 @@ export async function completeTenantOnboarding(input: unknown) {
       privacyTextVersion: "pending-legal-review",
       requiredFields: ["contactName", "email", "message"],
     });
+    await tx.insert(legalDocuments).values([
+      {
+        id: randomUUID(),
+        tenantId,
+        scope: "tenant",
+        documentType: "imprint",
+        version: 1,
+        status: "draft",
+        content: legalDrafts.imprint,
+        createdByUserId: ownerId,
+      },
+      {
+        id: randomUUID(),
+        tenantId,
+        scope: "tenant",
+        documentType: "privacy",
+        version: 1,
+        status: "draft",
+        content: legalDrafts.privacy,
+        createdByUserId: ownerId,
+      },
+    ]);
     await tx.insert(sitePages).values({
       id: pageId,
       tenantId,

@@ -11,9 +11,12 @@ Stand: 17. September 2026. Diese Anleitung bereitet FahrSeiten für ein Plesk-De
 - `migrate.mjs` wendet die versionierten Drizzle-Migrationen an.
 - `cron.mjs` ruft den geschützten Scheduler auf, ohne das Cron-Secret in die Kommandozeile zu schreiben.
 - `schema/fahrseiten-schema.sql` enthält das vollständige Schema für den optionalen Import in eine leere Datenbank.
+- `GO-LIVE.md`, `DEPLOYMENT.md` und `ENVIRONMENT.example.txt` geben dem hochgeladenen Release die Schrittfolge, technische Betriebsanleitung und eine geheimnisfreie Variablenvorlage mit.
 - `DEPLOYMENT.json` beschreibt Runtime und Startdatei des Artefakts.
 
 Das Artefakt enthält keine `.env`-Datei. Secrets werden ausschließlich als geschützte Plesk-Umgebungsvariablen hinterlegt.
+
+Die vollständige Bedienreihenfolge für den ersten netcup-Livegang steht in der [Livegang-Checkliste](go-live-plesk.md). Insbesondere wird `/setup` erst nach erfolgreicher DNS-Auflösung und funktionierendem HTTPS verwendet.
 
 ## Voraussetzungen in Plesk
 
@@ -65,25 +68,28 @@ Die Plesk-Startdatei muss direkt im Application Root liegen. Das entspricht der 
 
 Mindestens diese Variablen werden in Plesk hinterlegt:
 
-| Variable              | Vorgesehener Inhalt                                                         |
-| --------------------- | --------------------------------------------------------------------------- |
-| `NODE_ENV`            | `production`                                                                |
-| `APP_BASE_URL`        | `https://fahrseiten.de`                                                     |
-| `DATABASE_URL`        | MySQL-URL mit ausschließlich dort hinterlegten Zugangsdaten                 |
-| `DEMO_DATA_MODE`      | `database`                                                                  |
-| `MARKETING_HOSTS`     | `fahrseiten.de,www.fahrseiten.de`                                           |
-| `APP_HOSTS`           | `app.fahrseiten.de`                                                         |
-| `DEMO_HOSTS`          | Nur tatsächlich eingerichtete Testhosts oder ein bewusst leerer Wert        |
-| `TRUST_PROXY_HEADERS` | Zunächst `false`; nur nach dokumentierter Proxy-Prüfung auf `true` setzen   |
-| `SMTP_MODE`           | `smtp`                                                                      |
-| `SMTP_HOST`           | Host des freigegebenen SMTP-Anbieters                                       |
-| `SMTP_PORT`           | Port des freigegebenen SMTP-Anbieters                                       |
-| `SMTP_SECURE`         | `true` für implizites TLS, andernfalls `false` für STARTTLS                 |
-| `SMTP_USER`           | SMTP-Benutzer, falls benötigt                                               |
-| `SMTP_PASSWORD`       | SMTP-Passwort, falls benötigt                                               |
-| `SMTP_FROM`           | Freigegebener Absender, beispielsweise `FahrSeiten <noreply@fahrseiten.de>` |
-| `CRON_SECRET`         | Kryptografisch zufälliger Wert mit mindestens 24 Zeichen                    |
-| `INSTALL_TOKEN`       | Nur zur Erstinstallation: zufälliger Wert mit mindestens 32 Zeichen         |
+| Variable                      | Vorgesehener Inhalt                                                         |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| `NODE_ENV`                    | `production`                                                                |
+| `APP_BASE_URL`                | `https://fahrseiten.de`                                                     |
+| `DATABASE_URL`                | MySQL-URL mit ausschließlich dort hinterlegten Zugangsdaten                 |
+| `DEMO_DATA_MODE`              | `database`                                                                  |
+| `MARKETING_HOSTS`             | `fahrseiten.de,www.fahrseiten.de`                                           |
+| `APP_HOSTS`                   | `app.fahrseiten.de`                                                         |
+| `DEMO_HOSTS`                  | Nur tatsächlich eingerichtete Testhosts oder ein bewusst leerer Wert        |
+| `TRUST_PROXY_HEADERS`         | Zunächst `false`; nur nach dokumentierter Proxy-Prüfung auf `true` setzen   |
+| `SMTP_MODE`                   | `smtp`                                                                      |
+| `SMTP_HOST`                   | Host des freigegebenen SMTP-Anbieters                                       |
+| `SMTP_PORT`                   | Port des freigegebenen SMTP-Anbieters                                       |
+| `SMTP_SECURE`                 | `true` für implizites TLS, andernfalls `false` für STARTTLS                 |
+| `SMTP_USER`                   | SMTP-Benutzer, falls benötigt                                               |
+| `SMTP_PASSWORD`               | SMTP-Passwort, falls benötigt                                               |
+| `SMTP_FROM`                   | Freigegebener Absender, beispielsweise `FahrSeiten <noreply@fahrseiten.de>` |
+| `CRON_SECRET`                 | Kryptografisch zufälliger Wert mit mindestens 24 Zeichen                    |
+| `INSTALL_TOKEN`               | Nur zur Erstinstallation: zufälliger Wert mit mindestens 32 Zeichen         |
+| `CONSENT_FUNCTIONAL_SERVICES` | Namen tatsächlich aktiver funktionaler Dienste oder leer                    |
+| `CONSENT_STATISTICS_SERVICES` | Namen tatsächlich aktiver Statistikdienste oder leer                        |
+| `CONSENT_MARKETING_SERVICES`  | Namen tatsächlich aktiver Marketingdienste oder leer                        |
 
 `PORT` und gegebenenfalls `HOSTNAME` werden von Plesk beziehungsweise seiner Node.js-Laufzeit verwaltet. Sie dürfen nicht hart im Repository eingetragen werden. Die Startvalidierung nennt ausschließlich fehlerhafte Variablennamen oder Regeln und gibt keine Secret-Werte aus.
 
@@ -101,7 +107,9 @@ Nach dem ersten isolierten Stagingstart sind `Host` und `X-Forwarded-Host` mit e
 https://fahrseiten.de/setup
 ```
 
-Der Assistent fragt den Installationscode, die FahrSeiten-Anbieter- und Kontaktdaten, den ersten Plattform-Owner mit Passwort sowie Primär- und Akzentfarbe ab. Beim Absenden werden alle ausstehenden Migrationen angewendet. Anschließend werden der erste Plattform-Owner, die Plattformstammdaten und ein Audit-Eintrag angelegt. Ein bereits vorhandener Plattform-Owner verhindert eine zweite Installation.
+Der Assistent fragt den Installationscode, die FahrSeiten-Anbieter- und Kontaktdaten, den ersten Plattform-Owner mit Passwort, Primär- und Akzentfarbe, den Vorschautext sowie rechtliche Grundangaben ab. Beim Absenden werden alle ausstehenden Migrationen angewendet. Anschließend werden der erste Plattform-Owner, die Plattformstammdaten und ein Audit-Eintrag angelegt. Ein bereits vorhandener Plattform-Owner verhindert eine zweite Installation.
+
+Die öffentliche Hauptseite startet im Wartungsmodus. Auch wenn die Datenbank vor dem Setup noch nicht erreichbar ist, zeigt der Produktionsbetrieb bei `DEMO_DATA_MODE=database` auf `/` nur die neutrale FahrSeiten-Vorschau. Nach dem Login kann der Plattform-Owner Text und Freigabe unter `/admin/einstellungen` steuern. Der Installer, Login und die Administrationsrouten bleiben unabhängig davon erreichbar.
 
 Nach erfolgreichem Abschluss muss `INSTALL_TOKEN` sofort in Plesk entfernt und die Anwendung neu gestartet werden. Die Route bleibt erreichbar, kann ohne den serverseitigen Code aber keine Installation ausführen. Sie ist von Suchmaschinen ausgeschlossen und durch Same-Origin-Prüfung sowie Drosselung geschützt.
 
@@ -151,9 +159,10 @@ Neue Fahrschulen erhalten keine eigene FahrSeiten-Installation und keine eigene 
 
 1. Ein angemeldeter Plattform-Owner öffnet `/admin/mandanten/neu` und erzeugt einen Einmal-Link.
 2. Der Link ist sieben Tage gültig und wird nur bei seiner Erzeugung vollständig angezeigt. In der Datenbank liegt ausschließlich sein SHA-256-Hash.
-3. Die Fahrschule trägt Name, Inhaber beziehungsweise Ansprechpartner, Zugangsdaten, Adresse, Telefon, Wunschdomain sowie Primär- und Akzentfarbe ein.
+3. Die Fahrschule trägt Name, Inhaber beziehungsweise Ansprechpartner, Zugangsdaten, Adresse, Telefon, Wunschdomain, Primär- und Akzentfarbe sowie einen Vorschautext ein.
 4. Der Assistent legt in einer Transaktion Tenant, `tenant_owner`, Mitgliedschaft, Website, Theme, Hauptstandort, Kontaktformular, Startseite, Navigation und Audit-Eintrag an.
 5. Die Wunschdomain bleibt `pending`. DNS-Ziel, Inhabernachweis, Plesk-Alias und SSL müssen vor ihrer Aktivierung separat geprüft werden.
+6. Nach Aktivierung der Domain erscheint zunächst die farblich angepasste Wartungsseite. Der `tenant_owner` kann Text und Freigabe unter `/kunde/einstellungen` steuern.
 
 Tarifzuordnung, freigegebene Rechtstexte und weitere Designoptionen werden nicht stillschweigend vorbelegt. Diese Punkte bleiben bis zur fachlichen Entscheidung offen. Der Assistent ist ein kontrolliertes Onboarding durch die Plattformverwaltung und kein öffentliches Self-Service-Bestellsystem.
 

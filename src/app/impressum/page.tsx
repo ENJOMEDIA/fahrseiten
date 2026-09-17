@@ -1,17 +1,25 @@
 import { connection } from "next/server";
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { findPlatformSettings } from "@/modules/setup/platform-settings";
+import { findPublishedPlatformLegalDocument } from "@/modules/legal/repository";
 
 export default async function ImprintPage() {
   await connection();
-  const settings = await findPlatformSettings();
+  const [settings, document] = await Promise.all([
+    findPlatformSettings(),
+    findPublishedPlatformLegalDocument("imprint").catch(() => null),
+  ]);
   return (
     <SimpleMarketingPage
       eyebrow="Rechtliches"
       title="Impressum"
       text="Redaktioneller Platzhalter – vor Veröffentlichung rechtlich und inhaltlich zu vervollständigen."
     >
-      {settings ? (
+      {document ? (
+        <article className="rounded-3xl border bg-white p-8 leading-7 whitespace-pre-wrap text-slate-700">
+          {document.content}
+        </article>
+      ) : settings ? (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 leading-7">
           <p className="font-semibold">{settings.companyName}</p>
           <p>Vertreten durch {settings.ownerName}</p>
