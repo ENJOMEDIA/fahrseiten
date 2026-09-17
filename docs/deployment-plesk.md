@@ -4,7 +4,7 @@ Stand: 17. September 2026. Diese Anleitung bereitet FahrSeiten für ein Plesk-De
 
 ## Bereitstellungsmodell
 
-`pnpm build:plesk` erzeugt unter `dist/plesk` ein eigenständig lauffähiges Next.js-Standalone-Artefakt. Es enthält den von Next.js erzeugten Minimalserver, statische Dateien, öffentliche Assets, Drizzle-Migrationen sowie folgende Plesk-Einstiegspunkte:
+Plesk zieht den Branch `main` direkt aus GitHub in ein Quellverzeichnis. Die im Repository enthaltene zusätzliche Deployment-Aktion `bash deploy/plesk/deploy-from-git.sh` installiert die festgeschriebenen Abhängigkeiten und erzeugt unter `dist/plesk` einen eigenständig lauffähigen Next.js-Standalone-Build. Er enthält den von Next.js erzeugten Minimalserver, statische Dateien, öffentliche Assets, Drizzle-Migrationen sowie folgende Plesk-Einstiegspunkte:
 
 - `app.mjs` validiert die Produktionskonfiguration und startet danach den erzeugten Next.js-Server.
 - `install.mjs` migriert eine neue Plattformdatenbank und legt einmalig den ersten Plattform-Owner an.
@@ -14,53 +14,52 @@ Stand: 17. September 2026. Diese Anleitung bereitet FahrSeiten für ein Plesk-De
 - `GO-LIVE.md`, `DEPLOYMENT.md` und `ENVIRONMENT.example.txt` geben dem hochgeladenen Release die Schrittfolge, technische Betriebsanleitung und eine geheimnisfreie Variablenvorlage mit.
 - `DEPLOYMENT.json` beschreibt Runtime und Startdatei des Artefakts.
 
-Das Artefakt enthält keine `.env`-Datei. Allgemeine Betriebswerte und der erste Installationscode werden als geschützte Plesk-Umgebungsvariablen hinterlegt. Der Webinstaller speichert die geprüfte Datenbankverbindung in `FAHRSEITEN_CONFIG_FILE` außerhalb des Release-Verzeichnisses mit Dateimodus `0600`. Ohne expliziten Pfad verwendet die Produktion `$HOME/.fahrseiten/runtime.json`.
+Der Build enthält keine `.env`-Datei. Allgemeine Betriebswerte und der erste Installationscode werden als geschützte Plesk-Umgebungsvariablen hinterlegt. Der Webinstaller speichert die geprüfte Datenbankverbindung in `FAHRSEITEN_CONFIG_FILE` außerhalb des Git- und Application-Root mit Dateimodus `0600`. Ohne expliziten Pfad verwendet die Produktion `$HOME/.fahrseiten/runtime.json`.
 
 Die vollständige Bedienreihenfolge für den ersten netcup-Livegang steht in der [Livegang-Checkliste](go-live-plesk.md). Der Installer funktioniert auch vor der SSL-Ausstellung über HTTP. In diesem Fall werden Installationscode, Admin-Passwort und Stammdaten unverschlüsselt übertragen; dies ist nur die ausdrücklich gewählte Übergangslösung bis zur netcup-DNS- und SSL-Freigabe.
 
 ## Voraussetzungen in Plesk
 
-Vor einem Upload sind im Plesk-Panel oder beim Hostinganbieter diese Punkte zu prüfen:
+Vor dem ersten Deployment sind im Plesk-Panel oder beim Hostinganbieter diese Punkte zu prüfen:
 
 1. Plesk Node.js Toolkit ist aktiv und stellt **Node.js 22.x** bereit.
-2. Die Anwendung läuft auf Linux und erlaubt eine benutzerdefinierte Startdatei im Application Root.
-3. Eine unterstützte MySQL-/MariaDB-Datenbank samt eigenem Benutzer ist vorhanden.
-4. Shell-Zugriff oder eine gleichwertige Möglichkeit zum einmaligen Ausführen von `node migrate.mjs` ist vorhanden.
-5. Persistenter Speicher und Schreibrechte sind für spätere Uploads geklärt. Der lokale `.local-storage`-Adapter ist nicht als produktiver Speicher freigegeben.
-6. Plesk kann alle vorgesehenen Hosts auf dieselbe Node.js-Anwendung leiten und den ursprünglichen `Host`-Header erhalten.
+2. Die Plesk-Git-Erweiterung kann das GitHub-Repository und den Branch `main` abrufen sowie zusätzliche Deployment-Aktionen ausführen.
+3. Die Anwendung läuft auf Linux und erlaubt eine benutzerdefinierte Startdatei im Application Root.
+4. Eine unterstützte MySQL-/MariaDB-Datenbank samt eigenem Benutzer ist vorhanden.
+5. Shell-Zugriff oder eine gleichwertige Möglichkeit zum einmaligen Ausführen von `node migrate.mjs` ist vorhanden.
+6. Persistenter Speicher und Schreibrechte sind für spätere Uploads geklärt. Der lokale `.local-storage`-Adapter ist nicht als produktiver Speicher freigegeben.
+7. Plesk kann alle vorgesehenen Hosts auf dieselbe Node.js-Anwendung leiten und den ursprünglichen `Host`-Header erhalten.
 
 Fehlt Node.js 22, eine Startmöglichkeit oder der Host-Header bleibt nicht erhalten, darf das Deployment nicht fortgesetzt werden.
 
-## Artefakt erzeugen
+## Direkt aus GitHub bereitstellen
 
-Das Deployment-Artefakt muss auf Linux mit derselben CPU-Architektur wie das Plesk-System erzeugt werden. Ein auf macOS gebautes Standalone-Verzeichnis darf wegen möglicher nativer Abhängigkeiten nicht direkt auf den Linux-Server kopiert werden.
+1. In **Websites & Domains > Git > Add Repository** `https://github.com/ENJOMEDIA/fahrseiten.git` als Remote-Repository eintragen.
+2. Den Branch `main` und einen Quellpfad wie `fahrseiten-source` wählen.
+3. **Manual deployment** auswählen. Dadurch macht ein Push die Website nicht unkontrolliert live.
+4. Unter **Additional deployment actions** exakt diesen Befehl hinterlegen:
 
-Der manuell startbare GitHub-Actions-Workflow `Plesk-Artefakt` baut und prüft das Linux-Artefakt mit Node.js 22 und stellt es anschließend für 14 Tage als komprimiertes Workflow-Artefakt bereit. Er enthält keine Secrets und führt kein Deployment aus.
+   ```bash
+   bash deploy/plesk/deploy-from-git.sh
+   ```
 
-Alternativ kann das Artefakt aus einem sauberen Checkout direkt auf einem kompatiblen Linux-System mit Node.js 22 und pnpm 11 erzeugt werden:
+5. Zuerst **Pull Updates**, danach **Deploy from Repository** ausführen.
 
-```bash
-corepack enable
-corepack prepare pnpm@11.19.0 --activate
-pnpm install --frozen-lockfile
-pnpm test:plesk
-pnpm build:plesk
-pnpm verify:plesk
-```
+Das Skript sucht die von Plesk bereitgestellte Node.js-22-Laufzeit, verwendet die im Repository festgeschriebene pnpm-Version, installiert auch die für den Build benötigten Entwicklungsabhängigkeiten und führt `test:plesk`, `build:plesk` sowie `verify:plesk` aus. Bei einer falschen Node-Version oder einem Buildfehler bricht es ab. Der Build entsteht dadurch direkt auf dem Linux-Zielsystem und passt zu dessen Architektur.
 
-Nur der Inhalt von `dist/plesk` beziehungsweise des entpackten Linux-Artefakts wird als Application Root bereitgestellt. `node_modules` muss auf Plesk nicht erneut installiert werden, weil Next.js die benötigten Runtime-Abhängigkeiten in das Standalone-Artefakt aufnimmt.
+Der manuell startbare GitHub-Actions-Workflow `Plesk-Artefakt` bleibt als optionaler Prüf- und Downloadweg bestehen. Für das direkte Plesk-Git-Deployment ist er nicht erforderlich.
 
 ## Plesk-Einstellungen
 
 Für die Domain `fahrseiten.de` sind folgende Werte vorgesehen:
 
-| Plesk-Feld               | Wert                               |
-| ------------------------ | ---------------------------------- |
-| Node.js-Version          | `22.x`                             |
-| Application Mode         | `production`                       |
-| Application Root         | Verzeichnis mit dem Artefaktinhalt |
-| Document Root            | `<Application Root>/public`        |
-| Application Startup File | `app.mjs`                          |
+| Plesk-Feld               | Wert                                  |
+| ------------------------ | ------------------------------------- |
+| Node.js-Version          | `22.x`                                |
+| Application Mode         | `production`                          |
+| Application Root         | `fahrseiten-source/dist/plesk`        |
+| Document Root            | `fahrseiten-source/dist/plesk/public` |
+| Application Startup File | `app.mjs`                             |
 
 Die Plesk-Startdatei muss direkt im Application Root liegen. Das entspricht der Vorgabe des Plesk Node.js Toolkits. Plesk beziehungsweise der vorgeschaltete Webserver übernimmt TLS und Reverse Proxy; der Node-Prozess lauscht ausschließlich auf dem von Plesk gesetzten `PORT`.
 
@@ -192,18 +191,18 @@ node <Application Root>/cron.mjs
 
 Der Scheduled Task benötigt `APP_BASE_URL` und `CRON_SECRET` in seiner geschützten Laufzeitumgebung. Das Secret darf nicht als sichtbares Kommandozeilenargument oder in einer versionierten Datei stehen. Falls Plesk die Node-Anwendungsvariablen nicht an Scheduled Tasks weitergibt, muss vor Aktivierung ein vom Hostinganbieter empfohlener geschützter Mechanismus gewählt werden.
 
-## Release- und Rollbackablauf
+## Update- und Rollbackablauf
 
-Jedes Deployment erhält ein neues, unveränderliches Release-Verzeichnis. Das bisherige Release bleibt bis zur erfolgreichen Abnahme erhalten.
+Das Git-Deployment bleibt bewusst manuell. Ein Push nach GitHub ändert die laufende Website erst, wenn in Plesk **Pull Updates** und **Deploy from Repository** ausgeführt werden.
 
-1. Neues Artefakt in ein separates Release-Verzeichnis laden.
-2. Umgebungsvariablen und Dateirechte prüfen.
-3. Datenbankbackup erstellen und Migration ausführen.
-4. Plesk Application Root auf das neue Release umstellen oder den vorbereiteten atomaren Verzeichniswechsel ausführen.
-5. App neu starten und Health-/Readiness-Checks ausführen.
-6. Erst nach erfolgreicher Abnahme das vorherige Release nach der vereinbarten Frist entfernen.
+1. Vor dem Update ein konsistentes Datenbankbackup außerhalb des Document Root erstellen.
+2. Sicherstellen, dass der gewünschte Commit auf `main` liegt und seine GitHub-Prüfungen erfolgreich sind.
+3. In Plesk **Pull Updates** und anschließend **Deploy from Repository** ausführen. Das Deployment-Skript muss erfolgreich enden.
+4. Im Verzeichnis `fahrseiten-source/dist/plesk` `node migrate.mjs` ausführen.
+5. Bei einem Migrationsfehler sofort stoppen und die Anwendung nicht neu starten.
+6. Die Node.js-Anwendung neu starten und Health-/Readiness-Checks ausführen.
 
-Bei einem reinen Codefehler wird auf das vorherige Release zurückgeschaltet und die App neu gestartet. Enthält das Release eine nicht rückwärtskompatible Migration, reicht ein Code-Rollback nicht aus; dann ist nach dokumentierter Entscheidung das unmittelbar zuvor erstellte Datenbankbackup wiederherzustellen. Automatische destructive Down-Migrationen sind nicht vorgesehen.
+Die Datenbank und `$HOME/.fahrseiten/runtime.json` liegen außerhalb des Git- und Application-Root und werden beim Pull oder Build nicht überschrieben. Bei einem reinen Codefehler wird der fehlerhafte Commit ohne Force-Push mit `git revert` rückgängig gemacht, erneut gepullt und gebaut. Enthält das Update eine nicht rückwärtskompatible Migration, reicht ein Code-Rollback nicht aus; dann ist nach dokumentierter Entscheidung das unmittelbar zuvor erstellte Datenbankbackup wiederherzustellen. Automatische destructive Down-Migrationen sind nicht vorgesehen.
 
 ## Noch manuell zu entscheiden oder zu prüfen
 

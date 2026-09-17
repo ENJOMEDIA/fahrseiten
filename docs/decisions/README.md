@@ -9,7 +9,7 @@ Dieses Verzeichnis enthält die Architecture Decision Records (ADRs) des Projekt
 - [0003 – Authentifizierung und Sitzungen](0003-authentifizierung-und-sitzungen.md)
 - [0004 – Domain- und Hostauflösung](0004-domain-und-hostaufloesung.md)
 - [0005 – CMS-Versionen und lokale Demo](0005-cms-versionen-und-lokale-demo.md)
-- [0006 – Plesk-Bereitstellung als Standalone-Artefakt](0006-plesk-standalone-deployment.md)
+- [0006 – Plesk-Bereitstellung aus Git als Standalone-Build](0006-plesk-standalone-deployment.md)
 
 ## Zweck und Ablage
 
