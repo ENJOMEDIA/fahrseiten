@@ -99,3 +99,19 @@ test("creates a traceable local error report", async ({ page }) => {
   await page.getByRole("button", { name: "Fehlerbericht senden" }).click();
   await expect(page.getByText(/Referenz-ID: FS-/)).toBeVisible();
 });
+
+test("serves security headers and keyboard-accessible mobile navigation", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const response = await page.goto("/");
+  expect(response?.headers()["x-content-type-options"]).toBe("nosniff");
+  expect(response?.headers()["x-frame-options"]).toBe("DENY");
+  expect(response?.headers()["content-security-policy"]).toContain(
+    "frame-ancestors 'none'",
+  );
+  await keepNecessaryConsent(page);
+  await page.getByText("Menü", { exact: true }).click();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Funktionen" })).toBeFocused();
+});

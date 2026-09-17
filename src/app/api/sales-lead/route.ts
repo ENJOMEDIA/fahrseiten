@@ -5,8 +5,11 @@ import { AuthRateLimiter } from "@/modules/auth/rate-limit";
 import { dbSalesLeadRepository } from "@/modules/sales/db-repository";
 import { demoSalesLeadRepository } from "@/modules/sales/demo-repository";
 import { submitSalesLead } from "@/modules/sales/lead-service";
+import { isTrustedMutationRequest } from "@/modules/security/origin";
 const limiter = new AuthRateLimiter(5, 15 * 60_000, 15 * 60_000);
 export async function POST(request: Request) {
+  if (!isTrustedMutationRequest(request))
+    return new NextResponse(null, { status: 403 });
   const fingerprint = createHash("sha256")
     .update(request.headers.get("user-agent") ?? "unknown")
     .digest("hex");

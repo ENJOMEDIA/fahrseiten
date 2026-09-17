@@ -1,0 +1,37 @@
+# Release-Readiness
+
+Stand: 17. September 2026. Geprüfter Umfang: lokale Entwicklungsbasis der Schritte 1 bis 19. Dieser Bericht ist keine Produktionsfreigabe. Staging, netcup-Betrieb und Pilotkunde gehören ausdrücklich zu den nicht ausgeführten Schritten 20 und 21.
+
+## Ergebnis
+
+Für den lokal prüfbaren Umfang bestehen keine bekannten offenen kritischen Sicherheitsfehler. Build, statische Prüfungen, 73 Unit-/Integrationstests, 7 Chromium-E2E-Abläufe und die Produktionskompilierung müssen am Phasenende grün sein. Die Anwendung ist wegen der unten genannten Infrastruktur-, Rechts- und Betriebsnachweise noch nicht für einen Produktivstart freigegeben.
+
+| Prüfbereich                     | Status                   | Nachweis                                                                                                      | Offenes Risiko                                                            | Notwendige Maßnahme                                                                             |
+| ------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Authentifizierung und Session   | Bestanden, lokal         | Scrypt, gehashte Sessiontokens, `HttpOnly`, `SameSite=Lax`, `Secure` in Produktion, Rollenprüfungen und Tests | Persistente Mehrprozess-Drosselung und Plattform-2FA offen, mittel        | Vor Produktion zentralen Limiter und 2FA-Entscheidung umsetzen                                  |
+| Serverseitige Autorisierung     | Bestanden, lokal         | Admin-/Kundenlayouts, Permission-Matrix, serverseitige Featureprüfung                                         | Produktive Rollenabnahme mit Testdatenbank offen, mittel                  | Rollenmatrix im Staging je Rolle durchspielen                                                   |
+| Cross-Tenant-Isolation          | Bestanden, Code/Test     | Geprüfter Tenant-Kontext, tenantgebundene Repositories und Isolationstests                                    | Reale MySQL-Abnahme fehlt, mittel                                         | Migration/Seed und Negativtests gegen Staging-DB ausführen                                      |
+| CSRF und offene Weiterleitungen | Bestanden, Code/Test     | Same-Origin- und `Sec-Fetch-Site`-Prüfung an Browser-POST-Routen; Redirectziele sind fest codiert             | Reverse-Proxy-Hostverhalten offen, mittel                                 | Origin/Host hinter realer Proxy-Kette im Staging bestätigen                                     |
+| XSS und SQL-Injection           | Bestanden, Codeprüfung   | Kein `dangerouslySetInnerHTML`, React-Escaping, Zod-Eingaben, parametrisierte Drizzle-Abfragen                | CSP benötigt derzeit `unsafe-inline` für Next.js-Hydration/Styles, mittel | Nonce-basierte CSP vor Produktivfreigabe prüfen und möglichst einführen                         |
+| Upload-Sicherheit               | Bestanden, lokal         | Signatur-, MIME-, Größen-, Pfad- und Cross-Tenant-Tests                                                       | Virenscan und produktiver Storage offen, mittel                           | Storage- und Scanstrategie vor echten Uploads abnehmen                                          |
+| Rate-Limiting                   | Bestanden, Einzelprozess | Auth-, Kontakt-, Lead-, Consent- und Fehlerberichtsrouten gedrosselt                                          | In-Memory-Zähler gelten nicht pro Cluster, mittel                         | Zentralen/persistenten Limiter vor horizontalem Betrieb einführen                               |
+| Security-Header                 | Bestanden                | CSP, Frame-Schutz, Nosniff, Referrer-/Permissions-Policy, COOP; HSTS nur im Produktions-Build                 | Reales TLS nicht geprüft, mittel                                          | Header und HSTS erst auf Staging über HTTPS verifizieren                                        |
+| Secrets und Umgebungsvariablen  | Bestanden                | Zod-Schema, `.env*` ignoriert, nur `.env.example` versioniert, Secret-Scan ohne Treffer                       | Secret-Rotation und Hostingverwaltung offen, mittel                       | Produktive Secrets ausschließlich im Hosting verwalten und Rotation dokumentieren               |
+| Fehler und Logs                 | Bestanden                | Referenz-IDs, strukturierte Redaktionstests, keine Stacktraces in API-Antworten                               | Externer Monitoringbetrieb offen, niedrig bis mittel                      | Adapter, Alarmwege und Aufbewahrung vor Betrieb festlegen                                       |
+| Abhängigkeiten                  | Bestanden am Prüftag     | `pnpm audit --prod`: keine bekannten Schwachstellen                                                           | Befund altert, niedrig                                                    | Audit in CI beziehungsweise vor jedem Release wiederholen                                       |
+| Datenbankindizes                | Bestanden, Schema        | Tenant-, Status-, Ablauf-, Job- und Referenzabfragen besitzen gezielte Indizes                                | Keine produktiven Query-Pläne oder Lastwerte, mittel                      | Slow-Query-Analyse mit Stagingdaten durchführen                                                 |
+| Mobile und Barrierearmut        | Bestanden, lokal         | Responsive Layouts, mobile Navigation, semantische Labels, Live-Regionen, Fokus-/Tastatur-E2E                 | Formale WCAG-Konformitätsprüfung und Zielniveau offen, mittel             | Manuelle Screenreader-/Kontrastprüfung und verbindliches Ziel vor Freigabe                      |
+| Tests und Abdeckung             | Bestanden                | 73 Tests; Coverage: 82,85 % Statements, 64,64 % Branches, 85,98 % Funktionen, 83,98 % Zeilen                  | Schwächere Zweigabdeckung bei UI, Mail und Medien, niedrig bis mittel     | Risikobasierte Tests bei jeder Änderung ergänzen; keine Prozentoptimierung ohne fachlichen Wert |
+| Build und Zielruntime           | Bestanden mit Abweichung | Next.js-Produktions-Build erfolgreich                                                                         | Lokal Node 24.19 statt Ziel Node 22; netcup-Runtime unbestätigt, mittel   | CI auf Node 22 und Staging auf tatsächlicher Hostingruntime ausführen                           |
+
+## Bewusst nicht ausgeführt
+
+- Keine produktiven Zugangsdaten, DNS-, SSL-, Hosting- oder Deploymentänderungen.
+- Keine echte MySQL-/MariaDB-Migration, weil lokal keine Instanz verfügbar war.
+- Keine SMTP-Zustellung oder externe Monitoring-, Karten-, Analyse- oder Marketingdienste.
+- Kein Backup-/Restore-Test, Lasttest, netcup-Staging oder Pilotbetrieb.
+- Keine rechtliche Freigabe von Impressum, Datenschutz, Consent, Aufbewahrung oder Unterauftragnehmern.
+
+## Freigabekriterium für den nächsten Meilenstein
+
+Ein Stagingauftrag kann erst die offenen Hosting- und Datenbanknachweise erbringen. Eine Produktionsfreigabe erfordert zusätzlich geschlossene rechtliche Pflichtpunkte, getestete Backups/Wiederherstellung, reale Proxy-/TLS-/Domainprüfung, Monitoring und eine dokumentierte Abnahme ohne kritische Befunde.

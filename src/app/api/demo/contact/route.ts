@@ -6,9 +6,12 @@ import {
   demoNotificationPort,
 } from "@/modules/contacts/demo-adapters";
 import { submitInquiry } from "@/modules/contacts/service";
+import { isTrustedMutationRequest } from "@/modules/security/origin";
 
 const DEMO_TENANT_ID = "10000000-0000-4000-8000-000000000001";
 export async function POST(request: Request) {
+  if (!isTrustedMutationRequest(request))
+    return new NextResponse(null, { status: 403 });
   if (process.env.NODE_ENV === "production")
     return new NextResponse(null, { status: 404 });
   try {
