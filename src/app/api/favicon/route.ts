@@ -29,11 +29,17 @@ export async function GET(request: Request) {
         : context.kind === "marketing" || context.kind === "app"
           ? (await findPlatformSettings())?.faviconMediaId
           : null;
-    if (faviconId)
-      return NextResponse.redirect(
+    if (faviconId) {
+      const response = NextResponse.redirect(
         new URL(mediaPublicUrl(faviconId), request.url),
         307,
       );
+      response.headers.set(
+        "Cache-Control",
+        "private, no-store, max-age=0, must-revalidate",
+      );
+      return response;
+    }
   } catch {
     // Bei einer noch nicht migrierten Datenbank bleibt das neutrale Favicon erreichbar.
   }
@@ -41,7 +47,7 @@ export async function GET(request: Request) {
   return new NextResponse(fallback, {
     headers: {
       "Content-Type": "image/svg+xml; charset=utf-8",
-      "Cache-Control": "public, max-age=300",
+      "Cache-Control": "private, no-store, max-age=0, must-revalidate",
       "Content-Security-Policy": "default-src 'none'; sandbox",
       "X-Content-Type-Options": "nosniff",
     },

@@ -3,6 +3,7 @@ import {
   createStructuredLegalDocuments,
   createLegalDrafts,
   defaultLegalModules,
+  parseLegalProfileForm,
   publicationWarnings,
   validateLegalPublication,
 } from "./documents";
@@ -76,5 +77,45 @@ describe("legal document publication", () => {
     expect(documents.privacy).not.toContain("Online-Zahlungen");
     expect(publicationWarnings("imprint", documents.imprint)).toHaveLength(0);
     expect(publicationWarnings("privacy", documents.privacy)).toHaveLength(0);
+  });
+
+  it("reads the selected legal form and optional modules from the form", () => {
+    const form = new FormData();
+    const values = {
+      companyName: "Fahrschule Beispiel GmbH",
+      legalForm: "gmbh",
+      representativeName: "Erika Beispiel",
+      street: "Beispielweg 1",
+      postalCode: "12345",
+      city: "Berlin",
+      country: "Deutschland",
+      email: "kontakt@example.invalid",
+      phone: "030 123456",
+      registerType: "none",
+      registerCourt: "",
+      registerNumber: "",
+      vatId: "",
+      supervisoryAuthority: "",
+      editorialResponsible: "",
+      privacyContactEmail: "datenschutz@example.invalid",
+      dataProtectionOfficerEmail: "",
+      hostingProvider: "Beispiel Hosting GmbH",
+      inquiryRetentionMonths: "6",
+    };
+    for (const [key, value] of Object.entries(values)) form.set(key, value);
+    form.set("module_contactForm", "on");
+    form.set("module_maps", "on");
+    form.set("module_marketing", "on");
+
+    const profile = parseLegalProfileForm(form);
+
+    expect(profile.data.legalForm).toBe("gmbh");
+    expect(profile.modules).toMatchObject({
+      contactForm: true,
+      maps: true,
+      marketing: true,
+      analytics: false,
+      payments: false,
+    });
   });
 });

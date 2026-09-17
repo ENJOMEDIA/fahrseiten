@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useId, useMemo, useState } from "react";
 
 import type { LegalActionState } from "@/app/kunde/rechtliches/actions";
+import { useAutoSave } from "@/components/forms/auto-save";
 import type { LegalModuleSettings, LegalProfileData } from "@/db/schema";
 
 import { createStructuredLegalDocuments } from "./documents";
@@ -129,6 +130,7 @@ function Toggle({
 
 export function LegalBuilder({
   action: saveAction,
+  autoSave = false,
   profile,
   imprintStatus,
   privacyStatus,
@@ -138,12 +140,20 @@ export function LegalBuilder({
     state: LegalActionState,
     formData: FormData,
   ) => Promise<LegalActionState>;
+  autoSave?: boolean;
   profile: { data: LegalProfileData; modules: LegalModuleSettings };
   imprintStatus: "draft" | "published" | "archived";
   privacyStatus: "draft" | "published" | "archived";
   requiredModules?: Array<keyof LegalModuleSettings>;
 }) {
   const [state, action, pending] = useActionState(saveAction, initialState);
+  const autoSaveFormId = useId();
+  const autoSaveState = useAutoSave({
+    enabled: autoSave,
+    formId: autoSaveFormId,
+    pending,
+    result: state,
+  });
   const [registerType, setRegisterType] = useState(profile.data.registerType);
   const [regulated, setRegulated] = useState(profile.data.regulatedActivity);
   const [journalistic, setJournalistic] = useState(
@@ -162,7 +172,14 @@ export function LegalBuilder({
   );
 
   return (
-    <form action={action} className="space-y-7">
+    <form
+      action={action}
+      className="space-y-7"
+      id={autoSaveFormId}
+      onChange={autoSaveState.onChange}
+      onSubmit={autoSaveState.onSubmit}
+    >
+      {autoSaveState.indicator}
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 bg-slate-950 px-6 py-6 text-white sm:px-8">
           <p className="text-xs font-semibold tracking-[.18em] text-cyan-300 uppercase">
@@ -486,6 +503,7 @@ export function LegalBuilder({
           <div className="flex flex-wrap gap-3">
             <button
               className="rounded-full border border-slate-300 px-5 py-3 font-semibold"
+              data-auto-save-submit
               disabled={pending}
               name="intent"
               type="submit"

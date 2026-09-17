@@ -20,6 +20,7 @@ function harness(usages = 0) {
     async read() {
       return png;
     },
+    async delete() {},
   };
   const repository: MediaRepository = {
     async create(asset) {

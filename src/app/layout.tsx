@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   title: { default: "FahrSeiten – by ENJO MEDIA", template: "%s · FahrSeiten" },
   description: "Websites und digitale Werkzeuge für moderne Fahrschulen.",
   icons: {
-    icon: [{ url: "/api/favicon", type: "image/svg+xml" }],
-    shortcut: "/api/favicon",
+    icon: [{ url: "/api/favicon?v=2", sizes: "any" }],
+    shortcut: "/api/favicon?v=2",
   },
   openGraph: {
     title: "FahrSeiten – by ENJO MEDIA",

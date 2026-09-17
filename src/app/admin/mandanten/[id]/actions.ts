@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { requirePlatformPermission } from "@/modules/platform/access";
 import {
@@ -8,8 +9,38 @@ import {
   updateTenantDomain,
 } from "@/modules/platform/domain-operations";
 import { assignTenantPlan } from "@/modules/platform/plans";
+import { deletePlatformTenant } from "@/modules/platform/tenant-directory";
 
 export type DomainActionState = { message: string; error: boolean };
+export type TenantDeleteActionState = { message: string; error: boolean };
+
+export async function deleteTenantAction(
+  _state: TenantDeleteActionState,
+  formData: FormData,
+): Promise<TenantDeleteActionState> {
+  const identity = await requirePlatformPermission("platform.tenants.manage");
+  let result: Awaited<ReturnType<typeof deletePlatformTenant>>;
+  try {
+    result = await deletePlatformTenant({
+      tenantId: String(formData.get("tenantId") ?? ""),
+      confirmation: String(formData.get("confirmation") ?? ""),
+      actorUserId: identity.id,
+    });
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Der Mandant konnte nicht gelöscht werden.",
+      error: true,
+    };
+  }
+  revalidatePath("/admin/mandanten");
+  const query = new URLSearchParams({ deleted: result.deletedTenantName });
+  if (result.failedMediaFiles > 0)
+    query.set("mediaCleanup", String(result.failedMediaFiles));
+  redirect(`/admin/mandanten?${query.toString()}`);
+}
 
 export async function checkDomainAction(
   _state: DomainActionState,

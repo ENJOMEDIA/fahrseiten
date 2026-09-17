@@ -12,7 +12,7 @@ export function MigrationPanel({
 }: {
   action: (state: MigrationActionState) => Promise<MigrationActionState>;
   status: {
-    status: "ready" | "error" | "unknown";
+    status: "ready" | "pending" | "error" | "unknown";
     checkedAt: string | null;
     detail: string;
   };
@@ -47,7 +47,9 @@ export function MigrationPanel({
               ? "Schema aktuell"
               : status.status === "error"
                 ? "Prüfung erforderlich"
-                : "Noch nicht geprüft"}
+                : status.status === "pending"
+                  ? "Migration verfügbar"
+                  : "Noch nicht geprüft"}
           </span>
         </div>
       </div>

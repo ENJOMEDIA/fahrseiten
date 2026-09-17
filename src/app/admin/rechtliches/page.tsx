@@ -24,6 +24,7 @@ export default async function PlatformLegalPage() {
       {profile ? (
         <LegalBuilder
           action={savePlatformLegalAction}
+          autoSave
           imprintStatus={latest("imprint")?.status ?? "draft"}
           privacyStatus={latest("privacy")?.status ?? "draft"}
           profile={profile}

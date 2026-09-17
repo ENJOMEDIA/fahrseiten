@@ -7,8 +7,16 @@ import { listPlatformTenants } from "@/modules/platform/tenant-directory";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
 
-export default async function TenantsPage() {
+export default async function TenantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    deleted?: string;
+    mediaCleanup?: string;
+  }>;
+}) {
   await requirePlatformPermission("platform.tenants.manage");
+  const notice = await searchParams;
   const tenantRows = await listPlatformTenants();
   const activeDomains = tenantRows.filter(
     (tenant) => tenant.domainStatus === "active",
@@ -25,6 +33,21 @@ export default async function TenantsPage() {
       title="Mandanten"
       description="Alle eingerichteten Fahrschulen, Zugänge und Freigabeschritte an einem Ort."
     >
+      {notice.deleted ? (
+        <div
+          className={`mb-6 rounded-2xl border p-4 text-sm font-semibold ${
+            notice.mediaCleanup
+              ? "border-amber-300 bg-amber-50 text-amber-950"
+              : "border-emerald-200 bg-emerald-50 text-emerald-950"
+          }`}
+        >
+          „{notice.deleted}“ wurde vollständig aus der Mandantenverwaltung
+          entfernt.
+          {notice.mediaCleanup
+            ? ` ${notice.mediaCleanup} Mediendatei(en) konnten nicht aus dem Dateispeicher entfernt werden und müssen technisch geprüft werden.`
+            : " Zugehörige Mediendateien wurden ebenfalls entfernt."}
+        </div>
+      ) : null}
       <div className="mb-6 overflow-hidden rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useId } from "react";
 
+import { useAutoSave } from "@/components/forms/auto-save";
 import type { FeatureKey } from "@/modules/features/catalog";
 
 import {
@@ -43,11 +44,22 @@ export function PlanForm({
   features: FeatureOption[];
 }) {
   const [state, action, pending] = useActionState(savePlanAction, initialState);
+  const autoSaveFormId = useId();
+  const autoSave = useAutoSave({
+    enabled: Boolean(plan?.id),
+    formId: autoSaveFormId,
+    pending,
+    result: state,
+  });
   return (
     <form
       action={action}
       className="surface-lift rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"
+      id={autoSaveFormId}
+      onChange={autoSave.onChange}
+      onSubmit={autoSave.onSubmit}
     >
+      {autoSave.indicator}
       {plan?.id ? <input name="id" type="hidden" value={plan.id} /> : null}
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -162,6 +174,7 @@ export function PlanForm({
       </fieldset>
       <button
         className="premium-button mt-6 disabled:opacity-50"
+        data-auto-save-submit
         disabled={pending}
         type="submit"
       >
@@ -191,11 +204,22 @@ export function AddonForm({
     saveAddonAction,
     initialState,
   );
+  const autoSaveFormId = useId();
+  const autoSave = useAutoSave({
+    enabled: feature.availability !== "planned",
+    formId: autoSaveFormId,
+    pending,
+    result: state,
+  });
   return (
     <form
       action={action}
       className="rounded-2xl border border-slate-200 bg-white p-4"
+      id={autoSaveFormId}
+      onChange={autoSave.onChange}
+      onSubmit={autoSave.onSubmit}
     >
+      {autoSave.indicator}
       <input name="featureKey" type="hidden" value={feature.key} />
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -227,6 +251,7 @@ export function AddonForm({
       </label>
       <button
         className="mt-3 text-sm font-semibold text-cyan-800 disabled:opacity-50"
+        data-auto-save-submit
         disabled={pending || feature.availability === "planned"}
         type="submit"
       >

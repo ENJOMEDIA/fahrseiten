@@ -1,26 +1,28 @@
 import "server-only";
 
-import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { chmod, mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { drizzle } from "drizzle-orm/mysql2";
 import { migrate } from "drizzle-orm/mysql2/migrator";
+import { readMigrationFiles } from "drizzle-orm/migrator";
 import mysql from "mysql2/promise";
-import { z } from "zod";
+import type { RowDataPacket } from "mysql2/promise";
 
 import { env } from "@/config/env";
 import { runtimeConfigPath } from "@/config/runtime-config";
+import { compareMigrationState } from "./migration-state";
 
-const migrationStatusSchema = z.object({
-  status: z.enum(["ready", "error"]),
-  checkedAt: z.iso.datetime(),
-  detail: z.string().max(2_000),
-});
-
-export type MigrationStatus = z.infer<typeof migrationStatusSchema>;
+export type MigrationStatus = {
+  status: "ready" | "pending" | "error";
+  checkedAt: string;
+  detail: string;
+};
 export type MigrationStatusView =
   | MigrationStatus
   | { status: "unknown" | "error"; checkedAt: null; detail: string };
+
+const migrationsFolder = path.join(process.cwd(), "drizzle");
 
 function statusPath() {
   return path.join(path.dirname(runtimeConfigPath()), "migration-status.json");
@@ -46,27 +48,58 @@ async function writeMigrationStatus(status: MigrationStatus) {
   await chmod(file, 0o600);
 }
 
-export async function readMigrationStatus(): Promise<MigrationStatusView> {
+function errorCode(error: unknown) {
+  return error && typeof error === "object" && "code" in error
+    ? String(error.code)
+    : null;
+}
+
+async function inspectMigrationStatus(
+  connection: mysql.Connection,
+): Promise<MigrationStatus> {
+  const checkedAt = new Date().toISOString();
+  const available = readMigrationFiles({ migrationsFolder });
   try {
-    return migrationStatusSchema.parse(
-      JSON.parse(await readFile(statusPath(), "utf8")),
+    const [rows] = await connection.query<
+      Array<RowDataPacket & { hash: string; created_at: string | number }>
+    >(
+      "SELECT `hash`, `created_at` FROM `__drizzle_migrations` ORDER BY `created_at` DESC LIMIT 1",
     );
+    const row = rows[0];
+    const compared = compareMigrationState(
+      available,
+      row
+        ? { hash: String(row.hash), createdAt: Number(row.created_at) }
+        : null,
+    );
+    return { ...compared, checkedAt };
   } catch (error) {
-    if (error && typeof error === "object" && "code" in error) {
-      const code = String(error.code);
-      if (code === "ENOENT") {
-        return {
-          status: "unknown",
-          checkedAt: null,
-          detail: "Noch kein automatischer Migrationslauf protokolliert.",
-        };
-      }
-    }
+    if (errorCode(error) === "ER_NO_SUCH_TABLE")
+      return {
+        status: "pending",
+        checkedAt,
+        detail: `${available.length} Datenbankmigrationen sind noch nicht angewendet.`,
+      };
+    throw error;
+  }
+}
+
+export async function readMigrationStatus(): Promise<MigrationStatusView> {
+  let connection: mysql.Connection | null = null;
+  try {
+    connection = await mysql.createConnection({
+      uri: env.DATABASE_URL,
+      connectTimeout: 10_000,
+    });
+    return await inspectMigrationStatus(connection);
+  } catch (error) {
     return {
       status: "error",
       checkedAt: null,
-      detail: "Der gespeicherte Migrationsstatus ist nicht lesbar.",
+      detail: safeError(error),
     };
+  } finally {
+    await connection?.end();
   }
 }
 
@@ -78,13 +111,9 @@ export async function runDatabaseMigrations(): Promise<MigrationStatus> {
       connectTimeout: 10_000,
     });
     await migrate(drizzle({ client: connection }), {
-      migrationsFolder: path.join(process.cwd(), "drizzle"),
+      migrationsFolder,
     });
-    const status: MigrationStatus = {
-      status: "ready",
-      checkedAt: new Date().toISOString(),
-      detail: "Alle verfügbaren Datenbankmigrationen wurden angewendet.",
-    };
+    const status = await inspectMigrationStatus(connection);
     await writeMigrationStatus(status);
     return status;
   } catch (error) {

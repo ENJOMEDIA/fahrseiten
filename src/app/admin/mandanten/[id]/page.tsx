@@ -8,6 +8,7 @@ import { getDnsTarget } from "@/modules/platform/domain-operations";
 import { listPlatformPlans } from "@/modules/platform/plans";
 
 import { DomainManagement, TenantPlanForm } from "./domain-management";
+import { TenantDeleteForm } from "./tenant-delete-form";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
 
@@ -264,6 +265,22 @@ export default async function TenantDetailPage({
             </p>
           </Card>
         </div>
+      </section>
+      <section className="mt-7 rounded-[2rem] border border-red-200 bg-red-50 p-6 sm:p-8">
+        <p className="text-xs font-semibold tracking-[.16em] text-red-700 uppercase">
+          Gefahrenbereich
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold text-red-950">
+          Mandant löschen
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-red-900/80">
+          Entfernt den Mandanten, seine Website, Domains, Inhalte,
+          Kontaktanfragen, Rechtstexte, Medienzuordnungen und nicht mehr
+          benötigte Kundenzugänge. Protokolle mit Aufbewahrungszweck verlieren
+          ihre Mandantenzuordnung. Dieser Vorgang kann nicht rückgängig gemacht
+          werden.
+        </p>
+        <TenantDeleteForm tenantId={tenant.id} tenantName={tenant.name} />
       </section>
     </CustomerPage>
   );

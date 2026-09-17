@@ -1,10 +1,13 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
+  auditLogs,
   domains,
   legalDocuments,
+  mediaAssets,
   sites,
   subscriptions,
   plans,
@@ -12,6 +15,7 @@ import {
   tenants,
   users,
 } from "@/db/schema";
+import { getMediaStorage } from "@/modules/media/runtime-storage";
 
 export async function listPlatformTenants() {
   return db
@@ -114,5 +118,69 @@ export async function findPlatformTenant(id: string) {
   return {
     ...tenant,
     publishedLegal: new Set(publishedLegal.map((row) => row.documentType)),
+  };
+}
+
+export async function deletePlatformTenant(input: {
+  tenantId: string;
+  confirmation: string;
+  actorUserId: string;
+}) {
+  const [tenant] = await db
+    .select({ id: tenants.id, name: tenants.name })
+    .from(tenants)
+    .where(eq(tenants.id, input.tenantId))
+    .limit(1);
+  if (!tenant) throw new Error("Der Mandant wurde nicht gefunden.");
+  if (input.confirmation.trim() !== tenant.name)
+    throw new Error(
+      "Der eingegebene Mandantenname stimmt nicht exakt überein.",
+    );
+
+  const storageKeys = await db.transaction(async (tx) => {
+    const assets = await tx
+      .select({ storageKey: mediaAssets.storageKey })
+      .from(mediaAssets)
+      .where(eq(mediaAssets.tenantId, tenant.id));
+    const memberships = await tx
+      .select({ userId: tenantMemberships.userId })
+      .from(tenantMemberships)
+      .where(eq(tenantMemberships.tenantId, tenant.id));
+
+    await tx.delete(tenants).where(eq(tenants.id, tenant.id));
+
+    for (const membership of memberships) {
+      const remainingMembership = await tx
+        .select({ userId: tenantMemberships.userId })
+        .from(tenantMemberships)
+        .where(eq(tenantMemberships.userId, membership.userId))
+        .limit(1);
+      const user = await tx
+        .select({ platformRole: users.platformRole })
+        .from(users)
+        .where(eq(users.id, membership.userId))
+        .limit(1);
+      if (!remainingMembership[0] && user[0]?.platformRole === null)
+        await tx.delete(users).where(eq(users.id, membership.userId));
+    }
+
+    await tx.insert(auditLogs).values({
+      id: randomUUID(),
+      actorUserId: input.actorUserId,
+      action: "tenant.deleted",
+      entityType: "tenant",
+      entityId: tenant.id,
+      metadata: { mediaFiles: assets.length },
+    });
+    return assets.map((asset) => asset.storageKey);
+  });
+
+  const cleanup = await Promise.allSettled(
+    storageKeys.map((key) => getMediaStorage().delete(key)),
+  );
+  return {
+    deletedTenantName: tenant.name,
+    failedMediaFiles: cleanup.filter((result) => result.status === "rejected")
+      .length,
   };
 }

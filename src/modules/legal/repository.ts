@@ -202,6 +202,7 @@ export async function savePlatformLegalProfile(
         data: profile.data,
         modules: profile.modules,
         updatedByUserId: actorUserId,
+        updatedAt: new Date(),
       },
     });
 }
@@ -225,6 +226,7 @@ export async function saveTenantLegalProfile(
         data: profile.data,
         modules: profile.modules,
         updatedByUserId: context.userId,
+        updatedAt: new Date(),
       },
     });
 }
