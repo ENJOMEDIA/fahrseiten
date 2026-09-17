@@ -6,15 +6,15 @@ Stand: 17. September 2026. Hier stehen nicht abschließend entschiedene Punkte a
 
 | ID | Befund | Aktuelle Behandlung | Klärungszeitpunkt |
 | --- | --- | --- | --- |
-| OD-01 | AGENTS.md verlangt selbstständige lokale Commits ohne Push; Masterprompt Abschnitt 14 und Freigabeprompt verlangen Freigabe vor Commit und danach Push | Der ausdrückliche Auftrag für Schritt 1 autorisiert den lokalen Commit und verbietet Push. Die Branch-Regel bleibt anwendbar: phase/01-produktspezifikation, kein eigenständiger Merge. Ältere Quelldokumente werden in diesem Auftrag nicht geändert | Vor späterer Vereinheitlichung der Arbeitsgrundlagen; für diesen Auftrag geklärt |
-| OD-02 | AGENTS.md verbietet pauschal .env-Dateien; Laufplan, Masterprompt und .gitignore sehen eine .env.example mit Platzhaltern vor | Noch keine Umgebungsdatei anlegen; die reine Platzhalter-Ausnahme muss ausdrücklich konsistent dokumentiert werden | Vor Anlegen der Datei in Schritt 2 |
+| OD-01 | AGENTS.md verlangt selbstständige lokale Commits ohne Push; Masterprompt Abschnitt 14 und Freigabeprompt verlangen Freigabe vor Commit und danach Push | Durch den aktuellen Auftrag geklärt: je Phase lokaler Commit, kein Push, kein Warten zwischen den Phasen. Die vorhandene Branchwahl bleibt bestehen; kein eigenständiger Merge | Am 17. September 2026 für die Schritte 1 bis 19 geklärt |
+| OD-02 | AGENTS.md verbietet pauschal .env-Dateien; Laufplan, Masterprompt und .gitignore sehen eine .env.example mit Platzhaltern vor | Durch den aktuellen Auftrag geklärt: `.env.example` ohne Secrets ist ausdrücklich gefordert und zulässig; echte `.env`-Dateien bleiben ausgeschlossen | Am 17. September 2026 für das Projekt geklärt |
 | OD-09 | Schritt 4 benötigt Reset-Nachrichten; Schritt 12 verlangt eine Benachrichtigung, obwohl die Job-/Notification-Grundlage erst Schritt 14 folgt. Schritt 11 nennt bereits sämtliche Kundenaufgaben, obwohl Anfragen und Consent später folgen | Abhängigkeiten sichtbar halten, keine vollständigen späteren Funktionen vorziehen und keine vorzeitige Abnahme behaupten. Frühe Schnittstellen/Testadapter und die Grenzen der jeweiligen Zwischenabnahme noch abstimmen | Vor Schritt 4, erneut vor Schritt 11/12 |
 
 ## Technische Entscheidungen
 
 | ID | Offene Entscheidung und benötigter Nachweis | Spätestens relevant |
 | --- | --- | --- |
-| OD-03 | Node.js-/Next.js-/React-/Tailwind-/Drizzle-Versionen, Paketmanager, Validierungsbibliothek, Projektstruktur, Testwerkzeuge und CI; aktuelle offizielle Dokumentation und gegenseitige Kompatibilität prüfen, Hostingziel berücksichtigen | Schritt 2, Drizzle vor Schritt 3 |
+| OD-03 | Node.js 22 ist durch den aktuellen Auftrag festgelegt. Next.js-/React-/Tailwind-/Drizzle-Versionen, Paketmanager, Validierungsbibliothek, Projektstruktur, Testwerkzeuge und CI werden anhand aktueller offizieller Dokumentation und gegenseitiger Kompatibilität entschieden | Schritt 2, Drizzle vor Schritt 3 |
 | OD-04 | MySQL oder MariaDB, Version, lokaler Betrieb, ID-Strategie, Schema/Indizes, Transaktionsgrenzen sowie Migrations- und Seedverfahren | Schritt 3 |
 | OD-05 | Authentifizierungsbibliothek, Session-/Cookie-Konzept, Hashing, Reset-/Einladungsablauf, Rate-Limit-Speicher; Zeitpunkt und Verfahren der Zwei-Faktor-Authentifizierung mindestens für Plattform-Admins | Schritt 4; 2FA-Zeitpunkt dort dokumentieren |
 | OD-06 | Vertrauenswürdige Proxy-/Host-Header, lokale Domainstrategie, Vorschauzugriff, Domain-Statusübergänge, DNS-Ziele, Verifikationsverfahren, SSL und Domainlimits beim tatsächlichen Hosting | Lokales Modell Schritt 5; Infrastrukturprüfung vor Staging |

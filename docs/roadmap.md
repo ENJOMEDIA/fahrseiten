@@ -13,7 +13,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 | Schritt | Meilenstein | Inhalt | Status | Abnahmeziel in Kurzform |
 | --- | --- | --- | --- | --- |
-| 1 | A | Repository prüfen und Produktspezifikation anlegen | Dokumentation erstellt; zur Nutzerprüfung | Produktgrenzen, Architektur, Rollen und offene Entscheidungen dokumentiert; keine Fachfunktionen |
+| 1 | A | Repository prüfen und Produktspezifikation anlegen | Abgeschlossen | Produktgrenzen, Architektur, Rollen und offene Entscheidungen dokumentiert; keine Fachfunktionen |
 | 2 | A | Technisches Grundgerüst | Nicht begonnen | Reproduzierbare Installation, Start, Build und Grundprüfungen |
 | 3 | A | Datenbank und Mandantenfundament | Nicht begonnen | Migration/Seed und Cross-Tenant-Isolation geprüft |
 | 4 | A | Authentifizierung und Rechte | Nicht begonnen | Sessions und Rollen gegen Manipulation geprüft |
@@ -37,9 +37,9 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 ## Aktueller Lieferumfang und nächster Schritt
 
-Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung. Die Nutzerabnahme wird nicht vorweggenommen.
+Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Nach Prüfung dieser Dokumentation ist Schritt 2 der nächste mögliche Auftrag. Er wird nicht automatisch begonnen. Vor der Anlage einer Umgebungsbeispieldatei ist OD-02 zu klären; konkrete Versionsentscheidungen benötigen aktuelle Kompatibilitätsnachweise und ADRs.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 2 folgt als Nächstes. Konkrete Versionsentscheidungen benötigen aktuelle Kompatibilitätsnachweise und ADRs.
 
 ## Abhängigkeiten und Fortschreibung
 
