@@ -2,28 +2,28 @@
 
 Stand: 17. September 2026. Diese Datei dokumentiert den autonomen lokalen Auftrag für die Schritte 1 bis 19. Zeitangaben verwenden Europe/Berlin. Schritt 20 und 21 sind ausdrücklich ausgeschlossen.
 
-| Phase | Status | Start | Abschluss | Commit | Prüfungen | Einschränkungen und Nacharbeiten |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 – Produktspezifikation | completed | 2026-09-17 | 2026-09-17 | `c67cf78` plus Status-Nachtrag | Vollständigkeit, Markdown, Links, Konsistenz, Git-Diff | Keine Produktfunktionen; Konflikte OD-01/OD-02 durch aktuellen Auftrag geklärt |
-| 2 – Technisches Grundgerüst | pending | – | – | – | – | Node.js 22 Ziel; lokale Codex-Prüfung mit Node 24 möglich |
-| 3 – Datenbank und Mandantenfundament | pending | – | – | – | – | – |
-| 4 – Authentifizierung und Rechte | pending | – | – | – | – | – |
-| 5 – Domain- und Tenant-Auflösung | pending | – | – | – | – | – |
-| 6 – Designsystem und Layouts | pending | – | – | – | – | – |
-| 7 – Seiten und Veröffentlichung | pending | – | – | – | – | – |
-| 8 – Fahrschulinhalte | pending | – | – | – | – | – |
-| 9 – Medienverwaltung | pending | – | – | – | – | – |
-| 10 – Block-Builder | pending | – | – | – | – | – |
-| 11 – Kunden-Backend | pending | – | – | – | – | – |
-| 12 – Kontaktformulare und Kunden-CRM | pending | – | – | – | – | – |
-| 13 – Plattform-Admin und Akquise | pending | – | – | – | – | – |
-| 14 – E-Mail und Jobs | pending | – | – | – | – | – |
-| 15 – Tarife und Feature-Flags | pending | – | – | – | – | – |
-| 16 – Vertriebswebsite | pending | – | – | – | – | – |
-| 17 – Datenschutz und Consent | pending | – | – | – | – | – |
-| 18 – Fehler, Support und Monitoring | pending | – | – | – | – | – |
-| 19 – Härtung und Release-Readiness | pending | – | – | – | – | – |
+| Phase                                | Status    | Start      | Abschluss  | Commit                                     | Prüfungen                                                                              | Einschränkungen und Nacharbeiten                                                      |
+| ------------------------------------ | --------- | ---------- | ---------- | ------------------------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 1 – Produktspezifikation             | completed | 2026-09-17 | 2026-09-17 | `c67cf78` plus Status-Nachtrag             | Vollständigkeit, Markdown, Links, Konsistenz, Git-Diff                                 | Keine Produktfunktionen; Konflikte OD-01/OD-02 durch aktuellen Auftrag geklärt        |
+| 2 – Technisches Grundgerüst          | completed | 2026-09-17 | 2026-09-17 | `feat: technisches Grundgerüst einrichten` | Formatierung, ESLint, TypeScript, 2 Unit-Tests, 1 Chromium-E2E-Test, Produktions-Build | Ziel Node 22; lokal zusätzlich mit Node 24 geprüft; reales netcup-Hosting unbestätigt |
+| 3 – Datenbank und Mandantenfundament | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 4 – Authentifizierung und Rechte     | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 5 – Domain- und Tenant-Auflösung     | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 6 – Designsystem und Layouts         | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 7 – Seiten und Veröffentlichung      | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 8 – Fahrschulinhalte                 | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 9 – Medienverwaltung                 | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 10 – Block-Builder                   | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 11 – Kunden-Backend                  | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 12 – Kontaktformulare und Kunden-CRM | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 13 – Plattform-Admin und Akquise     | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 14 – E-Mail und Jobs                 | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 15 – Tarife und Feature-Flags        | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 16 – Vertriebswebsite                | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 17 – Datenschutz und Consent         | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 18 – Fehler, Support und Monitoring  | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
+| 19 – Härtung und Release-Readiness   | pending   | –          | –          | –                                          | –                                                                                      | –                                                                                     |
 
 ## Fortsetzungspunkt
 
-Phase 1 ist abgeschlossen. Als Nächstes wird Phase 2 begonnen. Ein Phase gilt erst nach erfolgreichen, für ihren Umfang verfügbaren Prüfungen und eigenem Commit als abgeschlossen.
+Phase 2 ist abgeschlossen. Als Nächstes wird Phase 3 begonnen. Eine Phase gilt erst nach erfolgreichen, für ihren Umfang verfügbaren Prüfungen und eigenem Commit als abgeschlossen.

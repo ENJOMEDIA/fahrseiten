@@ -8,13 +8,13 @@ Stand: 17. September 2026. Schritt 1 dokumentiert Produktspezifikation und Archi
 
 ## Geplante Bereiche
 
-| Bereich | Aufgabe |
-| --- | --- |
-| `fahrseiten.de` | Vertriebs- und Produktwebsite |
-| `app.fahrseiten.de` | Kunden-Backend, Plattformverwaltung und internes Akquise-CRM |
-| Individuelle Kundendomains | Öffentliche Websites der jeweiligen Fahrschulen |
-| `demo.fahrseiten.de` | Öffentliche Demo mit vollständig fiktiven Inhalten |
-| Optionale Vorschau-Subdomains | Geschützte Entwürfe und Onboarding |
+| Bereich                       | Aufgabe                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| `fahrseiten.de`               | Vertriebs- und Produktwebsite                                |
+| `app.fahrseiten.de`           | Kunden-Backend, Plattformverwaltung und internes Akquise-CRM |
+| Individuelle Kundendomains    | Öffentliche Websites der jeweiligen Fahrschulen              |
+| `demo.fahrseiten.de`          | Öffentliche Demo mit vollständig fiktiven Inhalten           |
+| Optionale Vorschau-Subdomains | Geschützte Entwürfe und Onboarding                           |
 
 ## Technischer Zielrahmen
 
@@ -22,19 +22,33 @@ Geplant sind Next.js mit App Router, React, TypeScript Strict Mode, Tailwind CSS
 
 netcup Webhosting 8000 ist das erste Hostingziel. Seine Eignung für die konkrete Konfiguration ist noch zu prüfen; eine spätere VPS-Migration soll ohne Neuentwicklung der Fachlogik möglich sein.
 
-## Geplantes lokales Setup
+## Lokales Setup
 
-Die Entwicklung erfolgt auf dem Mac. Das spätere Setup soll einen reproduzierbaren Ablauf bieten:
+Voraussetzungen sind Node.js 22 und pnpm 11. Die Entwicklung erfolgt lokal auf dem Mac; Linux und Windows mit WSL sind durch Next.js grundsätzlich unterstützt, aber noch nicht projektspezifisch geprüft.
 
-1. Repository lokal auschecken und einen Branch für den beauftragten Laufplanschritt verwenden.
-2. Nach dokumentierter Versionsentscheidung Node.js und den noch auszuwählenden Paketmanager einrichten.
-3. Projektabhängigkeiten anhand einer versionierten Lockdatei installieren, sobald Schritt 2 diese bereitstellt.
-4. Lokale Konfiguration getrennt von Staging und Produktion bereitstellen; keine Zugangsdaten oder echten Kunden- und Personendaten ins Repository aufnehmen.
-5. Ab Schritt 3 eine lokale MySQL-/MariaDB-Datenbank mit Migrationen und ausschließlich fiktiven Seed-Daten verwenden.
-6. Testdomains für getrennte Marketing-, Verwaltungs- und Tenant-Kontexte sowie einen lokalen Mail-Catcher oder sicheren Testmodus einrichten, sobald die jeweiligen Phasen beauftragt sind.
-7. Anwendung starten und die vorgesehenen Skripte `dev`, `build`, `lint`, `typecheck` und `test` nutzen, sobald sie existieren.
+```bash
+corepack enable
+corepack prepare pnpm@11.19.0 --activate
+pnpm install --frozen-lockfile
+cp .env.example .env.local
+pnpm dev
+```
 
-Diese Schritte sind ein Zielablauf, noch keine ausführbare Installationsanleitung. Node.js 22 ist als Zielumgebung festgelegt. Weitere Versionen, Datenbankbetrieb und Testwerkzeuge werden in den zuständigen Phasen entschieden. Eine `.env.example` darf ausschließlich dokumentierte Platzhalter enthalten; lokale `.env`-Dateien und Secrets bleiben ausgeschlossen.
+Danach ist die Anwendung unter `http://localhost:3000` erreichbar. `.env.local` bleibt ignoriert und darf keine produktiven Zugangsdaten enthalten. Die vorhandene `.env.example` dokumentiert ausschließlich sichere Platzhalter.
+
+Die wichtigsten Prüfungen:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm exec playwright install chromium
+pnpm test:e2e
+pnpm build
+```
+
+`pnpm check` bündelt Formatierung, Linting, Typprüfung, Unit-Tests und Produktions-Build. Datenbank, Mail-Catcher und lokale Testdomains werden in den zuständigen Phasen ergänzt.
 
 ## Verbindliche Grundlagen und Dokumentation
 

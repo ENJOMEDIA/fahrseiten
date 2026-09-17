@@ -4,14 +4,14 @@ Stand: 17. September 2026. Geplanter Rollenrahmen aus dem [Masterprompt](FahrSei
 
 ## Rollenrahmen
 
-| Rolle | Geltungsbereich | Vorgesehene Befugnisse | Verbindliche Grenzen |
-| --- | --- | --- | --- |
-| `platform_owner` | Plattform | Vollständige Plattformverwaltung einschließlich Mandanten, Rollen, Tarifen, Features und Systemeinstellungen | Serverseitige Prüfung und Audit auch bei privilegierten Aktionen; keine unprotokollierte Kontoübernahme |
-| `platform_sales` | Plattform | Akquise, Leads, Angebote und Onboarding | Keine sicherheitskritischen Systemeinstellungen; Detailrechte für Kundenanlage, Einladungen und Tarifänderungen noch offen |
-| `platform_support` | Plattform | Support und Diagnose | Keine ungeprüften Tarif-, Eigentümer- oder Sicherheitsänderungen; Umfang und Freigabe von Kundendatenzugriffen noch offen |
-| `tenant_owner` | Eigener Mandant | Inhaber/Hauptadministrator; Verwaltung des eigenen Mandanten im freigeschalteten Produktumfang | Keine Plattformrechte und keine Rechte an fremden Mandanten; Eigentumsübertragung und destruktive Aktionen noch zu spezifizieren |
-| `tenant_editor` | Zugewiesener Mandant | Inhalte und definierte Geschäftsdaten bearbeiten | Keine impliziten Verwaltungsrechte; Veröffentlichung, Rechtstexte, Anfragen, Export und Benutzerverwaltung noch im Detail festzulegen |
-| `tenant_viewer` | Zugewiesener Mandant | Ausschließlich lesender Zugriff auf ausdrücklich freigegebene Bereiche | Keine Änderungen; Einsicht in personenbezogene Anfragen, Export und weitere Lesebereiche nicht pauschal freigegeben |
+| Rolle              | Geltungsbereich      | Vorgesehene Befugnisse                                                                                       | Verbindliche Grenzen                                                                                                                  |
+| ------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `platform_owner`   | Plattform            | Vollständige Plattformverwaltung einschließlich Mandanten, Rollen, Tarifen, Features und Systemeinstellungen | Serverseitige Prüfung und Audit auch bei privilegierten Aktionen; keine unprotokollierte Kontoübernahme                               |
+| `platform_sales`   | Plattform            | Akquise, Leads, Angebote und Onboarding                                                                      | Keine sicherheitskritischen Systemeinstellungen; Detailrechte für Kundenanlage, Einladungen und Tarifänderungen noch offen            |
+| `platform_support` | Plattform            | Support und Diagnose                                                                                         | Keine ungeprüften Tarif-, Eigentümer- oder Sicherheitsänderungen; Umfang und Freigabe von Kundendatenzugriffen noch offen             |
+| `tenant_owner`     | Eigener Mandant      | Inhaber/Hauptadministrator; Verwaltung des eigenen Mandanten im freigeschalteten Produktumfang               | Keine Plattformrechte und keine Rechte an fremden Mandanten; Eigentumsübertragung und destruktive Aktionen noch zu spezifizieren      |
+| `tenant_editor`    | Zugewiesener Mandant | Inhalte und definierte Geschäftsdaten bearbeiten                                                             | Keine impliziten Verwaltungsrechte; Veröffentlichung, Rechtstexte, Anfragen, Export und Benutzerverwaltung noch im Detail festzulegen |
+| `tenant_viewer`    | Zugewiesener Mandant | Ausschließlich lesender Zugriff auf ausdrücklich freigegebene Bereiche                                       | Keine Änderungen; Einsicht in personenbezogene Anfragen, Export und weitere Lesebereiche nicht pauschal freigegeben                   |
 
 ## Durchsetzung
 

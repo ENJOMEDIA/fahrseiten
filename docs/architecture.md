@@ -6,13 +6,13 @@ Stand: 17. September 2026. Dies ist die geplante Architektur für Schritt 1; es 
 
 Eine zentrale mandantenfähige Next.js-Anwendung mit App Router, React und TypeScript Strict Mode liefert alle Bereiche aus. Fachmodule trennen Verantwortlichkeiten innerhalb derselben Codebasis; das MVP erhält keine Microservice-Architektur. Tailwind CSS und ein eigenes Designsystem stellen gemeinsame Komponenten und Gestaltungsvorgaben bereit.
 
-| Bereich | Kontext und Grenze |
-| --- | --- |
-| Marketing | `fahrseiten.de`; öffentliche Produktinformationen und Akquiseanfragen für ENJO MEDIA |
-| Plattform-Admin | `app.fahrseiten.de`; Plattformrollen, Mandantenverwaltung und internes Akquise-CRM |
-| Kunden-Admin | `app.fahrseiten.de`; authentifizierter Benutzer mit geprüfter Mitgliedschaft im ausgewählten Mandanten |
+| Bereich                     | Kontext und Grenze                                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Marketing                   | `fahrseiten.de`; öffentliche Produktinformationen und Akquiseanfragen für ENJO MEDIA                         |
+| Plattform-Admin             | `app.fahrseiten.de`; Plattformrollen, Mandantenverwaltung und internes Akquise-CRM                           |
+| Kunden-Admin                | `app.fahrseiten.de`; authentifizierter Benutzer mit geprüfter Mitgliedschaft im ausgewählten Mandanten       |
 | Öffentliche Tenant-Websites | Zugeordnete Kundendomains und fiktive Demo; ausschließlich veröffentlichte Inhalte des aufgelösten Mandanten |
-| Vorschau | Optionale Subdomains; Entwurfszugriff nur mit geprüfter Vorschau-Berechtigung |
+| Vorschau                    | Optionale Subdomains; Entwurfszugriff nur mit geprüfter Vorschau-Berechtigung                                |
 
 Geplante Modulgrenzen sind Identität und Berechtigungen, Mandanten und Domains, Website/CMS, Fahrschulinhalte, Medien, Kundenanfragen, Plattform-Akquise, Tarife/Features, Benachrichtigungen/Jobs sowie Audit/Support/Consent. Transport und UI rufen serverseitige Services auf; diese verwenden eine Datenzugriffsschicht mit erzwungenem Tenant-Kontext. Konkrete Verzeichnisse, Pakete und Bibliotheken werden erst in den zuständigen Schritten festgelegt (OD-03).
 

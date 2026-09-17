@@ -11,35 +11,35 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 ## Phasenstatus
 
-| Schritt | Meilenstein | Inhalt | Status | Abnahmeziel in Kurzform |
-| --- | --- | --- | --- | --- |
-| 1 | A | Repository prüfen und Produktspezifikation anlegen | Abgeschlossen | Produktgrenzen, Architektur, Rollen und offene Entscheidungen dokumentiert; keine Fachfunktionen |
-| 2 | A | Technisches Grundgerüst | Nicht begonnen | Reproduzierbare Installation, Start, Build und Grundprüfungen |
-| 3 | A | Datenbank und Mandantenfundament | Nicht begonnen | Migration/Seed und Cross-Tenant-Isolation geprüft |
-| 4 | A | Authentifizierung und Rechte | Nicht begonnen | Sessions und Rollen gegen Manipulation geprüft |
-| 5 | A | Domain- und Tenant-Auflösung | Nicht begonnen | Testhosts laden ausschließlich den richtigen Mandanten |
-| 6 | A | Designsystem und Anwendungslayouts | Nicht begonnen | Gemeinsame barrierearme und mobile Grundlagen |
-| 7 | B | Seiten-, Block- und Veröffentlichungssystem | Nicht begonnen | Datengetriebene Demo, geschützte Entwürfe und Veröffentlichung |
-| 8 | B | Fahrschulspezifische Inhaltsmodule | Nicht begonnen | MVP-Inhalte validiert und mandantengebunden darstellbar |
-| 9 | B | Medienverwaltung | Nicht begonnen | Geprüfte Uploads und isolierter Medienzugriff |
-| 10 | B | Intuitiver Block-Builder | Nicht begonnen | Bearbeiten, Vorschau, Veröffentlichung und Wiederherstellung geprüft |
-| 11 | C | Kunden-Backend vollständig machen | Nicht begonnen | Kundenabläufe; Abnahmeabhängigkeiten OD-09 zuerst klären |
-| 12 | C | Kontaktformulare, Leads und einfaches Kunden-CRM | Nicht begonnen | Anfrage beim richtigen Mandanten mit Benachrichtigung; OD-09 |
-| 13 | C | Plattform-Admin und Akquise-CRM | Nicht begonnen | Akquise, Kundenanlage und Onboarding mit Rollenprüfung |
-| 14 | C | E-Mail, Benachrichtigungen und Hintergrundjobs | Nicht begonnen | Idempotenz, Retry und sicherer Testbetrieb nachgewiesen |
-| 15 | C | Tarife, Feature-Flags und kommende Funktionen | Nicht begonnen | Serverseitige Freigaben nach Tarif und Mandant |
-| 16 | C | FahrSeiten-Vertriebswebsite | Nicht begonnen | Navigierbar, ehrlich formuliert und an Akquise angebunden |
-| 17 | C | Datenschutz-, Consent- und Rechtsgrundlagen technisch umsetzen | Nicht begonnen | Optionale Dienste blockiert, getrennte Mandantentexte pflegbar |
-| 18 | D | Fehlerberichte, Monitoring und Support | Nicht begonnen | Nachvollziehbare Fehler ohne sensible Logdaten |
-| 19 | D | Sicherheit, Qualität und Barrierefreiheit härten | Nicht begonnen | Release-Readiness ohne kritische offene Punkte |
-| 20 | D | Netcup-Staging vorbereiten | Nicht begonnen | Dokumentierter und freigegebener Ablauf nur mit Testdaten |
-| 21 | D | Pilotkunde und Produktivstart | Nicht begonnen | Kontrollierter Pilot mit ausdrücklicher Produktionsfreigabe |
+| Schritt | Meilenstein | Inhalt                                                         | Status         | Abnahmeziel in Kurzform                                                                          |
+| ------- | ----------- | -------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
+| 1       | A           | Repository prüfen und Produktspezifikation anlegen             | Abgeschlossen  | Produktgrenzen, Architektur, Rollen und offene Entscheidungen dokumentiert; keine Fachfunktionen |
+| 2       | A           | Technisches Grundgerüst                                        | Abgeschlossen  | Reproduzierbare Installation, Start, Build und Grundprüfungen                                    |
+| 3       | A           | Datenbank und Mandantenfundament                               | Nicht begonnen | Migration/Seed und Cross-Tenant-Isolation geprüft                                                |
+| 4       | A           | Authentifizierung und Rechte                                   | Nicht begonnen | Sessions und Rollen gegen Manipulation geprüft                                                   |
+| 5       | A           | Domain- und Tenant-Auflösung                                   | Nicht begonnen | Testhosts laden ausschließlich den richtigen Mandanten                                           |
+| 6       | A           | Designsystem und Anwendungslayouts                             | Nicht begonnen | Gemeinsame barrierearme und mobile Grundlagen                                                    |
+| 7       | B           | Seiten-, Block- und Veröffentlichungssystem                    | Nicht begonnen | Datengetriebene Demo, geschützte Entwürfe und Veröffentlichung                                   |
+| 8       | B           | Fahrschulspezifische Inhaltsmodule                             | Nicht begonnen | MVP-Inhalte validiert und mandantengebunden darstellbar                                          |
+| 9       | B           | Medienverwaltung                                               | Nicht begonnen | Geprüfte Uploads und isolierter Medienzugriff                                                    |
+| 10      | B           | Intuitiver Block-Builder                                       | Nicht begonnen | Bearbeiten, Vorschau, Veröffentlichung und Wiederherstellung geprüft                             |
+| 11      | C           | Kunden-Backend vollständig machen                              | Nicht begonnen | Kundenabläufe; Abnahmeabhängigkeiten OD-09 zuerst klären                                         |
+| 12      | C           | Kontaktformulare, Leads und einfaches Kunden-CRM               | Nicht begonnen | Anfrage beim richtigen Mandanten mit Benachrichtigung; OD-09                                     |
+| 13      | C           | Plattform-Admin und Akquise-CRM                                | Nicht begonnen | Akquise, Kundenanlage und Onboarding mit Rollenprüfung                                           |
+| 14      | C           | E-Mail, Benachrichtigungen und Hintergrundjobs                 | Nicht begonnen | Idempotenz, Retry und sicherer Testbetrieb nachgewiesen                                          |
+| 15      | C           | Tarife, Feature-Flags und kommende Funktionen                  | Nicht begonnen | Serverseitige Freigaben nach Tarif und Mandant                                                   |
+| 16      | C           | FahrSeiten-Vertriebswebsite                                    | Nicht begonnen | Navigierbar, ehrlich formuliert und an Akquise angebunden                                        |
+| 17      | C           | Datenschutz-, Consent- und Rechtsgrundlagen technisch umsetzen | Nicht begonnen | Optionale Dienste blockiert, getrennte Mandantentexte pflegbar                                   |
+| 18      | D           | Fehlerberichte, Monitoring und Support                         | Nicht begonnen | Nachvollziehbare Fehler ohne sensible Logdaten                                                   |
+| 19      | D           | Sicherheit, Qualität und Barrierefreiheit härten               | Nicht begonnen | Release-Readiness ohne kritische offene Punkte                                                   |
+| 20      | D           | Netcup-Staging vorbereiten                                     | Nicht begonnen | Dokumentierter und freigegebener Ablauf nur mit Testdaten                                        |
+| 21      | D           | Pilotkunde und Produktivstart                                  | Nicht begonnen | Kontrollierter Pilot mit ausdrücklicher Produktionsfreigabe                                      |
 
 ## Aktueller Lieferumfang und nächster Schritt
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 2 folgt als Nächstes. Konkrete Versionsentscheidungen benötigen aktuelle Kompatibilitätsnachweise und ADRs.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 3 folgt als Nächstes. Die Projektbasis und Versionsentscheidung sind in ADR 0001 dokumentiert.
 
 ## Abhängigkeiten und Fortschreibung
 
