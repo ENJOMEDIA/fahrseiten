@@ -5,6 +5,11 @@ const serverEnvSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   APP_BASE_URL: z.url().default("http://localhost:3000"),
+  DATABASE_URL: z
+    .url()
+    .default(
+      "mysql://fahrseiten_local:local_only@127.0.0.1:3306/fahrseiten_local",
+    ),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

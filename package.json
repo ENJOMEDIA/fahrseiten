@@ -13,6 +13,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "db:generate": "drizzle-kit generate",
+    "db:check": "drizzle-kit check",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
@@ -21,6 +25,8 @@
     "node": "22.x"
   },
   "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "mysql2": "3.24.4",
     "next": "16.3.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -37,12 +43,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^5.0.1",
+    "drizzle-kit": "0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^5.0.1"
   },

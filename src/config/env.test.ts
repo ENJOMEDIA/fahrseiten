@@ -7,6 +7,8 @@ describe("parseServerEnv", () => {
     expect(parseServerEnv({})).toEqual({
       NODE_ENV: "development",
       APP_BASE_URL: "http://localhost:3000",
+      DATABASE_URL:
+        "mysql://fahrseiten_local:local_only@127.0.0.1:3306/fahrseiten_local",
     });
   });
 

@@ -15,7 +15,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 | ------- | ----------- | -------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
 | 1       | A           | Repository prüfen und Produktspezifikation anlegen             | Abgeschlossen  | Produktgrenzen, Architektur, Rollen und offene Entscheidungen dokumentiert; keine Fachfunktionen |
 | 2       | A           | Technisches Grundgerüst                                        | Abgeschlossen  | Reproduzierbare Installation, Start, Build und Grundprüfungen                                    |
-| 3       | A           | Datenbank und Mandantenfundament                               | Nicht begonnen | Migration/Seed und Cross-Tenant-Isolation geprüft                                                |
+| 3       | A           | Datenbank und Mandantenfundament                               | Abgeschlossen  | Migration/Seed und Cross-Tenant-Isolation geprüft                                                |
 | 4       | A           | Authentifizierung und Rechte                                   | Nicht begonnen | Sessions und Rollen gegen Manipulation geprüft                                                   |
 | 5       | A           | Domain- und Tenant-Auflösung                                   | Nicht begonnen | Testhosts laden ausschließlich den richtigen Mandanten                                           |
 | 6       | A           | Designsystem und Anwendungslayouts                             | Nicht begonnen | Gemeinsame barrierearme und mobile Grundlagen                                                    |
@@ -39,7 +39,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 3 folgt als Nächstes. Die Projektbasis und Versionsentscheidung sind in ADR 0001 dokumentiert.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 4 folgt als Nächstes. Datenbankschema und Migrationen sind in ADR 0002 dokumentiert.
 
 ## Abhängigkeiten und Fortschreibung
 
