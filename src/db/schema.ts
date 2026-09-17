@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   index,
+  int,
   json,
   mysqlEnum,
   mysqlTable,
@@ -73,6 +74,68 @@ export const users = mysqlTable(
     ...timestamps,
   },
   (table) => [uniqueIndex("users_email_unique").on(table.email)],
+);
+
+export const sessions = mysqlTable(
+  "sessions",
+  {
+    id: id("id").primaryKey(),
+    userId: id("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }).notNull(),
+    lastSeenAt: timestamp("last_seen_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("sessions_token_hash_unique").on(table.tokenHash),
+    index("sessions_user_idx").on(table.userId),
+    index("sessions_expiry_idx").on(table.expiresAt),
+  ],
+);
+
+export const passwordResetTokens = mysqlTable(
+  "password_reset_tokens",
+  {
+    id: id("id").primaryKey(),
+    userId: id("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }).notNull(),
+    usedAt: timestamp("used_at", { mode: "date", fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("password_reset_token_hash_unique").on(table.tokenHash),
+    index("password_reset_user_idx").on(table.userId),
+    index("password_reset_expiry_idx").on(table.expiresAt),
+  ],
+);
+
+export const authRateLimits = mysqlTable(
+  "auth_rate_limits",
+  {
+    keyHash: varchar("key_hash", { length: 64 }).primaryKey(),
+    action: varchar("action", { length: 40 }).notNull(),
+    attempts: int("attempts").default(0).notNull(),
+    windowStartedAt: timestamp("window_started_at", {
+      mode: "date",
+      fsp: 3,
+    }).notNull(),
+    blockedUntil: timestamp("blocked_until", { mode: "date", fsp: 3 }),
+    updatedAt: timestamp("updated_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index("auth_rate_limits_action_idx").on(table.action)],
 );
 
 export const tenantMemberships = mysqlTable(

@@ -22,6 +22,7 @@ erDiagram
 
 - `tenants`: Fahrschulen mit stabilem UUID-Bezeichner, Slug und deaktivierbarem Status.
 - `users`: Plattformweite Identitäten; Plattformrolle und Tenant-Mitgliedschaften bleiben getrennt.
+- `sessions`, `password_reset_tokens`, `auth_rate_limits`: gehashte Authentifizierungstokens, Ablauf und vorbereitete persistente Drosselung.
 - `tenant_memberships`: aktive Rolle eines Benutzers innerhalb genau eines Mandanten.
 - `domains`: normalisierte, global eindeutige Hostnamen und Onboarding-/SSL-Status.
 - `sites`: mandantengebundene Website-Grundeinstellungen.

@@ -38,4 +38,4 @@ Diese Liste ist ein Entscheidungsbedarf, keine zusätzliche Rechtevergabe. Die F
 
 Sicherheitsrelevante Aktionen, Rollenwechsel, Supportzugriffe, Veröffentlichungen und Feature-Freigaben benötigen nachvollziehbare Audit-Einträge ohne Secrets. Aufbewahrung und Einsicht in diese Protokolle bleiben festzulegen.
 
-Ab Schritt 4 werden erlaubte und verbotene Aktionen, Mehrfachmitgliedschaften, manipulierte Rollen-/Tenant-/Objekt-IDs sowie entzogene oder deaktivierte Zugriffe getestet. Cross-Tenant-Isolation ist auch bei privilegierten Plattformabläufen explizit zu prüfen. Es existieren in Schritt 1 noch keine ausführbaren Rechteprüfungen oder Tests.
+Seit Schritt 4 werden erlaubte und verbotene Rollenrechte, Mehrfachmitgliedschaften und manipulierte Tenant-/Objekt-IDs getestet. Die zentrale Berechtigungsmatrix liegt in `src/modules/auth/permissions.ts`. Cross-Tenant-Isolation ist auch bei privilegierten Plattformabläufen explizit zu prüfen. Noch nicht freigegebene Detailrechte gelten weiterhin als verweigert.

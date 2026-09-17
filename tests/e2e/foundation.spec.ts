@@ -9,3 +9,12 @@ test("renders the local marketing foundation", async ({ page }) => {
     page.getByRole("navigation", { name: "Lokale Bereiche" }),
   ).toBeVisible();
 });
+
+test("protects admin areas and exposes accessible login fields", async ({
+  page,
+}) => {
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByLabel("E-Mail-Adresse")).toBeVisible();
+  await expect(page.getByLabel("Passwort")).toHaveAttribute("type", "password");
+});

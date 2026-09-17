@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 
 import { parseServerEnv } from "@/config/env-schema";
+import { hashPassword } from "@/modules/auth/password";
 
 import {
   auditLogs,
@@ -34,6 +35,7 @@ const ids = {
 const env = parseServerEnv(process.env);
 const connection = await mysql.createConnection(env.DATABASE_URL);
 const db = drizzle({ client: connection });
+const demoPasswordHash = await hashPassword("Demo-FahrSeiten-2026!");
 
 try {
   await db.transaction(async (tx) => {
@@ -60,12 +62,14 @@ try {
           id: ids.platformOwner,
           email: "plattform@fahrseiten.local",
           displayName: "Lokale Plattformverwaltung",
+          passwordHash: demoPasswordHash,
           platformRole: "platform_owner",
         },
         {
           id: ids.tenantOwner,
           email: "inhaber@morgenrot.local",
           displayName: "Mara Beispiel",
+          passwordHash: demoPasswordHash,
         },
       ])
       .onDuplicateKeyUpdate({ set: { active: true } });
