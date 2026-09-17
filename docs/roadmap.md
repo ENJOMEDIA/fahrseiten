@@ -18,7 +18,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 | 3       | A           | Datenbank und Mandantenfundament                               | Abgeschlossen  | Migration/Seed und Cross-Tenant-Isolation geprüft                                                |
 | 4       | A           | Authentifizierung und Rechte                                   | Abgeschlossen  | Sessions und Rollen gegen Manipulation geprüft                                                   |
 | 5       | A           | Domain- und Tenant-Auflösung                                   | Abgeschlossen  | Testhosts laden ausschließlich den richtigen Mandanten                                           |
-| 6       | A           | Designsystem und Anwendungslayouts                             | Nicht begonnen | Gemeinsame barrierearme und mobile Grundlagen                                                    |
+| 6       | A           | Designsystem und Anwendungslayouts                             | Abgeschlossen  | Gemeinsame barrierearme und mobile Grundlagen                                                    |
 | 7       | B           | Seiten-, Block- und Veröffentlichungssystem                    | Nicht begonnen | Datengetriebene Demo, geschützte Entwürfe und Veröffentlichung                                   |
 | 8       | B           | Fahrschulspezifische Inhaltsmodule                             | Nicht begonnen | MVP-Inhalte validiert und mandantengebunden darstellbar                                          |
 | 9       | B           | Medienverwaltung                                               | Nicht begonnen | Geprüfte Uploads und isolierter Medienzugriff                                                    |
@@ -39,7 +39,7 @@ Stand: 17. September 2026. Diese Übersicht bildet den [verbindlichen Laufplan](
 
 Schritt 1 liefert README, Product Scope, Architekturgrundlage, Rollenrahmen, diese Roadmap, offene Entscheidungen, Ausführungsstatus und das ADR-Verfahren. Es gibt keine Produktfunktionen, Next.js-Einrichtung oder Betriebsänderung.
 
-Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 6 folgt als Nächstes. Domain- und Hostauflösung sind in ADR 0004 dokumentiert.
+Der autonome Gesamtauftrag vom 17. September 2026 gibt die Schritte 2 bis 19 frei. Schritt 7 folgt als Nächstes. Das Designsystem ist unter `/designsystem` prüfbar.
 
 ## Abhängigkeiten und Fortschreibung
 
