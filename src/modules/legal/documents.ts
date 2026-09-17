@@ -226,7 +226,7 @@ export function createStructuredLegalDocuments(input: {
   const { data, modules } = input;
   const address = `${data.street}\n${data.postalCode} ${data.city}\n${data.country}`;
   const imprintSections = [
-    `Impressum\n\nAngaben gemäß § 5 DDG und § 18 Abs. 1 MStV\n\nAnbieter\n${data.companyName}\nRechtsform: ${legalFormLabels[data.legalForm]}\n${address}`,
+    `Impressum\n\nAngaben gemäß § 5 DDG und § 18 Abs. 1 MStV\n\nAnbieter\n${data.companyName}\nRechtsform: ${legalFormLabels[data.legalForm]}\n\nAnschrift\n${address}`,
     `Vertretung\n${data.representativeName}`,
     `Kontakt\nE-Mail: ${data.email}${data.phone ? `\nTelefon: ${data.phone}` : ""}`,
   ];
@@ -247,7 +247,7 @@ export function createStructuredLegalDocuments(input: {
     );
 
   const privacySections = [
-    `Datenschutzerklärung\n\n1. Verantwortlicher\n${data.companyName}\n${address}\nE-Mail: ${data.privacyContactEmail}${data.phone ? `\nTelefon: ${data.phone}` : ""}`,
+    `Datenschutzerklärung\n\n1. Verantwortlicher\n${data.companyName}\n\nAnschrift\n${address}\nE-Mail: ${data.privacyContactEmail}${data.phone ? `\nTelefon: ${data.phone}` : ""}`,
   ];
   if (data.dataProtectionOfficerRequired) {
     privacySections.push(

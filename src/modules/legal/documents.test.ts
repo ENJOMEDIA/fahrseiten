@@ -69,9 +69,12 @@ describe("legal document publication", () => {
 
     expect(documents.imprint).toContain("HRB 12345");
     expect(documents.imprint).toContain("Beispielbehörde");
+    expect(documents.imprint).toContain("Anschrift\nBeispielweg 1");
+    expect(documents.privacy).toContain("Anschrift\nBeispielweg 1");
     expect(documents.privacy).toContain("Kartendienste");
     expect(documents.privacy).toContain("Reichweitenmessung");
     expect(documents.privacy).not.toContain("Online-Zahlungen");
+    expect(publicationWarnings("imprint", documents.imprint)).toHaveLength(0);
     expect(publicationWarnings("privacy", documents.privacy)).toHaveLength(0);
   });
 });
