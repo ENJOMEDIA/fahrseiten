@@ -1,41 +1,63 @@
-import { redirect } from "next/navigation";
-
-import { AppShell, Breadcrumbs } from "@/components/layout/app-shell";
+import Link from "next/link";
+import { Breadcrumbs } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
-import { logoutAction } from "@/modules/auth/actions";
+import { hasPlatformPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
-
-export default async function PlatformAdminPlaceholder() {
+export default async function PlatformDashboardPage() {
   const identity = await getSessionIdentity();
-  if (!identity?.platformRole) redirect("/login");
+  const role = identity?.platformRole ?? null;
   return (
-    <AppShell
-      eyebrow="Plattformverwaltung"
-      navigation={[
-        { href: "/admin", label: "Übersicht", current: true },
-        { href: "/admin/mandanten", label: "Mandanten" },
-        { href: "/admin/akquise", label: "Akquise" },
-        { href: "/admin/support", label: "Support" },
-      ]}
-      title={identity.displayName}
-    >
+    <>
       <Breadcrumbs items={[{ label: "Plattform" }, { label: "Übersicht" }]} />
-      <h1 className="mt-6 text-3xl font-semibold text-slate-950">
-        Plattform-Admin
-      </h1>
-      <Card className="mt-6">
-        <p className="text-slate-600">
-          Die Plattformfunktionen folgen in Phase 13.
-        </p>
-      </Card>
-      <form action={logoutAction} className="mt-8">
-        <button
-          className="rounded-xl border border-slate-300 bg-white px-4 py-2"
-          type="submit"
-        >
-          Abmelden
-        </button>
-      </form>
-    </AppShell>
+      <h1 className="mt-6 text-3xl font-semibold">Plattform-Admin</h1>
+      <p className="mt-3 text-slate-600">
+        Zentrale Verwaltung mit rollenabhängigen Bereichen und vollständiger
+        Audit-Grundlage.
+      </p>
+      <div className="mt-8 grid gap-5 md:grid-cols-3">
+        {hasPlatformPermission(role, "platform.tenants.manage") ? (
+          <Card>
+            <h2 className="font-semibold">Mandanten</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Kunden, Domains, Pläne, Features und Onboarding.
+            </p>
+            <Link
+              className="mt-4 inline-block font-semibold text-cyan-800"
+              href="/admin/mandanten"
+            >
+              Öffnen
+            </Link>
+          </Card>
+        ) : null}
+        {hasPlatformPermission(role, "platform.sales.manage") ? (
+          <Card>
+            <h2 className="font-semibold">Akquise</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Leads, Aktivitäten und Wiedervorlagen.
+            </p>
+            <Link
+              className="mt-4 inline-block font-semibold text-cyan-800"
+              href="/admin/akquise"
+            >
+              Öffnen
+            </Link>
+          </Card>
+        ) : null}
+        {hasPlatformPermission(role, "platform.support.diagnose") ? (
+          <Card>
+            <h2 className="font-semibold">Support</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Protokollierte Diagnose ohne Kontoübernahme.
+            </p>
+            <Link
+              className="mt-4 inline-block font-semibold text-cyan-800"
+              href="/admin/support"
+            >
+              Öffnen
+            </Link>
+          </Card>
+        ) : null}
+      </div>
+    </>
   );
 }

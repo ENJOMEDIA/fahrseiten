@@ -706,6 +706,130 @@ export const contactStatusHistory = mysqlTable(
   ],
 );
 
+export const leadStatusValues = [
+  "new",
+  "contacted",
+  "interested",
+  "demo",
+  "offer",
+  "won",
+  "lost",
+] as const;
+export const salesLeads = mysqlTable(
+  "sales_leads",
+  {
+    id: id("id").primaryKey(),
+    companyName: varchar("company_name", { length: 180 }).notNull(),
+    contactName: varchar("contact_name", { length: 160 }),
+    email: varchar("email", { length: 254 }),
+    phone: varchar("phone", { length: 40 }),
+    website: varchar("website", { length: 500 }),
+    source: varchar("source", { length: 100 }),
+    status: mysqlEnum("status", leadStatusValues).default("new").notNull(),
+    ownerUserId: id("owner_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    nextTaskAt: timestamp("next_task_at", { mode: "date", fsp: 3 }),
+    lossReason: text("loss_reason"),
+    convertedTenantId: id("converted_tenant_id").references(() => tenants.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index("sales_leads_status_task_idx").on(table.status, table.nextTaskAt),
+  ],
+);
+export const salesActivities = mysqlTable(
+  "sales_activities",
+  {
+    id: id("id").primaryKey(),
+    leadId: id("lead_id")
+      .notNull()
+      .references(() => salesLeads.id, { onDelete: "cascade" }),
+    actorUserId: id("actor_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    activityType: varchar("activity_type", { length: 80 }).notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("sales_activities_lead_idx").on(table.leadId, table.createdAt),
+  ],
+);
+export const platformTasks = mysqlTable(
+  "platform_tasks",
+  {
+    id: id("id").primaryKey(),
+    leadId: id("lead_id").references(() => salesLeads.id, {
+      onDelete: "cascade",
+    }),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    assignedUserId: id("assigned_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    title: varchar("title", { length: 180 }).notNull(),
+    dueAt: timestamp("due_at", { mode: "date", fsp: 3 }),
+    completedAt: timestamp("completed_at", { mode: "date", fsp: 3 }),
+    ...timestamps,
+  },
+  (table) => [
+    index("platform_tasks_assignee_due_idx").on(
+      table.assignedUserId,
+      table.dueAt,
+    ),
+  ],
+);
+export const onboardingItems = mysqlTable(
+  "onboarding_items",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    key: varchar("key", { length: 100 }).notNull(),
+    label: varchar("label", { length: 180 }).notNull(),
+    completedAt: timestamp("completed_at", { mode: "date", fsp: 3 }),
+    completedByUserId: id("completed_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("onboarding_items_tenant_key_unique").on(
+      table.tenantId,
+      table.key,
+    ),
+  ],
+);
+export const tenantInternalNotes = mysqlTable(
+  "tenant_internal_notes",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    authorUserId: id("author_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    note: text("note").notNull(),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("tenant_internal_notes_tenant_idx").on(
+      table.tenantId,
+      table.createdAt,
+    ),
+  ],
+);
+
 export const plans = mysqlTable(
   "plans",
   {

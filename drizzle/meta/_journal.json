@@ -43,6 +43,13 @@
       "when": 1789634549482,
       "tag": "0005_smart_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1789634897140,
+      "tag": "0006_little_freak",
+      "breakpoints": true
     }
   ]
 }
