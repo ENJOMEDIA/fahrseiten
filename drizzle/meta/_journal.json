@@ -15,6 +15,13 @@
       "when": 1789632222733,
       "tag": "0001_chief_alice",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1789633174051,
+      "tag": "0002_perpetual_winter_soldier",
+      "breakpoints": true
     }
   ]
 }

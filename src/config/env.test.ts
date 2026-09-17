@@ -13,6 +13,7 @@ describe("parseServerEnv", () => {
       MARKETING_HOSTS: "localhost,127.0.0.1,fahrseiten.de,www.fahrseiten.de",
       APP_HOSTS: "app.localhost,app.fahrseiten.de",
       DEMO_HOSTS: "demo.localhost,demo.fahrseiten.de,demo.fahrseiten.local",
+      DEMO_DATA_MODE: "fixture",
     });
   });
 

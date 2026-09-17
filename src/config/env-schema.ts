@@ -21,6 +21,7 @@ const serverEnvSchema = z.object({
   DEMO_HOSTS: z
     .string()
     .default("demo.localhost,demo.fahrseiten.de,demo.fahrseiten.local"),
+  DEMO_DATA_MODE: z.enum(["fixture", "database"]).default("fixture"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

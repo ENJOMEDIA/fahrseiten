@@ -8,13 +8,19 @@ import {
   auditLogs,
   domains,
   featureFlags,
+  navigationItems,
+  pageBlocks,
+  pageVersions,
   plans,
   planFeatures,
+  seoSettings,
+  sitePages,
   sites,
   subscriptions,
   tenantFeatures,
   tenantMemberships,
   tenants,
+  themeSettings,
   users,
 } from "./schema";
 
@@ -30,6 +36,12 @@ const ids = {
   builderFeature: "60000000-0000-4000-8000-000000000001",
   schedulingFeature: "60000000-0000-4000-8000-000000000002",
   audit: "70000000-0000-4000-8000-000000000001",
+  homePage: "80000000-0000-4000-8000-000000000001",
+  aboutPage: "80000000-0000-4000-8000-000000000002",
+  contactPage: "80000000-0000-4000-8000-000000000003",
+  homeVersion: "81000000-0000-4000-8000-000000000001",
+  aboutVersion: "81000000-0000-4000-8000-000000000002",
+  contactVersion: "81000000-0000-4000-8000-000000000003",
 } as const;
 
 const env = parseServerEnv(process.env);
@@ -103,6 +115,224 @@ try {
         sslStatus: "local",
       })
       .onDuplicateKeyUpdate({ set: { status: "active", primary: true } });
+
+    await tx
+      .insert(sitePages)
+      .values([
+        {
+          id: ids.homePage,
+          tenantId: ids.demoTenant,
+          siteId: ids.demoSite,
+          slug: "",
+          title: "Start",
+          status: "published",
+          publishedVersionId: ids.homeVersion,
+        },
+        {
+          id: ids.aboutPage,
+          tenantId: ids.demoTenant,
+          siteId: ids.demoSite,
+          slug: "ueber-uns",
+          title: "Über uns",
+          status: "published",
+          publishedVersionId: ids.aboutVersion,
+        },
+        {
+          id: ids.contactPage,
+          tenantId: ids.demoTenant,
+          siteId: ids.demoSite,
+          slug: "kontakt",
+          title: "Kontakt",
+          status: "published",
+          publishedVersionId: ids.contactVersion,
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { status: "published" } });
+
+    await tx
+      .insert(pageVersions)
+      .values([
+        {
+          id: ids.homeVersion,
+          tenantId: ids.demoTenant,
+          pageId: ids.homePage,
+          version: 1,
+          state: "published",
+          title: "Sicher ans Ziel",
+          createdByUserId: ids.tenantOwner,
+        },
+        {
+          id: ids.aboutVersion,
+          tenantId: ids.demoTenant,
+          pageId: ids.aboutPage,
+          version: 1,
+          state: "published",
+          title: "Über uns",
+          createdByUserId: ids.tenantOwner,
+        },
+        {
+          id: ids.contactVersion,
+          tenantId: ids.demoTenant,
+          pageId: ids.contactPage,
+          version: 1,
+          state: "published",
+          title: "Kontakt",
+          createdByUserId: ids.tenantOwner,
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { state: "published" } });
+
+    await tx
+      .insert(pageBlocks)
+      .values([
+        {
+          id: "82000000-0000-4000-8000-000000000001",
+          tenantId: ids.demoTenant,
+          versionId: ids.homeVersion,
+          blockType: "hero",
+          position: 0,
+          properties: {
+            type: "hero",
+            eyebrow: "Fiktive Demo-Fahrschule",
+            heading: "Sicher ans Ziel – Schritt für Schritt",
+            text: "Persönliche Ausbildung, klare Abläufe und ein ruhiges Lernumfeld.",
+            actionLabel: "Kontakt aufnehmen",
+            actionHref: "/kontakt",
+          },
+        },
+        {
+          id: "82000000-0000-4000-8000-000000000002",
+          tenantId: ids.demoTenant,
+          versionId: ids.homeVersion,
+          blockType: "benefits",
+          position: 1,
+          properties: {
+            type: "benefits",
+            heading: "Darum Morgenrot",
+            items: [
+              {
+                title: "Persönlich",
+                text: "Feste Ansprechpersonen begleiten dich.",
+              },
+              {
+                title: "Transparent",
+                text: "Leistungen und nächste Schritte bleiben nachvollziehbar.",
+              },
+              { title: "Flexibel", text: "Lernen passend zu deinem Alltag." },
+            ],
+          },
+        },
+        {
+          id: "82000000-0000-4000-8000-000000000003",
+          tenantId: ids.demoTenant,
+          versionId: ids.homeVersion,
+          blockType: "faq",
+          position: 2,
+          properties: {
+            type: "faq",
+            heading: "Häufige Fragen",
+            items: [
+              {
+                question: "Ist das eine echte Fahrschule?",
+                answer: "Nein. Alle Inhalte sind fiktive Demo-Daten.",
+              },
+            ],
+          },
+        },
+        {
+          id: "82000000-0000-4000-8000-000000000004",
+          tenantId: ids.demoTenant,
+          versionId: ids.aboutVersion,
+          blockType: "text_image",
+          position: 0,
+          properties: {
+            type: "text_image",
+            heading: "Lernen mit Ruhe und Struktur",
+            paragraphs: [
+              "Morgenrot ist eine vollständig fiktive Fahrschule für die lokale Produktdemo.",
+            ],
+            imageAlt: "Abstrakte Demo-Bildfläche",
+            imagePosition: "right",
+          },
+        },
+        {
+          id: "82000000-0000-4000-8000-000000000005",
+          tenantId: ids.demoTenant,
+          versionId: ids.contactVersion,
+          blockType: "cta",
+          position: 0,
+          properties: {
+            type: "cta",
+            heading: "Lass uns sprechen",
+            text: "Diese Kontaktdaten sind fiktiv.",
+            actionLabel: "E-Mail schreiben",
+            actionHref: "mailto:hallo@morgenrot.invalid",
+          },
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { visible: true } });
+
+    await tx
+      .insert(navigationItems)
+      .values([
+        {
+          id: "83000000-0000-4000-8000-000000000001",
+          tenantId: ids.demoTenant,
+          siteId: ids.demoSite,
+          pageId: ids.homePage,
+          label: "Start",
+          position: 0,
+        },
+        {
+          id: "83000000-0000-4000-8000-000000000002",
+          tenantId: ids.demoTenant,
+          siteId: ids.demoSite,
+          pageId: ids.aboutPage,
+          label: "Über uns",
+          position: 1,
+        },
+        {
+          id: "83000000-0000-4000-8000-000000000003",
+          tenantId: ids.demoTenant,
+          siteId: ids.demoSite,
+          pageId: ids.contactPage,
+          label: "Kontakt",
+          position: 2,
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { visible: true } });
+
+    await tx
+      .insert(themeSettings)
+      .values({ tenantId: ids.demoTenant, siteId: ids.demoSite })
+      .onDuplicateKeyUpdate({ set: { themeKey: "calm_cyan" } });
+    await tx
+      .insert(seoSettings)
+      .values([
+        {
+          id: "84000000-0000-4000-8000-000000000001",
+          tenantId: ids.demoTenant,
+          pageId: ids.homePage,
+          title: "Fahrschule Morgenrot – Demo",
+          description: "Fiktive Demo-Fahrschule für FahrSeiten.",
+          noIndex: true,
+        },
+        {
+          id: "84000000-0000-4000-8000-000000000002",
+          tenantId: ids.demoTenant,
+          pageId: ids.aboutPage,
+          title: "Über uns – Fahrschule Morgenrot",
+          noIndex: true,
+        },
+        {
+          id: "84000000-0000-4000-8000-000000000003",
+          tenantId: ids.demoTenant,
+          pageId: ids.contactPage,
+          title: "Kontakt – Fahrschule Morgenrot",
+          noIndex: true,
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { noIndex: true } });
 
     await tx
       .insert(plans)

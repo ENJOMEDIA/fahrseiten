@@ -49,6 +49,7 @@ export const featureStatusValues = [
   "beta",
   "enabled",
 ] as const;
+export const pageStatusValues = ["draft", "published", "archived"] as const;
 
 export const tenants = mysqlTable(
   "tenants",
@@ -198,6 +199,160 @@ export const sites = mysqlTable(
     ...timestamps,
   },
   (table) => [uniqueIndex("sites_tenant_unique").on(table.tenantId)],
+);
+
+export const sitePages = mysqlTable(
+  "site_pages",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    siteId: id("site_id")
+      .notNull()
+      .references(() => sites.id, { onDelete: "cascade" }),
+    slug: varchar("slug", { length: 160 }).notNull(),
+    title: varchar("title", { length: 180 }).notNull(),
+    status: mysqlEnum("status", pageStatusValues).default("draft").notNull(),
+    publishedVersionId: id("published_version_id"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("site_pages_tenant_slug_unique").on(table.tenantId, table.slug),
+    index("site_pages_site_idx").on(table.siteId),
+  ],
+);
+
+export const pageVersions = mysqlTable(
+  "page_versions",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    pageId: id("page_id")
+      .notNull()
+      .references(() => sitePages.id, { onDelete: "cascade" }),
+    version: int("version").notNull(),
+    state: mysqlEnum("state", pageStatusValues).default("draft").notNull(),
+    title: varchar("title", { length: 180 }).notNull(),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("page_versions_page_version_unique").on(
+      table.pageId,
+      table.version,
+    ),
+    index("page_versions_tenant_idx").on(table.tenantId),
+  ],
+);
+
+export const pageBlocks = mysqlTable(
+  "page_blocks",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    versionId: id("version_id")
+      .notNull()
+      .references(() => pageVersions.id, { onDelete: "cascade" }),
+    blockType: varchar("block_type", { length: 60 }).notNull(),
+    schemaVersion: int("schema_version").default(1).notNull(),
+    position: int("position").notNull(),
+    visible: boolean("visible").default(true).notNull(),
+    properties: json("properties").$type<Record<string, unknown>>().notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("page_blocks_version_position_unique").on(
+      table.versionId,
+      table.position,
+    ),
+    index("page_blocks_tenant_idx").on(table.tenantId),
+  ],
+);
+
+export const navigationItems = mysqlTable(
+  "navigation_items",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    siteId: id("site_id")
+      .notNull()
+      .references(() => sites.id, { onDelete: "cascade" }),
+    pageId: id("page_id").references(() => sitePages.id, {
+      onDelete: "cascade",
+    }),
+    parentId: id("parent_id"),
+    label: varchar("label", { length: 100 }).notNull(),
+    externalUrl: varchar("external_url", { length: 500 }),
+    position: int("position").notNull(),
+    visible: boolean("visible").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("navigation_items_site_position_idx").on(
+      table.siteId,
+      table.position,
+    ),
+  ],
+);
+
+export const themeSettings = mysqlTable(
+  "theme_settings",
+  {
+    tenantId: id("tenant_id")
+      .primaryKey()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    siteId: id("site_id")
+      .notNull()
+      .references(() => sites.id, { onDelete: "cascade" }),
+    themeKey: varchar("theme_key", { length: 80 })
+      .default("calm_cyan")
+      .notNull(),
+    primaryColor: varchar("primary_color", { length: 7 })
+      .default("#0891b2")
+      .notNull(),
+    accentColor: varchar("accent_color", { length: 7 })
+      .default("#0f172a")
+      .notNull(),
+    fontKey: varchar("font_key", { length: 80 })
+      .default("system_sans")
+      .notNull(),
+    logoMediaId: id("logo_media_id"),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("theme_settings_site_unique").on(table.siteId)],
+);
+
+export const seoSettings = mysqlTable(
+  "seo_settings",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    pageId: id("page_id")
+      .notNull()
+      .references(() => sitePages.id, { onDelete: "cascade" }),
+    title: varchar("title", { length: 70 }),
+    description: varchar("description", { length: 170 }),
+    canonicalPath: varchar("canonical_path", { length: 300 }),
+    noIndex: boolean("no_index").default(false).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("seo_settings_page_unique").on(table.pageId),
+    index("seo_settings_tenant_idx").on(table.tenantId),
+  ],
 );
 
 export const plans = mysqlTable(
