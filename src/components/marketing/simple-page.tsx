@@ -5,6 +5,7 @@ import { MarketingHero, MarketingShell } from "./marketing-shell";
 import { MaintenancePage } from "@/components/maintenance/maintenance-page";
 import { env } from "@/config/env";
 import { findPlatformSettings } from "@/modules/setup/platform-settings";
+import { mediaPublicUrl } from "@/modules/media/public-url";
 
 function MaintenanceLegalShell({
   brandName,
@@ -64,6 +65,11 @@ export async function SimpleMarketingPage({
           settings?.maintenanceMessage ??
           "Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen."
         }
+        logoUrl={
+          settings?.logoMediaId
+            ? mediaPublicUrl(settings.logoMediaId)
+            : undefined
+        }
         primaryColor={settings?.primaryColor ?? "#0891b2"}
         variant="platform"
       />
@@ -83,6 +89,12 @@ export async function SimpleMarketingPage({
       {page}
     </MaintenanceLegalShell>
   ) : (
-    <MarketingShell>{page}</MarketingShell>
+    <MarketingShell
+      logoUrl={
+        settings?.logoMediaId ? mediaPublicUrl(settings.logoMediaId) : undefined
+      }
+    >
+      {page}
+    </MarketingShell>
   );
 }

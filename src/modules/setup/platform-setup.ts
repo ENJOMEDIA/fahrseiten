@@ -16,11 +16,15 @@ import * as databaseSchema from "@/db/schema";
 import {
   auditLogs,
   legalDocuments,
+  legalProfiles,
   platformSettings,
   users,
 } from "@/db/schema";
 import { hashPassword } from "@/modules/auth/password";
-import { createLegalDrafts } from "@/modules/legal/documents";
+import {
+  createInitialLegalProfile,
+  createLegalDrafts,
+} from "@/modules/legal/documents";
 
 import { SetupInputError } from "./error";
 import { platformSetupSchema } from "./schemas";
@@ -119,6 +123,10 @@ export async function completePlatformSetup(input: unknown) {
       ownerName: parsed.ownerName,
       email: parsed.email,
     });
+    const legalProfile = createInitialLegalProfile(
+      { ...parsed, ownerName: parsed.ownerName, email: parsed.email },
+      { regulatedActivity: false },
+    );
     await setupDb.transaction(async (tx) => {
       await tx.insert(users).values({
         id: ownerId,
@@ -142,6 +150,13 @@ export async function completePlatformSetup(input: unknown) {
         maintenanceMode: true,
         maintenanceMessage: parsed.maintenanceMessage,
         setupCompletedAt: new Date(),
+      });
+      await tx.insert(legalProfiles).values({
+        profileKey: "platform",
+        scope: "platform",
+        data: legalProfile.data,
+        modules: legalProfile.modules,
+        updatedByUserId: ownerId,
       });
       await tx.insert(legalDocuments).values([
         {

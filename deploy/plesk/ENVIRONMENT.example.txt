@@ -10,6 +10,9 @@ MARKETING_HOSTS=fahrseiten.de,www.fahrseiten.de
 APP_HOSTS=app.fahrseiten.de
 DEMO_HOSTS=
 TRUST_PROXY_HEADERS=false
+MEDIA_STORAGE_PATH=<ABSOLUTER-PERSISTENTER-PFAD>/.fahrseiten/media
+# Optional, wenn media.fahrseiten.de später als CDN-/Proxy-Origin eingerichtet ist:
+MEDIA_PUBLIC_BASE_URL=
 
 SMTP_MODE=smtp
 SMTP_HOST=<SMTP-HOST-AUS-DEM-NETCUP-WCP>

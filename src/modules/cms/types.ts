@@ -30,5 +30,6 @@ export type TenantWebsite = {
   theme: {
     primaryColor: string;
     accentColor: string;
+    logoUrl?: string;
   };
 };

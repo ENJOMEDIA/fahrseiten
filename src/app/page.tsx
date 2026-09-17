@@ -8,6 +8,7 @@ import {
   plannedMarketingFeatures,
 } from "@/config/marketing";
 import { findPlatformSettings } from "@/modules/setup/platform-settings";
+import { mediaPublicUrl } from "@/modules/media/public-url";
 
 export const dynamic = "force-dynamic";
 
@@ -139,6 +140,11 @@ export default async function MarketingStartPage() {
           settings?.maintenanceMessage ??
           "Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen."
         }
+        logoUrl={
+          settings?.logoMediaId
+            ? mediaPublicUrl(settings.logoMediaId)
+            : undefined
+        }
         primaryColor={settings?.primaryColor ?? "#0891b2"}
         variant="platform"
       />
@@ -146,7 +152,11 @@ export default async function MarketingStartPage() {
   }
 
   return (
-    <MarketingShell>
+    <MarketingShell
+      logoUrl={
+        settings?.logoMediaId ? mediaPublicUrl(settings.logoMediaId) : undefined
+      }
+    >
       <main className="overflow-hidden">
         <section className="marketing-home-hero relative bg-[#070b12] px-6 pt-24 pb-20 text-white sm:pt-32 sm:pb-28">
           <div className="hero-orb hero-orb-one" aria-hidden="true" />

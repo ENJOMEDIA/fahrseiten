@@ -1,6 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 
-export function MarketingHeader() {
+export function MarketingHeader({ logoUrl }: { logoUrl?: string }) {
   const links = [
     ["Funktionen", "/funktionen"],
     ["Design & Demo", "/design"],
@@ -17,9 +18,22 @@ export function MarketingHeader() {
           className="group flex items-center gap-3 font-semibold tracking-tight text-slate-950"
           href="/"
         >
-          <span className="grid size-9 place-items-center rounded-xl bg-slate-950 text-white shadow-lg shadow-slate-950/15 transition-transform group-hover:-rotate-3">
-            F
-          </span>
+          {logoUrl ? (
+            <span className="grid h-10 min-w-12 place-items-center rounded-xl bg-white px-2 shadow-lg shadow-slate-950/10">
+              <Image
+                alt="FahrSeiten Logo"
+                className="h-7 w-auto object-contain"
+                height={28}
+                src={logoUrl}
+                unoptimized
+                width={120}
+              />
+            </span>
+          ) : (
+            <span className="grid size-9 place-items-center rounded-xl bg-slate-950 text-white shadow-lg shadow-slate-950/15 transition-transform group-hover:-rotate-3">
+              F
+            </span>
+          )}
           <span>
             FahrSeiten
             <span className="ml-2 hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">

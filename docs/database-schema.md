@@ -30,13 +30,17 @@ erDiagram
 - `sites`: mandantengebundene Website-Grundeinstellungen einschließlich Wartungsstatus und Vorschautext.
 - `plans`, `subscriptions`: vorbereitete Tarifzuordnung ohne Zahlungsabwicklung.
 - `feature_flags`, `plan_features`, `tenant_features`: zentrale Features, Planstandard und Mandanten-Override.
+- `legal_profiles`: validierte Anbieter- und Datenschutzangaben sowie aktivierte Rechtsmodule; Plattformprofil und Tenant-Profile bleiben über Scope und `tenant_id` getrennt.
+- `media_assets` und `media_usages`: geprüfte Bildmetadaten, stabile Speicherschlüssel und Verwendungen; Tenant-Medien tragen immer ihre `tenant_id`, Plattformmedien verwenden ausschließlich den ausdrücklich geprüften Plattformkontext.
+- `platform_settings.logo_media_id` und `theme_settings.logo_media_id`: zentral ausgewählte Logos für FahrSeiten beziehungsweise den jeweiligen Mandanten.
+- `legal_documents`: versionierte, aus dem jeweiligen Rechtsprofil erzeugte Entwürfe und veröffentlichte Snapshots für Impressum und Datenschutz.
 - `audit_logs`: append-orientierte sicherheitsrelevante Ereignisse; mandantenübergreifende Plattformereignisse dürfen `tenant_id = NULL` verwenden.
 
 ## Isolationsregel
 
 Jede fachliche Tabelle mit Mandantendaten erhält `tenant_id`. Serverseitige Dienste bekommen einen geprüften `TenantContext`; eine ID aus Request, URL oder Formular erzeugt allein keinen Kontext. Objektzugriffe müssen `tenant_id` in derselben Abfrage einschränken. Die Datenbank ist eine zusätzliche Persistenzgrenze, ersetzt aber keine Autorisierung.
 
-Cross-Tenant-Tests prüfen ab Phase 3, dass Mitgliedschaften und Objekte anderer Mandanten abgewiesen werden. Künftige Medien, Inhalte, Anfragen, Cache-Schlüssel und Jobs folgen derselben Regel.
+Cross-Tenant-Tests prüfen ab Phase 3, dass Mitgliedschaften und Objekte anderer Mandanten abgewiesen werden. Medien, Inhalte, Anfragen und Jobs werden serverseitig an denselben geprüften Tenant-Kontext gebunden; Cache-Schlüssel müssen dieser Regel ebenfalls folgen.
 
 ## Migrationen und lokaler Seed
 
@@ -58,4 +62,4 @@ Eine lokale Datenbank war in der Codex-Umgebung nicht verfügbar. Migration und 
 
 Es gibt genau eine zentrale FahrSeiten-Installation mit einer gemeinsamen Datenbank. Der geschützte Webinstaller unter `/setup` fragt Host beziehungsweise IP, Port, Datenbankname, Benutzer und Passwort ab, wendet die Migrationen an und legt einmalig den ersten `platform_owner` sowie die Anbieter- und Designstammdaten an. Anschließend speichert er die Datenbankverbindung mit restriktiven Dateirechten in einer persistenten Runtime-Datei außerhalb des Release-Verzeichnisses. Diese Datei enthält keinen Installationstoken, markiert den Abschluss dauerhaft und sperrt den Installer schon vor einer weiteren Tokenprüfung. Der Shell-Installer bleibt als Alternative verfügbar.
 
-Eine Fahrschule wird anschließend über einen vom Plattform-Owner erzeugten Einmal-Link als Tenant provisioniert. Die Transaktion legt Mandant, `tenant_owner`, Mitgliedschaft, Site, Theme, Hauptstandort, Kontaktformular, Startseite, Navigation, Domain im Status `pending` und Audit-Eintrag an. Der Link ist sieben Tage gültig, wird in der Datenbank nur gehasht gespeichert und nach Verwendung gesperrt. Dafür wird weder das Schema erneut importiert noch eine weitere Anwendungskopie angelegt. Tarif, Rechtstexte und Domainfreigabe bleiben bewusst außerhalb dieses initialen Assistenten, bis die offenen fachlichen und betrieblichen Entscheidungen getroffen sind.
+Eine Fahrschule wird anschließend über einen vom Plattform-Owner erzeugten Einmal-Link als Tenant provisioniert. Die Transaktion legt Mandant, `tenant_owner`, Mitgliedschaft, Site, Theme, Hauptstandort, Kontaktformular, strukturiertes Rechtsprofil, erste Rechtsentwürfe, Startseite, Navigation, Domain im Status `pending` und Audit-Eintrag an. Der Link ist sieben Tage gültig, wird in der Datenbank nur gehasht gespeichert und nach Verwendung gesperrt. Dafür wird weder das Schema erneut importiert noch eine weitere Anwendungskopie angelegt. Tarif, rechtliche Freigabe und Domainfreigabe bleiben kontrollierte Folgeschritte.

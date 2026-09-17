@@ -69,6 +69,7 @@ export default async function TenantSitePlaceholder({
       <MaintenancePage
         accentColor={website.theme.accentColor}
         brandName={website.name}
+        logoUrl={website.theme.logoUrl}
         message={website.maintenanceMessage}
         primaryColor={website.theme.primaryColor}
         variant="tenant"

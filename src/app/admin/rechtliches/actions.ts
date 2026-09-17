@@ -3,7 +3,14 @@
 import { revalidatePath } from "next/cache";
 
 import type { LegalActionState } from "@/app/kunde/rechtliches/actions";
-import { savePlatformLegalDocument } from "@/modules/legal/repository";
+import {
+  createStructuredLegalDocuments,
+  parseLegalProfileForm,
+} from "@/modules/legal/documents";
+import {
+  savePlatformLegalDocument,
+  savePlatformLegalProfile,
+} from "@/modules/legal/repository";
 import { requirePlatformPermission } from "@/modules/platform/access";
 
 export async function savePlatformLegalAction(
@@ -11,22 +18,37 @@ export async function savePlatformLegalAction(
   formData: FormData,
 ): Promise<LegalActionState> {
   const identity = await requirePlatformPermission("platform.security.manage");
-  const type = formData.get("type");
-  if (type !== "imprint" && type !== "privacy")
-    return { message: "Unbekannter Dokumenttyp.", error: true };
   try {
     const publish = formData.get("intent") === "publish";
+    const submittedProfile = parseLegalProfileForm(formData);
+    const profile = {
+      ...submittedProfile,
+      modules: {
+        ...submittedProfile.modules,
+        contactForm: true,
+        emailDelivery: true,
+        consentManagement: true,
+      },
+    };
+    const documents = createStructuredLegalDocuments(profile);
+    await savePlatformLegalProfile(identity.id, profile);
     await savePlatformLegalDocument(identity.id, {
-      type,
-      content: String(formData.get("content") ?? ""),
+      type: "imprint",
+      content: documents.imprint,
+      publish,
+    });
+    await savePlatformLegalDocument(identity.id, {
+      type: "privacy",
+      content: documents.privacy,
       publish,
     });
     revalidatePath("/admin/rechtliches");
-    revalidatePath(type === "imprint" ? "/impressum" : "/datenschutz");
+    revalidatePath("/impressum");
+    revalidatePath("/datenschutz");
     return {
       message: publish
-        ? "Geprüfte Fassung veröffentlicht."
-        : "Entwurf gespeichert.",
+        ? "Impressum und Datenschutz wurden als geprüfte Fassungen veröffentlicht."
+        : "Strukturierte Angaben und beide Entwürfe wurden aktualisiert.",
       error: false,
     };
   } catch (error) {

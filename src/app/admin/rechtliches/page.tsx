@@ -1,38 +1,43 @@
 import { CustomerPage } from "@/components/customer/customer-page";
-import { LegalEditor } from "@/modules/legal/legal-editor";
-import { findLatestPlatformLegalDocuments } from "@/modules/legal/repository";
+import { LegalBuilder } from "@/modules/legal/legal-builder";
+import {
+  findLatestPlatformLegalDocuments,
+  findPlatformLegalProfile,
+} from "@/modules/legal/repository";
 import { requirePlatformPermission } from "@/modules/platform/access";
 
 import { savePlatformLegalAction } from "./actions";
 
 export default async function PlatformLegalPage() {
   await requirePlatformPermission("platform.security.manage");
-  const documents = await findLatestPlatformLegalDocuments();
+  const [documents, profile] = await Promise.all([
+    findLatestPlatformLegalDocuments(),
+    findPlatformLegalProfile(),
+  ]);
+  const latest = (type: "imprint" | "privacy") =>
+    documents.find((document) => document.documentType === type);
   return (
     <CustomerPage
       title="Rechtliches"
-      description="Impressum und Datenschutz der FahrSeiten-Plattform verwalten."
+      description="Pflichtangaben strukturiert erfassen und rechtliche Dokumente kontrolliert erzeugen."
     >
-      <p className="mb-6 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm">
-        Die automatisch erzeugten Entwürfe müssen anhand der tatsächlichen
-        Anbieter, Prozesse und Verträge rechtlich geprüft werden.
-      </p>
-      <div className="grid gap-6">
-        {(["imprint", "privacy"] as const).map((type) => {
-          const document = documents.find((item) => item.documentType === type);
-          return document ? (
-            <LegalEditor
-              action={savePlatformLegalAction}
-              content={document.content}
-              key={type}
-              status={document.status}
-              type={type}
-            />
-          ) : (
-            <p key={type}>Entwurf fehlt.</p>
-          );
-        })}
-      </div>
+      {profile ? (
+        <LegalBuilder
+          action={savePlatformLegalAction}
+          imprintStatus={latest("imprint")?.status ?? "draft"}
+          privacyStatus={latest("privacy")?.status ?? "draft"}
+          profile={profile}
+          requiredModules={[
+            "contactForm",
+            "emailDelivery",
+            "consentManagement",
+          ]}
+        />
+      ) : (
+        <p className="rounded-2xl border border-amber-300 bg-amber-50 p-5">
+          Die Plattformstammdaten fehlen. Führe zuerst den Webinstaller aus.
+        </p>
+      )}
     </CustomerPage>
   );
 }

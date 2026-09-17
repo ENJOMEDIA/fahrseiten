@@ -1,5 +1,17 @@
 import type { NextConfig } from "next";
 
+function configuredMediaOrigin() {
+  try {
+    return process.env.MEDIA_PUBLIC_BASE_URL
+      ? new URL(process.env.MEDIA_PUBLIC_BASE_URL).origin
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+const mediaOrigin = configuredMediaOrigin();
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -10,7 +22,7 @@ const contentSecurityPolicy = [
     process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""
   }`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  `img-src 'self' data: blob:${mediaOrigin ? ` ${mediaOrigin}` : ""}`,
   "font-src 'self' data:",
   "connect-src 'self'",
   "media-src 'self'",
@@ -42,6 +54,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   allowedDevOrigins: ["127.0.0.1"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "9mb",
+    },
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

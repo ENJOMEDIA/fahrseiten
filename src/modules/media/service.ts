@@ -14,7 +14,7 @@ const metadataSchema = z.object({
 });
 export type MediaAssetRecord = z.infer<typeof metadataSchema> & {
   id: string;
-  tenantId: string;
+  tenantId: string | null;
   storageKey: string;
   mimeType: string;
   byteSize: number;
@@ -31,7 +31,7 @@ export interface MediaRepository {
 }
 
 export async function uploadImage(input: {
-  tenantId: string;
+  tenantId: string | null;
   bytes: Uint8Array;
   metadata: unknown;
   storage: MediaStorage;
@@ -51,7 +51,7 @@ export async function uploadImage(input: {
   )
     throw new Error("Ungültige Bildabmessungen.");
   const id = randomUUID();
-  const storageKey = `${input.tenantId}/${id}.${inspected.extension}`;
+  const storageKey = `${input.tenantId ?? "platform"}/${id}.${inspected.extension}`;
   const asset: MediaAssetRecord = {
     ...metadata,
     id,

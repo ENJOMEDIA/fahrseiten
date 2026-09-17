@@ -90,6 +90,7 @@ export const platformSettings = mysqlTable("platform_settings", {
   city: varchar("city", { length: 120 }).notNull(),
   primaryColor: varchar("primary_color", { length: 7 }).notNull(),
   accentColor: varchar("accent_color", { length: 7 }).notNull(),
+  logoMediaId: id("logo_media_id"),
   maintenanceMode: boolean("maintenance_mode").default(true).notNull(),
   maintenanceMessage: varchar("maintenance_message", { length: 500 })
     .default(
@@ -598,9 +599,9 @@ export const mediaAssets = mysqlTable(
   "media_assets",
   {
     id: id("id").primaryKey(),
-    tenantId: id("tenant_id")
-      .notNull()
-      .references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
     storageKey: varchar("storage_key", { length: 500 }).notNull(),
     originalName: varchar("original_name", { length: 255 }).notNull(),
     mimeType: varchar("mime_type", { length: 100 }).notNull(),
@@ -1047,6 +1048,67 @@ export const legalDocumentStatusValues = [
   "published",
   "archived",
 ] as const;
+
+export type LegalProfileData = {
+  companyName: string;
+  legalForm: "individual" | "gbr" | "ug" | "gmbh" | "other";
+  representativeName: string;
+  street: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  email: string;
+  phone: string;
+  registerType:
+    "none" | "commercial" | "partnership" | "cooperative" | "association";
+  registerCourt: string;
+  registerNumber: string;
+  vatId: string;
+  regulatedActivity: boolean;
+  supervisoryAuthority: string;
+  journalisticContent: boolean;
+  editorialResponsible: string;
+  privacyContactEmail: string;
+  dataProtectionOfficerRequired: boolean;
+  dataProtectionOfficerEmail: string;
+  hostingProvider: string;
+  inquiryRetentionMonths: 3 | 6 | 12 | 24;
+};
+
+export type LegalModuleSettings = {
+  contactForm: boolean;
+  emailDelivery: boolean;
+  consentManagement: boolean;
+  maps: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  video: boolean;
+  messaging: boolean;
+  onlineBooking: boolean;
+  payments: boolean;
+};
+
+export const legalProfiles = mysqlTable(
+  "legal_profiles",
+  {
+    profileKey: varchar("profile_key", { length: 36 }).primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    scope: mysqlEnum("scope", legalDocumentScopeValues).notNull(),
+    data: json("data").$type<LegalProfileData>().notNull(),
+    modules: json("modules").$type<LegalModuleSettings>().notNull(),
+    updatedByUserId: id("updated_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("legal_profiles_tenant_unique").on(table.tenantId),
+    index("legal_profiles_scope_idx").on(table.scope),
+  ],
+);
+
 export const legalDocuments = mysqlTable(
   "legal_documents",
   {

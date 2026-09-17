@@ -5,7 +5,15 @@ import { notFound, redirect } from "next/navigation";
 
 import { hasTenantPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
-import { saveTenantLegalDocument } from "@/modules/legal/repository";
+import {
+  createStructuredLegalDocuments,
+  parseLegalProfileForm,
+} from "@/modules/legal/documents";
+import {
+  enforceRequiredTenantLegalModules,
+  saveTenantLegalDocument,
+  saveTenantLegalProfile,
+} from "@/modules/legal/repository";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
 
 export type LegalActionState = { message: string; error: boolean };
@@ -22,9 +30,6 @@ export async function saveLegalAction(
     !hasTenantPermission(membership.role, "tenant.settings.manage")
   )
     notFound();
-  const type = formData.get("type");
-  if (type !== "imprint" && type !== "privacy")
-    return { message: "Unbekannter Dokumenttyp.", error: true };
   const context = createMembershipTenantContext({
     requestedTenantId: membership.tenantId,
     userId: identity.id,
@@ -32,16 +37,32 @@ export async function saveLegalAction(
   });
   try {
     const publish = formData.get("intent") === "publish";
+    const submittedProfile = parseLegalProfileForm(formData);
+    const profile = {
+      ...submittedProfile,
+      modules: await enforceRequiredTenantLegalModules(
+        context.tenantId,
+        submittedProfile.modules,
+      ),
+    };
+    const documents = createStructuredLegalDocuments(profile);
+    await saveTenantLegalProfile(context, profile);
     await saveTenantLegalDocument(context, {
-      type,
-      content: String(formData.get("content") ?? ""),
+      type: "imprint",
+      content: documents.imprint,
+      publish,
+    });
+    await saveTenantLegalDocument(context, {
+      type: "privacy",
+      content: documents.privacy,
       publish,
     });
     revalidatePath("/kunde/rechtliches");
+    revalidatePath("/site", "layout");
     return {
       message: publish
-        ? "Geprüfte Fassung veröffentlicht."
-        : "Entwurf gespeichert.",
+        ? "Impressum und Datenschutz wurden als geprüfte Fassungen veröffentlicht."
+        : "Strukturierte Angaben und beide Entwürfe wurden aktualisiert.",
       error: false,
     };
   } catch (error) {

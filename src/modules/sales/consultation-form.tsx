@@ -34,7 +34,7 @@ export function ConsultationForm() {
         if (response.ok) {
           form.reset();
           setStatus(
-            "Vielen Dank. Die fiktive Beratungsanfrage liegt im lokalen Akquise-CRM.",
+            "Vielen Dank. Deine Anfrage ist bei FahrSeiten angekommen.",
           );
         } else
           setStatus(
@@ -101,8 +101,8 @@ export function ConsultationForm() {
           type="checkbox"
         />
         <span>
-          Ich akzeptiere den vorläufigen lokalen Datenschutzhinweis. Bitte keine
-          echten Kundendaten eingeben.
+          Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung
+          meiner Anfrage zu.
         </span>
       </label>
       <button

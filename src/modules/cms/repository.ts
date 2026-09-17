@@ -16,6 +16,7 @@ import {
 
 import { parseStoredBlocks } from "./block-schema";
 import type { PublishedPage, TenantWebsite } from "./types";
+import { mediaPublicUrl } from "@/modules/media/public-url";
 
 export async function findTenantWebsite(
   tenantId: string,
@@ -64,6 +65,9 @@ export async function findTenantWebsite(
     theme: {
       primaryColor: row.theme?.primaryColor ?? "#0891b2",
       accentColor: row.theme?.accentColor ?? "#0f172a",
+      logoUrl: row.theme?.logoMediaId
+        ? mediaPublicUrl(row.theme.logoMediaId)
+        : undefined,
     },
   };
 }

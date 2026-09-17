@@ -142,6 +142,17 @@ Der lokale Demo-Seed wird in Staging und Produktion niemals ausgeführt.
 
 ## Datenbankmigration bei Updates
 
+Beim Start prüft FahrSeiten die versionierten Migrationen automatisch. Ein
+Migrationskonflikt wird in `$HOME/.fahrseiten/migration-status.json`
+protokolliert; der Next.js-Webserver startet trotzdem, damit Wartungsseite,
+Healthcheck und Diagnose erreichbar bleiben. Bereiche, die bereits das neue
+Schema benötigen, können bis zur Behebung eingeschränkt sein. Deshalb müssen
+Migrationen additiv und rückwärtskompatibel geplant werden.
+
+Der Plattform-Owner sieht denselben Status unter `/admin/system` und kann den
+Lauf dort erneut anstoßen. `node migrate.mjs` bleibt als Shell-Fallback
+verfügbar.
+
 Vor jeder Migration:
 
 1. Plesk-Datenbankexport oder gleichwertiges konsistentes Backup erstellen.
@@ -154,7 +165,26 @@ Vor jeder Migration:
 node migrate.mjs
 ```
 
-Bei einem Fehler wird nicht gestartet oder neu migriert, bis die konkrete Ursache geklärt ist. Der Demo-Seed wird niemals in Staging oder Produktion ausgeführt.
+Bei einem Fehler werden keine Down-Migrationen oder automatischen
+Rücksetzungen ausgeführt. Die Ursache muss vor einem weiteren Deployment
+geklärt werden. Der Demo-Seed wird niemals in Staging oder Produktion
+ausgeführt.
+
+## Persistente Medien und Logo
+
+Kunden laden PNG-, JPEG- oder WebP-Dateien im Kundenbereich unter
+`/kunde/medien` hoch. Signatur, Größe und Abmessungen werden serverseitig
+geprüft. Metadaten und Mandantenzuordnung liegen in MySQL; die Binärdateien
+liegen unter `MEDIA_STORAGE_PATH`. Dieser Pfad muss außerhalb des Git- und
+Application-Roots liegen, etwa `$HOME/.fahrseiten/media`, damit ein Pull oder
+Build keine Uploads überschreibt.
+
+Die öffentliche URL `/media/<UUID>` bleibt stabil und liefert kontrollierte
+Cache-Header. Später kann `MEDIA_PUBLIC_BASE_URL` beispielsweise auf
+`https://media.fahrseiten.de/media` zeigen. Die Medien-Subdomain muss dann als
+CDN oder Reverse Proxy genau diese öffentliche Route als Origin verwenden.
+Eine DNS- oder CDN-Änderung wird nicht automatisch durch die Anwendung
+ausgeführt.
 
 ## Mandanten statt Einzelinstanzen
 

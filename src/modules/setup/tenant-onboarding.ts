@@ -9,6 +9,7 @@ import {
   contactForms,
   domains,
   legalDocuments,
+  legalProfiles,
   locations,
   navigationItems,
   pageBlocks,
@@ -24,7 +25,10 @@ import {
 import { hashPassword } from "@/modules/auth/password";
 import { createOpaqueToken, hashToken } from "@/modules/auth/tokens";
 import { normalizeHostname } from "@/modules/domains/hostname";
-import { createLegalDrafts } from "@/modules/legal/documents";
+import {
+  createInitialLegalProfile,
+  createLegalDrafts,
+} from "@/modules/legal/documents";
 
 import { SetupInputError } from "./error";
 import { tenantOnboardingSchema } from "./schemas";
@@ -118,6 +122,10 @@ export async function completeTenantOnboarding(input: unknown) {
       ownerName: parsed.ownerName,
       email: parsed.ownerEmail,
     });
+    const legalProfile = createInitialLegalProfile(
+      { ...parsed, ownerName: parsed.ownerName, email: parsed.ownerEmail },
+      { regulatedActivity: true },
+    );
 
     await tx
       .insert(tenants)
@@ -167,6 +175,14 @@ export async function completeTenantOnboarding(input: unknown) {
       name: "Allgemeine Kontaktanfrage",
       privacyTextVersion: "pending-legal-review",
       requiredFields: ["contactName", "email", "message"],
+    });
+    await tx.insert(legalProfiles).values({
+      profileKey: tenantId,
+      tenantId,
+      scope: "tenant",
+      data: legalProfile.data,
+      modules: legalProfile.modules,
+      updatedByUserId: ownerId,
     });
     await tx.insert(legalDocuments).values([
       {

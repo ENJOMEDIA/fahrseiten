@@ -15,7 +15,7 @@ describe("MaintenancePage", () => {
       />,
     );
 
-    expect(screen.getByText("Fahrschule Beispiel")).toBeInTheDocument();
+    expect(screen.getAllByText("Fahrschule Beispiel")).toHaveLength(2);
     expect(
       screen.getByText("Unsere neue Website ist bald für dich da."),
     ).toBeInTheDocument();

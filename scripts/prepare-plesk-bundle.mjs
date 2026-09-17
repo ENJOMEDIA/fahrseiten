@@ -26,6 +26,7 @@ for (const file of [
   "cron.mjs",
   "install.mjs",
   "migrate.mjs",
+  "migration-runner.mjs",
   "password.mjs",
   "runtime-config.mjs",
   "validate-env.mjs",

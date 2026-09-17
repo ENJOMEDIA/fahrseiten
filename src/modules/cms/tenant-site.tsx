@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { BlockRenderer } from "./block-renderer";
 import type { PublishedPage, TenantWebsite } from "./types";
@@ -24,8 +25,18 @@ export function TenantSite({
     >
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
-          <Link className="text-lg font-bold" href="/">
-            {website.name}
+          <Link className="flex items-center gap-3 text-lg font-bold" href="/">
+            {website.theme.logoUrl ? (
+              <Image
+                alt={`Logo ${website.name}`}
+                className="h-10 w-auto object-contain"
+                height={40}
+                src={website.theme.logoUrl}
+                unoptimized
+                width={160}
+              />
+            ) : null}
+            <span>{website.name}</span>
           </Link>
           <nav aria-label="Hauptnavigation">
             <ul className="flex flex-wrap gap-5">
