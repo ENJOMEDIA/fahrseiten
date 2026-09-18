@@ -45,6 +45,9 @@ const serverEnvSchema = z.object({
   CONSENT_FUNCTIONAL_SERVICES: z.string().default(""),
   CONSENT_STATISTICS_SERVICES: z.string().default(""),
   CONSENT_MARKETING_SERVICES: z.string().default(""),
+  ONLINEBRIEF_API_KEY: z.string().min(1).optional(),
+  ONLINEBRIEF_API_SECRET: z.string().min(1).optional(),
+  ONLINEBRIEF_MODE: z.enum(["test", "live"]).default("test"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

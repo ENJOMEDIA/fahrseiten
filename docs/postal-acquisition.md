@@ -6,7 +6,7 @@ Stand: 18. September 2026.
 
 FahrSeiten kann einen persönlichen, signierten Link und einen QR-Code für einen vorhandenen Akquise-Kontakt erzeugen. Der Link ist für einen adressierten Brief bestimmt und führt auf eine eigene Rückmeldeseite unter `/brief/{leadId}`. Die bestehende Produktwebsite und die Beispielwebsite unter `/demo` bleiben davon getrennt.
 
-Eine Anbindung an einen Briefdienstleister ist noch nicht aktiv. Insbesondere werden derzeit keine Briefe automatisch bestellt, bezahlt oder an einen externen Anbieter übertragen. Die Auswahl eines Anbieters, dessen Auftragsverarbeitungsvertrag, Kosten, Testbetrieb und produktive Freigabe bleiben offene Entscheidungen.
+Die produktive Anbindung an einen Briefdienstleister ist noch nicht aktiv. Insbesondere werden derzeit keine Briefe automatisch bestellt, bezahlt oder an einen externen Anbieter übertragen. Für Onlinebrief24 ist ein technischer API-Adapter vorbereitet; Auftragsverarbeitungsvertrag, Kosten, Testbetrieb und produktive Freigabe bleiben vor dem ersten Versand zu prüfen.
 
 ## Ablauf
 
@@ -22,6 +22,25 @@ Eine Anbindung an einen Briefdienstleister ist noch nicht aktiv. Insbesondere we
 7. Eine Ablehnung sperrt weitere Akquise-E-Mails für diesen Kontakt, entfernt noch nicht versandte Akquise-Jobs und setzt den Kontakt auf `lost`.
 
 Die Bestätigungs- und Informationsmails werden durch die bestehende Hintergrundjob-Verarbeitung verschickt. Dafür müssen SMTP und der Plesk-Cronjob funktionsfähig eingerichtet sein. Ein bloßer Seitenaufruf bestätigt keine Einwilligung; die Bestätigung erfolgt ausdrücklich per POST, damit automatische Linkprüfungen von Mailprogrammen keine Zustimmung auslösen.
+
+## Onlinebrief24
+
+Der technische Adapter erzeugt den von Onlinebrief24 dokumentierten
+JSON-Request mit PDF als Base64, MD5-Prüfsumme, Lead-ID im Hinweisfeld und der
+Kostenstelle `FahrSeiten Akquise`. Der Adapter akzeptiert PDFs bis 50 MB und
+trennt Test- und Live-Modus. Im Testmodus landen Aufträge laut Anbieter im
+Warenkorb und werden nicht unmittelbar produziert. Der Live-Modus ist
+kostenpflichtig und verlangt deshalb im Anwendungscode zusätzlich die erneute
+Bestätigung der festen Lead-ID.
+
+API-Key und API-Secret werden nur als Plesk-Umgebungsvariablen gesetzt. Das
+Repository enthält keine Zugangsdaten. Vor dem ersten echten Versand bleiben
+Briefvorlage, Empfängeranschrift, Seitenformat, Fensterposition, Guthaben,
+Preis und der Auftrag im Onlinebrief24-Warenkorb manuell zu prüfen. Die
+Anbindung verschickt in diesem Stand selbstständig noch keinen Brief; sie ist
+die abgesicherte technische Grundlage für den nächsten Akquise-Schritt.
+
+Quelle: [Onlinebrief24 API-Dokumentation](https://www.onlinebrief24.de/briefe-uebertragen/api)
 
 ## Datenschutz und Nachweis
 

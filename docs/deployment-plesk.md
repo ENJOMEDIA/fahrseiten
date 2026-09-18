@@ -93,6 +93,15 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 
 `DATABASE_URL` wird bei der normalen Browserinstallation nicht vorab gesetzt. Host, Port, Datenbankname, Benutzer und Passwort werden in `/setup` erfasst. `PORT` und gegebenenfalls `HOSTNAME` werden von Plesk beziehungsweise seiner Node.js-Laufzeit verwaltet. Sie dürfen nicht hart im Repository eingetragen werden. Die Startvalidierung nennt ausschließlich fehlerhafte Variablennamen oder Regeln und gibt keine Secret-Werte aus.
 
+Für die optionale Onlinebrief24-Anbindung werden `ONLINEBRIEF_API_KEY` und
+`ONLINEBRIEF_API_SECRET` ausschließlich als geschützte Plesk-Variablen
+hinterlegt. `ONLINEBRIEF_MODE=test` ist die sichere Voreinstellung und legt
+übertragene Briefe nur in den Onlinebrief24-Warenkorb. Erst nach einer
+kontrollierten Abnahme darf `ONLINEBRIEF_MODE=live` gesetzt werden. Der
+Anwendungscode verlangt im Live-Modus zusätzlich die erneute Bestätigung der
+zugehörigen Lead-ID; Zugangsdaten werden weder in Git noch in der Datenbank
+gespeichert.
+
 ## Domain- und Proxy-Prüfung
 
 `fahrseiten.de` und `www.fahrseiten.de` gehören zur Marketingoberfläche. Login,

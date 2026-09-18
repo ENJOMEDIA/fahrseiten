@@ -4,14 +4,28 @@ import { revalidatePath } from "next/cache";
 
 import type { LegalActionState } from "@/app/kunde/rechtliches/actions";
 import {
+  createPlatformTermsDraft,
   createStructuredLegalDocuments,
   parseLegalProfileForm,
 } from "@/modules/legal/documents";
 import {
+  findPlatformLegalProfile,
   savePlatformLegalDocument,
   savePlatformLegalProfile,
 } from "@/modules/legal/repository";
 import { requirePlatformPermission } from "@/modules/platform/access";
+
+export async function replacePlatformTermsTemplateAction() {
+  const identity = await requirePlatformPermission("platform.security.manage");
+  const profile = await findPlatformLegalProfile();
+  if (!profile) throw new Error("Plattformstammdaten fehlen.");
+  await savePlatformLegalDocument(identity.id, {
+    type: "terms",
+    content: createPlatformTermsDraft(profile.data),
+    publish: false,
+  });
+  revalidatePath("/admin/rechtliches");
+}
 
 export async function savePlatformLegalAction(
   _state: LegalActionState,

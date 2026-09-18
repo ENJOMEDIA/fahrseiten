@@ -22,6 +22,7 @@ describe("parseServerEnv", () => {
       CONSENT_FUNCTIONAL_SERVICES: "",
       CONSENT_STATISTICS_SERVICES: "",
       CONSENT_MARKETING_SERVICES: "",
+      ONLINEBRIEF_MODE: "test",
     });
   });
 

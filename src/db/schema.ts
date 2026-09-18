@@ -1110,6 +1110,9 @@ export const subscriptions = mysqlTable(
     planNameSnapshot: varchar("plan_name_snapshot", { length: 120 }).notNull(),
     monthlyPriceCentsSnapshot: int("monthly_price_cents_snapshot"),
     setupPriceCentsSnapshot: int("setup_price_cents_snapshot"),
+    billingIntervalMonths: int("billing_interval_months").default(1).notNull(),
+    minimumTermMonths: int("minimum_term_months").default(1).notNull(),
+    nextInvoiceAt: timestamp("next_invoice_at", { mode: "date", fsp: 3 }),
     status: varchar("status", { length: 40 }).default("active").notNull(),
     startsAt: timestamp("starts_at", { mode: "date", fsp: 3 })
       .defaultNow()
@@ -1118,6 +1121,65 @@ export const subscriptions = mysqlTable(
     ...timestamps,
   },
   (table) => [index("subscriptions_tenant_idx").on(table.tenantId)],
+);
+
+export const billingProfiles = mysqlTable("billing_profiles", {
+  tenantId: id("tenant_id")
+    .primaryKey()
+    .references(() => tenants.id, { onDelete: "cascade" }),
+  useLocationAddress: boolean("use_location_address").default(true).notNull(),
+  companyName: varchar("company_name", { length: 180 }).notNull(),
+  recipientName: varchar("recipient_name", { length: 160 }),
+  email: varchar("email", { length: 254 }).notNull(),
+  street: varchar("street", { length: 180 }).notNull(),
+  postalCode: varchar("postal_code", { length: 20 }).notNull(),
+  city: varchar("city", { length: 120 }).notNull(),
+  country: varchar("country", { length: 120 }).default("Deutschland").notNull(),
+  vatId: varchar("vat_id", { length: 40 }),
+  ...timestamps,
+});
+
+export const invoiceStatusValues = [
+  "open",
+  "paid",
+  "overdue",
+  "cancelled",
+] as const;
+export const invoiceRecords = mysqlTable(
+  "invoice_records",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    subscriptionId: id("subscription_id").references(() => subscriptions.id, {
+      onDelete: "set null",
+    }),
+    customerNumberSnapshot: varchar("customer_number_snapshot", {
+      length: 32,
+    }).notNull(),
+    invoiceNumber: varchar("invoice_number", { length: 80 }).notNull(),
+    externalProvider: varchar("external_provider", { length: 40 })
+      .default("accountable")
+      .notNull(),
+    externalReference: varchar("external_reference", { length: 160 }),
+    issuedAt: timestamp("issued_at", { mode: "date", fsp: 3 }).notNull(),
+    dueAt: timestamp("due_at", { mode: "date", fsp: 3 }).notNull(),
+    grossAmountCents: int("gross_amount_cents").notNull(),
+    status: mysqlEnum("status", invoiceStatusValues).default("open").notNull(),
+    paidAt: timestamp("paid_at", { mode: "date", fsp: 3 }),
+    storageKey: varchar("storage_key", { length: 500 }).notNull(),
+    originalName: varchar("original_name", { length: 255 }).notNull(),
+    byteSize: int("byte_size").notNull(),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("invoice_records_number_unique").on(table.invoiceNumber),
+    index("invoice_records_tenant_due_idx").on(table.tenantId, table.dueAt),
+  ],
 );
 
 export const featureFlags = mysqlTable(

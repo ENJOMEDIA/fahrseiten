@@ -33,7 +33,7 @@ export class LocalMediaStorage implements MediaStorage {
     }
   }
   private resolve(key: string) {
-    if (!/^[a-zA-Z0-9/_-]+\.(png|jpg|webp|svg|ico)$/.test(key))
+    if (!/^[a-zA-Z0-9/_-]+\.(png|jpg|webp|svg|ico|pdf)$/.test(key))
       throw new Error("Ungültiger Speicherschlüssel.");
     const target = path.resolve(this.root, key);
     const root = `${path.resolve(this.root)}${path.sep}`;

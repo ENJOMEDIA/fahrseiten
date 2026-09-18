@@ -6,8 +6,15 @@ import { requirePlatformPermission } from "@/modules/platform/access";
 import { findPlatformTenant } from "@/modules/platform/tenant-directory";
 import { getDnsTarget } from "@/modules/platform/domain-operations";
 import { listPlatformPlans } from "@/modules/platform/plans";
+import { findTenantBilling } from "@/modules/billing/service";
 
 import { DomainManagement, TenantPlanForm } from "./domain-management";
+import {
+  BillingProfileForm,
+  BillingScheduleForm,
+  InvoiceUploadForm,
+} from "./billing-management";
+import { updateInvoiceStatusAction } from "./actions";
 import { TenantDeleteForm } from "./tenant-delete-form";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
@@ -66,13 +73,14 @@ export default async function TenantDetailPage({
   const { id } = await params;
   const tenant = await findPlatformTenant(id);
   if (!tenant) notFound();
-  const [dnsTarget, availablePlans] = await Promise.all([
+  const [dnsTarget, availablePlans, billing] = await Promise.all([
     getDnsTarget().catch(() => ({
       hostname: "fahrseiten.de",
       ipv4: [] as string[],
       ipv6: [] as string[],
     })),
     listPlatformPlans(),
+    findTenantBilling(id),
   ]);
 
   const legalComplete =
@@ -327,6 +335,168 @@ export default async function TenantDetailPage({
               </li>
             ))}
           </ol>
+        </Card>
+      </section>
+      <section className="mt-7 grid gap-5 xl:grid-cols-2">
+        <Card>
+          <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">
+            Vertrag & Abrechnung
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">
+            Laufzeit und Fälligkeit
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Accountable bleibt die Rechnungsquelle. Hier werden nur der
+            operative Vertragsstand und der nächste erwartete Rechnungstermin
+            gepflegt.
+          </p>
+          {billing.subscription ? (
+            <>
+              <BillingScheduleForm
+                subscription={billing.subscription}
+                tenantId={tenant.id}
+              />
+              <a
+                className="mt-5 inline-flex rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold"
+                href={`/api/admin/mandanten/${tenant.id}/vertrag`}
+              >
+                Vertrags-PDF erzeugen
+              </a>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                Das Muster vor Unterschrift zusammen mit Angebot, AGB und AVV
+                rechtlich auf den konkreten Auftrag prüfen.
+              </p>
+            </>
+          ) : (
+            <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
+              Weise zuerst ein Paket zu, damit Laufzeit und Vertrag erzeugt
+              werden können.
+            </p>
+          )}
+        </Card>
+        <Card>
+          <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">
+            Stammdaten
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Rechnungsanschrift</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Die Anschrift wird beim Einrichten abgefragt und kann für Rechnungen
+            und Vertragsdokumente getrennt vom Fahrschulstandort gepflegt
+            werden.
+          </p>
+          <BillingProfileForm profile={billing.profile} tenantId={tenant.id} />
+        </Card>
+      </section>
+      <section className="mt-7 grid gap-5 xl:grid-cols-[.9fr_1.1fr]">
+        <Card>
+          <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">
+            Accountable-Abgleich
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Rechnung hinterlegen</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Lade nach dem Versand über Accountable eine PDF-Kopie hoch. Die
+            Originalrechnung und steuerliche Archivierung bleiben in
+            Accountable.
+          </p>
+          <InvoiceUploadForm tenantId={tenant.id} />
+        </Card>
+        <Card>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">
+                Historie
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold">Rechnungen</h2>
+            </div>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
+              {billing.invoices.length}
+            </span>
+          </div>
+          <div className="mt-5 space-y-3">
+            {billing.invoices.length ? (
+              billing.invoices.map((invoice) => (
+                <div
+                  className="rounded-2xl border border-slate-200 p-4"
+                  key={invoice.id}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{invoice.invoiceNumber}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {formatter.format(invoice.issuedAt)} ·{" "}
+                        {moneyFormatter.format(invoice.grossAmountCents / 100)}
+                      </p>
+                    </div>
+                    <StatusBadge
+                      tone={
+                        invoice.status === "paid"
+                          ? "success"
+                          : invoice.status === "overdue"
+                            ? "danger"
+                            : "warning"
+                      }
+                    >
+                      {invoice.status === "paid"
+                        ? "Bezahlt"
+                        : invoice.status === "overdue"
+                          ? "Überfällig"
+                          : invoice.status === "cancelled"
+                            ? "Storniert"
+                            : "Offen"}
+                    </StatusBadge>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <a
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                      href={`/api/rechnungen/${invoice.id}`}
+                    >
+                      PDF laden
+                    </a>
+                    {invoice.status !== "paid" ? (
+                      <form action={updateInvoiceStatusAction}>
+                        <input
+                          name="tenantId"
+                          type="hidden"
+                          value={tenant.id}
+                        />
+                        <input
+                          name="invoiceId"
+                          type="hidden"
+                          value={invoice.id}
+                        />
+                        <input name="status" type="hidden" value="paid" />
+                        <button className="rounded-lg bg-emerald-100 px-3 py-2 text-xs font-semibold text-emerald-800">
+                          Als bezahlt markieren
+                        </button>
+                      </form>
+                    ) : null}
+                    {invoice.status === "open" ? (
+                      <form action={updateInvoiceStatusAction}>
+                        <input
+                          name="tenantId"
+                          type="hidden"
+                          value={tenant.id}
+                        />
+                        <input
+                          name="invoiceId"
+                          type="hidden"
+                          value={invoice.id}
+                        />
+                        <input name="status" type="hidden" value="overdue" />
+                        <button className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                          Als überfällig markieren
+                        </button>
+                      </form>
+                    ) : null}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
+                Noch keine Rechnungskopie hinterlegt.
+              </p>
+            )}
+          </div>
         </Card>
       </section>
       <section className="mt-7 grid gap-5 xl:grid-cols-[1.1fr_.9fr]">

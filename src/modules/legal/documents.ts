@@ -50,45 +50,63 @@ export function createPlatformTermsDraft(data: LegalProfileData) {
   return `Allgemeine Geschäftsbedingungen – ENTWURF
 
 1. Geltungsbereich
-Diese Allgemeinen Geschäftsbedingungen gelten für Verträge zwischen ${data.companyName} und gewerblich handelnden Fahrschulen über die Bereitstellung und Betreuung der FahrSeiten-Plattform.
+Diese Allgemeinen Geschäftsbedingungen gelten für Verträge zwischen ${data.companyName} (nachfolgend „Anbieter“) und Unternehmern im Sinne des § 14 BGB, insbesondere Fahrschulen (nachfolgend „Kunde“), über die Bereitstellung und Betreuung der FahrSeiten-Plattform. Verträge mit Verbrauchern werden auf dieser Grundlage nicht geschlossen. Abweichende Bedingungen des Kunden gelten nur, wenn der Anbieter ihnen ausdrücklich in Textform zustimmt.
 
 2. Leistungsumfang
-Der konkrete Leistungsumfang ergibt sich aus dem ausgewählten Paket, dem individuellen Angebot und der Auftragsbestätigung. Zusatzleistungen wie Fotografie, Medienproduktion, Texterstellung, Domainumzüge oder individuelle Anpassungen werden nur geschuldet, wenn sie ausdrücklich vereinbart wurden.
+Der konkrete Leistungsumfang ergibt sich aus dem ausgewählten Paket, dem individuellen Angebot, der Leistungsbeschreibung und der Auftragsbestätigung. Zusatzleistungen wie Fotografie, Medienproduktion, Texterstellung, Domainumzüge oder individuelle Anpassungen werden nur geschuldet, wenn sie ausdrücklich vereinbart wurden. Der Anbieter darf die Plattform weiterentwickeln, sofern der vereinbarte Kernnutzen dadurch nicht wesentlich eingeschränkt wird.
 
 3. Vertragsschluss
 [Festlegen: Wie werden Angebot, Annahme, Onboarding und Beginn des kostenpflichtigen Vertrags verbindlich?]
 
-4. Mitwirkungspflichten des Kunden
-Der Kunde stellt richtige und vollständige Inhalte, Kontaktdaten, Rechtstexte, Bildrechte und erforderliche Zugänge rechtzeitig bereit. Er prüft die von ihm veröffentlichten Inhalte und rechtlichen Angaben vor der Freigabe.
+4. Einrichtung und Mitwirkungspflichten
+Der Kunde stellt richtige und vollständige Stammdaten, Inhalte, Kontaktdaten, Freigaben und erforderliche Zugänge rechtzeitig bereit. Verzögerungen aus fehlender Mitwirkung verschieben vereinbarte Termine angemessen. Der Kunde prüft die eingerichtete Website vor Veröffentlichung und meldet erkennbare Fehler unverzüglich.
 
-5. Domains und Drittanbieter
+5. Verantwortung für Inhalte und Rechte
+Der Kunde ist für alle von ihm bereitgestellten, ausgewählten oder freigegebenen Texte, Bilder, Logos, Marken, Preise, Angebote und sonstigen Inhalte verantwortlich. Er sichert zu, dass die Inhalte richtig und rechtmäßig sind und er über alle erforderlichen Nutzungs-, Marken- und Persönlichkeitsrechte verfügt. Bei nachvollziehbaren Rechtsverletzungen darf der Anbieter betroffene Inhalte vorübergehend sperren und den Kunden informieren.
+
+Automatisch erzeugte oder technisch unterstützte Impressums-, Datenschutz-, Cookie- und Vertragstexte sind Arbeitshilfen. Der Kunde muss sie auf seinen konkreten Betrieb, seine Rechtsform und die tatsächlich eingesetzten Dienste prüfen und bei Bedarf rechtlich beraten lassen. Der Anbieter bleibt für seine eigenen technischen Leistungen und selbst erstellten Inhalte verantwortlich.
+
+6. Domains und Drittanbieter
 [Festlegen: Wer wird Domaininhaber, wer trägt laufende Domain-, Hosting- und Drittanbieterkosten und wie erfolgt ein Anbieterwechsel?]
 
-6. Vergütung und Fälligkeit
+7. Vergütung, Rechnung und Verzug
 [Festlegen: Einrichtungspreis, monatliche Abrechnung, Zahlungsziel, Umsatzsteuer, Verzug und Preise für Zusatzleistungen.]
+Rechnungen werden über das eingesetzte externe Rechnungssystem separat übermittelt. Eine zusätzliche Anzeige oder PDF-Kopie im FahrSeiten-Kundenbereich dient nur der Übersicht und ersetzt nicht die Rechnung. Der Kunde hält seine Rechnungsanschrift und Rechnungskontaktadresse aktuell.
 
-7. Laufzeit und Kündigung
+8. Laufzeit und Kündigung
 [Festlegen: Mindestlaufzeit, Verlängerung, ordentliche Kündigungsfrist und Folgen einer Vertragsbeendigung.]
 
-8. Verfügbarkeit, Wartung und Änderungen
+9. Verfügbarkeit, Wartung und Störungen
 [Festlegen: zugesagte Verfügbarkeit, angekündigte Wartungsfenster, Sicherheitsupdates und zulässige Weiterentwicklung der Plattform.]
+Der Kunde meldet Störungen mit einer nachvollziehbaren Beschreibung. Der Anbieter darf notwendige Wartungs- und Sicherheitsarbeiten durchführen und kündigt planbare Einschränkungen nach Möglichkeit an.
 
-9. Rechte an Inhalten und Medien
-Der Kunde versichert, die erforderlichen Rechte an bereitgestellten Texten, Marken, Logos, Fotos und sonstigen Medien zu besitzen. Rechte an individuell erstellten Foto- und Medienleistungen richten sich nach dem jeweiligen Angebot.
+10. Nutzungsrechte und Medienleistungen
+Der Kunde räumt dem Anbieter die für Vertragserfüllung, Speicherung, technische Bearbeitung und öffentliche Auslieferung erforderlichen, auf die Vertragsdauer beschränkten Nutzungsrechte an bereitgestellten Inhalten ein. Rechte an individuell erstellten Foto- und Medienleistungen, Rohdateien und Bearbeitungen richten sich nach dem jeweiligen Angebot.
 
-10. Datenschutz und Auftragsverarbeitung
+11. Datenschutz und Auftragsverarbeitung
 Die Parteien beachten die anwendbaren Datenschutzvorschriften. Soweit ${data.companyName} personenbezogene Daten im Auftrag des Kunden verarbeitet, wird vor Beginn der Verarbeitung eine gesonderte Vereinbarung zur Auftragsverarbeitung geschlossen.
 
-11. Haftung
-[Durch Rechtsberatung festlegen: Haftungsumfang, Kardinalpflichten, Datenverlust, höhere Gewalt und Haftungshöchstgrenzen.]
+12. Mängel und Haftung
+Der Anbieter erhält bei Mängeln zunächst Gelegenheit zur Nacherfüllung. Der Anbieter haftet unbeschränkt bei Vorsatz, grober Fahrlässigkeit, Verletzung von Leben, Körper oder Gesundheit, nach dem Produkthaftungsgesetz und in sonstigen gesetzlich zwingenden Fällen. Bei leicht fahrlässiger Verletzung einer wesentlichen Vertragspflicht ist die Haftung auf den vertragstypischen, bei Vertragsschluss vorhersehbaren Schaden begrenzt. Im Übrigen ist die Haftung für leichte Fahrlässigkeit ausgeschlossen, soweit gesetzlich zulässig. Für Datenverlust ist die Haftung auf den Wiederherstellungsaufwand begrenzt, der bei angemessener Datensicherung entstanden wäre.
 
-12. Datenexport und Vertragsende
+[Durch Rechtsberatung festlegen: angemessene Haftungshöchstgrenze für typische Sach- und Vermögensschäden sowie konkrete Regelung zu höherer Gewalt.]
+
+13. Sperrung
+Bei erheblichem Zahlungsverzug, Sicherheitsgefahren oder rechtswidriger Nutzung darf der Anbieter den betroffenen Zugang nach vorheriger Ankündigung vorübergehend sperren, soweit keine sofortige Maßnahme erforderlich ist. Die Sperrung muss verhältnismäßig sein und wird aufgehoben, sobald ihr Grund entfällt.
+
+14. Datenexport und Vertragsende
 [Festlegen: Exportformat, Bereitstellungsfrist, Löschfrist, Domainübertragung und kostenpflichtige Unterstützungsleistungen nach Vertragsende.]
 
-13. Schlussbestimmungen
+15. Vertraulichkeit
+Beide Parteien behandeln nicht öffentliche geschäftliche und technische Informationen vertraulich. Gesetzliche Offenlegungs- und Aufbewahrungspflichten bleiben unberührt.
+
+16. Änderungen dieser AGB
+[Festlegen: Unter welchen Voraussetzungen und mit welcher Vorlauffrist dürfen AGB für laufende Verträge geändert werden? Eine Zustimmungsfiktion darf nicht pauschal unterstellt werden.]
+
+17. Schlussbestimmungen
 [Festlegen: anwendbares Recht, Gerichtsstand für Unternehmer, Textform und Umgang mit unwirksamen Bestimmungen.]
 
-Dieser Entwurf enthält offene geschäftliche und rechtliche Entscheidungen. Er darf erst nach Vervollständigung und anwaltlicher Prüfung veröffentlicht oder in Verträge einbezogen werden.`;
+Dieser B2B-Entwurf enthält offene geschäftliche und rechtliche Entscheidungen. Er darf erst nach Vervollständigung, Abgleich mit Angebot, Vertragsmuster und AVV sowie anwaltlicher Prüfung veröffentlicht oder in Verträge einbezogen werden.`;
 }
 
 export function validateLegalPublication(raw: unknown) {

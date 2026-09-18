@@ -36,6 +36,12 @@ export const customerNavigation = [
     description: "Adresse und SSL-Status",
   },
   {
+    href: "/kunde/abrechnung",
+    label: "Vertrag & Rechnungen",
+    icon: "€",
+    description: "Laufzeit, Fälligkeit und Belege",
+  },
+  {
     href: "/kunde/rechtliches",
     label: "Rechtliches",
     icon: "§",

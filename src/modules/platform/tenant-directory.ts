@@ -8,6 +8,7 @@ import {
   backgroundJobs,
   domains,
   legalDocuments,
+  invoiceRecords,
   mediaAssets,
   sites,
   subscriptions,
@@ -303,6 +304,10 @@ export async function deletePlatformTenant(input: {
       })
       .from(mediaAssets)
       .where(eq(mediaAssets.tenantId, tenant.id));
+    const invoiceFiles = await tx
+      .select({ storageKey: invoiceRecords.storageKey })
+      .from(invoiceRecords)
+      .where(eq(invoiceRecords.tenantId, tenant.id));
     const memberships = await tx
       .select({ userId: tenantMemberships.userId })
       .from(tenantMemberships)
@@ -360,11 +365,14 @@ export async function deletePlatformTenant(input: {
         originLeadId: originLead?.id ?? null,
       },
     });
-    return assets.flatMap((asset) =>
-      asset.optimizedStorageKey
-        ? [asset.storageKey, asset.optimizedStorageKey]
-        : [asset.storageKey],
-    );
+    return [
+      ...assets.flatMap((asset) =>
+        asset.optimizedStorageKey
+          ? [asset.storageKey, asset.optimizedStorageKey]
+          : [asset.storageKey],
+      ),
+      ...invoiceFiles.map((invoice) => invoice.storageKey),
+    ];
   });
 
   const cleanup = await Promise.allSettled(

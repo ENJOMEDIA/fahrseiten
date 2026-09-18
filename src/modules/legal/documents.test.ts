@@ -158,5 +158,14 @@ describe("legal document publication", () => {
     expect(platform.privacy).toContain("Postalische Akquise");
     expect(tenant.privacy).not.toContain("Postalische Akquise");
     expect(createPlatformTermsDraft(data)).toContain("[Festlegen:");
+    expect(createPlatformTermsDraft(data)).toContain(
+      "Unternehmern im Sinne des § 14 BGB",
+    );
+    expect(createPlatformTermsDraft(data)).toContain(
+      "Verantwortung für Inhalte und Rechte",
+    );
+    expect(createPlatformTermsDraft(data)).toContain(
+      "wesentlichen Vertragspflicht",
+    );
   });
 });

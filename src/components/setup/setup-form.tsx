@@ -222,6 +222,7 @@ export function TenantOnboardingForm({
 }) {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const [useLocationForBilling, setUseLocationForBilling] = useState(true);
 
   async function submit(formData: FormData) {
     setPending(true);
@@ -303,6 +304,55 @@ export function TenantOnboardingForm({
           required
         />
       </div>
+      <fieldset className="grid gap-5 rounded-2xl border border-slate-200 p-5 sm:col-span-2 sm:grid-cols-2">
+        <legend className="px-2 font-semibold">Rechnungsanschrift</legend>
+        <input name="billingUseLocationAddress" type="hidden" value="false" />
+        <label className="flex items-start gap-3 text-sm leading-6 sm:col-span-2">
+          <input
+            checked={useLocationForBilling}
+            className="mt-1 size-5"
+            name="billingUseLocationAddress"
+            onChange={(event) => setUseLocationForBilling(event.target.checked)}
+            type="checkbox"
+          />
+          <span>
+            Standortadresse und Kunden-E-Mail auch als Rechnungsanschrift
+            verwenden
+          </span>
+        </label>
+        {!useLocationForBilling ? (
+          <>
+            <Input
+              label="Firma / Rechnungsempfänger"
+              name="billingCompanyName"
+              required
+            />
+            <Input
+              label="Ansprechpartner (optional)"
+              name="billingRecipientName"
+            />
+            <Input
+              label="Rechnungs-E-Mail"
+              name="billingEmail"
+              required
+              type="email"
+            />
+            <Input
+              label="Straße und Hausnummer"
+              name="billingStreet"
+              required
+            />
+            <Input label="Postleitzahl" name="billingPostalCode" required />
+            <Input label="Ort" name="billingCity" required />
+            <Input
+              defaultValue="Deutschland"
+              label="Land"
+              name="billingCountry"
+              required
+            />
+          </>
+        ) : null}
+      </fieldset>
       <Input
         defaultValue="#0891b2"
         label="Primärfarbe"

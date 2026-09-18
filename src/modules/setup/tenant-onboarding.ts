@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import {
   auditLogs,
   backgroundJobs,
+  billingProfiles,
   contactForms,
   domains,
   legalDocuments,
@@ -305,6 +306,32 @@ export async function completeTenantOnboarding(input: unknown) {
       city: parsed.city,
       phone: parsed.phone || null,
       email: parsed.ownerEmail,
+    });
+    await tx.insert(billingProfiles).values({
+      tenantId,
+      useLocationAddress: parsed.billingUseLocationAddress,
+      companyName: parsed.billingUseLocationAddress
+        ? parsed.companyName
+        : parsed.billingCompanyName!,
+      recipientName: parsed.billingUseLocationAddress
+        ? parsed.ownerName
+        : parsed.billingRecipientName || null,
+      email: parsed.billingUseLocationAddress
+        ? parsed.ownerEmail
+        : parsed.billingEmail!,
+      street: parsed.billingUseLocationAddress
+        ? parsed.street
+        : parsed.billingStreet!,
+      postalCode: parsed.billingUseLocationAddress
+        ? parsed.postalCode
+        : parsed.billingPostalCode!,
+      city: parsed.billingUseLocationAddress
+        ? parsed.city
+        : parsed.billingCity!,
+      country: parsed.billingUseLocationAddress
+        ? "Deutschland"
+        : parsed.billingCountry!,
+      vatId: parsed.vatId || null,
     });
     await tx.insert(domains).values({
       id: randomUUID(),
