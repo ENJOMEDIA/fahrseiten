@@ -78,12 +78,13 @@ export async function assignPlanAction(
   _state: DomainActionState,
   formData: FormData,
 ): Promise<DomainActionState> {
-  await requirePlatformPermission("platform.tenants.manage");
+  const identity = await requirePlatformPermission("platform.tenants.manage");
   try {
     const tenantId = String(formData.get("tenantId"));
     await assignTenantPlan({
       tenantId,
       planId: String(formData.get("planId")),
+      actorUserId: identity.id,
     });
     revalidatePath(`/admin/mandanten/${tenantId}`);
     revalidatePath("/admin/mandanten");

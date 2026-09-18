@@ -1,10 +1,15 @@
 import "server-only";
 
-import { asc, desc, eq, like } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, like } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db/client";
-import { backgroundJobs, salesActivities, salesLeads } from "@/db/schema";
+import {
+  backgroundJobs,
+  salesActivities,
+  salesLeads,
+  tenantOnboardingTokens,
+} from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { salesStages, type LeadStatus } from "./sales-stages";
 import type { SalesCsvRow } from "./sales-csv";
@@ -70,6 +75,24 @@ export async function listSalesPipeline() {
     latestActivity: latestByLead.get(lead.id) ?? null,
     latestOutreach: latestOutreachByLead.get(lead.id) ?? null,
   }));
+}
+
+export async function findSalesLeadForInstance(id: string) {
+  const leadId = z.uuid().parse(id);
+  const [lead] = await db
+    .select({
+      id: salesLeads.id,
+      companyName: salesLeads.companyName,
+      contactName: salesLeads.contactName,
+      email: salesLeads.email,
+      phone: salesLeads.phone,
+      website: salesLeads.website,
+      convertedTenantId: salesLeads.convertedTenantId,
+    })
+    .from(salesLeads)
+    .where(eq(salesLeads.id, leadId))
+    .limit(1);
+  return lead ?? null;
 }
 
 export async function createManualLead(raw: unknown, actorUserId: string) {
@@ -183,11 +206,32 @@ export async function deleteSalesLead(input: {
   const id = z.uuid().parse(input.id);
   return db.transaction(async (tx) => {
     const [lead] = await tx
-      .select({ companyName: salesLeads.companyName })
+      .select({
+        companyName: salesLeads.companyName,
+        convertedTenantId: salesLeads.convertedTenantId,
+      })
       .from(salesLeads)
       .where(eq(salesLeads.id, id))
       .limit(1);
     if (!lead) throw new Error("Der Akquise-Kontakt wurde nicht gefunden.");
+    if (lead.convertedTenantId)
+      throw new Error(
+        "Dieser Lead gehört zu einer Kundenakte und darf nicht gelöscht werden.",
+      );
+    const [pendingSetup] = await tx
+      .select({ id: tenantOnboardingTokens.id })
+      .from(tenantOnboardingTokens)
+      .where(
+        and(
+          eq(tenantOnboardingTokens.leadId, id),
+          isNull(tenantOnboardingTokens.usedAt),
+        ),
+      )
+      .limit(1);
+    if (pendingSetup)
+      throw new Error(
+        "Für diesen Lead läuft eine Instanzeinrichtung. Storniere zuerst den Einrichtungslink.",
+      );
     if (input.confirmation.trim() !== lead.companyName)
       throw new Error("Der eingegebene Name stimmt nicht überein.");
 

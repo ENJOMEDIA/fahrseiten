@@ -177,6 +177,17 @@ export default async function TenantsPage({
                       SMTP-Fehler: {setup.invitation.lastErrorCode}
                     </p>
                   ) : null}
+                  {!setup.leadId ? (
+                    <p className="mt-3 rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-800">
+                      Keine eindeutige Lead-Zuordnung vorhanden. Bitte diese
+                      alte Einrichtung stornieren und aus dem Akquise-Lead neu
+                      erstellen.
+                    </p>
+                  ) : (
+                    <p className="mt-3 font-mono text-[11px] text-slate-400">
+                      Lead: {setup.leadId}
+                    </p>
+                  )}
                   <CancelPendingInstanceForm
                     displayName={displayName}
                     setupId={setup.id}
@@ -233,7 +244,8 @@ export default async function TenantsPage({
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
-                    Seit {formatter.format(tenant.createdAt)}
+                    {tenant.customerNumber} · Seit{" "}
+                    {formatter.format(tenant.createdAt)}
                   </p>
                   <h2 className="mt-2 truncate text-xl font-semibold">
                     {tenant.name}
@@ -281,7 +293,7 @@ export default async function TenantsPage({
                 className="mt-5 inline-flex font-semibold text-cyan-800"
                 href={`/admin/mandanten/${tenant.id}`}
               >
-                Einrichtung und Details ansehen →
+                Kundenakte öffnen →
               </Link>
             </Card>
           ))}

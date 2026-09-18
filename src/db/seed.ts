@@ -66,11 +66,13 @@ try {
       .values([
         {
           id: ids.demoTenant,
+          customerNumber: "FS-100000000000",
           name: "Fahrschule Morgenrot (Demo)",
           slug: "morgenrot-demo",
         },
         {
           id: ids.isolationTenant,
+          customerNumber: "FS-200000000000",
           name: "Fahrschule Nordstern (Test)",
           slug: "nordstern-test",
         },
@@ -581,6 +583,9 @@ try {
         id: ids.subscription,
         tenantId: ids.demoTenant,
         planId: ids.localPlan,
+        planNameSnapshot: "Lokaler Demo-Plan",
+        monthlyPriceCentsSnapshot: null,
+        setupPriceCentsSnapshot: null,
         status: "active",
       })
       .onDuplicateKeyUpdate({ set: { status: "active" } });

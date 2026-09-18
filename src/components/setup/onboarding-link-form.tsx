@@ -2,7 +2,21 @@
 
 import { useState } from "react";
 
-export function OnboardingLinkForm() {
+type OnboardingPrefill = {
+  companyName?: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  phone?: string;
+  domain?: string;
+};
+
+export function OnboardingLinkForm({
+  leadId,
+  initialValues = {},
+}: {
+  leadId?: string;
+  initialValues?: OnboardingPrefill;
+}) {
   const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -19,6 +33,7 @@ export function OnboardingLinkForm() {
         ownerEmail: formData.get("ownerEmail"),
         phone: formData.get("phone"),
         domain: formData.get("domain"),
+        leadId: formData.get("leadId"),
         sendInvitation,
       }),
     });
@@ -50,6 +65,7 @@ export function OnboardingLinkForm() {
       action={(formData) => createInstance(formData, false)}
       className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
     >
+      <input name="leadId" type="hidden" value={leadId ?? ""} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold tracking-[0.18em] text-cyan-700 uppercase">
@@ -67,16 +83,35 @@ export function OnboardingLinkForm() {
         </span>
       </div>
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
-        <Field label="Fahrschule / Firma" name="companyName" />
-        <Field label="Ansprechperson / Inhaber" name="ownerName" />
-        <Field label="E-Mail des Kunden" name="ownerEmail" type="email" />
-        <Field label="Telefon" name="phone" />
+        <Field
+          defaultValue={initialValues.companyName}
+          label="Fahrschule / Firma"
+          name="companyName"
+          required
+        />
+        <Field
+          defaultValue={initialValues.ownerName}
+          label="Ansprechperson / Inhaber"
+          name="ownerName"
+        />
+        <Field
+          defaultValue={initialValues.ownerEmail}
+          label="E-Mail des Kunden"
+          name="ownerEmail"
+          type="email"
+        />
+        <Field
+          defaultValue={initialValues.phone}
+          label="Telefon"
+          name="phone"
+        />
         <div className="sm:col-span-2">
           <Field
             hint="Ohne https:// und ohne Pfad. Kann vom Kunden noch korrigiert werden."
             label="Gewünschte Domain"
             name="domain"
             placeholder="fahrschule-beispiel.de"
+            defaultValue={initialValues.domain}
           />
         </div>
       </div>
@@ -143,20 +178,26 @@ function Field({
   type = "text",
   hint,
   placeholder,
+  defaultValue,
+  required = false,
 }: {
   label: string;
   name: string;
   type?: string;
   hint?: string;
   placeholder?: string;
+  defaultValue?: string;
+  required?: boolean;
 }) {
   return (
     <label className="block text-sm font-semibold">
       {label}
       <input
         className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+        defaultValue={defaultValue}
         name={name}
         placeholder={placeholder}
+        required={required}
         type={type}
       />
       {hint ? (

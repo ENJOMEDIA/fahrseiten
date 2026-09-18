@@ -12,6 +12,8 @@ import {
   sites,
   subscriptions,
   plans,
+  salesActivities,
+  salesLeads,
   tenantMemberships,
   tenantOnboardingTokens,
   tenants,
@@ -23,6 +25,7 @@ export async function listPlatformTenants() {
   return db
     .select({
       id: tenants.id,
+      customerNumber: tenants.customerNumber,
       name: tenants.name,
       slug: tenants.slug,
       status: tenants.status,
@@ -65,6 +68,7 @@ export async function listPendingInstanceSetups() {
   const setups = await db
     .select({
       id: tenantOnboardingTokens.id,
+      leadId: tenantOnboardingTokens.leadId,
       prefill: tenantOnboardingTokens.prefill,
       expiresAt: tenantOnboardingTokens.expiresAt,
       createdAt: tenantOnboardingTokens.createdAt,
@@ -104,6 +108,7 @@ export async function cancelPendingInstanceSetup(input: {
     const [setup] = await tx
       .select({
         id: tenantOnboardingTokens.id,
+        leadId: tenantOnboardingTokens.leadId,
         prefill: tenantOnboardingTokens.prefill,
         usedAt: tenantOnboardingTokens.usedAt,
       })
@@ -129,6 +134,14 @@ export async function cancelPendingInstanceSetup(input: {
     await tx
       .delete(tenantOnboardingTokens)
       .where(eq(tenantOnboardingTokens.id, setup.id));
+    if (setup.leadId)
+      await tx.insert(salesActivities).values({
+        id: randomUUID(),
+        leadId: setup.leadId,
+        actorUserId: input.actorUserId,
+        activityType: "instance_setup_cancelled",
+        note: "Vorbereitete Instanz und Einrichtungslink wurden storniert.",
+      });
     await tx.insert(auditLogs).values({
       id: randomUUID(),
       actorUserId: input.actorUserId,
@@ -145,6 +158,7 @@ export async function findPlatformTenant(id: string) {
   const [tenant] = await db
     .select({
       id: tenants.id,
+      customerNumber: tenants.customerNumber,
       name: tenants.name,
       slug: tenants.slug,
       status: tenants.status,
@@ -160,6 +174,11 @@ export async function findPlatformTenant(id: string) {
       ownerEmail: users.email,
       ownerActive: users.active,
       planName: plans.publicName,
+      subscriptionId: subscriptions.id,
+      subscriptionStatus: subscriptions.status,
+      subscriptionStartsAt: subscriptions.startsAt,
+      monthlyPriceCents: subscriptions.monthlyPriceCentsSnapshot,
+      setupPriceCents: subscriptions.setupPriceCentsSnapshot,
     })
     .from(tenants)
     .leftJoin(
@@ -188,18 +207,71 @@ export async function findPlatformTenant(id: string) {
     .limit(1);
 
   if (!tenant) return null;
-  const publishedLegal = await db
-    .select({ documentType: legalDocuments.documentType })
-    .from(legalDocuments)
-    .where(
-      and(
-        eq(legalDocuments.tenantId, tenant.id),
-        eq(legalDocuments.status, "published"),
-      ),
-    );
+  const [publishedLegal, originLeads, tenantAudits, billingHistory] =
+    await Promise.all([
+      db
+        .select({ documentType: legalDocuments.documentType })
+        .from(legalDocuments)
+        .where(
+          and(
+            eq(legalDocuments.tenantId, tenant.id),
+            eq(legalDocuments.status, "published"),
+          ),
+        ),
+      db
+        .select()
+        .from(salesLeads)
+        .where(eq(salesLeads.convertedTenantId, tenant.id))
+        .limit(1),
+      db
+        .select({
+          id: auditLogs.id,
+          action: auditLogs.action,
+          entityType: auditLogs.entityType,
+          metadata: auditLogs.metadata,
+          createdAt: auditLogs.createdAt,
+          actorName: users.displayName,
+        })
+        .from(auditLogs)
+        .leftJoin(users, eq(users.id, auditLogs.actorUserId))
+        .where(eq(auditLogs.tenantId, tenant.id))
+        .orderBy(desc(auditLogs.createdAt)),
+      db
+        .select({
+          id: subscriptions.id,
+          status: subscriptions.status,
+          startsAt: subscriptions.startsAt,
+          endsAt: subscriptions.endsAt,
+          planName: subscriptions.planNameSnapshot,
+          monthlyPriceCents: subscriptions.monthlyPriceCentsSnapshot,
+          setupPriceCents: subscriptions.setupPriceCentsSnapshot,
+        })
+        .from(subscriptions)
+        .where(eq(subscriptions.tenantId, tenant.id))
+        .orderBy(desc(subscriptions.startsAt)),
+    ]);
+  const originLead = originLeads[0] ?? null;
+  const leadActivities = originLead
+    ? await db
+        .select({
+          id: salesActivities.id,
+          activityType: salesActivities.activityType,
+          note: salesActivities.note,
+          createdAt: salesActivities.createdAt,
+          actorName: users.displayName,
+        })
+        .from(salesActivities)
+        .leftJoin(users, eq(users.id, salesActivities.actorUserId))
+        .where(eq(salesActivities.leadId, originLead.id))
+        .orderBy(desc(salesActivities.createdAt))
+    : [];
   return {
     ...tenant,
     publishedLegal: new Set(publishedLegal.map((row) => row.documentType)),
+    originLead,
+    leadActivities,
+    tenantAudits,
+    billingHistory,
   };
 }
 
@@ -209,7 +281,11 @@ export async function deletePlatformTenant(input: {
   actorUserId: string;
 }) {
   const [tenant] = await db
-    .select({ id: tenants.id, name: tenants.name })
+    .select({
+      id: tenants.id,
+      name: tenants.name,
+      customerNumber: tenants.customerNumber,
+    })
     .from(tenants)
     .where(eq(tenants.id, input.tenantId))
     .limit(1);
@@ -231,6 +307,29 @@ export async function deletePlatformTenant(input: {
       .select({ userId: tenantMemberships.userId })
       .from(tenantMemberships)
       .where(eq(tenantMemberships.tenantId, tenant.id));
+    const [originLead] = await tx
+      .select({ id: salesLeads.id })
+      .from(salesLeads)
+      .where(eq(salesLeads.convertedTenantId, tenant.id))
+      .limit(1);
+
+    if (originLead) {
+      await tx.insert(salesActivities).values({
+        id: randomUUID(),
+        leadId: originLead.id,
+        actorUserId: input.actorUserId,
+        activityType: "tenant_deleted",
+        note: `Kundeninstanz ${tenant.customerNumber} wurde gelöscht. Die Akquise-Historie bleibt erhalten.`,
+      });
+      await tx
+        .update(salesLeads)
+        .set({
+          status: "lost",
+          lossReason: `Ehemalige Kundenakte ${tenant.customerNumber}; Instanz gelöscht`,
+          nextTaskAt: null,
+        })
+        .where(eq(salesLeads.id, originLead.id));
+    }
 
     await tx.delete(tenants).where(eq(tenants.id, tenant.id));
 
@@ -255,7 +354,11 @@ export async function deletePlatformTenant(input: {
       action: "tenant.deleted",
       entityType: "tenant",
       entityId: tenant.id,
-      metadata: { mediaFiles: assets.length },
+      metadata: {
+        mediaFiles: assets.length,
+        customerNumber: tenant.customerNumber,
+        originLeadId: originLead?.id ?? null,
+      },
     });
     return assets.flatMap((asset) =>
       asset.optimizedStorageKey

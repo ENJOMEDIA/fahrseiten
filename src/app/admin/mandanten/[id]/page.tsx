@@ -11,6 +11,34 @@ import { DomainManagement, TenantPlanForm } from "./domain-management";
 import { TenantDeleteForm } from "./tenant-delete-form";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
+const timelineFormatter = new Intl.DateTimeFormat("de-DE", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+const moneyFormatter = new Intl.NumberFormat("de-DE", {
+  style: "currency",
+  currency: "EUR",
+});
+
+const activityLabels: Record<string, string> = {
+  note: "Akquise-Notiz",
+  csv_import_note: "Lead importiert",
+  instance_setup_created: "Instanzeinrichtung vorbereitet",
+  instance_setup_cancelled: "Instanzeinrichtung storniert",
+  tenant_created: "Kundeninstanz angelegt",
+  tenant_deleted: "Kundeninstanz gelöscht",
+  postal_response_declined: "Postalische Ansprache abgelehnt",
+  postal_response_pending: "Rückmeldung über Brief-Link",
+  postal_email_confirmed: "E-Mail-Adresse bestätigt",
+};
+
+const auditLabels: Record<string, string> = {
+  "tenant.onboarding.completed": "Einrichtung abgeschlossen",
+  "tenant.domain.updated": "Kundendomain geändert",
+  "tenant.domain.checked": "DNS und SSL geprüft",
+  "legal.published": "Rechtstext veröffentlicht",
+  "legal.draft.saved": "Rechtstext-Entwurf gespeichert",
+};
 
 function Step({
   complete,
@@ -56,6 +84,47 @@ export default async function TenantDetailPage({
   const dnsHost = domainIsSubdomain
     ? (tenant.domain?.split(".")[0] ?? "www")
     : "@";
+  const timeline = [
+    ...(tenant.originLead
+      ? [
+          {
+            id: `lead-${tenant.originLead.id}`,
+            title: "Akquise-Lead angelegt",
+            detail: `Quelle: ${tenant.originLead.source ?? "nicht angegeben"}`,
+            date: tenant.originLead.createdAt,
+            actor: null as string | null,
+          },
+        ]
+      : []),
+    ...tenant.leadActivities.map((activity) => ({
+      id: `activity-${activity.id}`,
+      title:
+        activityLabels[activity.activityType] ??
+        `Akquise: ${activity.activityType}`,
+      detail: activity.note,
+      date: activity.createdAt,
+      actor: activity.actorName,
+    })),
+    ...tenant.tenantAudits
+      .filter((event) => event.action !== "tenant.plan.assigned")
+      .map((event) => ({
+        id: `audit-${event.id}`,
+        title: auditLabels[event.action] ?? event.action,
+        detail: `Systemprotokoll · ${event.entityType}`,
+        date: event.createdAt,
+        actor: event.actorName,
+      })),
+    ...tenant.billingHistory.map((entry) => ({
+      id: `subscription-${entry.id}`,
+      title:
+        entry.status === "active"
+          ? `Paket „${entry.planName}“ zugewiesen`
+          : `Paket „${entry.planName}“ beendet`,
+      detail: `${entry.monthlyPriceCents === null ? "Monatspreis offen" : `${moneyFormatter.format(entry.monthlyPriceCents / 100)} monatlich`}${entry.setupPriceCents === null ? "" : ` · ${moneyFormatter.format(entry.setupPriceCents / 100)} Einrichtung`}`,
+      date: entry.startsAt,
+      actor: null as string | null,
+    })),
+  ].sort((left, right) => right.date.getTime() - left.date.getTime());
 
   return (
     <CustomerPage
@@ -135,6 +204,131 @@ export default async function TenantDetailPage({
           </Card>
         </div>
       </div>
+      <section className="mt-7 grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
+        <div className="grid gap-5">
+          <Card className="border-cyan-100 bg-gradient-to-br from-cyan-50 to-white">
+            <p className="text-xs font-semibold tracking-[.16em] text-cyan-800 uppercase">
+              Kundenakte
+            </p>
+            <p className="mt-3 text-3xl font-semibold tracking-tight">
+              {tenant.customerNumber}
+            </p>
+            <dl className="mt-5 space-y-4 text-sm">
+              <div>
+                <dt className="text-slate-500">Ursprüngliche Lead-ID</dt>
+                <dd className="mt-1 font-mono text-xs break-all">
+                  {tenant.originLead?.id ?? "Keine Altzuordnung vorhanden"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Instanz-ID</dt>
+                <dd className="mt-1 font-mono text-xs break-all">
+                  {tenant.id}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Akquise-Status</dt>
+                <dd className="mt-1 font-semibold">
+                  {tenant.originLead?.status ?? "Historischer Bestand"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Brief-Rückmeldung</dt>
+                <dd className="mt-1 font-semibold">
+                  {tenant.originLead?.postalResponse ?? "Keine Rückmeldung"}
+                </dd>
+              </div>
+            </dl>
+          </Card>
+          <Card>
+            <p className="text-xs font-semibold tracking-[.16em] text-slate-500 uppercase">
+              Abrechnungsbezug
+            </p>
+            <h2 className="mt-2 text-xl font-semibold">
+              {tenant.planName ?? "Noch kein Paket"}
+            </h2>
+            {tenant.subscriptionId ? (
+              <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-slate-500">Monatlich</dt>
+                  <dd className="font-semibold">
+                    {tenant.monthlyPriceCents === null
+                      ? "Offen"
+                      : moneyFormatter.format(tenant.monthlyPriceCents / 100)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Einrichtung</dt>
+                  <dd className="font-semibold">
+                    {tenant.setupPriceCents === null
+                      ? "Offen"
+                      : moneyFormatter.format(tenant.setupPriceCents / 100)}
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-500">Vertragszuordnung</dt>
+                  <dd className="mt-1 font-mono text-xs break-all">
+                    {tenant.subscriptionId}
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="mt-3 text-sm text-slate-600">
+                Sobald ein Paket zugewiesen wird, werden Bezeichnung und Preise
+                als historischer Stand gespeichert.
+              </p>
+            )}
+            <p className="mt-4 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">
+              Künftige Rechnungsdokumente werden über die Kundennummer und die
+              Vertragszuordnung referenziert. Eine automatische
+              Rechnungserstellung ist noch nicht aktiv.
+            </p>
+          </Card>
+        </div>
+        <Card>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">
+                Verlauf
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold">
+                Akquise bis Kundenbetrieb
+              </h2>
+            </div>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
+              {timeline.length} Ereignisse
+            </span>
+          </div>
+          <ol className="mt-6 space-y-5">
+            {timeline.map((event) => (
+              <li
+                className="relative grid grid-cols-[auto_1fr] gap-4"
+                key={event.id}
+              >
+                <span className="mt-1 size-3 rounded-full bg-cyan-500 ring-4 ring-cyan-50" />
+                <div className="border-b border-slate-100 pb-5">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <p className="font-semibold">{event.title}</p>
+                    <time className="text-xs text-slate-500">
+                      {timelineFormatter.format(event.date)}
+                    </time>
+                  </div>
+                  {event.detail ? (
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                      {event.detail}
+                    </p>
+                  ) : null}
+                  {event.actor ? (
+                    <p className="mt-1 text-xs text-slate-400">
+                      Bearbeitet von {event.actor}
+                    </p>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </Card>
+      </section>
       <section className="mt-7 grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
         <Card className="overflow-hidden p-0">
           <div className="border-b border-slate-100 bg-gradient-to-r from-cyan-50 to-white p-6">
@@ -259,7 +453,9 @@ export default async function TenantDetailPage({
           </Card>
           <Card>
             <p className="text-sm text-slate-500">Interne Kennung</p>
-            <p className="mt-1 font-mono text-xs break-all">{tenant.id}</p>
+            <p className="mt-1 font-mono text-xs break-all">
+              {tenant.customerNumber}
+            </p>
             <p className="mt-3 text-xs text-slate-500">
               Zuletzt geändert: {formatter.format(tenant.updatedAt)}
             </p>

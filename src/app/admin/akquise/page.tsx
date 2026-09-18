@@ -244,7 +244,7 @@ export default async function SalesPage() {
                   {lead.status === "won" && !lead.convertedTenantId ? (
                     <Link
                       className="mt-3 inline-flex rounded-xl bg-emerald-100 px-3 py-2 text-xs font-semibold text-emerald-900"
-                      href="/admin/mandanten/neu"
+                      href={`/admin/mandanten/neu?lead=${lead.id}`}
                     >
                       Instanz vorbereiten →
                     </Link>

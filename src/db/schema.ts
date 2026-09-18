@@ -56,12 +56,16 @@ export const tenants = mysqlTable(
   "tenants",
   {
     id: id("id").primaryKey(),
+    customerNumber: varchar("customer_number", { length: 32 }).notNull(),
     name: varchar("name", { length: 160 }).notNull(),
     slug: varchar("slug", { length: 100 }).notNull(),
     status: mysqlEnum("status", tenantStatusValues).default("active").notNull(),
     ...timestamps,
   },
-  (table) => [uniqueIndex("tenants_slug_unique").on(table.slug)],
+  (table) => [
+    uniqueIndex("tenants_customer_number_unique").on(table.customerNumber),
+    uniqueIndex("tenants_slug_unique").on(table.slug),
+  ],
 );
 
 export const users = mysqlTable(
@@ -113,6 +117,7 @@ export const tenantOnboardingTokens = mysqlTable(
   "tenant_onboarding_tokens",
   {
     id: id("id").primaryKey(),
+    leadId: id("lead_id"),
     tokenHash: varchar("token_hash", { length: 64 }).notNull(),
     createdByUserId: id("created_by_user_id")
       .notNull()
@@ -132,6 +137,7 @@ export const tenantOnboardingTokens = mysqlTable(
   },
   (table) => [
     uniqueIndex("tenant_onboarding_tokens_hash_unique").on(table.tokenHash),
+    index("tenant_onboarding_tokens_lead_idx").on(table.leadId),
     index("tenant_onboarding_tokens_expiry_idx").on(table.expiresAt),
   ],
 );
@@ -881,6 +887,9 @@ export const salesLeads = mysqlTable(
   },
   (table) => [
     index("sales_leads_status_task_idx").on(table.status, table.nextTaskAt),
+    uniqueIndex("sales_leads_converted_tenant_unique").on(
+      table.convertedTenantId,
+    ),
   ],
 );
 export const salesActivities = mysqlTable(
@@ -1098,6 +1107,9 @@ export const subscriptions = mysqlTable(
     planId: id("plan_id")
       .notNull()
       .references(() => plans.id),
+    planNameSnapshot: varchar("plan_name_snapshot", { length: 120 }).notNull(),
+    monthlyPriceCentsSnapshot: int("monthly_price_cents_snapshot"),
+    setupPriceCentsSnapshot: int("setup_price_cents_snapshot"),
     status: varchar("status", { length: 40 }).default("active").notNull(),
     startsAt: timestamp("starts_at", { mode: "date", fsp: 3 })
       .defaultNow()

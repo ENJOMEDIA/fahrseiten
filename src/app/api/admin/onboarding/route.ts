@@ -25,11 +25,12 @@ export async function POST(request: Request) {
 
   const input = z
     .object({
-      companyName: z.string().trim().max(160).default(""),
+      companyName: z.string().trim().min(2).max(160),
       ownerName: z.string().trim().max(160).default(""),
       ownerEmail: z.union([z.literal(""), z.email()]).default(""),
       phone: z.string().trim().max(40).default(""),
       domain: z.string().trim().max(253).default(""),
+      leadId: z.union([z.literal(""), z.uuid()]).default(""),
       sendInvitation: z.boolean().default(false),
     })
     .parse(await request.json().catch(() => ({})));
@@ -42,11 +43,13 @@ export async function POST(request: Request) {
     );
   const result = await createTenantOnboardingLink({
     createdByUserId: identity.id,
+    leadId: input.leadId || undefined,
     publicOrigin,
     sendInvitation: input.sendInvitation,
     prefill: Object.fromEntries(
       Object.entries(input).filter(
-        ([key, value]) => key !== "sendInvitation" && value !== "",
+        ([key, value]) =>
+          !["sendInvitation", "leadId"].includes(key) && value !== "",
       ),
     ),
   });

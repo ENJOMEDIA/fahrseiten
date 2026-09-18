@@ -4,7 +4,13 @@ import { asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db/client";
-import { featureFlags, planFeatures, plans, subscriptions } from "@/db/schema";
+import {
+  auditLogs,
+  featureFlags,
+  planFeatures,
+  plans,
+  subscriptions,
+} from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { featureCatalog, type FeatureKey } from "@/modules/features/catalog";
 import { priceToCents } from "./pricing";
@@ -166,10 +172,16 @@ export async function listSellableAddons() {
 export async function assignTenantPlan(input: {
   tenantId: string;
   planId: string;
+  actorUserId: string;
 }) {
   await db.transaction(async (tx) => {
     const [plan] = await tx
-      .select({ id: plans.id })
+      .select({
+        id: plans.id,
+        publicName: plans.publicName,
+        monthlyPriceCents: plans.monthlyPriceCents,
+        setupPriceCents: plans.setupPriceCents,
+      })
       .from(plans)
       .where(eq(plans.id, input.planId))
       .limit(1);
@@ -182,7 +194,23 @@ export async function assignTenantPlan(input: {
       id: createId(),
       tenantId: input.tenantId,
       planId: input.planId,
+      planNameSnapshot: plan.publicName,
+      monthlyPriceCentsSnapshot: plan.monthlyPriceCents,
+      setupPriceCentsSnapshot: plan.setupPriceCents,
       status: "active",
+    });
+    await tx.insert(auditLogs).values({
+      id: createId(),
+      tenantId: input.tenantId,
+      actorUserId: input.actorUserId,
+      action: "tenant.plan.assigned",
+      entityType: "subscription",
+      metadata: {
+        planId: plan.id,
+        planName: plan.publicName,
+        monthlyPriceCents: plan.monthlyPriceCents,
+        setupPriceCents: plan.setupPriceCents,
+      },
     });
   });
 }

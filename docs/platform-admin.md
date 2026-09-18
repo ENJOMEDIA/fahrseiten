@@ -12,6 +12,10 @@ Sales kann keine Mandanten-, Plan-, Eigentümer- oder Sicherheitseinstellungen �
 
 Mandanten können gesucht, angelegt, bearbeitet und deaktiviert werden. Die Detailansicht bündelt Kundenzugänge, Domains, Plan, Feature-Freigaben, Onboarding-Checkliste, interne Notizen und Aktivität. Interne Notizen dürfen keine Zugangsdaten oder unnötigen sensiblen Angaben enthalten.
 
+Die Detailansicht ist zugleich die [Kundenakte](customer-history.md). Sie führt die feste Lead-ID, eine lesbare Kundennummer und die technische Tenant-ID zusammen. Akquise-Aktivitäten, Onboarding, Systemereignisse und historische Paketzuweisungen werden chronologisch dargestellt. Paketname und Preise werden bei jeder Zuweisung als Snapshot gespeichert, damit spätere Preisänderungen den damaligen Vertragsstand nicht überschreiben.
+
+Ein aus dem Akquise-CRM gestarteter Einrichtungslink speichert die konkrete Lead-ID. Die fertige Instanz wird ausschließlich mit diesem Lead verbunden; eine unsichere Zuordnung über übereinstimmende E-Mail-Adressen findet nicht statt. Wird eine Instanz ohne vorhandenen Lead vorbereitet, legt das System zuerst einen Lead an.
+
 ## Akquise-CRM
 
 Leads speichern Fahrschule, Ansprechperson, Kontaktdaten, bestehende Website, Quelle, Verantwortlichen, nächsten Termin und Verlustgrund. Die Pipeline umfasst `new`, `contacted`, `interested`, `demo`, `offer`, `won` und `lost`. Aktivitäten und Aufgaben liegen in getrennten Tabellen.

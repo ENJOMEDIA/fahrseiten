@@ -29,6 +29,7 @@ import { env } from "@/config/env";
 import { hashPassword } from "@/modules/auth/password";
 import { createOpaqueToken, hashToken } from "@/modules/auth/tokens";
 import { normalizeHostname } from "@/modules/domains/hostname";
+import { customerNumberFromTenantId } from "@/modules/platform/customer-reference";
 import {
   createInitialLegalProfile,
   createLegalDrafts,
@@ -56,6 +57,7 @@ export type TenantSetupPrefill = {
 
 export async function createTenantOnboardingLink(input: {
   createdByUserId: string;
+  leadId?: string;
   prefill: TenantSetupPrefill;
   publicOrigin: string;
   sendInvitation: boolean;
@@ -67,8 +69,65 @@ export async function createTenantOnboardingLink(input: {
     input.publicOrigin,
   ).toString();
   await db.transaction(async (tx) => {
+    const matchingLeads = input.leadId
+      ? await tx
+          .select()
+          .from(salesLeads)
+          .where(eq(salesLeads.id, input.leadId))
+          .limit(1)
+      : input.prefill.ownerEmail
+        ? await tx
+            .select()
+            .from(salesLeads)
+            .where(eq(salesLeads.email, input.prefill.ownerEmail))
+            .limit(2)
+        : [];
+    if (!input.leadId && matchingLeads.length > 1)
+      throw new Error(
+        "Zur E-Mail-Adresse existieren mehrere Leads. Starte die Instanzerstellung beim gewünschten Lead im Akquise-Bereich.",
+      );
+    const selectedLead = matchingLeads[0];
+    if (input.leadId && !selectedLead)
+      throw new Error("Der ausgewählte Akquise-Lead wurde nicht gefunden.");
+    if (selectedLead?.convertedTenantId)
+      throw new Error("Dieser Lead ist bereits mit einer Instanz verbunden.");
+    const leadId = selectedLead?.id ?? randomUUID();
+    const [pendingSetup] = selectedLead
+      ? await tx
+          .select({ id: tenantOnboardingTokens.id })
+          .from(tenantOnboardingTokens)
+          .where(
+            and(
+              eq(tenantOnboardingTokens.leadId, leadId),
+              isNull(tenantOnboardingTokens.usedAt),
+              gt(tenantOnboardingTokens.expiresAt, new Date()),
+            ),
+          )
+          .limit(1)
+      : [];
+    if (pendingSetup)
+      throw new Error(
+        "Für diesen Lead existiert bereits ein gültiger Einrichtungslink.",
+      );
+    if (!selectedLead)
+      await tx.insert(salesLeads).values({
+        id: leadId,
+        companyName: input.prefill.companyName || "Vorbereitete Instanz",
+        contactName: input.prefill.ownerName || null,
+        email: input.prefill.ownerEmail || null,
+        phone: input.prefill.phone || null,
+        website: input.prefill.domain
+          ? /^(https?:\/\/)/i.test(input.prefill.domain)
+            ? input.prefill.domain
+            : `https://${input.prefill.domain}`
+          : null,
+        source: "instance_setup",
+        status: "interested",
+        ownerUserId: input.createdByUserId,
+      });
     await tx.insert(tenantOnboardingTokens).values({
       id: tokenId,
+      leadId,
       tokenHash: hashToken(token),
       createdByUserId: input.createdByUserId,
       prefill: input.prefill,
@@ -93,39 +152,15 @@ export async function createTenantOnboardingLink(input: {
         runAt: new Date(),
       });
     }
-    if (input.prefill.ownerEmail) {
-      const [existingLead] = await tx
-        .select({ id: salesLeads.id })
-        .from(salesLeads)
-        .where(eq(salesLeads.email, input.prefill.ownerEmail))
-        .limit(1);
-      const leadId = existingLead?.id ?? randomUUID();
-      if (!existingLead)
-        await tx.insert(salesLeads).values({
-          id: leadId,
-          companyName: input.prefill.companyName || "Vorbereitete Instanz",
-          contactName: input.prefill.ownerName || null,
-          email: input.prefill.ownerEmail,
-          phone: input.prefill.phone || null,
-          website: input.prefill.domain
-            ? /^(https?:\/\/)/i.test(input.prefill.domain)
-              ? input.prefill.domain
-              : `https://${input.prefill.domain}`
-            : null,
-          source: "instance_setup",
-          status: "interested",
-          ownerUserId: input.createdByUserId,
-        });
-      await tx.insert(salesActivities).values({
-        id: randomUUID(),
-        leadId,
-        actorUserId: input.createdByUserId,
-        activityType: "instance_setup_created",
-        note: input.sendInvitation
-          ? "Instanz vorbereitet und Einladungs-E-Mail eingeplant."
-          : "Instanz vorbereitet und persönlicher Einrichtungslink erstellt.",
-      });
-    }
+    await tx.insert(salesActivities).values({
+      id: randomUUID(),
+      leadId,
+      actorUserId: input.createdByUserId,
+      activityType: "instance_setup_created",
+      note: input.sendInvitation
+        ? "Instanz vorbereitet und Einladungs-E-Mail eingeplant."
+        : "Instanz vorbereitet und persönlicher Einrichtungslink erstellt.",
+    });
   });
   return { token, tokenId, actionUrl };
 }
@@ -217,6 +252,7 @@ export async function completeTenantOnboarding(input: unknown) {
     if (slugInUse) slug = `${slugBase}-${randomUUID().slice(0, 6)}`;
 
     const tenantId = randomUUID();
+    const customerNumber = customerNumberFromTenantId(tenantId);
     const ownerId = randomUUID();
     const siteId = randomUUID();
     const pageId = randomUUID();
@@ -232,9 +268,12 @@ export async function completeTenantOnboarding(input: unknown) {
       { regulatedActivity: true },
     );
 
-    await tx
-      .insert(tenants)
-      .values({ id: tenantId, name: parsed.companyName, slug });
+    await tx.insert(tenants).values({
+      id: tenantId,
+      customerNumber,
+      name: parsed.companyName,
+      slug,
+    });
     await tx.insert(users).values({
       id: ownerId,
       email: parsed.ownerEmail,
@@ -373,10 +412,21 @@ export async function completeTenantOnboarding(input: unknown) {
       .set({ usedAt: new Date() })
       .where(eq(tenantOnboardingTokens.id, onboarding.id));
 
+    if (!onboarding.leadId)
+      throw new SetupInputError(
+        "Die Einrichtung besitzt keine feste Akquise-Zuordnung.",
+      );
     await tx
       .update(salesLeads)
       .set({ status: "won", convertedTenantId: tenantId })
-      .where(eq(salesLeads.email, parsed.ownerEmail));
+      .where(eq(salesLeads.id, onboarding.leadId));
+    await tx.insert(salesActivities).values({
+      id: randomUUID(),
+      leadId: onboarding.leadId,
+      actorUserId: onboarding.createdByUserId,
+      activityType: "tenant_created",
+      note: `Kundenakte ${customerNumber} und Instanz wurden angelegt.`,
+    });
     await tx.insert(auditLogs).values({
       id: randomUUID(),
       tenantId,
