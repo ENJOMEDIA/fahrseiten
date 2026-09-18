@@ -9,9 +9,10 @@ import {
   databaseMediaRepository,
   setTenantFavicon,
   setTenantLogo,
+  setTenantMediaCategory,
 } from "@/modules/media/repository";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
-import { uploadImage } from "@/modules/media/service";
+import { parseTenantMediaCategory, uploadImage } from "@/modules/media/service";
 import { queueMediaOptimization } from "@/modules/media/processing";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
 
@@ -48,7 +49,7 @@ export async function uploadTenantMedia(formData: FormData) {
       category:
         usage === "logo" || usage === "favicon"
           ? "branding"
-          : String(formData.get("category") ?? "general"),
+          : parseTenantMediaCategory(formData.get("category") ?? "general"),
     },
     storage: getMediaStorage(),
     repository: databaseMediaRepository,
@@ -79,6 +80,17 @@ export async function cropTenantMedia(formData: FormData) {
     cropZoom: formData.get("cropZoom"),
   });
   revalidatePath("/kunde/medien");
+}
+
+export async function categorizeTenantMedia(formData: FormData) {
+  const context = await requireWritableTenant();
+  await setTenantMediaCategory(
+    context.tenantId,
+    String(formData.get("mediaId") ?? ""),
+    formData.get("category"),
+  );
+  revalidatePath("/kunde/medien");
+  revalidatePath("/kunde/website/builder");
 }
 
 export async function chooseTenantLogo(formData: FormData) {

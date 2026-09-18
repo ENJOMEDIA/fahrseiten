@@ -6,7 +6,7 @@ import { inspectImage } from "./image-inspection";
 import type { MediaStorage } from "./storage";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-export const mediaCategoryValues = [
+export const tenantMediaCategoryValues = [
   "general",
   "branding",
   "vehicles",
@@ -14,6 +14,20 @@ export const mediaCategoryValues = [
   "team",
   "courses",
   "content",
+] as const;
+export const platformMediaCategoryValues = [
+  "general",
+  "branding",
+  "marketing_hero",
+  "marketing_sections",
+  "demo",
+  "content",
+] as const;
+export const mediaCategoryValues = [
+  ...tenantMediaCategoryValues,
+  "marketing_hero",
+  "marketing_sections",
+  "demo",
 ] as const;
 export type MediaCategory = (typeof mediaCategoryValues)[number];
 export const mediaCategoryLabels: Record<MediaCategory, string> = {
@@ -24,7 +38,16 @@ export const mediaCategoryLabels: Record<MediaCategory, string> = {
   team: "Team",
   courses: "Kurse & Ausbildung",
   content: "Website-Inhalte",
+  marketing_hero: "Landingpage & Hero",
+  marketing_sections: "Landingpage-Bereiche",
+  demo: "Produktdemo",
 };
+export function parseTenantMediaCategory(value: unknown) {
+  return z.enum(tenantMediaCategoryValues).parse(value);
+}
+export function parsePlatformMediaCategory(value: unknown) {
+  return z.enum(platformMediaCategoryValues).parse(value);
+}
 const metadataSchema = z.object({
   originalName: z.string().trim().min(1).max(255),
   claimedMimeType: z.string().max(100),

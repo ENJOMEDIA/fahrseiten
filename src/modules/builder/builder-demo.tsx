@@ -12,7 +12,7 @@ import {
 } from "./themes";
 import {
   mediaCategoryLabels,
-  mediaCategoryValues,
+  tenantMediaCategoryValues,
   type MediaCategory,
 } from "@/modules/media/service";
 import {
@@ -331,7 +331,7 @@ export function BuilderDemo({
                       }}
                     >
                       <option value="">Kein Bild ausgewählt</option>
-                      {mediaCategoryValues.map((category) => {
+                      {tenantMediaCategoryValues.map((category) => {
                         const categoryMedia = media.filter(
                           (asset) => asset.category === category,
                         );
@@ -511,7 +511,7 @@ export function BuilderDemo({
                   defaultValue="content"
                   name="category"
                 >
-                  {mediaCategoryValues.map((category) => (
+                  {tenantMediaCategoryValues.map((category) => (
                     <option key={category} value={category}>
                       {mediaCategoryLabels[category]}
                     </option>

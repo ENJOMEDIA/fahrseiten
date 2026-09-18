@@ -10,6 +10,10 @@ import {
   themeSettings,
 } from "@/db/schema";
 import type { MediaAssetRecord, MediaRepository } from "./service";
+import {
+  parsePlatformMediaCategory,
+  parseTenantMediaCategory,
+} from "./service";
 
 function mapAsset(row: typeof mediaAssets.$inferSelect): MediaAssetRecord {
   return {
@@ -97,6 +101,43 @@ export async function listPlatformMedia() {
   return rows.map(mapAsset);
 }
 
+export async function setTenantMediaCategory(
+  tenantId: string,
+  mediaId: string,
+  category: unknown,
+) {
+  const parsedCategory = parseTenantMediaCategory(category);
+  const result = await db
+    .update(mediaAssets)
+    .set({ category: parsedCategory })
+    .where(
+      and(
+        eq(mediaAssets.id, mediaId),
+        eq(mediaAssets.tenantId, tenantId),
+        isNull(mediaAssets.archivedAt),
+      ),
+    );
+  if (!result[0].affectedRows) throw new Error("Medium nicht gefunden.");
+}
+
+export async function setPlatformMediaCategory(
+  mediaId: string,
+  category: unknown,
+) {
+  const parsedCategory = parsePlatformMediaCategory(category);
+  const result = await db
+    .update(mediaAssets)
+    .set({ category: parsedCategory })
+    .where(
+      and(
+        eq(mediaAssets.id, mediaId),
+        isNull(mediaAssets.tenantId),
+        isNull(mediaAssets.archivedAt),
+      ),
+    );
+  if (!result[0].affectedRows) throw new Error("Medium nicht gefunden.");
+}
+
 export async function findPublicMedia(id: string) {
   const [row] = await db
     .select()
@@ -114,6 +155,12 @@ export async function setTenantLogo(tenantId: string, mediaId: string) {
     .update(themeSettings)
     .set({ logoMediaId: mediaId })
     .where(eq(themeSettings.tenantId, tenantId));
+  await db
+    .update(mediaAssets)
+    .set({ category: "branding" })
+    .where(
+      and(eq(mediaAssets.tenantId, tenantId), eq(mediaAssets.id, mediaId)),
+    );
 }
 
 export async function setTenantFavicon(tenantId: string, mediaId: string) {
@@ -124,6 +171,12 @@ export async function setTenantFavicon(tenantId: string, mediaId: string) {
     .update(themeSettings)
     .set({ faviconMediaId: mediaId })
     .where(eq(themeSettings.tenantId, tenantId));
+  await db
+    .update(mediaAssets)
+    .set({ category: "branding" })
+    .where(
+      and(eq(mediaAssets.tenantId, tenantId), eq(mediaAssets.id, mediaId)),
+    );
 }
 
 export async function findTenantBrandingIds(tenantId: string) {
@@ -159,6 +212,10 @@ export async function setPlatformLogo(mediaId: string) {
     .limit(1);
   if (!asset) throw new Error("Das Logo gehört nicht zur Plattform.");
   await db.update(platformSettings).set({ logoMediaId: mediaId });
+  await db
+    .update(mediaAssets)
+    .set({ category: "branding" })
+    .where(eq(mediaAssets.id, mediaId));
 }
 
 export async function setPlatformFavicon(mediaId: string) {
@@ -175,6 +232,10 @@ export async function setPlatformFavicon(mediaId: string) {
     .limit(1);
   if (!asset) throw new Error("Das Favicon gehört nicht zur Plattform.");
   await db.update(platformSettings).set({ faviconMediaId: mediaId });
+  await db
+    .update(mediaAssets)
+    .set({ category: "branding" })
+    .where(eq(mediaAssets.id, mediaId));
 }
 
 export async function findPlatformLogoId() {

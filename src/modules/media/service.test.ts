@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   archiveImage,
+  parsePlatformMediaCategory,
+  parseTenantMediaCategory,
   selectTenantImage,
   uploadImage,
   type MediaAssetRecord,
@@ -42,6 +44,12 @@ function harness(usages = 0) {
 }
 
 describe("media service", () => {
+  it("keeps platform and tenant media categories separate", () => {
+    expect(parseTenantMediaCategory("vehicles")).toBe("vehicles");
+    expect(parsePlatformMediaCategory("marketing_hero")).toBe("marketing_hero");
+    expect(() => parseTenantMediaCategory("marketing_hero")).toThrow();
+    expect(() => parsePlatformMediaCategory("vehicles")).toThrow();
+  });
   it("validates signatures and stores tenant-partitioned images", async () => {
     const { storage, repository } = harness();
     const asset = await uploadImage({

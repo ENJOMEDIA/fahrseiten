@@ -1,10 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { databaseMediaRepository } from "@/modules/media/repository";
+import {
+  databaseMediaRepository,
+  setPlatformMediaCategory,
+} from "@/modules/media/repository";
 import { queueMediaOptimization } from "@/modules/media/processing";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
-import { uploadImage } from "@/modules/media/service";
+import {
+  parsePlatformMediaCategory,
+  uploadImage,
+} from "@/modules/media/service";
 import { requirePlatformPermission } from "@/modules/platform/access";
 
 export async function uploadPlatformMedia(formData: FormData) {
@@ -20,6 +26,9 @@ export async function uploadPlatformMedia(formData: FormData) {
       claimedMimeType: file.type,
       altText: String(formData.get("altText") ?? ""),
       description: String(formData.get("description") ?? ""),
+      category: parsePlatformMediaCategory(
+        formData.get("category") ?? "general",
+      ),
     },
     storage: getMediaStorage(),
     repository: databaseMediaRepository,
@@ -33,6 +42,15 @@ export async function uploadPlatformMedia(formData: FormData) {
       cropY: 50,
       cropZoom: 100,
     });
+  revalidatePath("/admin/medien");
+}
+
+export async function categorizePlatformMedia(formData: FormData) {
+  await requirePlatformPermission("platform.security.manage");
+  await setPlatformMediaCategory(
+    String(formData.get("mediaId") ?? ""),
+    formData.get("category"),
+  );
   revalidatePath("/admin/medien");
 }
 

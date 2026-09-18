@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
+import { MediaCategoryOverview } from "@/components/media/media-category-overview";
 import { getSessionIdentity } from "@/modules/auth/session";
 import {
   findTenantBrandingIds,
@@ -10,12 +11,13 @@ import {
 import { mediaPublicUrl } from "@/modules/media/public-url";
 import {
   mediaCategoryLabels,
-  mediaCategoryValues,
+  tenantMediaCategoryValues,
 } from "@/modules/media/service";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
 import {
   chooseTenantFavicon,
   chooseTenantLogo,
+  categorizeTenantMedia,
   uploadTenantMedia,
 } from "./actions";
 import { MediaCropForm } from "./media-crop-form";
@@ -37,128 +39,159 @@ export default async function MediaPage() {
         findTenantBrandingIds(context.tenantId),
       ])
     : [[], { logoMediaId: null, faviconMediaId: null }];
-  const populatedCategories = mediaCategoryValues
-    .map((category) => ({
+  const categoryGroups = tenantMediaCategoryValues.map((category) => ({
+    category,
+    assets: assets.filter((asset) => asset.category === category),
+  }));
+  const categoryCounts = Object.fromEntries(
+    tenantMediaCategoryValues.map((category) => [
       category,
-      assets: assets.filter((asset) => asset.category === category),
-    }))
-    .filter((group) => group.assets.length > 0);
+      assets.filter((asset) => asset.category === category).length,
+    ]),
+  );
 
   return (
     <CustomerPage
       title="Medien & Markenauftritt"
       description="Bilder verwalten und Seitenlogo sowie Browser-Favicon getrennt festlegen."
     >
+      <MediaCategoryOverview
+        categories={tenantMediaCategoryValues}
+        counts={categoryCounts}
+      />
       <div className="grid gap-5 xl:grid-cols-[1fr_23rem]">
-        <div>
-          {assets.length === 0 ? (
-            <Card className="py-14 text-center">
-              <h2 className="text-xl font-semibold">
-                Deine Medienbibliothek ist bereit
-              </h2>
-              <p className="mt-2 text-slate-600">
-                Lade rechts das erste Bild oder Logo hoch.
-              </p>
-            </Card>
-          ) : (
-            <div className="space-y-9">
-              {populatedCategories.map((group) => (
-                <section key={group.category}>
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <h2 className="text-xl font-semibold">
-                      {mediaCategoryLabels[group.category]}
-                    </h2>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">
-                      {group.assets.length} Medien
-                    </span>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-                    {group.assets.map((asset) => (
-                      <Card className="overflow-hidden p-0" key={asset.id}>
-                        <div className="relative aspect-[4/3] bg-slate-100">
-                          <Image
-                            alt={asset.altText}
-                            className="object-contain p-4"
-                            fill
-                            sizes="(max-width: 640px) 100vw, 33vw"
-                            src={mediaPublicUrl(asset.id)}
-                            unoptimized
-                          />
-                        </div>
-                        <div className="p-4">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="truncate font-semibold">
-                              {asset.originalName}
-                            </p>
-                            {branding.logoMediaId === asset.id ? (
-                              <StatusBadge tone="success">Logo</StatusBadge>
-                            ) : null}
-                            {branding.faviconMediaId === asset.id ? (
-                              <StatusBadge tone="info">Favicon</StatusBadge>
-                            ) : null}
-                          </div>
-                          <p className="mt-1 text-xs text-slate-500">
-                            {asset.width} × {asset.height} px ·{" "}
-                            {Math.ceil(asset.byteSize / 1024)} KB
+        <div className="space-y-9">
+          {categoryGroups.map((group) => (
+            <section id={`media-${group.category}`} key={group.category}>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold">
+                  {mediaCategoryLabels[group.category]}
+                </h2>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">
+                  {group.assets.length} Medien
+                </span>
+              </div>
+              {group.assets.length ? (
+                <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                  {group.assets.map((asset) => (
+                    <Card className="overflow-hidden p-0" key={asset.id}>
+                      <div className="relative aspect-[4/3] bg-slate-100">
+                        <Image
+                          alt={asset.altText}
+                          className="object-contain p-4"
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          src={mediaPublicUrl(asset.id)}
+                          unoptimized
+                        />
+                      </div>
+                      <div className="p-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate font-semibold">
+                            {asset.originalName}
                           </p>
-                          <p className="mt-1 text-xs font-semibold text-slate-500">
-                            Optimierung:{" "}
-                            {asset.processingStatus === "ready"
-                              ? "WebP bereit"
-                              : asset.processingStatus === "failed"
-                                ? "Fehlgeschlagen"
-                                : asset.processingStatus === "queued" ||
-                                    asset.processingStatus === "processing"
-                                  ? "Wird verarbeitet"
-                                  : "Original"}
-                          </p>
-                          {branding.logoMediaId !== asset.id ? (
-                            <form action={chooseTenantLogo} className="mt-3">
-                              <input
-                                name="mediaId"
-                                type="hidden"
-                                value={asset.id}
-                              />
-                              <button
-                                className="text-sm font-semibold text-cyan-800"
-                                type="submit"
-                              >
-                                Als Logo verwenden
-                              </button>
-                            </form>
+                          {branding.logoMediaId === asset.id ? (
+                            <StatusBadge tone="success">Logo</StatusBadge>
                           ) : null}
-                          <MediaCropForm
-                            imageUrl={mediaPublicUrl(asset.id)}
-                            mediaId={asset.id}
-                            processable={
-                              !["image/svg+xml", "image/x-icon"].includes(
-                                asset.mimeType,
-                              )
-                            }
-                          />
-                          {branding.faviconMediaId !== asset.id ? (
-                            <form action={chooseTenantFavicon} className="mt-2">
-                              <input
-                                name="mediaId"
-                                type="hidden"
-                                value={asset.id}
-                              />
-                              <button
-                                className="text-sm font-semibold text-indigo-700"
-                                type="submit"
-                              >
-                                Als Favicon verwenden
-                              </button>
-                            </form>
+                          {branding.faviconMediaId === asset.id ? (
+                            <StatusBadge tone="info">Favicon</StatusBadge>
                           ) : null}
                         </div>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          )}
+                        <p className="mt-1 text-xs text-slate-500">
+                          {asset.width} × {asset.height} px ·{" "}
+                          {Math.ceil(asset.byteSize / 1024)} KB
+                        </p>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">
+                          Optimierung:{" "}
+                          {asset.processingStatus === "ready"
+                            ? "WebP bereit"
+                            : asset.processingStatus === "failed"
+                              ? "Fehlgeschlagen"
+                              : asset.processingStatus === "queued" ||
+                                  asset.processingStatus === "processing"
+                                ? "Wird verarbeitet"
+                                : "Original"}
+                        </p>
+                        <form
+                          action={categorizeTenantMedia}
+                          className="mt-4 flex gap-2"
+                        >
+                          <input
+                            name="mediaId"
+                            type="hidden"
+                            value={asset.id}
+                          />
+                          <label className="min-w-0 flex-1 text-xs font-semibold text-slate-600">
+                            Bereich
+                            <select
+                              className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2 font-normal"
+                              defaultValue={asset.category}
+                              name="category"
+                            >
+                              {tenantMediaCategoryValues.map((category) => (
+                                <option key={category} value={category}>
+                                  {mediaCategoryLabels[category]}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <button
+                            className="self-end rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                            type="submit"
+                          >
+                            Verschieben
+                          </button>
+                        </form>
+                        {branding.logoMediaId !== asset.id ? (
+                          <form action={chooseTenantLogo} className="mt-3">
+                            <input
+                              name="mediaId"
+                              type="hidden"
+                              value={asset.id}
+                            />
+                            <button
+                              className="text-sm font-semibold text-cyan-800"
+                              type="submit"
+                            >
+                              Als Logo verwenden
+                            </button>
+                          </form>
+                        ) : null}
+                        <MediaCropForm
+                          imageUrl={mediaPublicUrl(asset.id)}
+                          mediaId={asset.id}
+                          processable={
+                            !["image/svg+xml", "image/x-icon"].includes(
+                              asset.mimeType,
+                            )
+                          }
+                        />
+                        {branding.faviconMediaId !== asset.id ? (
+                          <form action={chooseTenantFavicon} className="mt-2">
+                            <input
+                              name="mediaId"
+                              type="hidden"
+                              value={asset.id}
+                            />
+                            <button
+                              className="text-sm font-semibold text-indigo-700"
+                              type="submit"
+                            >
+                              Als Favicon verwenden
+                            </button>
+                          </form>
+                        ) : null}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-5 text-sm text-slate-500">
+                  Noch keine Medien. Wähle diesen Bereich beim Upload aus.
+                </div>
+              )}
+            </section>
+          ))}
         </div>
         <Card className="h-fit xl:sticky xl:top-28">
           <h2 className="font-semibold">Bild hochladen</h2>
@@ -180,7 +213,7 @@ export default async function MediaPage() {
                 defaultValue="general"
                 name="category"
               >
-                {mediaCategoryValues.map((category) => (
+                {tenantMediaCategoryValues.map((category) => (
                   <option key={category} value={category}>
                     {mediaCategoryLabels[category]}
                   </option>
