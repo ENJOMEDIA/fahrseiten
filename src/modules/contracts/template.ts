@@ -1,4 +1,5 @@
 export type ContractTemplateInput = {
+  brandLogoPng?: Uint8Array;
   contractNumber: string;
   customerNumber: string;
   provider: {

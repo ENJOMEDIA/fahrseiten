@@ -3,6 +3,7 @@ import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { findPublishedPlatformLegalDocument } from "@/modules/legal/repository";
 import { getOptionalServiceConfig } from "@/modules/consent/config";
 import { PrivacyServiceNotice } from "@/modules/legal/public-document";
+import { createOnlinebriefPrivacyNotice } from "@/modules/legal/documents";
 
 export default async function PrivacyPage() {
   await connection();
@@ -10,6 +11,11 @@ export default async function PrivacyPage() {
     findPublishedPlatformLegalDocument("privacy").catch(() => null),
     getOptionalServiceConfig(),
   ]);
+  const privacyContent = document
+    ? document.content.includes("Onlinebrief24")
+      ? document.content
+      : `${document.content}\n\n${createOnlinebriefPrivacyNotice()}`
+    : null;
   return (
     <SimpleMarketingPage
       availableDuringMaintenance
@@ -17,9 +23,9 @@ export default async function PrivacyPage() {
       title="Datenschutz"
       text="Informationen zur Verarbeitung personenbezogener Daten auf der FahrSeiten-Plattform."
     >
-      {document ? (
+      {privacyContent ? (
         <article className="rounded-3xl border bg-white p-8 leading-7 whitespace-pre-wrap text-slate-700">
-          {document.content}
+          {privacyContent}
           <PrivacyServiceNotice services={services} />
         </article>
       ) : (

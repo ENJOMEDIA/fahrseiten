@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import type { LegalActionState } from "@/app/kunde/rechtliches/actions";
 import {
-  createPlatformTermsDraft,
+  createPlatformTerms,
   createStructuredLegalDocuments,
   parseLegalProfileForm,
 } from "@/modules/legal/documents";
@@ -21,7 +21,7 @@ export async function replacePlatformTermsTemplateAction() {
   if (!profile) throw new Error("Plattformstammdaten fehlen.");
   await savePlatformLegalDocument(identity.id, {
     type: "terms",
-    content: createPlatformTermsDraft(profile.data),
+    content: createPlatformTerms(profile.data),
     publish: false,
   });
   revalidatePath("/admin/rechtliches");

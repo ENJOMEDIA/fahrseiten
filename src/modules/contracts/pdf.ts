@@ -27,6 +27,9 @@ export async function createContractPdf(input: ContractTemplateInput) {
   const document = await PDFDocument.create();
   const regular = await document.embedFont(StandardFonts.Helvetica);
   const bold = await document.embedFont(StandardFonts.HelveticaBold);
+  const brandLogo = input.brandLogoPng
+    ? await document.embedPng(input.brandLogoPng)
+    : null;
   const pages: ReturnType<typeof document.addPage>[] = [];
   let page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   pages.push(page);
@@ -74,13 +77,31 @@ export async function createContractPdf(input: ContractTemplateInput) {
     height: 172,
     color: rgb(0.035, 0.067, 0.12),
   });
-  page.drawText("FAHRSEITEN", {
-    x: MARGIN,
-    y: PAGE_HEIGHT - 62,
-    font: bold,
-    size: 11,
-    color: rgb(0.25, 0.9, 0.9),
-  });
+  if (brandLogo) {
+    page.drawRectangle({
+      x: MARGIN - 8,
+      y: PAGE_HEIGHT - 82,
+      width: 171,
+      height: 50,
+      color: rgb(1, 1, 1),
+      opacity: 0.96,
+    });
+    const dimensions = brandLogo.scaleToFit(151, 36);
+    page.drawImage(brandLogo, {
+      x: MARGIN,
+      y: PAGE_HEIGHT - 57 - dimensions.height / 2,
+      width: dimensions.width,
+      height: dimensions.height,
+    });
+  } else {
+    page.drawText("FAHRSEITEN", {
+      x: MARGIN,
+      y: PAGE_HEIGHT - 62,
+      font: bold,
+      size: 11,
+      color: rgb(0.25, 0.9, 0.9),
+    });
+  }
   page.drawText("SaaS-Nutzungs- und Betreuungsvertrag", {
     x: MARGIN,
     y: PAGE_HEIGHT - 101,

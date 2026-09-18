@@ -28,9 +28,32 @@ abgestufte Haftungsregelung. Die Verantwortung des Kunden für bereitgestellte
 oder freigegebene Inhalte hebt die eigene Verantwortung von FahrSeiten für
 technische Leistungen und selbst erstellte Inhalte ausdrücklich nicht auf.
 
-Das Vertrags-PDF und der AGB-Entwurf sind Arbeitsgrundlagen. Vor dem ersten
+Das Vertrags-PDF und die allgemeinen B2B-AGB sind Arbeitsgrundlagen. Vor dem ersten
 Vertragsschluss müssen Angebot, Leistungsbeschreibung, AGB,
 Auftragsverarbeitungsvereinbarung, Kündigungslogik, Haftungsgrenze, Domain- und
 Löschregelung gemeinsam anwaltlich geprüft und auf das tatsächliche
-Geschäftsmodell abgestimmt werden. Offene geschäftliche Entscheidungen bleiben
-im AGB-Entwurf als Platzhalter markiert und verhindern dessen Veröffentlichung.
+Geschäftsmodell abgestimmt werden. Die öffentliche AGB-Seite verwendet die
+allgemeine Fassung, solange keine individuell geprüfte und versionierte Fassung
+im Rechtsbereich veröffentlicht wurde.
+
+Das Vertrags-PDF verwendet das im Plattform-Medienbereich hinterlegte Logo. Das
+Logo wird serverseitig in ein PDF-kompatibles PNG umgewandelt; fehlt es oder ist
+es technisch nicht lesbar, erscheint als sichere Rückfallebene der Schriftzug
+„FAHRSEITEN“.
+
+## Elektronische Unterschrift
+
+FahrSeiten soll Kundenakte, Vertragsdaten und Status eines Signaturvorgangs
+verwalten, die eigentliche elektronische Signatur jedoch über einen
+eIDAS-konformen Vertrauensdiensteanbieter ausführen. Eine selbst gebaute
+Zeichenfläche für eine gemalte Unterschrift liefert allein keinen belastbaren
+Identitäts-, Integritäts- oder Zeitnachweis.
+
+Eine spätere Integration speichert Anbieter, externe Vorgangs-ID,
+SHA-256-Prüfsumme des unveränderlichen Vertrags-PDFs, Unterzeichner, Status,
+Zeitpunkte und Prüfprotokoll. Webhooks müssen kryptografisch geprüft und
+idempotent verarbeitet werden. Vor der Auswahl sind Signaturniveau, EU-Hosting,
+AVV, Unterauftragnehmer, API, Webhooks, Export des Prüfprotokolls, Kosten und
+Löschfristen zu vergleichen. Ob für den konkreten FahrSeiten-Vertrag eine
+einfache, fortgeschrittene oder qualifizierte elektronische Signatur benötigt
+wird, ist rechtlich festzulegen.

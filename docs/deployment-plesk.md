@@ -90,6 +90,9 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 | `CONSENT_FUNCTIONAL_SERVICES` | Namen tatsächlich aktiver funktionaler Dienste oder leer                    |
 | `CONSENT_STATISTICS_SERVICES` | Namen tatsächlich aktiver Statistikdienste oder leer                        |
 | `CONSENT_MARKETING_SERVICES`  | Namen tatsächlich aktiver Marketingdienste oder leer                        |
+| `ONLINEBRIEF_MODE`            | Zunächst `test`; `live` erst nach dokumentierter Versandfreigabe            |
+| `ONLINEBRIEF_API_KEY`         | API-Key aus dem Onlinebrief24-Kundencenter                                  |
+| `ONLINEBRIEF_API_SECRET`      | API-Secret aus dem Onlinebrief24-Kundencenter                               |
 
 `DATABASE_URL` wird bei der normalen Browserinstallation nicht vorab gesetzt. Host, Port, Datenbankname, Benutzer und Passwort werden in `/setup` erfasst. `PORT` und gegebenenfalls `HOSTNAME` werden von Plesk beziehungsweise seiner Node.js-Laufzeit verwaltet. Sie dürfen nicht hart im Repository eingetragen werden. Die Startvalidierung nennt ausschließlich fehlerhafte Variablennamen oder Regeln und gibt keine Secret-Werte aus.
 

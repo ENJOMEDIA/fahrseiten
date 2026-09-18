@@ -1,10 +1,35 @@
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 
 import { createContractPdf } from "@/modules/contracts/pdf";
 import { findPlatformLegalProfile } from "@/modules/legal/repository";
 import { requirePlatformPermission } from "@/modules/platform/access";
 import { findPlatformTenant } from "@/modules/platform/tenant-directory";
 import { findTenantBilling } from "@/modules/billing/service";
+import {
+  findPlatformLogoId,
+  findPublicMedia,
+} from "@/modules/media/repository";
+import { getMediaStorage } from "@/modules/media/runtime-storage";
+
+async function loadContractLogo() {
+  const logoId = await findPlatformLogoId();
+  if (!logoId) return undefined;
+  const asset = await findPublicMedia(logoId);
+  if (!asset) return undefined;
+  const source = await getMediaStorage().read(asset.storageKey);
+  return new Uint8Array(
+    await sharp(source)
+      .resize({
+        width: 620,
+        height: 168,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .png()
+      .toBuffer(),
+  );
+}
 
 export async function GET(
   _request: Request,
@@ -12,10 +37,11 @@ export async function GET(
 ) {
   await requirePlatformPermission("platform.tenants.manage");
   const tenantId = (await params).id;
-  const [tenant, billing, platform] = await Promise.all([
+  const [tenant, billing, platform, brandLogoPng] = await Promise.all([
     findPlatformTenant(tenantId),
     findTenantBilling(tenantId),
     findPlatformLegalProfile(),
+    loadContractLogo().catch(() => undefined),
   ]);
   if (!tenant || !billing.profile || !billing.subscription || !platform)
     return NextResponse.json(
@@ -26,6 +52,7 @@ export async function GET(
     );
   const contractNumber = `V-${tenant.customerNumber}-${billing.subscription.id.slice(0, 8).toUpperCase()}`;
   const bytes = await createContractPdf({
+    brandLogoPng,
     contractNumber,
     customerNumber: tenant.customerNumber,
     provider: {

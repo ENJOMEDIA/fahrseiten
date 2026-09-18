@@ -159,14 +159,19 @@ Akquiseanfragen der FahrSeiten-Landingpage werden bereits im internen Akquise-CR
 3. Als Befehl den vom WCP gültigen Node-Pfad plus Releasepfad verwenden, beispielsweise sinngemäß:
 
    ```text
-   node fahrseiten.de/dist/plesk/cron.mjs
+   /opt/plesk/node/22/bin/node /var/www/vhosts/hosting177968.ae89a.netcup.net/fahrseiten.de/dist/plesk/cron.mjs
    ```
 
-4. Mit einem Intervall von fünf Minuten starten.
+4. Als Zeitplan `*/5 * * * *` beziehungsweise in der Plesk-Auswahl **alle fünf Minuten** einstellen. Diese eine Aufgabe verarbeitet die gemeinsame Warteschlange für Akquise-, Bestätigungs-, Passwort- und Systemmails; pro Mailtyp ist kein eigener Cronjob erforderlich.
 5. Prüfen, wie Plesk die App-Umgebungsvariablen an Scheduled Tasks übergibt. `APP_BASE_URL` und `CRON_SECRET` müssen vorhanden sein, dürfen aber nicht als sichtbare Kommandozeilenargumente erscheinen.
 6. **Run Now/Jetzt ausführen** verwenden. Nur bei erfolgreichem Testlauf aktiv lassen.
 
 Plesk führt Linux-Aufgaben je nach Tarif in einer eingeschränkten Umgebung aus. Bei `node: command not found` oder fehlenden Variablen stoppen und den im WCP vorgesehenen Node-Pfad beziehungsweise netcup-Support verwenden.
+
+Der Onlinebrief24-Adapter benötigt aktuell keinen eigenen Cronjob. Test- oder
+Live-Aufträge dürfen erst durch eine ausdrückliche Admin-Aktion entstehen. Eine
+spätere automatische Statusabfrage wird als eigener, idempotenter Job ergänzt
+und nicht über verdeckte Dauerläufe aktiviert.
 
 ## 12. Wartungsmodus, Rechtstexte und Freigabe
 

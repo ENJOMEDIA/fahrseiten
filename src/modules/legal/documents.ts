@@ -109,6 +109,63 @@ Beide Parteien behandeln nicht öffentliche geschäftliche und technische Inform
 Dieser B2B-Entwurf enthält offene geschäftliche und rechtliche Entscheidungen. Er darf erst nach Vervollständigung, Abgleich mit Angebot, Vertragsmuster und AVV sowie anwaltlicher Prüfung veröffentlicht oder in Verträge einbezogen werden.`;
 }
 
+export function createPlatformTerms(data: LegalProfileData) {
+  return `Allgemeine Geschäftsbedingungen
+
+1. Geltungsbereich
+Diese Allgemeinen Geschäftsbedingungen gelten für Verträge zwischen ${data.companyName} (nachfolgend „Anbieter“) und Unternehmern im Sinne des § 14 BGB, insbesondere Fahrschulen (nachfolgend „Kunde“), über die Bereitstellung, Einrichtung und Betreuung der FahrSeiten-Plattform. Ein Vertragsschluss mit Verbrauchern ist auf dieser Grundlage nicht vorgesehen. Abweichende Geschäftsbedingungen des Kunden gelten nur, wenn der Anbieter ihrer Geltung ausdrücklich in Textform zugestimmt hat.
+
+2. Leistungsumfang
+Der geschuldete Leistungsumfang ergibt sich aus dem angenommenen Angebot, der Paketbeschreibung, der Auftragsbestätigung und gegebenenfalls ergänzenden Leistungsbeschreibungen. FahrSeiten umfasst je nach gebuchtem Paket insbesondere die Bereitstellung einer mandantenfähigen Website, Verwaltungsfunktionen, Inhaltsmodule, Domainanbindung und technische Pflege. Zusatzleistungen wie Fotografie, Medienproduktion, Texterstellung, Domainumzüge oder individuelle Entwicklungen werden nur geschuldet, wenn sie ausdrücklich vereinbart wurden. Der Anbieter darf die Plattform weiterentwickeln, soweit der vereinbarte Kernnutzen nicht wesentlich eingeschränkt wird.
+
+3. Vertragsschluss
+Die Darstellung von Leistungen auf der Website ist kein verbindliches Angebot. Ein Vertrag kommt durch Annahme eines individuellen Angebots, eine Auftragsbestätigung des Anbieters oder die beiderseitige Unterzeichnung eines Vertragsdokuments zustande. Angaben im Einrichtungsprozess dienen der technischen Vorbereitung und ersetzen ohne ausdrückliche Bestätigung keinen Vertragsschluss.
+
+4. Einrichtung und Mitwirkung
+Der Kunde stellt richtige und vollständige Stammdaten, Inhalte, Freigaben, Domaininformationen und erforderliche Zugänge rechtzeitig bereit. Verzögerungen aus fehlender oder verspäteter Mitwirkung verschieben vereinbarte Termine angemessen. Der Kunde prüft die eingerichtete Website vor der Veröffentlichung und meldet erkennbare Fehler unverzüglich. Zugangsdaten sind vertraulich zu behandeln und vor dem Zugriff Dritter zu schützen.
+
+5. Inhalte, Rechtstexte und Rechte Dritter
+Der Kunde ist für die von ihm bereitgestellten, ausgewählten oder freigegebenen Texte, Bilder, Logos, Marken, Preise, Angebote und sonstigen Inhalte verantwortlich. Er sichert zu, dass die Inhalte richtig und rechtmäßig sind und er über alle erforderlichen Nutzungs-, Marken- und Persönlichkeitsrechte verfügt. Bei nachvollziehbaren Hinweisen auf Rechtsverletzungen darf der Anbieter betroffene Inhalte vorübergehend sperren und den Kunden informieren.
+
+Automatisch erzeugte oder technisch unterstützte Impressums-, Datenschutz-, Cookie- und Vertragstexte sind Arbeitshilfen. Der Kunde muss sie auf seinen konkreten Betrieb, seine Rechtsform und die tatsächlich eingesetzten Dienste prüfen und erforderlichenfalls rechtlich beraten lassen. Der Anbieter bleibt für seine eigenen technischen Leistungen und selbst erstellten Inhalte verantwortlich.
+
+6. Domains und Drittanbieter
+Eine Kundendomain kann beim bisherigen Domainanbieter verbleiben und technisch mit FahrSeiten verbunden werden. Soweit im Angebot nichts anderes vereinbart ist, bleibt der Kunde Domaininhaber und für Verlängerung, Gebühren, Inhaberdaten und erforderliche DNS-Freigaben verantwortlich. Leistungen externer Anbieter, insbesondere Domain-, Karten-, Analyse-, E-Mail-, Brief-, Signatur- oder Zahlungsdienste, unterliegen zusätzlich deren Bedingungen und können gesonderte Kosten verursachen. Solche Dienste werden nur im vereinbarten Umfang eingebunden.
+
+7. Vergütung und Rechnungen
+Einrichtungsentgelt, laufende Vergütung, Abrechnungszeitraum und Zusatzleistungen ergeben sich aus dem angenommenen Angebot oder der Auftragsbestätigung. Rechnungen werden elektronisch über das vom Anbieter eingesetzte Rechnungssystem übermittelt und sind innerhalb des auf der Rechnung angegebenen Zahlungsziels ohne Abzug fällig. Die Anzeige einer Rechnungskopie oder eines Zahlungsstatus im FahrSeiten-Kundenbereich dient der Übersicht und ersetzt nicht die übermittelte Rechnung. Alle Preise verstehen sich zuzüglich gesetzlicher Umsatzsteuer, soweit diese anfällt und nicht ausdrücklich ein Bruttopreis ausgewiesen ist.
+
+8. Laufzeit und Kündigung
+Vertragsbeginn, Mindestlaufzeit und ordentliche Kündigungsfrist ergeben sich aus dem angenommenen Angebot oder der Auftragsbestätigung. Fehlt dort eine Mindestlaufzeit, läuft der Vertrag auf unbestimmte Zeit und kann mit einer Frist von einem Monat zum Monatsende in Textform gekündigt werden. Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt unberührt.
+
+9. Betrieb, Wartung und Störungen
+Der Anbieter stellt die Plattform mit der im Angebot vereinbarten Verfügbarkeit bereit. Ohne ausdrückliche Service-Level-Vereinbarung besteht kein Anspruch auf eine bestimmte unterbrechungsfreie Verfügbarkeit. Notwendige Wartungs-, Sicherheits- und Aktualisierungsarbeiten sind zulässig; planbare Einschränkungen werden nach Möglichkeit angekündigt. Störungen sind mit einer nachvollziehbaren Beschreibung zu melden. Der Anbieter bearbeitet Wiederherstellung und Schadensbegrenzung nach Dringlichkeit.
+
+10. Nutzungsrechte und Medienleistungen
+Der Kunde räumt dem Anbieter die für Vertragserfüllung, Speicherung, technische Bearbeitung und öffentliche Auslieferung erforderlichen, räumlich auf die vereinbarte Nutzung und zeitlich auf die Vertragsdauer beschränkten Nutzungsrechte an bereitgestellten Inhalten ein. Rechte an individuell erstellten Fotos, Medien, Rohdateien und Bearbeitungen richten sich nach dem jeweiligen Angebot. Rechte an der Plattform, ihrer Software und allgemein verwendbaren Komponenten verbleiben beim Anbieter oder den jeweiligen Rechteinhabern.
+
+11. Datenschutz und Auftragsverarbeitung
+Die Parteien beachten die anwendbaren Datenschutzvorschriften. Soweit der Anbieter personenbezogene Daten im Auftrag des Kunden verarbeitet, schließen die Parteien vor Beginn dieser Verarbeitung eine Vereinbarung zur Auftragsverarbeitung. Der Anbieter darf sorgfältig ausgewählte Unterauftragsverarbeiter einsetzen, soweit die datenschutzrechtlichen Voraussetzungen eingehalten werden.
+
+12. Mängel
+Der Kunde zeigt Mängel unverzüglich und nachvollziehbar an. Der Anbieter erhält zunächst Gelegenheit zur Nacherfüllung innerhalb angemessener Frist. Schlägt die Nacherfüllung fehl, stehen dem Kunden die gesetzlichen Mängelrechte zu. Unerhebliche Abweichungen, die die vereinbarte Nutzung nicht wesentlich beeinträchtigen, begründen keine Mängelrechte.
+
+13. Haftung
+Der Anbieter haftet unbeschränkt bei Vorsatz, grober Fahrlässigkeit, Verletzung von Leben, Körper oder Gesundheit, nach dem Produkthaftungsgesetz sowie in sonstigen gesetzlich zwingenden Fällen. Bei leicht fahrlässiger Verletzung einer wesentlichen Vertragspflicht ist die Haftung auf den vertragstypischen, bei Vertragsschluss vorhersehbaren Schaden begrenzt. Im Übrigen ist die Haftung für leichte Fahrlässigkeit ausgeschlossen, soweit gesetzlich zulässig. Für Datenverlust ist die Haftung auf den Wiederherstellungsaufwand begrenzt, der bei einer dem Risiko angemessenen Datensicherung entstanden wäre. Die vorstehenden Beschränkungen gelten auch zugunsten der gesetzlichen Vertreter und Erfüllungsgehilfen des Anbieters.
+
+14. Sperrung
+Bei erheblichem Zahlungsverzug, konkreten Sicherheitsgefahren, rechtswidriger Nutzung oder einer erheblichen Verletzung vertraglicher Pflichten darf der Anbieter betroffene Zugänge oder Veröffentlichungen nach vorheriger Ankündigung vorübergehend sperren, soweit keine sofortige Maßnahme erforderlich ist. Die Sperrung muss verhältnismäßig sein und wird aufgehoben, sobald ihr Grund entfällt.
+
+15. Vertragsende, Daten und Domain
+Nach Vertragsende werden Zugänge gesperrt. Der Kunde kann bis zum Vertragsende verfügbare Exportfunktionen nutzen. Soweit keine gesetzlichen Aufbewahrungspflichten, berechtigten Nachweise oder abweichenden Vereinbarungen bestehen, werden Mandantendaten nach Ablauf einer angemessenen technischen Abwicklungs- und Sicherungsfrist gelöscht. Unterstützung bei Sonderexporten, Domainübertragungen oder Migrationen kann nach Aufwand gesondert vergütet werden. Die Pflicht des Kunden zur Sicherung seiner Geschäftsunterlagen bleibt unberührt.
+
+16. Änderungen der Vertragsbedingungen
+Änderungen dieser Bedingungen für bestehende Verträge werden dem Kunden in Textform angeboten. Sie werden nur durch ausdrückliche Zustimmung oder eine anderweitig wirksame Vereinbarung Vertragsbestandteil. Eine bloße Nichtreaktion gilt nicht als Zustimmung, sofern dies nicht im Einzelfall gesetzlich zulässig und ausdrücklich vereinbart ist.
+
+17. Schlussbestimmungen
+Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Ist der Kunde Kaufmann, juristische Person des öffentlichen Rechts oder öffentlich-rechtliches Sondervermögen, ist der Sitz des Anbieters Gerichtsstand, soweit gesetzlich zulässig. Individuelle Vereinbarungen haben Vorrang. Sollte eine Bestimmung unwirksam sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt; an die Stelle der unwirksamen Bestimmung tritt die gesetzliche Regelung.`;
+}
+
 export function validateLegalPublication(raw: unknown) {
   const input = legalDocumentInputSchema.parse(raw);
   const warnings = publicationWarnings(input.type, input.content);
@@ -251,6 +308,15 @@ export const defaultLegalModules: LegalModuleSettings = {
   payments: false,
 };
 
+export function createOnlinebriefPrivacyNotice() {
+  return `Postalische Akquise und Onlinebrief24
+Für gezielt ausgewählte Geschäftskontakte verarbeiten wir Firmenanschrift, Namen beziehungsweise Funktion geschäftlicher Ansprechpartner, öffentlich zugängliche geschäftliche Kontaktdaten, Datenquelle, Versandstatus und Rückmeldung zur Direktwerbung. Rechtsgrundlage für die postalische Ansprache und interne Dokumentation ist unser berechtigtes Interesse an der Vorstellung unserer Leistungen gegenüber geeigneten Geschäftskunden gemäß Art. 6 Abs. 1 lit. f DSGVO. Betroffene können der werblichen Verarbeitung jederzeit widersprechen.
+
+Für Druck, Kuvertierung und Versand übermitteln wir den Brief einschließlich Empfängeranschrift und Lead-Referenz an die letterei.de Postdienste GmbH, Maybachstraße 9, 21423 Winsen (Luhe), die den Dienst Onlinebrief24 bereitstellt. Die Verarbeitung erfolgt als Auftragsverarbeitung nach Art. 28 DSGVO auf Grundlage einer gesonderten Vereinbarung. Briefdaten werden nur so lange gespeichert, wie dies für Produktion, Versand, Nachweis und gesetzliche Pflichten erforderlich ist; zusätzliche Archivfunktionen beim Anbieter werden nicht ohne festgelegtes Löschkonzept genutzt. Für die postalische Zustellung erhält das beauftragte Postunternehmen die erforderlichen Adress- und Sendungsdaten.
+
+Über den persönlichen Rückmeldelink kann Interesse erklärt oder jeder weitere Werbekontakt abgelehnt werden. Eine freiwillige Einwilligung in E-Mail-Informationen wird getrennt erfasst und per Double-Opt-in bestätigt; Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Ein Widerruf oder Werbewiderspruch wird in einer Sperrliste berücksichtigt, damit keine weitere werbliche Ansprache erfolgt.`;
+}
+
 export function parseLegalProfileForm(formData: FormData) {
   const checked = (name: keyof LegalModuleSettings) =>
     formData.get(`module_${name}`) === "on";
@@ -351,7 +417,7 @@ export function createStructuredLegalDocuments(input: {
   }
   if (platformPostalAcquisition) {
     privacySections.push(
-      `${privacySections.length + 1}. Postalische Akquise und Rückmeldungen\nFür gezielt ausgewählte Geschäftskontakte verarbeiten wir Firmenanschrift, öffentlich zugängliche geschäftliche Kontaktdaten, Datenquelle, Versandstatus und Rückmeldung zur Direktwerbung. Rechtsgrundlage für die postalische Ansprache und die interne Dokumentation ist Art. 6 Abs. 1 lit. f DSGVO. Über den persönlichen Rückmeldelink kann Interesse erklärt oder jeder weitere Werbekontakt abgelehnt werden. Eine freiwillige Einwilligung in E-Mail-Informationen wird getrennt erfasst und per Double-Opt-in bestätigt; Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Ein Widerruf oder Werbewiderspruch wird dauerhaft in einer Sperrliste berücksichtigt.`,
+      `${privacySections.length + 1}. ${createOnlinebriefPrivacyNotice()}`,
     );
   }
   const optionalModules: Array<[keyof LegalModuleSettings, string, string]> = [

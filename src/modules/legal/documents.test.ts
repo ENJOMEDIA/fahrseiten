@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createStructuredLegalDocuments,
+  createPlatformTerms,
   createPlatformTermsDraft,
   createLegalDrafts,
   defaultLegalModules,
@@ -156,8 +157,14 @@ describe("legal document publication", () => {
     });
 
     expect(platform.privacy).toContain("Postalische Akquise");
+    expect(platform.privacy).toContain("letterei.de Postdienste GmbH");
+    expect(platform.privacy).toContain("Art. 28 DSGVO");
     expect(tenant.privacy).not.toContain("Postalische Akquise");
     expect(createPlatformTermsDraft(data)).toContain("[Festlegen:");
+    const liveTerms = createPlatformTerms(data);
+    expect(liveTerms).not.toContain("[Festlegen:");
+    expect(publicationWarnings("terms", liveTerms)).toHaveLength(0);
+    expect(liveTerms).toContain("Ein Vertrag kommt durch Annahme");
     expect(createPlatformTermsDraft(data)).toContain(
       "Unternehmern im Sinne des § 14 BGB",
     );

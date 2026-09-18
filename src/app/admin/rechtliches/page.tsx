@@ -1,7 +1,7 @@
 import { CustomerPage } from "@/components/customer/customer-page";
 import { LegalBuilder } from "@/modules/legal/legal-builder";
 import { LegalEditor } from "@/modules/legal/legal-editor";
-import { createPlatformTermsDraft } from "@/modules/legal/documents";
+import { createPlatformTerms } from "@/modules/legal/documents";
 import {
   findLatestPlatformLegalDocuments,
   findPlatformLegalProfile,
@@ -60,7 +60,7 @@ export default async function PlatformLegalPage() {
           <LegalEditor
             action={savePlatformTermsAction}
             content={
-              latest("terms")?.content ?? createPlatformTermsDraft(profile.data)
+              latest("terms")?.content ?? createPlatformTerms(profile.data)
             }
             status={latest("terms")?.status ?? "draft"}
             type="terms"
