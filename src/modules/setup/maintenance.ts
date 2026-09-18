@@ -15,12 +15,14 @@ import type { TenantContext } from "@/modules/tenancy/tenant-context";
 const maintenanceInput = z.object({
   enabled: z.boolean(),
   message: z.string().trim().min(10).max(500),
+  demoAvailableDuringMaintenance: z.boolean().optional(),
 });
 
 export async function updatePlatformMaintenance(input: {
   enabled: boolean;
   message: string;
   actorUserId: string;
+  demoAvailableDuringMaintenance: boolean;
 }) {
   const parsed = maintenanceInput.parse(input);
   const [settings] = await db
@@ -40,6 +42,8 @@ export async function updatePlatformMaintenance(input: {
       .set({
         maintenanceMode: parsed.enabled,
         maintenanceMessage: parsed.message,
+        demoAvailableDuringMaintenance:
+          parsed.demoAvailableDuringMaintenance ?? true,
       })
       .where(eq(platformSettings.id, settings.id));
     await tx.insert(auditLogs).values({

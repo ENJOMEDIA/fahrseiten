@@ -18,6 +18,7 @@ export function TenantSite({
   return (
     <div
       className="min-h-screen bg-slate-50 text-slate-950"
+      data-theme={website.theme.themeKey ?? "calm_cyan"}
       style={
         {
           "--tenant-primary": website.theme.primaryColor,

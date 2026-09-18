@@ -76,6 +76,9 @@ export async function SimpleMarketingPage({
         }
         primaryColor={settings?.primaryColor ?? "#0891b2"}
         variant="platform"
+        demoHref={
+          settings?.demoAvailableDuringMaintenance ? "/demo" : undefined
+        }
       />
     );
   }

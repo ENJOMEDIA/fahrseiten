@@ -3,6 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { BlockRenderer } from "@/modules/cms/block-renderer";
 import type { BlockProperties, StoredBlock } from "@/modules/cms/block-schema";
+import { uploadTenantMedia } from "@/app/kunde/medien/actions";
+import { saveTenantBuilderTheme } from "@/app/kunde/website/builder/actions";
+import {
+  builderThemes,
+  builderThemeValues,
+  type BuilderThemeKey,
+} from "./themes";
+import {
+  mediaCategoryLabels,
+  mediaCategoryValues,
+  type MediaCategory,
+} from "@/modules/media/service";
 import {
   duplicateBlock,
   moveBlock,
@@ -41,7 +53,24 @@ const initialBlocks: StoredBlock[] = [
   },
 ];
 
-export function BuilderDemo() {
+type BuilderMedia = {
+  id: string;
+  url: string;
+  label: string;
+  category: MediaCategory;
+};
+
+export function BuilderDemo({
+  media = [],
+  tenantMode = false,
+  canUseThemes = false,
+  initialTheme,
+}: {
+  media?: BuilderMedia[];
+  tenantMode?: boolean;
+  canUseThemes?: boolean;
+  initialTheme?: string;
+}) {
   const [blocks, setBlocks] = useState(initialBlocks);
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">(
@@ -52,7 +81,11 @@ export function BuilderDemo() {
     { label: string; blocks: StoredBlock[] }[]
   >([]);
   const [navigation, setNavigation] = useState("Start, Über uns, Kontakt");
-  const [theme, setTheme] = useState("cyan");
+  const [theme, setTheme] = useState<BuilderThemeKey>(
+    builderThemeValues.includes(initialTheme as BuilderThemeKey)
+      ? (initialTheme as BuilderThemeKey)
+      : "calm_cyan",
+  );
   const [font, setFont] = useState("system");
   const [logo, setLogo] = useState("none");
   const [pages, setPages] = useState(["Startseite", "Über uns"]);
@@ -277,6 +310,47 @@ export function BuilderDemo() {
                     />
                   </label>
                 ) : null}
+                {block.properties.type === "hero" ||
+                block.properties.type === "text_image" ? (
+                  <label className="mt-3 block text-sm font-semibold">
+                    Bild aus der Medienbibliothek
+                    <select
+                      className="mt-1 w-full rounded-lg border p-2 font-normal"
+                      value={block.properties.imageUrl ?? ""}
+                      onChange={(event) => {
+                        const selected = media.find(
+                          (asset) => asset.url === event.target.value,
+                        );
+                        patchProperties(block.id, {
+                          imageUrl: selected?.url,
+                          imageAlt: selected?.label ?? "",
+                          ...(block.properties.type === "text_image"
+                            ? { mediaId: selected?.id }
+                            : {}),
+                        } as Partial<BlockProperties>);
+                      }}
+                    >
+                      <option value="">Kein Bild ausgewählt</option>
+                      {mediaCategoryValues.map((category) => {
+                        const categoryMedia = media.filter(
+                          (asset) => asset.category === category,
+                        );
+                        return categoryMedia.length ? (
+                          <optgroup
+                            key={category}
+                            label={mediaCategoryLabels[category]}
+                          >
+                            {categoryMedia.map((asset) => (
+                              <option key={asset.id} value={asset.url}>
+                                {asset.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        ) : null;
+                      })}
+                    </select>
+                  </label>
+                ) : null}
                 {!block.properties.heading ? (
                   <p className="mt-2 text-sm text-red-700">
                     Eine Überschrift ist erforderlich.
@@ -338,18 +412,65 @@ export function BuilderDemo() {
                 onChange={(event) => setNavigation(event.target.value)}
               />
             </label>
-            <label className="block text-sm font-semibold">
-              Farbvariante
-              <select
-                className="mt-2 w-full rounded-xl border p-3"
-                value={theme}
-                onChange={(event) => setTheme(event.target.value)}
-              >
-                <option value="cyan">Cyan</option>
-                <option value="blue">Blau</option>
-                <option value="green">Grün</option>
-              </select>
-            </label>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-semibold">Designvorlage</h2>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    Drei kontrollierte Themes sorgen für ein stimmiges Layout
+                    auf allen Geräten.
+                  </p>
+                </div>
+                {!canUseThemes && tenantMode ? (
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+                    Ab Wachstum
+                  </span>
+                ) : null}
+              </div>
+              <form action={saveTenantBuilderTheme} className="mt-4">
+                <div className="grid gap-2">
+                  {builderThemeValues.map((key) => (
+                    <label
+                      className={`cursor-pointer rounded-xl border p-3 ${theme === key ? "border-cyan-500 bg-cyan-50" : "border-slate-200"}`}
+                      key={key}
+                    >
+                      <span className="flex items-center gap-3">
+                        <input
+                          checked={theme === key}
+                          disabled={tenantMode && !canUseThemes}
+                          name="themeKey"
+                          onChange={() => setTheme(key)}
+                          type="radio"
+                          value={key}
+                        />
+                        <span className="flex-1">
+                          <span className="block text-sm font-semibold">
+                            {builderThemes[key].name}
+                          </span>
+                          <span className="block text-xs text-slate-500">
+                            {builderThemes[key].description}
+                          </span>
+                        </span>
+                        <span
+                          className="size-7 rounded-full border-4 border-white shadow"
+                          style={{
+                            backgroundColor: builderThemes[key].primary,
+                          }}
+                        />
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                {tenantMode && canUseThemes ? (
+                  <button
+                    className="mt-3 w-full rounded-xl border px-4 py-2 text-sm font-semibold"
+                    type="submit"
+                  >
+                    Design anwenden
+                  </button>
+                ) : null}
+              </form>
+            </div>
             <label className="block text-sm font-semibold">
               Schriftvariante
               <select
@@ -361,6 +482,49 @@ export function BuilderDemo() {
                 <option value="serif-heading">Serif Überschriften</option>
               </select>
             </label>
+            {tenantMode ? (
+              <form
+                action={uploadTenantMedia}
+                className="rounded-2xl border border-dashed border-slate-300 p-4"
+              >
+                <h2 className="font-semibold">Neues Bild hochladen</h2>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Das Bild wird optimiert und gleichzeitig im gewählten Bereich
+                  deiner Medienbibliothek abgelegt.
+                </p>
+                <input name="usage" type="hidden" value="library" />
+                <input
+                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
+                  className="mt-3 block w-full text-sm"
+                  name="file"
+                  required
+                  type="file"
+                />
+                <input
+                  className="mt-3 w-full rounded-xl border p-2 text-sm"
+                  name="altText"
+                  placeholder="Kurze Bildbeschreibung"
+                  required
+                />
+                <select
+                  className="mt-3 w-full rounded-xl border p-2 text-sm"
+                  defaultValue="content"
+                  name="category"
+                >
+                  {mediaCategoryValues.map((category) => (
+                    <option key={category} value={category}>
+                      {mediaCategoryLabels[category]}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="mt-3 w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                  type="submit"
+                >
+                  Hochladen & einsortieren
+                </button>
+              </form>
+            ) : null}
             <label className="block text-sm font-semibold">
               Logo
               <select
@@ -421,6 +585,12 @@ export function BuilderDemo() {
             <div
               className={`mx-auto overflow-hidden rounded-3xl bg-white shadow-lg transition-[max-width] ${device === "mobile" ? "max-w-[390px]" : device === "tablet" ? "max-w-[800px]" : "max-w-none"}`}
               data-theme={theme}
+              style={
+                {
+                  "--tenant-primary": builderThemes[theme].primary,
+                  "--tenant-accent": builderThemes[theme].accent,
+                } as React.CSSProperties
+              }
             >
               <BlockRenderer blocks={blocks} />
             </div>

@@ -35,6 +35,7 @@ export async function uploadPlatformBrandAsset(
           kind === "logo"
             ? "Zentrales Markenlogo der FahrSeiten-Plattform"
             : "Browser- und App-Symbol der FahrSeiten-Plattform",
+        category: "branding",
       },
       storage: getMediaStorage(),
       repository: databaseMediaRepository,

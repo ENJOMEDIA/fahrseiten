@@ -16,6 +16,8 @@ export async function savePlatformMaintenance(
       actorUserId: identity.id,
       enabled: formData.get("enabled") === "on",
       message: String(formData.get("message") ?? ""),
+      demoAvailableDuringMaintenance:
+        formData.get("demoAvailableDuringMaintenance") === "on",
     });
     revalidatePath("/", "layout");
     revalidatePath("/admin/einstellungen");

@@ -10,6 +10,7 @@ export function MaintenancePage({
   accentColor,
   variant,
   logoUrl,
+  demoHref,
 }: {
   brandName: string;
   message: string;
@@ -17,6 +18,7 @@ export function MaintenancePage({
   accentColor: string;
   variant: "platform" | "tenant";
   logoUrl?: string;
+  demoHref?: string;
 }) {
   const platform = variant === "platform";
   const previews = platform
@@ -226,12 +228,22 @@ export function MaintenancePage({
               Cookie-Einstellungen
             </Link>
             {platform ? (
-              <Link
-                className="rounded-full border border-white/15 px-4 py-2 font-semibold text-white hover:bg-white/10"
-                href={dashboardUrl()}
-              >
-                Kundenlogin
-              </Link>
+              <>
+                {demoHref ? (
+                  <Link
+                    className="rounded-full bg-white px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-50"
+                    href={demoHref}
+                  >
+                    Live-Demo ansehen
+                  </Link>
+                ) : null}
+                <Link
+                  className="rounded-full border border-white/15 px-4 py-2 font-semibold text-white hover:bg-white/10"
+                  href={dashboardUrl()}
+                >
+                  Kundenlogin
+                </Link>
+              </>
             ) : null}
           </nav>
         </footer>

@@ -40,6 +40,11 @@ export const featureCatalog = {
     description: "Eigener Markenauftritt mit sicher verwalteten Bilddateien.",
     availability: "available",
   },
+  theme_templates: {
+    title: "Designvorlagen",
+    description: "Drei abgestimmte Website-Themes im Builder auswählen.",
+    availability: "available",
+  },
   multi_location: {
     title: "Mehrere Standorte",
     description: "Zusätzliche Fahrschulstandorte strukturiert verwalten.",

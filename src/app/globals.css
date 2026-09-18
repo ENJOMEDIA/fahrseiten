@@ -172,6 +172,25 @@ textarea {
   box-shadow: 0 20px 48px rgb(15 23 42 / 0.1);
 }
 
+[data-theme="urban_night"] {
+  --radius-card: 0.75rem;
+}
+
+[data-theme="urban_night"] h1,
+[data-theme="urban_night"] h2 {
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+[data-theme="warm_motion"] {
+  --radius-card: 2rem;
+}
+
+[data-theme="warm_motion"] h1,
+[data-theme="warm_motion"] h2 {
+  letter-spacing: -0.025em;
+}
+
 .app-sidebar::before {
   content: "";
   position: absolute;

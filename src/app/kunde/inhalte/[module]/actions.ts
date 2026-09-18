@@ -56,6 +56,7 @@ export async function createContentEntryAction(
             altText:
               String(formData.get("imageAlt") ?? "").trim() ||
               `Fahrschulfahrzeug ${String(formData.get("title") ?? "").trim()}`,
+            category: "vehicles",
           },
           storage: getMediaStorage(),
           repository: databaseMediaRepository,

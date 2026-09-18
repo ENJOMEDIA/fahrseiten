@@ -36,6 +36,7 @@ export async function uploadTenantMedia(formData: FormData) {
   const file = formData.get("file");
   if (!(file instanceof File))
     throw new Error("Bitte eine Bilddatei auswählen.");
+  const usage = String(formData.get("usage") ?? "library");
   const asset = await uploadImage({
     tenantId: context.tenantId,
     bytes: new Uint8Array(await file.arrayBuffer()),
@@ -44,11 +45,14 @@ export async function uploadTenantMedia(formData: FormData) {
       claimedMimeType: file.type,
       altText: String(formData.get("altText") ?? ""),
       description: String(formData.get("description") ?? ""),
+      category:
+        usage === "logo" || usage === "favicon"
+          ? "branding"
+          : String(formData.get("category") ?? "general"),
     },
     storage: getMediaStorage(),
     repository: databaseMediaRepository,
   });
-  const usage = String(formData.get("usage") ?? "library");
   if (usage === "logo") await setTenantLogo(context.tenantId, asset.id);
   if (usage === "favicon") await setTenantFavicon(context.tenantId, asset.id);
   if (!["image/svg+xml", "image/x-icon"].includes(asset.mimeType))
@@ -61,6 +65,7 @@ export async function uploadTenantMedia(formData: FormData) {
       cropZoom: 100,
     });
   revalidatePath("/kunde/medien");
+  revalidatePath("/kunde/website/builder");
 }
 
 export async function cropTenantMedia(formData: FormData) {

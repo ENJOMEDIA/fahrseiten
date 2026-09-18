@@ -147,6 +147,9 @@ export default async function MarketingStartPage() {
         }
         primaryColor={settings?.primaryColor ?? "#0891b2"}
         variant="platform"
+        demoHref={
+          settings?.demoAvailableDuringMaintenance ? "/demo" : undefined
+        }
       />
     );
   }

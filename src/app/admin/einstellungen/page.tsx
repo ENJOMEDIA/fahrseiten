@@ -31,6 +31,9 @@ export default async function PlatformSettingsPage() {
             legalReady={legalReady}
             maintenanceMessage={settings.maintenanceMessage}
             maintenanceMode={settings.maintenanceMode}
+            demoAvailableDuringMaintenance={
+              settings.demoAvailableDuringMaintenance
+            }
           />
           <div className="grid h-fit gap-5">
             <Card>

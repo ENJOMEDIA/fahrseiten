@@ -17,6 +17,7 @@ export function MaintenanceForm({
   legalReady,
   legalHref,
   tenant = false,
+  demoAvailableDuringMaintenance = true,
 }: {
   action: (
     state: MaintenanceActionState,
@@ -27,6 +28,7 @@ export function MaintenanceForm({
   legalReady: boolean;
   legalHref: string;
   tenant?: boolean;
+  demoAvailableDuringMaintenance?: boolean;
 }) {
   const [state, action, pending] = useActionState(saveAction, initialState);
 
@@ -67,6 +69,23 @@ export function MaintenanceForm({
           </span>
         </span>
       </label>
+      {!tenant ? (
+        <label className="flex items-start gap-3 rounded-xl border border-cyan-100 bg-cyan-50 p-4 font-semibold">
+          <input
+            className="mt-1 size-5"
+            defaultChecked={demoAvailableDuringMaintenance}
+            name="demoAvailableDuringMaintenance"
+            type="checkbox"
+          />
+          <span>
+            Öffentliche Demo trotz Wartungsmodus zeigen
+            <span className="mt-1 block text-sm leading-6 font-normal text-slate-600">
+              Die Produktdemo unter /demo bleibt erreichbar. Alle übrigen
+              Marketingseiten folgen weiterhin dem Wartungsmodus.
+            </span>
+          </span>
+        </label>
+      ) : null}
       <label className="block text-sm font-semibold">
         Vorschautext
         <textarea

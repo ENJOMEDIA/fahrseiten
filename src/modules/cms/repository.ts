@@ -63,6 +63,7 @@ export async function findTenantWebsite(
       position: item.position,
     })),
     theme: {
+      themeKey: row.theme?.themeKey ?? "calm_cyan",
       primaryColor: row.theme?.primaryColor ?? "#0891b2",
       accentColor: row.theme?.accentColor ?? "#0f172a",
       logoUrl: row.theme?.logoMediaId

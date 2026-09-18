@@ -24,6 +24,7 @@ function mapAsset(row: typeof mediaAssets.$inferSelect): MediaAssetRecord {
     height: row.height,
     altText: row.altText,
     description: row.description ?? undefined,
+    category: row.category as MediaAssetRecord["category"],
     archivedAt: row.archivedAt ?? undefined,
     optimizedStorageKey: row.optimizedStorageKey ?? undefined,
     optimizedByteSize: row.optimizedByteSize ?? undefined,
@@ -48,6 +49,7 @@ export const databaseMediaRepository: MediaRepository = {
       height: asset.height,
       altText: asset.altText,
       description: asset.description ?? null,
+      category: asset.category,
     });
   },
   async find(tenantId, id) {

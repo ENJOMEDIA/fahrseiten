@@ -93,6 +93,9 @@ export const platformSettings = mysqlTable("platform_settings", {
   logoMediaId: id("logo_media_id"),
   faviconMediaId: id("favicon_media_id"),
   maintenanceMode: boolean("maintenance_mode").default(true).notNull(),
+  demoAvailableDuringMaintenance: boolean("demo_available_during_maintenance")
+    .default(true)
+    .notNull(),
   maintenanceMessage: varchar("maintenance_message", { length: 500 })
     .default(
       "Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen.",
@@ -615,6 +618,7 @@ export const mediaAssets = mysqlTable(
     height: int("height").notNull(),
     altText: varchar("alt_text", { length: 300 }).notNull(),
     description: text("description"),
+    category: varchar("category", { length: 40 }).default("general").notNull(),
     optimizedStorageKey: varchar("optimized_storage_key", { length: 500 }),
     optimizedByteSize: int("optimized_byte_size"),
     cropAspect: mysqlEnum("crop_aspect", ["original", "16:9", "4:3", "1:1"])

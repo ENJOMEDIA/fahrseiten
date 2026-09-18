@@ -29,6 +29,7 @@ export type TenantWebsite = {
   basePath?: string;
   navigation: SiteNavigationItem[];
   theme: {
+    themeKey?: string;
     primaryColor: string;
     accentColor: string;
     logoUrl?: string;

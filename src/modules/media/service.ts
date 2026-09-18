@@ -6,11 +6,31 @@ import { inspectImage } from "./image-inspection";
 import type { MediaStorage } from "./storage";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+export const mediaCategoryValues = [
+  "general",
+  "branding",
+  "vehicles",
+  "locations",
+  "team",
+  "courses",
+  "content",
+] as const;
+export type MediaCategory = (typeof mediaCategoryValues)[number];
+export const mediaCategoryLabels: Record<MediaCategory, string> = {
+  general: "Allgemein",
+  branding: "Logo & Marke",
+  vehicles: "Fahrzeuge",
+  locations: "Standorte & Räume",
+  team: "Team",
+  courses: "Kurse & Ausbildung",
+  content: "Website-Inhalte",
+};
 const metadataSchema = z.object({
   originalName: z.string().trim().min(1).max(255),
   claimedMimeType: z.string().max(100),
   altText: z.string().trim().max(300),
   description: z.string().trim().max(2_000).optional(),
+  category: z.enum(mediaCategoryValues).default("general"),
 });
 export type MediaAssetRecord = z.infer<typeof metadataSchema> & {
   id: string;
