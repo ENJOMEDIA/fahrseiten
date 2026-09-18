@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
 import { requirePlatformPermission } from "@/modules/platform/access";
@@ -28,6 +30,19 @@ export default async function SalesPage() {
       lead.nextTaskAt <= new Date() &&
       !["won", "lost"].includes(lead.status),
   ).length;
+  const activeLeads = leads.filter(
+    (lead) => !["won", "lost"].includes(lead.status),
+  );
+  const withoutNextStep = activeLeads.filter((lead) => !lead.nextTaskAt).length;
+  const workQueue = activeLeads
+    .filter((lead) => !lead.nextTaskAt || lead.nextTaskAt <= new Date())
+    .sort((left, right) => {
+      if (!left.nextTaskAt && !right.nextTaskAt) return 0;
+      if (!left.nextTaskAt) return 1;
+      if (!right.nextTaskAt) return -1;
+      return left.nextTaskAt.getTime() - right.nextTaskAt.getTime();
+    })
+    .slice(0, 6);
   return (
     <CustomerPage
       title="Akquise-CRM"
@@ -55,7 +70,7 @@ export default async function SalesPage() {
           </div>
         </Card>
       ) : null}
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card className="surface-lift">
           <p className="text-sm text-slate-500">Interessenten</p>
           <p className="mt-1 text-3xl font-semibold">{leads.length}</p>
@@ -74,7 +89,84 @@ export default async function SalesPage() {
             {leads.filter((lead) => lead.status === "won").length}
           </p>
         </Card>
+        <Card className="surface-lift">
+          <p className="text-sm text-slate-500">Ohne nächsten Schritt</p>
+          <p
+            className={`mt-1 text-3xl font-semibold ${withoutNextStep ? "text-orange-700" : "text-emerald-700"}`}
+          >
+            {withoutNextStep}
+          </p>
+        </Card>
       </div>
+      <section className="mb-7 overflow-hidden rounded-[2rem] bg-slate-950 p-5 text-white shadow-xl sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold tracking-[.16em] text-cyan-300 uppercase">
+              Dein Arbeitsbereich
+            </p>
+            <h2 className="mt-1 text-xl font-semibold">
+              Heute im Blick behalten
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+              Fällige Wiedervorlagen stehen zuerst. Kontakte ohne Termin folgen,
+              damit keine Anfrage zwischen anderen Projekten liegen bleibt.
+            </p>
+          </div>
+          <Link
+            className="rounded-full bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950"
+            href="/admin/akquise/kontakte"
+          >
+            E-Mail-Versand öffnen →
+          </Link>
+        </div>
+        {workQueue.length ? (
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {workQueue.map((lead) => (
+              <article
+                className="rounded-2xl border border-white/10 bg-white/7 p-4"
+                key={lead.id}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold">{lead.companyName}</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      {lead.contactName ||
+                        salesStageLabels[lead.status as LeadStatus]}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full px-2 py-1 text-[11px] font-semibold ${lead.nextTaskAt ? "bg-amber-300 text-amber-950" : "bg-white/10 text-slate-200"}`}
+                  >
+                    {lead.nextTaskAt ? "Fällig" : "Termin fehlt"}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                  {lead.phone ? (
+                    <a
+                      className="rounded-lg bg-white px-3 py-2 text-slate-950"
+                      href={`tel:${lead.phone}`}
+                    >
+                      Anrufen
+                    </a>
+                  ) : null}
+                  {lead.email ? (
+                    <a
+                      className="rounded-lg border border-white/20 px-3 py-2"
+                      href={`mailto:${lead.email}`}
+                    >
+                      E-Mail
+                    </a>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-5 rounded-2xl bg-emerald-400/15 p-4 text-sm text-emerald-200">
+            Alles geplant – aktuell ist keine Wiedervorlage fällig.
+          </p>
+        )}
+      </section>
       <CreateLeadForm />
       <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
         {salesStages.map((status) => (
@@ -167,6 +259,7 @@ export default async function SalesPage() {
                   <LeadControls
                     lead={{
                       id: lead.id,
+                      companyName: lead.companyName,
                       status: lead.status as LeadStatus,
                       nextTaskAt: lead.nextTaskAt,
                     }}
@@ -182,4 +275,3 @@ export default async function SalesPage() {
     </CustomerPage>
   );
 }
-import Link from "next/link";

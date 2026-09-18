@@ -7,7 +7,7 @@ import {
   listPendingInstanceSetups,
   listPlatformTenants,
 } from "@/modules/platform/tenant-directory";
-import { processPendingInvitations } from "./actions";
+import { PendingInvitationsForm } from "./pending-invitations-form";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
 
@@ -105,14 +105,7 @@ export default async function TenantsPage({
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-900">
                 {pendingSetups.length} offen
               </span>
-              <form action={processPendingInvitations}>
-                <button
-                  className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white"
-                  type="submit"
-                >
-                  Ausstehenden Versand jetzt prüfen
-                </button>
-              </form>
+              <PendingInvitationsForm />
             </div>
           </div>
           <div className="mt-5 grid gap-3 lg:grid-cols-2">

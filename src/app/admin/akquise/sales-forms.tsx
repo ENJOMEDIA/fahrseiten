@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   salesStageLabels,
@@ -10,6 +10,7 @@ import {
 
 import {
   createLeadAction,
+  deleteLeadAction,
   importSalesCsvAction,
   saveSalesTemplateAction,
   startOutreachAction,
@@ -153,7 +154,7 @@ export function OutreachForm({
   );
   return (
     <form action={action}>
-      <div className="sticky top-4 z-10 mb-4 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur">
+      <div className="sticky top-4 z-10 mb-4 grid gap-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur lg:grid-cols-[minmax(16rem,1fr)_minmax(20rem,1.4fr)_auto] lg:items-end">
         <label className="min-w-64 flex-1 text-sm font-semibold">
           E-Mail-Vorlage
           <select
@@ -168,6 +169,17 @@ export function OutreachForm({
             ))}
           </select>
         </label>
+        <label className="flex min-h-11 items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 font-semibold text-amber-950">
+          <input
+            className="mt-0.5 size-4 shrink-0"
+            name="contactPermissionConfirmed"
+            required
+            type="checkbox"
+            value="yes"
+          />
+          Ich habe für alle ausgewählten Kontakte geprüft und dokumentiert, dass
+          diese konkrete E-Mail zulässig ist.
+        </label>
         <button
           className="premium-button disabled:opacity-50"
           disabled={pending}
@@ -175,7 +187,9 @@ export function OutreachForm({
         >
           {pending ? "Plant Versand …" : "Akquise für Auswahl starten"}
         </button>
-        <Result state={state} />
+        <div className="lg:col-span-3">
+          <Result state={state} />
+        </div>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full min-w-[850px] text-left text-sm">
@@ -329,12 +343,22 @@ export function CreateLeadForm() {
 export function LeadControls({
   lead,
 }: {
-  lead: { id: string; status: LeadStatus; nextTaskAt: Date | null };
+  lead: {
+    id: string;
+    companyName: string;
+    status: LeadStatus;
+    nextTaskAt: Date | null;
+  };
 }) {
   const [state, action, pending] = useActionState(
     updateLeadAction,
     initialState,
   );
+  const [deleteState, deleteAction, deleting] = useActionState(
+    deleteLeadAction,
+    initialState,
+  );
+  const [confirmation, setConfirmation] = useState("");
   const dateValue = lead.nextTaskAt
     ? new Date(
         lead.nextTaskAt.getTime() -
@@ -381,6 +405,32 @@ export function LeadControls({
         </button>
         <Result state={state} />
       </form>
+      <details className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3">
+        <summary className="cursor-pointer text-xs font-semibold text-red-800">
+          Kontakt vollständig löschen
+        </summary>
+        <form action={deleteAction} className="mt-3 space-y-3">
+          <input name="id" type="hidden" value={lead.id} />
+          <label className="block text-xs font-semibold text-red-950">
+            Zur Bestätigung „{lead.companyName}“ eingeben
+            <input
+              autoComplete="off"
+              className="mt-2 min-h-10 w-full rounded-xl border border-red-200 bg-white px-3 font-normal"
+              name="confirmation"
+              onChange={(event) => setConfirmation(event.target.value)}
+              value={confirmation}
+            />
+          </label>
+          <button
+            className="rounded-xl bg-red-700 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={confirmation.trim() !== lead.companyName || deleting}
+            type="submit"
+          >
+            {deleting ? "Wird gelöscht …" : "Kontakt endgültig löschen"}
+          </button>
+          <Result state={deleteState} />
+        </form>
+      </details>
     </details>
   );
 }

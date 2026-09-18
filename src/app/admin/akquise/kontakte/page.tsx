@@ -30,6 +30,11 @@ export default async function SalesContactsPage() {
           empfangenden Person erforderlich ist. Die SMTP-Annahme beweist keine
           tatsächliche Zustellung oder Öffnung.
         </p>
+        <p className="mt-3 text-sm leading-6 font-semibold text-amber-950">
+          Auch eine öffentlich angegebene E-Mail-Adresse oder ein allgemeines
+          Kontaktformular ist keine automatische Werbeeinwilligung. Vor jedem
+          Versand muss die konkrete Zulässigkeit geprüft sein.
+        </p>
       </Card>
       <CsvImportForm />
       <div className="mt-8">

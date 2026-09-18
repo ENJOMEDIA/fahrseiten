@@ -124,6 +124,31 @@ export async function updateLead(input: {
   });
 }
 
+export async function deleteSalesLead(input: {
+  id: string;
+  confirmation: string;
+}) {
+  const id = z.uuid().parse(input.id);
+  return db.transaction(async (tx) => {
+    const [lead] = await tx
+      .select({ companyName: salesLeads.companyName })
+      .from(salesLeads)
+      .where(eq(salesLeads.id, id))
+      .limit(1);
+    if (!lead) throw new Error("Der Akquise-Kontakt wurde nicht gefunden.");
+    if (input.confirmation.trim() !== lead.companyName)
+      throw new Error("Der eingegebene Name stimmt nicht überein.");
+
+    // Versandjobs enthalten keinen Fremdschlüssel zum Lead. Sie werden deshalb
+    // vor dem Kontakt entfernt; Zustellnachweise hängen daran und folgen per CASCADE.
+    await tx
+      .delete(backgroundJobs)
+      .where(like(backgroundJobs.idempotencyKey, `sales:${id}:%`));
+    await tx.delete(salesLeads).where(eq(salesLeads.id, id));
+    return { companyName: lead.companyName };
+  });
+}
+
 export async function importSalesLeads(
   rows: SalesCsvRow[],
   actorUserId: string,

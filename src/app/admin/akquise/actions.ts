@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import {
   createManualLead,
+  deleteSalesLead,
   importSalesLeads,
   updateLead,
 } from "@/modules/platform/sales-crm";
@@ -112,6 +113,10 @@ export async function startOutreachAction(
 ): Promise<SalesActionState> {
   const identity = await requirePlatformPermission("platform.sales.manage");
   try {
+    if (formData.get("contactPermissionConfirmed") !== "yes")
+      throw new Error(
+        "Bitte bestätige vor dem Versand, dass die Kontaktaufnahme für alle ausgewählten Empfänger geprüft wurde.",
+      );
     const count = await queueSalesOutreach({
       leadIds: formData.getAll("leadIds").map(String),
       templateId: String(formData.get("templateId")),
@@ -155,6 +160,33 @@ export async function updateLeadAction(
         error instanceof Error
           ? error.message
           : "Änderung konnte nicht gespeichert werden.",
+      error: true,
+    };
+  }
+}
+
+export async function deleteLeadAction(
+  _state: SalesActionState,
+  formData: FormData,
+): Promise<SalesActionState> {
+  await requirePlatformPermission("platform.sales.manage");
+  try {
+    const result = await deleteSalesLead({
+      id: String(formData.get("id") ?? ""),
+      confirmation: String(formData.get("confirmation") ?? ""),
+    });
+    revalidatePath("/admin/akquise");
+    revalidatePath("/admin/akquise/kontakte");
+    return {
+      message: `„${result.companyName}“ wurde mit Aktivitäten und Versanddaten gelöscht.`,
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Der Akquise-Kontakt konnte nicht gelöscht werden.",
       error: true,
     };
   }
