@@ -9,6 +9,7 @@ import {
   parseStoredBlocks,
   type StoredBlock,
 } from "@/modules/cms/block-schema";
+import { hydrateTenantContentBlocks } from "@/modules/content/block-data";
 
 export type TenantBuilderPage = {
   id: string;
@@ -53,22 +54,27 @@ export async function listTenantBuilderPages(
         )
         .orderBy(asc(pageBlocks.position))
     : [];
-  return selected.map(({ page, version }) => ({
-    id: page.id,
-    title: page.title,
-    slug: page.slug,
-    blocks: parseStoredBlocks(
-      blocks
-        .filter((block) => block.versionId === version.id)
-        .map((block) => ({
-          id: block.id,
-          schemaVersion: block.schemaVersion,
-          position: block.position,
-          visible: block.visible,
-          properties: block.properties,
-        })),
-    ),
-  }));
+  return Promise.all(
+    selected.map(async ({ page, version }) => ({
+      id: page.id,
+      title: page.title,
+      slug: page.slug,
+      blocks: await hydrateTenantContentBlocks(
+        tenantId,
+        parseStoredBlocks(
+          blocks
+            .filter((block) => block.versionId === version.id)
+            .map((block) => ({
+              id: block.id,
+              schemaVersion: block.schemaVersion,
+              position: block.position,
+              visible: block.visible,
+              properties: block.properties,
+            })),
+        ),
+      ),
+    })),
+  );
 }
 
 async function saveDraft(

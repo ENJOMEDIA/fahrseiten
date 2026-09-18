@@ -17,6 +17,7 @@ import {
 import { parseStoredBlocks } from "./block-schema";
 import type { PublishedPage, TenantWebsite } from "./types";
 import { mediaPublicUrl } from "@/modules/media/public-url";
+import { hydrateTenantContentBlocks } from "@/modules/content/block-data";
 
 export async function findTenantWebsite(
   tenantId: string,
@@ -119,14 +120,17 @@ export async function findPublishedPage(
     slug: row.page.slug,
     title: row.version.title,
     version: row.version.version,
-    blocks: parseStoredBlocks(
-      stored.map((block) => ({
-        id: block.id,
-        schemaVersion: block.schemaVersion,
-        position: block.position,
-        visible: block.visible,
-        properties: block.properties,
-      })),
+    blocks: await hydrateTenantContentBlocks(
+      tenantId,
+      parseStoredBlocks(
+        stored.map((block) => ({
+          id: block.id,
+          schemaVersion: block.schemaVersion,
+          position: block.position,
+          visible: block.visible,
+          properties: block.properties,
+        })),
+      ),
     ),
     seo: {
       title: row.seo?.title ?? undefined,
