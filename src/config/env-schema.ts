@@ -41,6 +41,7 @@ const serverEnvSchema = z.object({
     .min(3)
     .default("FahrSeiten Lokal <noreply@fahrseiten.local>"),
   CRON_SECRET: z.string().min(24).optional(),
+  CRON_TRIGGER_TOKEN: z.string().min(32).optional(),
   INSTALL_TOKEN: z.string().min(32).optional(),
   CONSENT_FUNCTIONAL_SERVICES: z.string().default(""),
   CONSENT_STATISTICS_SERVICES: z.string().default(""),

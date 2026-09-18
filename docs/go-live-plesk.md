@@ -155,18 +155,28 @@ Akquiseanfragen der FahrSeiten-Landingpage werden bereits im internen Akquise-CR
 ## 11. Scheduler aktivieren
 
 1. In Plesk **Scheduled Tasks/Geplante Aufgaben** öffnen.
-2. Eine Aufgabe **Run a command/Befehl ausführen** für den Hosting-Systembenutzer anlegen.
-3. Als Befehl den vom WCP gültigen Node-Pfad plus Releasepfad verwenden, beispielsweise sinngemäß:
+2. Einen neuen, vom `CRON_SECRET` verschiedenen Wert mit
+   `openssl rand -hex 32` erzeugen und als geschützte Node.js-Variable
+   `CRON_TRIGGER_TOKEN` speichern. Anwendung danach neu starten.
+3. Eine Aufgabe des Typs **URL abrufen/Fetch a URL** anlegen. Als URL eintragen:
 
    ```text
-   /opt/plesk/node/22/bin/node /var/www/vhosts/hosting177968.ae89a.netcup.net/fahrseiten.de/dist/plesk/cron.mjs
+   https://fahrseiten.de/api/cron?token=<CRON_TRIGGER_TOKEN>
    ```
 
 4. Als Zeitplan `*/5 * * * *` beziehungsweise in der Plesk-Auswahl **alle fünf Minuten** einstellen. Diese eine Aufgabe verarbeitet die gemeinsame Warteschlange für Akquise-, Bestätigungs-, Passwort- und Systemmails; pro Mailtyp ist kein eigener Cronjob erforderlich.
-5. Prüfen, wie Plesk die App-Umgebungsvariablen an Scheduled Tasks übergibt. `APP_BASE_URL` und `CRON_SECRET` müssen vorhanden sein, dürfen aber nicht als sichtbare Kommandozeilenargumente erscheinen.
-6. **Run Now/Jetzt ausführen** verwenden. Nur bei erfolgreichem Testlauf aktiv lassen.
+5. **Run Now/Jetzt ausführen** verwenden. Erwartet wird eine JSON-Antwort mit
+   `"ok":true`. Nur bei erfolgreichem Testlauf aktiv lassen.
 
-Plesk führt Linux-Aufgaben je nach Tarif in einer eingeschränkten Umgebung aus. Bei `node: command not found` oder fehlenden Variablen stoppen und den im WCP vorgesehenen Node-Pfad beziehungsweise netcup-Support verwenden.
+netcup führt Kundenaufgaben in einer eingeschränkten Plesk-Chroot aus, in der
+der Node-Pfad des Toolkits nicht verfügbar sein kann. Der URL-Trigger benötigt
+deshalb kein Node.js im Scheduler. Sein eigener Token darf nur diesen
+Scheduler auslösen und wird nicht für Akquise-, Abmelde- oder andere signierte
+Links verwendet. Da Plesk die URL in der Aufgabenverwaltung und gegebenenfalls
+in Zugriffsprotokollen speichert, muss der Token wie ein Passwort behandelt und
+bei Verdacht sofort ausgetauscht werden. Der weiterhin vorhandene
+Bearer-geschützte POST-Aufruf über `dist/plesk/cron.mjs` bleibt eine Alternative
+für Server ohne diese Chroot-Einschränkung.
 
 Der Onlinebrief24-Adapter benötigt aktuell keinen eigenen Cronjob. Test- oder
 Live-Aufträge dürfen erst durch eine ausdrückliche Admin-Aktion entstehen. Eine

@@ -96,6 +96,22 @@ export function validateProductionEnvironment(
     );
   }
 
+  if (
+    source.CRON_TRIGGER_TOKEN &&
+    (source.CRON_TRIGGER_TOKEN.length < 32 ||
+      hasPlaceholder(source.CRON_TRIGGER_TOKEN))
+  ) {
+    errors.push(
+      "CRON_TRIGGER_TOKEN muss ein eigener zufälliger Wert mit mindestens 32 Zeichen sein.",
+    );
+  }
+  if (
+    source.CRON_TRIGGER_TOKEN &&
+    source.CRON_TRIGGER_TOKEN === source.CRON_SECRET
+  ) {
+    errors.push("CRON_TRIGGER_TOKEN und CRON_SECRET müssen verschieden sein.");
+  }
+
   if (source.SMTP_MODE !== "smtp") {
     errors.push("SMTP_MODE muss im Plesk-Betrieb smtp sein.");
   }

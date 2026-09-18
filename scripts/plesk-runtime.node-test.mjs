@@ -24,6 +24,7 @@ const validEnvironment = {
   MARKETING_HOSTS: "fahrseiten.de,www.fahrseiten.de",
   APP_HOSTS: "app.fahrseiten.de",
   CRON_SECRET: "a-random-secret-with-32-characters",
+  CRON_TRIGGER_TOKEN: "a-separate-trigger-token-with-32-characters",
   SMTP_MODE: "smtp",
   SMTP_HOST: "mx.test.invalid",
   SMTP_PORT: "465",
@@ -55,6 +56,16 @@ test("accepts a later HTTPS dashboard host", () => {
     }),
     [],
   );
+});
+
+test("requires a dedicated URL trigger token", () => {
+  const sharedSecret = "one-secret-must-not-protect-both-cron-paths";
+  const errors = validateProductionEnvironment({
+    ...validEnvironment,
+    CRON_SECRET: sharedSecret,
+    CRON_TRIGGER_TOKEN: sharedSecret,
+  });
+  assert.ok(errors.some((error) => error.includes("müssen verschieden sein")));
 });
 
 test("allows the one-time database bootstrap when the install token exists", () => {
@@ -99,6 +110,7 @@ test("rejects local defaults and missing production settings", () => {
       "mysql://fahrseiten_local:local_only@127.0.0.1:3306/fahrseiten_local",
     DEMO_DATA_MODE: "fixture",
     CRON_SECRET: "replace-with-a-secret",
+    CRON_TRIGGER_TOKEN: "replace-with-a-trigger-token",
     SMTP_MODE: "catch",
     SMTP_HOST: "localhost",
     SMTP_PORT: "invalid",
@@ -112,6 +124,7 @@ test("rejects local defaults and missing production settings", () => {
     "DATABASE_URL enthält einen erkennbaren Platzhalter.",
     "DEMO_DATA_MODE muss im Plesk-Betrieb database sein.",
     "CRON_SECRET muss ein zufälliger Wert mit mindestens 24 Zeichen sein.",
+    "CRON_TRIGGER_TOKEN muss ein eigener zufälliger Wert mit mindestens 32 Zeichen sein.",
     "SMTP_MODE muss im Plesk-Betrieb smtp sein.",
     "SMTP_HOST muss ein realer SMTP-Host sein.",
     "SMTP_PORT muss ein gültiger Port sein.",

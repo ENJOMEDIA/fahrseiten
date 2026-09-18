@@ -1,17 +1,29 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { env } from "@/config/env";
+import {
+  hasValidCronBearer,
+  hasValidCronUrlToken,
+} from "@/modules/jobs/cron-auth";
 import { runNotificationScheduler } from "@/modules/notifications/runtime";
-export async function POST(request: Request) {
-  const provided =
-    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  if (!env.CRON_SECRET || !safeEqual(provided, env.CRON_SECRET))
-    return NextResponse.json({ ok: false }, { status: 401 });
+
+async function runScheduler() {
   const result = await runNotificationScheduler();
-  return NextResponse.json({ ok: true, ...result });
+  return NextResponse.json(
+    { ok: true, ...result },
+    { headers: { "Cache-Control": "private, no-store" } },
+  );
 }
-function safeEqual(left: string, right: string) {
-  const a = Buffer.from(left);
-  const b = Buffer.from(right);
-  return a.length === b.length && timingSafeEqual(a, b);
+
+export async function POST(request: Request) {
+  if (!hasValidCronBearer(request, env.CRON_SECRET))
+    return NextResponse.json({ ok: false }, { status: 401 });
+  return runScheduler();
+}
+
+export async function GET(request: Request) {
+  if (!env.CRON_TRIGGER_TOKEN)
+    return NextResponse.json({ ok: false }, { status: 503 });
+  if (!hasValidCronUrlToken(request, env.CRON_TRIGGER_TOKEN))
+    return NextResponse.json({ ok: false }, { status: 401 });
+  return runScheduler();
 }
