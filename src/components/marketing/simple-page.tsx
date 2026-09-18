@@ -36,6 +36,7 @@ function MaintenanceLegalShell({
           <Link className="font-semibold text-slate-950" href={dashboardUrl()}>
             Kundenlogin
           </Link>
+          <span>Mit Autonomie und Liebe zum Detail gebaut.</span>
         </div>
       </footer>
     </div>
@@ -75,6 +76,7 @@ export async function SimpleMarketingPage({
             : undefined
         }
         primaryColor={settings?.primaryColor ?? "#0891b2"}
+        showBrandName={settings?.showBrandName ?? true}
         variant="platform"
         demoHref={
           settings?.demoAvailableDuringMaintenance ? "/demo" : undefined

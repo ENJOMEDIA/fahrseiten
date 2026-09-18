@@ -7,7 +7,7 @@ export const demoWebsite: TenantWebsite = {
   tenantId,
   name: "Fahrschule Morgenrot",
   maintenanceMode: false,
-  maintenanceMessage: "Fiktive Vorschau",
+  maintenanceMessage: "Beispiel-Website",
   basePath: "/demo",
   navigation: [
     { id: "nav-home", label: "Start", href: "/demo", position: 0 },
@@ -101,7 +101,7 @@ const pages: PublishedPage[] = [
     version: 2,
     seo: {
       title: "Fahrschule Morgenrot – Deine Fahrt beginnt hier",
-      description: "Interaktive FahrSeiten-Demo mit fiktiven Inhalten.",
+      description: "Beispiel-Website mit vollständig fiktiven Inhalten.",
       noIndex: true,
     },
     blocks: parseStoredBlocks([
@@ -159,7 +159,7 @@ const pages: PublishedPage[] = [
           ],
           imageUrl: "/demo/fleet-electric.webp",
           imageAlt:
-            "Modernes elektrisches Fahrschulfahrzeug der Demo-Fahrschule",
+            "Modernes elektrisches Fahrschulfahrzeug der Beispiel-Fahrschule",
           imagePosition: "left",
         },
       },
@@ -202,7 +202,7 @@ const pages: PublishedPage[] = [
               quote:
                 "Ich wusste immer, wo ich stehe. Das hat mir vor der Prüfung unglaublich viel Ruhe gegeben.",
               rating: 5,
-              sourceLabel: "fiktive Demo-Stimme",
+              sourceLabel: "fiktive Beispielstimme",
             },
             {
               id: "voice-2",
@@ -212,7 +212,7 @@ const pages: PublishedPage[] = [
               quote:
                 "Geduldig erklärt, flexibel geplant und im Auto sofort wohlgefühlt. Genau so hatte ich es mir gewünscht.",
               rating: 5,
-              sourceLabel: "fiktive Demo-Stimme",
+              sourceLabel: "fiktive Beispielstimme",
             },
             {
               id: "voice-3",
@@ -222,7 +222,7 @@ const pages: PublishedPage[] = [
               quote:
                 "Mit B197 konnte ich entspannt starten und trotzdem das Schalten sicher lernen.",
               rating: 5,
-              sourceLabel: "fiktive Demo-Stimme",
+              sourceLabel: "fiktive Beispielstimme",
             },
           ],
         },
@@ -244,7 +244,7 @@ const pages: PublishedPage[] = [
             {
               question: "Kann ich mit Automatik beginnen?",
               answer:
-                "Ja. In dieser fiktiven Demo wird auch die Ausbildung B197 gezeigt, bei der Automatik und vorgeschriebene Schaltkompetenz verbunden werden.",
+                "Ja. Auf dieser Beispiel-Website wird auch die Ausbildung B197 gezeigt, bei der Automatik und vorgeschriebene Schaltkompetenz verbunden werden.",
             },
             {
               question: "Sind Preise und Termine auf dieser Seite echt?",
@@ -276,7 +276,7 @@ const pages: PublishedPage[] = [
     version: 1,
     seo: {
       title: "Ausbildung & Preise – Fahrschule Morgenrot",
-      description: "Fiktive Klassen, Kurse und Preise der FahrSeiten-Demo.",
+      description: "Fiktive Klassen, Kurse und Preise der Beispiel-Website.",
       noIndex: true,
     },
     blocks: parseStoredBlocks([
@@ -453,7 +453,7 @@ const pages: PublishedPage[] = [
     version: 1,
     seo: {
       title: "Fuhrpark – Fahrschule Morgenrot",
-      description: "Fiktiver Fuhrpark der FahrSeiten-Demo.",
+      description: "Fiktiver Fuhrpark der Beispiel-Website.",
       noIndex: true,
     },
     blocks: parseStoredBlocks([
@@ -539,7 +539,7 @@ const pages: PublishedPage[] = [
           type: "hero",
           eyebrow: "Fiktiv. Aber realistisch gedacht.",
           heading: "Menschen, die dir etwas zutrauen.",
-          text: "Unsere Demo-Fahrschule zeigt, wie Persönlichkeit, klare Inhalte und moderne Gestaltung zusammenwirken können.",
+          text: "Unsere Beispiel-Fahrschule zeigt, wie Persönlichkeit, klare Inhalte und moderne Gestaltung zusammenwirken können.",
           actionLabel: "Team kennenlernen",
           actionHref: "/demo/ueber-uns#team",
           imageUrl: "/demo/hero-driving-school.webp",
@@ -598,7 +598,7 @@ const pages: PublishedPage[] = [
               id: "team-lina",
               position: 2,
               active: true,
-              name: "Lina Demo",
+              name: "Lina Beispiel",
               role: "Organisation",
               bio: "Behält Termine und Unterlagen im Blick und macht den Einstieg angenehm unkompliziert.",
               qualifications: ["Anmeldung", "Terminplanung", "Erstberatung"],
@@ -707,7 +707,7 @@ const pages: PublishedPage[] = [
         properties: {
           type: "contact_teaser",
           heading: "Direkt, freundlich und ohne Fachchinesisch.",
-          text: "Diese Kontaktdaten sind bewusst ungültige Demo-Daten. Das Formular darunter dient ausschließlich zum Testen der Anwendung.",
+          text: "Diese Kontaktdaten sind bewusst ungültige Beispieldaten. Das Formular darunter dient ausschließlich zum Testen der Anwendung.",
           phone: "+49 30 0000000",
           email: "hallo@morgenrot.invalid",
         },
@@ -728,7 +728,7 @@ const pages: PublishedPage[] = [
         visible: true,
         properties: {
           type: "text_image",
-          heading: "Impressum der Demo-Fahrschule",
+          heading: "Impressum der Beispiel-Fahrschule",
           paragraphs: [
             "Fahrschule Morgenrot ist ein vollständig fiktives Anschauungsbeispiel. Beispielweg 1, 00000 Musterstadt.",
             "Vertreten durch: Mara Beispiel. Kontakt: hallo@morgenrot.invalid. Es findet kein realer Geschäftsbetrieb statt.",
@@ -754,9 +754,9 @@ const pages: PublishedPage[] = [
         visible: true,
         properties: {
           type: "text_image",
-          heading: "Datenschutz in dieser Demo",
+          heading: "Datenschutz auf dieser Beispiel-Website",
           paragraphs: [
-            "Diese Vorschau verwendet ausschließlich fiktive Inhalte. Bitte gib im Demo-Kontaktformular keine echten Personen- oder Kundendaten ein.",
+            "Diese Beispiel-Website verwendet ausschließlich fiktive Inhalte. Bitte gib im Kontaktformular keine echten Personen- oder Kundendaten ein.",
             "Auf einer Kundenseite erzeugt FahrSeiten Datenschutzbausteine passend zu den aktivierten Funktionen und Einwilligungen. Die verantwortliche Fahrschule prüft und veröffentlicht die Angaben.",
           ],
           imageAlt: "Abstrakte Bildfläche zum Datenschutz",

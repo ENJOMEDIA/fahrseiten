@@ -72,6 +72,22 @@ export default async function PricingPage() {
                   zzgl. {formatEuro(plan.setupPriceCents)} Einrichtung
                 </p>
               ) : null}
+              {index === marketingPlans.length - 1 &&
+              marketingPlans.length === 3 ? (
+                <div
+                  className={`mt-6 rounded-2xl border p-4 ${plan.highlighted ? "border-cyan-300/30 bg-cyan-300/10" : "border-cyan-100 bg-cyan-50"}`}
+                >
+                  <p
+                    className={`text-xs font-bold tracking-[.14em] uppercase ${plan.highlighted ? "text-cyan-300" : "text-cyan-700"}`}
+                  >
+                    Mit Medienproduktion kombinierbar
+                  </p>
+                  <p className="mt-2 text-sm leading-6 opacity-75">
+                    Neue Fahrzeug-, Team- und Standortfotos von ENJO MEDIA als
+                    separat kalkulierte Zusatzleistung.
+                  </p>
+                </div>
+              ) : null}
               <ul className="mt-7 space-y-2 text-sm">
                 {plan.includedFeatures.map((key) => (
                   <li key={key}>
@@ -112,6 +128,47 @@ export default async function PricingPage() {
           </div>
         </section>
       ) : null}
+      <section className="relative mt-12 overflow-hidden rounded-[2rem] bg-slate-950 p-8 text-white sm:p-10">
+        <div
+          aria-hidden="true"
+          className="absolute -top-20 -right-16 size-72 rounded-full bg-cyan-400/20 blur-3xl"
+        />
+        <div className="relative grid gap-8 lg:grid-cols-[1.1fr_.9fr] lg:items-end">
+          <div>
+            <p className="text-xs font-semibold tracking-[.18em] text-cyan-300 uppercase">
+              ENJO MEDIA Fotografie
+            </p>
+            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+              Deine Fahrschule verdient eigene Bilder statt austauschbarer
+              Stockfotos.
+            </h2>
+            <p className="mt-5 max-w-2xl leading-7 text-slate-300">
+              Auf Wunsch fotografieren wir Fahrzeuge, Team und Standorte und
+              bereiten die Auswahl direkt für deine FahrSeiten-Website auf. Die
+              Medienverwaltung bleibt Bestandteil des gebuchten Pakets; der
+              Fototermin und die Bildproduktion werden einmalig und transparent
+              nach Umfang angeboten.
+            </p>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur">
+            <ul className="space-y-3 text-sm text-slate-200">
+              <li>✓ Fahrzeug- und Detailaufnahmen</li>
+              <li>✓ Team- und Standortfotografie</li>
+              <li>✓ Auswahl, Bearbeitung und Web-Optimierung</li>
+              <li>✓ Direkte Einpflege in den Medienbereich</li>
+            </ul>
+            <p className="mt-5 text-xs leading-5 text-slate-400">
+              Preis nach Umfang, Entfernung und gewünschter Bildmenge.
+            </p>
+            <Link
+              className="mt-5 inline-flex rounded-full bg-cyan-300 px-5 py-3 font-semibold text-slate-950"
+              href="/kontakt"
+            >
+              Medienpaket anfragen →
+            </Link>
+          </div>
+        </div>
+      </section>
       <section className="mt-16 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-8 sm:p-10">
         <p className="section-kicker">Ohne Überraschungen</p>
         <div className="mt-4 grid gap-8 md:grid-cols-[1fr_1fr]">

@@ -172,7 +172,7 @@ export function TenantSite({
           <p>
             © {new Date().getFullYear()} {website.name}
           </p>
-          <p>Mit FahrSeiten und viel Liebe erstellt</p>
+          <p>Mit FahrSeiten, Autonomie und Liebe zum Detail gebaut.</p>
         </div>
       </footer>
     </div>

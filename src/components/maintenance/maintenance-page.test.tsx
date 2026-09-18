@@ -19,7 +19,9 @@ describe("MaintenancePage", () => {
     expect(
       screen.getByText("Unsere neue Website ist bald für dich da."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Vorschau" })).toBeVisible();
+    expect(
+      screen.getByRole("region", { name: "Leistungsüberblick" }),
+    ).toBeVisible();
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute(
       "content",
       "noindex, nofollow",

@@ -70,8 +70,8 @@ export function MaintenanceForm({
           Wartungsmodus aktiv
           <span className="mt-1 block text-sm font-normal text-slate-600">
             {tenant
-              ? "Die Kundendomain zeigt eine Vorschauseite mit den hinterlegten Markenfarben."
-              : "Die öffentliche Hauptseite und alle Marketing-Unterseiten zeigen die Vorschau. Administration, Installer und rechtliche Seiten bleiben erreichbar."}
+              ? "Die Kundendomain zeigt eine Wartungsseite mit den hinterlegten Markenfarben."
+              : "Die öffentliche Hauptseite und alle Marketing-Unterseiten zeigen die Wartungsseite. Administration, Installer und rechtliche Seiten bleiben erreichbar."}
           </span>
         </span>
       </label>
@@ -84,16 +84,16 @@ export function MaintenanceForm({
             type="checkbox"
           />
           <span>
-            Öffentliche Demo trotz Wartungsmodus zeigen
+            Öffentliche Beispiel-Website trotz Wartungsmodus zeigen
             <span className="mt-1 block text-sm leading-6 font-normal text-slate-600">
-              Die Produktdemo unter /demo bleibt erreichbar. Alle übrigen
+              Die öffentliche Beispiel-Website bleibt erreichbar. Alle übrigen
               Marketingseiten folgen weiterhin dem Wartungsmodus.
             </span>
           </span>
         </label>
       ) : null}
       <label className="block text-sm font-semibold">
-        Vorschautext
+        Text der Wartungsseite
         <textarea
           className="mt-2 min-h-32 w-full rounded-xl border p-3 font-normal"
           defaultValue={maintenanceMessage}

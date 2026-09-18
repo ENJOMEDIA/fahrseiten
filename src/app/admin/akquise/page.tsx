@@ -262,6 +262,9 @@ export default async function SalesPage() {
                       companyName: lead.companyName,
                       status: lead.status as LeadStatus,
                       nextTaskAt: lead.nextTaskAt,
+                      emailPermission: lead.emailPermission,
+                      emailPermissionEvidence: lead.emailPermissionEvidence,
+                      emailOptOutAt: lead.emailOptOutAt,
                     }}
                   />
                 </Card>

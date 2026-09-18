@@ -5,6 +5,7 @@ export type MailMessage = {
   subject: string;
   text: string;
   html: string;
+  headers?: Record<string, string>;
 };
 export interface MailTransport {
   send(message: MailMessage): Promise<void>;

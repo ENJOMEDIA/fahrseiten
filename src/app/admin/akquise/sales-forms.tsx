@@ -87,8 +87,8 @@ export function SalesTemplateForm() {
       <h2 className="text-xl font-semibold">Neue Vorlage</h2>
       <p className="mt-2 text-sm text-slate-600">
         Erlaubte Platzhalter: {"{{Fahrschule}}"}, {"{{Ansprechpartner}}"},{" "}
-        {"{{Webseite}}"} und {"{{Demo-Link}}"}. Die HTML-Fassung wird sicher aus
-        diesem Text erzeugt.
+        {"{{Webseite}}"} und {"{{Beispiel-Webseite}}"}. Die HTML-Fassung wird
+        sicher aus diesem Text erzeugt.
       </p>
       <div className="mt-5 space-y-4">
         <label className="block text-sm font-semibold">
@@ -140,6 +140,8 @@ export function OutreachForm({
     phone: string | null;
     website: string | null;
     status: string;
+    emailPermission: string;
+    emailOptOutAt: Date | null;
     latestOutreach?: {
       status: string;
       lastErrorCode: string | null;
@@ -209,7 +211,13 @@ export function OutreachForm({
                 <td className="p-4">
                   <input
                     aria-label={`${lead.companyName} auswählen`}
-                    disabled={!lead.email}
+                    disabled={
+                      !lead.email ||
+                      !["consent", "existing_customer"].includes(
+                        lead.emailPermission,
+                      ) ||
+                      Boolean(lead.emailOptOutAt)
+                    }
                     name="leadIds"
                     type="checkbox"
                     value={lead.id}
@@ -238,6 +246,17 @@ export function OutreachForm({
                 </td>
                 <td className="p-4">{lead.status}</td>
                 <td className="p-4 text-xs font-semibold">
+                  <div
+                    className={`mb-2 ${lead.emailOptOutAt ? "text-red-700" : ["consent", "existing_customer"].includes(lead.emailPermission) ? "text-emerald-700" : "text-amber-700"}`}
+                  >
+                    {lead.emailOptOutAt
+                      ? "Abgemeldet"
+                      : lead.emailPermission === "consent"
+                        ? "Einwilligung dokumentiert"
+                        : lead.emailPermission === "existing_customer"
+                          ? "Bestandskunden-Ausnahme"
+                          : "Keine Versandfreigabe"}
+                  </div>
                   {!lead.latestOutreach
                     ? "Noch nicht versendet"
                     : lead.latestOutreach.status === "completed"
@@ -325,6 +344,28 @@ export function CreateLeadForm() {
             name="note"
           />
         </label>
+        <label className="text-sm font-semibold">
+          E-Mail-Freigabe
+          <select
+            className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
+            defaultValue="unknown"
+            name="emailPermission"
+          >
+            <option value="unknown">Noch nicht vorhanden</option>
+            <option value="consent">Ausdrückliche Einwilligung</option>
+            <option value="existing_customer">
+              Bestandskunden-Ausnahme (§ 7 Abs. 3 UWG vollständig erfüllt)
+            </option>
+          </select>
+        </label>
+        <label className="text-sm font-semibold sm:col-span-2">
+          Nachweis der Freigabe
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
+            name="emailPermissionEvidence"
+            placeholder="z. B. Einwilligung über Formular am 18.09.2026"
+          />
+        </label>
         <div>
           <button
             className="premium-button disabled:opacity-50"
@@ -348,6 +389,9 @@ export function LeadControls({
     companyName: string;
     status: LeadStatus;
     nextTaskAt: Date | null;
+    emailPermission: string;
+    emailPermissionEvidence: string | null;
+    emailOptOutAt: Date | null;
   };
 }) {
   const [state, action, pending] = useActionState(
@@ -396,6 +440,34 @@ export function LeadControls({
           name="note"
           placeholder="Gespräch, Ergebnis oder nächster Schritt …"
         />
+        <label className="block text-xs font-semibold text-slate-700">
+          E-Mail-Freigabe
+          <select
+            className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+            defaultValue={lead.emailPermission}
+            disabled={Boolean(lead.emailOptOutAt)}
+            name="emailPermission"
+          >
+            <option value="unknown">Noch nicht vorhanden</option>
+            <option value="consent">Ausdrückliche Einwilligung</option>
+            <option value="existing_customer">
+              Bestandskunden-Ausnahme (§ 7 Abs. 3 UWG vollständig erfüllt)
+            </option>
+            <option value="withdrawn">Abgemeldet / gesperrt</option>
+          </select>
+        </label>
+        {lead.emailOptOutAt ? (
+          <input name="emailPermission" type="hidden" value="withdrawn" />
+        ) : null}
+        <label className="block text-xs font-semibold text-slate-700">
+          Nachweis
+          <textarea
+            className="mt-1 min-h-20 w-full rounded-xl border border-slate-300 p-3 text-sm font-normal"
+            defaultValue={lead.emailPermissionEvidence ?? ""}
+            name="emailPermissionEvidence"
+            placeholder="Quelle und Zeitpunkt der Einwilligung dokumentieren"
+          />
+        </label>
         <button
           className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           disabled={pending}

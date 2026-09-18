@@ -146,6 +146,7 @@ export default async function MarketingStartPage() {
             : undefined
         }
         primaryColor={settings?.primaryColor ?? "#0891b2"}
+        showBrandName={settings?.showBrandName ?? true}
         variant="platform"
         demoHref={
           settings?.demoAvailableDuringMaintenance ? "/demo" : undefined

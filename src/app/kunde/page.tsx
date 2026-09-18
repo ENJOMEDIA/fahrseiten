@@ -138,7 +138,7 @@ export default async function CustomerDashboardPage() {
           <p className="mt-4 leading-7 text-white/80">
             {online
               ? "Deine freigegebenen Inhalte werden auf der Kundendomain angezeigt."
-              : "Besucher sehen deine gestaltete Vorschauseite, bis du die Website freigibst."}
+              : "Besucher sehen deine gestaltete Wartungsseite, bis du die Website freigibst."}
           </p>
           <Link
             className="mt-8 inline-flex rounded-full bg-white px-5 py-3 font-semibold text-slate-950"

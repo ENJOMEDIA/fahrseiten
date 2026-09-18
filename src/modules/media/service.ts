@@ -40,7 +40,7 @@ export const mediaCategoryLabels: Record<MediaCategory, string> = {
   content: "Website-Inhalte",
   marketing_hero: "Landingpage & Hero",
   marketing_sections: "Landingpage-Bereiche",
-  demo: "Produktdemo",
+  demo: "Beispiel-Website",
 };
 export function parseTenantMediaCategory(value: unknown) {
   return z.enum(tenantMediaCategoryValues).parse(value);

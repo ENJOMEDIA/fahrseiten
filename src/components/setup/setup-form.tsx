@@ -183,7 +183,7 @@ export function PlatformSetupForm() {
         <Input
           defaultValue="Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen."
           hint="Dieser Text erscheint, solange die Hauptseite im Wartungsmodus ist."
-          label="Text für die Vorschauseite"
+          label="Text für die Wartungsseite"
           name="maintenanceMessage"
           required
         />
@@ -321,7 +321,7 @@ export function TenantOnboardingForm({
         <Input
           defaultValue="Unsere neue Website entsteht gerade. Bald findest du hier alle wichtigen Informationen rund um unsere Fahrschule."
           hint="Dieser Text erscheint auf der Kundendomain bis zur Freischaltung der Website."
-          label="Text für die Vorschauseite"
+          label="Text für die Wartungsseite"
           name="maintenanceMessage"
           required
         />

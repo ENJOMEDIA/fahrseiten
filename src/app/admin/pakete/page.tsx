@@ -46,6 +46,20 @@ export default async function PricingAdminPage() {
         ))}
         {plans.length < 3 ? <PlanForm features={features} /> : null}
       </div>
+      <section className="mt-10 rounded-[2rem] bg-slate-950 p-6 text-white sm:p-8">
+        <p className="text-xs font-semibold tracking-[.16em] text-cyan-300 uppercase">
+          ENJO MEDIA Zusatzleistung
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold">
+          Foto- & Medienproduktion
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+          Fahrzeug-, Team- und Standortfotografie wird auf der Preisseite beim
+          umfangreichsten Paket hervorgehoben. Sie ist keine versteckte
+          Monatsleistung und wird je nach Einsatz, Entfernung und Bildumfang
+          separat angeboten.
+        </p>
+      </section>
       <section className="mt-10">
         <p className="section-kicker">Optionale Module</p>
         <h2 className="mt-2 text-2xl font-semibold">

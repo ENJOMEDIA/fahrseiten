@@ -53,6 +53,9 @@ export function MarketingShell({
               Zum Kundenlogin →
             </Link>
           </div>
+          <p className="text-xs text-slate-500 md:col-span-2 md:text-right">
+            Mit Autonomie und Liebe zum Detail gebaut.
+          </p>
         </div>
       </footer>
     </>

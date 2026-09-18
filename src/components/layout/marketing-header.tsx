@@ -14,7 +14,7 @@ export function MarketingHeader({
 }) {
   const links = [
     ["Funktionen", "/funktionen"],
-    ["Design & Demo", "/design"],
+    ["Design & Baukasten", "/design"],
     ["Preise", "/preise"],
     ["FAQ", "/faq"],
     ["Beratung", "/kontakt"],

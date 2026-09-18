@@ -11,6 +11,7 @@ export function MaintenancePage({
   variant,
   logoUrl,
   demoHref,
+  showBrandName = true,
 }: {
   brandName: string;
   message: string;
@@ -19,6 +20,7 @@ export function MaintenancePage({
   variant: "platform" | "tenant";
   logoUrl?: string;
   demoHref?: string;
+  showBrandName?: boolean;
 }) {
   const platform = variant === "platform";
   const previews = platform
@@ -71,7 +73,7 @@ export function MaintenancePage({
                 F
               </span>
             )}
-            {brandName}
+            {showBrandName ? brandName : null}
           </p>
           <span className="hidden items-center gap-2 text-sm text-white/60 sm:flex">
             <span className="status-pulse size-2 rounded-full bg-cyan-300" />
@@ -130,7 +132,7 @@ export function MaintenancePage({
                         width={80}
                       />
                     ) : null}
-                    {brandName}
+                    {showBrandName ? brandName : null}
                   </strong>
                   <div className="flex gap-3 text-[10px] text-slate-400">
                     <span>ANGEBOTE</span>
@@ -178,7 +180,7 @@ export function MaintenancePage({
                       <p className="text-[11px] font-semibold">{title}</p>
                       <div className="mt-2 h-1.5 w-3/4 rounded bg-slate-200" />
                       <div className="mt-1 h-1.5 w-1/2 rounded bg-slate-200" />
-                      <span className="sr-only">Vorschau {index + 1}</span>
+                      <span className="sr-only">Bereich {index + 1}</span>
                     </div>
                   ))}
                 </div>
@@ -194,7 +196,7 @@ export function MaintenancePage({
           </div>
         </div>
         <section
-          aria-label="Vorschau"
+          aria-label="Leistungsüberblick"
           className="mt-20 grid gap-4 border-t border-white/10 pt-10 md:grid-cols-3"
         >
           {previews.map(([title, text], index) => (
@@ -234,7 +236,7 @@ export function MaintenancePage({
                     className="rounded-full bg-white px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-50"
                     href={demoHref}
                   >
-                    Live-Demo ansehen
+                    Beispiel-Website ansehen
                   </Link>
                 ) : null}
                 <Link
@@ -246,6 +248,9 @@ export function MaintenancePage({
               </>
             ) : null}
           </nav>
+          <p className="text-xs text-white/40">
+            Mit Autonomie und Liebe zum Detail gebaut.
+          </p>
         </footer>
       </div>
     </main>

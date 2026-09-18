@@ -183,6 +183,13 @@
       "when": 1789724790427,
       "tag": "0025_burly_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1789730516149,
+      "tag": "0026_regular_overlord",
+      "breakpoints": true
     }
   ]
 }

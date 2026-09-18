@@ -22,7 +22,7 @@ export default async function PlatformSettingsPage() {
   return (
     <CustomerPage
       title="Plattform-Einstellungen"
-      description="Öffentliche FahrSeiten-Seite kontrolliert freigeben oder als Vorschau anzeigen."
+      description="Öffentliche FahrSeiten-Seite kontrolliert freigeben oder im Wartungsmodus betreiben."
     >
       {settings ? (
         <>

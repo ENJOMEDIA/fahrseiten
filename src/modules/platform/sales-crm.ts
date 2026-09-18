@@ -17,7 +17,16 @@ const createLeadSchema = z.object({
   website: z.union([z.literal(""), z.url()]),
   note: z.string().trim().max(3_000),
   nextTaskAt: z.string().trim(),
+  emailPermission: z.enum(["unknown", "consent", "existing_customer"]),
+  emailPermissionEvidence: z.string().trim().max(2_000),
 });
+
+const emailPermissionSchema = z.enum([
+  "unknown",
+  "consent",
+  "existing_customer",
+  "withdrawn",
+]);
 
 function parseTaskDate(value: string) {
   if (!value) return null;
@@ -65,6 +74,13 @@ export async function listSalesPipeline() {
 
 export async function createManualLead(raw: unknown, actorUserId: string) {
   const input = createLeadSchema.parse(raw);
+  if (
+    ["consent", "existing_customer"].includes(input.emailPermission) &&
+    input.emailPermissionEvidence.length < 10
+  )
+    throw new Error(
+      "Bitte dokumentiere Quelle und Zeitpunkt der E-Mail-Freigabe nachvollziehbar.",
+    );
   const id = createId();
   await db.transaction(async (tx) => {
     await tx.insert(salesLeads).values({
@@ -78,6 +94,10 @@ export async function createManualLead(raw: unknown, actorUserId: string) {
       status: "new",
       ownerUserId: actorUserId,
       nextTaskAt: parseTaskDate(input.nextTaskAt),
+      emailPermission: input.emailPermission,
+      emailPermissionEvidence: input.emailPermissionEvidence || null,
+      emailPermissionAt:
+        input.emailPermission === "unknown" ? null : new Date(),
     });
     if (input.note) {
       await tx.insert(salesActivities).values({
@@ -98,19 +118,51 @@ export async function updateLead(input: {
   nextTaskAt: string;
   note: string;
   actorUserId: string;
+  emailPermission: string;
+  emailPermissionEvidence: string;
 }) {
   const status = z.enum(salesStages).parse(input.status);
   const note = z.string().trim().max(3_000).parse(input.note);
+  const emailPermission = emailPermissionSchema.parse(input.emailPermission);
+  const emailPermissionEvidence = z
+    .string()
+    .trim()
+    .max(2_000)
+    .parse(input.emailPermissionEvidence);
+  if (
+    ["consent", "existing_customer"].includes(emailPermission) &&
+    emailPermissionEvidence.length < 10
+  )
+    throw new Error(
+      "Bitte dokumentiere Quelle und Zeitpunkt der E-Mail-Freigabe nachvollziehbar.",
+    );
   await db.transaction(async (tx) => {
     const existing = await tx
-      .select({ id: salesLeads.id })
+      .select({
+        id: salesLeads.id,
+        emailOptOutAt: salesLeads.emailOptOutAt,
+      })
       .from(salesLeads)
       .where(eq(salesLeads.id, input.id))
       .limit(1);
     if (!existing[0]) throw new Error("Interessent wurde nicht gefunden.");
+    if (existing[0].emailOptOutAt && emailPermission !== "withdrawn")
+      throw new Error(
+        "Die Abmeldung ist dauerhaft gesperrt und kann nicht über die Bearbeitung aufgehoben werden.",
+      );
     await tx
       .update(salesLeads)
-      .set({ status, nextTaskAt: parseTaskDate(input.nextTaskAt) })
+      .set({
+        status,
+        nextTaskAt: parseTaskDate(input.nextTaskAt),
+        emailPermission,
+        emailPermissionEvidence: emailPermissionEvidence || null,
+        emailPermissionAt:
+          emailPermission === "unknown" || emailPermission === "withdrawn"
+            ? null
+            : new Date(),
+        emailOptOutAt: emailPermission === "withdrawn" ? new Date() : null,
+      })
       .where(eq(salesLeads.id, input.id));
     if (note) {
       await tx.insert(salesActivities).values({

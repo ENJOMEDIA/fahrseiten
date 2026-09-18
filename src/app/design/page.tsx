@@ -50,7 +50,7 @@ export default function DesignPage() {
               "Du wählst Inhaltstypen aus, statt Layouts versehentlich kaputtzumachen.",
             ],
             [
-              "Vorschau & Freigabe",
+              "Prüfen & Freigeben",
               "Änderungen werden geprüft, bevor sie öffentlich erscheinen.",
             ],
           ].map(([title, text], index) => (
@@ -72,7 +72,7 @@ export default function DesignPage() {
           className="inline-flex rounded-full bg-slate-950 px-6 py-3 font-semibold text-white"
           href="/demo"
         >
-          Fiktive Website-Demo ansehen →
+          Beispiel-Website entdecken →
         </Link>
       </div>
     </SimpleMarketingPage>

@@ -28,6 +28,7 @@ export default async function DemoLayout({
           "Hier entsteht die neue FahrSeiten-Plattform für moderne Fahrschulen."
         }
         primaryColor={settings?.primaryColor ?? "#0891b2"}
+        showBrandName={settings?.showBrandName ?? true}
         variant="platform"
       />
     );

@@ -839,6 +839,15 @@ export const salesLeads = mysqlTable(
     website: varchar("website", { length: 500 }),
     source: varchar("source", { length: 100 }),
     privacyTextVersion: varchar("privacy_text_version", { length: 80 }),
+    emailPermission: varchar("email_permission", { length: 40 })
+      .default("unknown")
+      .notNull(),
+    emailPermissionEvidence: text("email_permission_evidence"),
+    emailPermissionAt: timestamp("email_permission_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    emailOptOutAt: timestamp("email_opt_out_at", { mode: "date", fsp: 3 }),
     status: mysqlEnum("status", leadStatusValues).default("new").notNull(),
     ownerUserId: id("owner_user_id").references(() => users.id, {
       onDelete: "set null",

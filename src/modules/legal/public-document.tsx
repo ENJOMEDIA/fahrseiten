@@ -32,7 +32,13 @@ export function PublicLegalDocument({
   );
 }
 
-function LegalContent({ content, title }: { content: string; title: string }) {
+export function LegalContent({
+  content,
+  title,
+}: {
+  content: string;
+  title: string;
+}) {
   const sections = content
     .split(/\n{2,}/)
     .map((section) => section.trim())

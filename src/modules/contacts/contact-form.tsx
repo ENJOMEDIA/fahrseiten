@@ -106,8 +106,8 @@ export function DemoContactForm() {
         <label className="mt-4 flex gap-3 text-sm">
           <input className="mt-1" name="consent" required type="checkbox" />
           <span>
-            Ich habe den fiktiven Datenschutzhinweis Version demo-v1 gelesen und
-            stimme der Verarbeitung dieser Testangaben zu.
+            Ich habe den Datenschutzhinweis gelesen und stimme der Verarbeitung
+            dieser Testangaben zu.
           </span>
         </label>
         <button

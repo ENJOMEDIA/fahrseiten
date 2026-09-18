@@ -14,7 +14,7 @@ export const salesStageLabels: Record<LeadStatus, string> = {
   new: "Neu",
   contacted: "Kontaktiert",
   interested: "Interessiert",
-  demo: "Demo",
+  demo: "Präsentation",
   offer: "Angebot",
   won: "Gewonnen",
   lost: "Verloren",

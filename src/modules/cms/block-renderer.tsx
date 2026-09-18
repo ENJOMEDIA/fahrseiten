@@ -128,7 +128,7 @@ function Block({
               <div className="absolute right-5 bottom-5 rounded-2xl bg-white/92 px-5 py-4 shadow-xl backdrop-blur-xl">
                 <p className="text-2xl font-black">4,9 / 5</p>
                 <p className="text-xs font-bold text-slate-500">
-                  fiktive Demo-Bewertung
+                  fiktive Beispielbewertung
                 </p>
               </div>
             </div>
@@ -476,60 +476,100 @@ function Block({
             ))}
         </ContentSection>
       );
-    case "locations":
+    case "locations": {
+      const activeLocations = value.items.filter((item) => item.active);
       return (
         <ContentSection
           alternate={alternate}
           eyebrow="Vor Ort für dich"
           heading={value.heading}
         >
-          {value.items
-            .filter((item) => item.active)
-            .map((item) => (
-              <article
-                className="tenant-content-card rounded-[var(--radius-card)] border border-slate-200 bg-white p-7 shadow-sm"
-                itemScope
-                itemType="https://schema.org/DrivingSchool"
-                key={item.id}
+          {activeLocations.length ? (
+            <div className="relative col-span-full min-h-72 overflow-hidden rounded-[var(--radius-card)] border border-slate-200 bg-slate-900 shadow-xl">
+              <div className="absolute inset-0 [background-image:linear-gradient(35deg,transparent_47%,rgba(255,255,255,.16)_48%,transparent_50%),linear-gradient(145deg,transparent_47%,rgba(255,255,255,.12)_48%,transparent_50%)] [background-size:95px_95px] opacity-35" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,var(--tenant-primary),transparent_24%),radial-gradient(circle_at_78%_70%,var(--tenant-primary),transparent_20%)] opacity-35" />
+              <div className="relative flex min-h-72 flex-col justify-between p-6 text-white sm:p-8">
+                <div>
+                  <p className="text-xs font-black tracking-[.18em] text-white/55 uppercase">
+                    Standortübersicht
+                  </p>
+                  <p className="mt-2 max-w-lg text-xl font-black">
+                    {activeLocations.length === 1
+                      ? "Hier findest du uns"
+                      : `${activeLocations.length} Standorte auf einen Blick`}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {activeLocations.map((item, index) => {
+                    const address = `${item.street}, ${item.postalCode} ${item.city}`;
+                    return (
+                      <a
+                        className="group flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur hover:bg-white/20"
+                        href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`}
+                        key={item.id}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <span className="grid size-9 place-items-center rounded-full bg-[var(--tenant-primary)] font-black text-white shadow-lg">
+                          {index + 1}
+                        </span>
+                        <span>
+                          <strong className="block text-sm">{item.name}</strong>
+                          <span className="text-xs text-white/60">
+                            In OpenStreetMap öffnen ↗
+                          </span>
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {activeLocations.map((item, index) => (
+            <article
+              className="tenant-content-card rounded-[var(--radius-card)] border border-slate-200 bg-white p-7 shadow-sm"
+              itemScope
+              itemType="https://schema.org/DrivingSchool"
+              key={item.id}
+            >
+              <span
+                className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-xl text-white"
+                aria-hidden="true"
               >
-                <span
-                  className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-xl text-white"
-                  aria-hidden="true"
-                >
-                  ⌖
-                </span>
-                <h3 className="mt-6 text-2xl font-black" itemProp="name">
-                  {item.name}
-                </h3>
-                <address
-                  className="mt-3 leading-7 text-slate-600 not-italic"
-                  itemProp="address"
-                >
-                  {item.street}
-                  <br />
-                  {item.postalCode} {item.city}
-                </address>
-                <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5 text-sm">
-                  {item.openingHours.map((hours) => (
-                    <li
-                      className="flex justify-between gap-4"
-                      key={hours.weekday}
-                    >
-                      <span className="font-bold">
-                        {weekdays[hours.weekday]}
-                      </span>
-                      <span className="text-slate-500">
-                        {hours.closed
-                          ? "geschlossen"
-                          : `${hours.opensAt}–${hours.closesAt}`}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
+                {index + 1}
+              </span>
+              <h3 className="mt-6 text-2xl font-black" itemProp="name">
+                {item.name}
+              </h3>
+              <address
+                className="mt-3 leading-7 text-slate-600 not-italic"
+                itemProp="address"
+              >
+                {item.street}
+                <br />
+                {item.postalCode} {item.city}
+              </address>
+              <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5 text-sm">
+                {item.openingHours.map((hours) => (
+                  <li
+                    className="flex justify-between gap-4"
+                    key={hours.weekday}
+                  >
+                    <span className="font-bold">{weekdays[hours.weekday]}</span>
+                    <span className="text-slate-500">
+                      {hours.closed
+                        ? "geschlossen"
+                        : `${hours.opensAt}–${hours.closesAt}`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
         </ContentSection>
       );
+    }
     case "testimonials":
       return (
         <ContentSection

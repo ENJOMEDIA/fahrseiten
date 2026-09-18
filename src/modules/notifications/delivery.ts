@@ -16,6 +16,7 @@ const payloadSchema = z.object({
     "sales_outreach",
   ]),
   values: z.record(z.string(), z.unknown()),
+  headers: z.record(z.string(), z.string()).optional(),
 });
 export interface DeliveryRepository {
   reserve(input: {
@@ -59,6 +60,7 @@ export async function deliverEmailJob(
       subject: rendered.subject,
       text: rendered.text,
       html: rendered.html,
+      headers: payload.headers,
     });
     await repository.markSent(deliveryKey, now);
   } catch (error) {

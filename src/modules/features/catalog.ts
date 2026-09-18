@@ -31,8 +31,8 @@ export const featureCatalog = {
     availability: "available",
   },
   maintenance_preview: {
-    title: "Wartungs- & Vorschauseite",
-    description: "Gebrandete Vorschauseite bis zur öffentlichen Freigabe.",
+    title: "Individuelle Wartungsseite",
+    description: "Gebrandete Wartungsseite bis zur öffentlichen Freigabe.",
     availability: "available",
   },
   media_branding: {

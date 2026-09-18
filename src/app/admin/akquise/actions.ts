@@ -33,6 +33,8 @@ export async function createLeadAction(
         website: formData.get("website"),
         note: formData.get("note"),
         nextTaskAt: formData.get("nextTaskAt"),
+        emailPermission: formData.get("emailPermission"),
+        emailPermissionEvidence: formData.get("emailPermissionEvidence"),
       },
       identity.id,
     );
@@ -151,6 +153,10 @@ export async function updateLeadAction(
       nextTaskAt: String(formData.get("nextTaskAt") ?? ""),
       note: String(formData.get("note") ?? ""),
       actorUserId: identity.id,
+      emailPermission: String(formData.get("emailPermission") ?? "unknown"),
+      emailPermissionEvidence: String(
+        formData.get("emailPermissionEvidence") ?? "",
+      ),
     });
     revalidatePath("/admin/akquise");
     return { message: "Akquise-Stand wurde gespeichert.", error: false };

@@ -23,20 +23,6 @@ export function DemoSite({
 
   return (
     <>
-      <div className="demo-ribbon relative z-50 bg-slate-950 px-4 py-2.5 text-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-xs">
-          <p className="font-bold">
-            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-cyan-400" />
-            Interaktive FahrSeiten-Demo{" "}
-            <span className="ml-2 font-medium text-white/50">
-              · fiktive Inhalte
-            </span>
-          </p>
-          <p className="font-medium text-white/60">
-            Mit denselben Bausteinen und Themes wie im Kunden-Builder erstellt
-          </p>
-        </div>
-      </div>
       <TenantSite
         afterContent={afterContent}
         page={page}
@@ -51,7 +37,7 @@ export function DemoSite({
         }}
       />
       <aside
-        aria-label="Demo-Theme auswählen"
+        aria-label="Website-Theme auswählen"
         className="demo-theme-switcher fixed right-3 bottom-3 z-50 w-[min(25rem,calc(100vw-1.5rem))] rounded-3xl border border-white/15 bg-slate-950/92 p-3 text-white shadow-2xl backdrop-blur-2xl sm:right-5 sm:bottom-5"
       >
         <div className="flex items-center justify-between gap-3 px-2 pb-2">
