@@ -11,6 +11,7 @@ const payloadSchema = z.object({
     "contact_inquiry_received",
     "password_reset",
     "user_invitation",
+    "instance_invitation",
     "follow_up_due",
     "sales_outreach",
   ]),

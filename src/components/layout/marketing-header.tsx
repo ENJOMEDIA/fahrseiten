@@ -3,7 +3,13 @@ import Image from "next/image";
 
 import { dashboardUrl } from "@/config/dashboard-url";
 
-export function MarketingHeader({ logoUrl }: { logoUrl?: string }) {
+export function MarketingHeader({
+  logoUrl,
+  brandName = "FahrSeiten",
+}: {
+  logoUrl?: string;
+  brandName?: string;
+}) {
   const links = [
     ["Funktionen", "/funktionen"],
     ["Design & Demo", "/design"],
@@ -36,12 +42,14 @@ export function MarketingHeader({ logoUrl }: { logoUrl?: string }) {
               F
             </span>
           )}
-          <span>
-            FahrSeiten
-            <span className="ml-2 hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">
-              by ENJO MEDIA
+          {!logoUrl ? (
+            <span>
+              {brandName}
+              <span className="ml-2 hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">
+                by ENJO MEDIA
+              </span>
             </span>
-          </span>
+          ) : null}
         </Link>
         <nav
           aria-label="Marketing-Navigation"

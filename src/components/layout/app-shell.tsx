@@ -13,6 +13,7 @@ type NavItem = {
   label: string;
   icon?: string;
   description?: string;
+  group?: string;
 };
 
 function Navigation({
@@ -24,53 +25,67 @@ function Navigation({
 }) {
   const pathname = usePathname();
   const root = items[0]?.href;
-  return items.map((item) => {
+  return items.map((item, index) => {
     const active =
       pathname === item.href ||
       (item.href !== root && pathname.startsWith(`${item.href}/`));
+    const showGroup = Boolean(
+      item.group && item.group !== items[index - 1]?.group,
+    );
     return (
-      <Link
-        aria-current={active ? "page" : undefined}
-        className={cn(
-          "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition",
-          active
-            ? mobile
-              ? "bg-slate-950 text-white"
-              : "bg-white text-slate-950 shadow-lg shadow-black/10"
-            : mobile
-              ? "text-slate-700 hover:bg-slate-100"
-              : "text-slate-400 hover:bg-white/8 hover:text-white",
-        )}
-        href={item.href}
-        key={item.href}
-      >
-        <span
-          aria-hidden="true"
+      <div className={showGroup ? "pt-4 first:pt-0" : ""} key={item.href}>
+        {showGroup ? (
+          <p
+            className={cn(
+              "mb-2 px-3 text-[10px] font-bold tracking-[.16em] uppercase",
+              mobile ? "text-slate-400" : "text-slate-600",
+            )}
+          >
+            {item.group}
+          </p>
+        ) : null}
+        <Link
+          aria-current={active ? "page" : undefined}
           className={cn(
-            "grid size-8 shrink-0 place-items-center rounded-xl text-xs font-bold",
+            "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition",
             active
-              ? "bg-cyan-100 text-cyan-800"
+              ? mobile
+                ? "bg-slate-950 text-white"
+                : "bg-white text-slate-950 shadow-lg shadow-black/10"
               : mobile
-                ? "bg-slate-100 text-slate-500"
-                : "bg-white/8 text-slate-400 group-hover:bg-white/12",
+                ? "text-slate-700 hover:bg-slate-100"
+                : "text-slate-400 hover:bg-white/8 hover:text-white",
           )}
+          href={item.href}
         >
-          {item.icon ?? item.label.slice(0, 1)}
-        </span>
-        <span className="min-w-0">
-          <span className="block font-semibold">{item.label}</span>
-          {item.description && !mobile ? (
-            <span
-              className={cn(
-                "mt-0.5 block truncate text-[11px]",
-                active ? "text-slate-500" : "text-slate-600",
-              )}
-            >
-              {item.description}
-            </span>
-          ) : null}
-        </span>
-      </Link>
+          <span
+            aria-hidden="true"
+            className={cn(
+              "grid size-8 shrink-0 place-items-center rounded-xl text-xs font-bold",
+              active
+                ? "bg-cyan-100 text-cyan-800"
+                : mobile
+                  ? "bg-slate-100 text-slate-500"
+                  : "bg-white/8 text-slate-400 group-hover:bg-white/12",
+            )}
+          >
+            {item.icon ?? item.label.slice(0, 1)}
+          </span>
+          <span className="min-w-0">
+            <span className="block font-semibold">{item.label}</span>
+            {item.description && !mobile ? (
+              <span
+                className={cn(
+                  "mt-0.5 block truncate text-[11px]",
+                  active ? "text-slate-500" : "text-slate-600",
+                )}
+              >
+                {item.description}
+              </span>
+            ) : null}
+          </span>
+        </Link>
+      </div>
     );
   });
 }

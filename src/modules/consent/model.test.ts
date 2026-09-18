@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  CONSENT_VERSION,
+  consentNoticeVersion,
   mayLoadOptional,
   necessaryOnly,
   parseConsentCookie,
@@ -15,12 +15,20 @@ describe("consent control", () => {
   });
 
   it("round-trips the current version and invalidates older notices", () => {
+    const version = consentNoticeVersion([
+      { category: "functional", label: "Karte", services: "Kartendienst" },
+    ]);
     const state = {
-      version: CONSENT_VERSION,
+      version,
       choices: { ...necessaryOnly, functional: true },
       savedAt: new Date().toISOString(),
     } as const;
     expect(parseConsentCookie(serializeConsent(state))).toEqual(state);
+    expect(
+      consentNoticeVersion([
+        { category: "functional", label: "Video", services: "Videodienst" },
+      ]),
+    ).not.toBe(version);
     expect(
       parseConsentCookie(
         encodeURIComponent(JSON.stringify({ ...state, version: "old-v0" })),

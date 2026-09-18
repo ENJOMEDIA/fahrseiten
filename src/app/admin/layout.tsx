@@ -18,6 +18,7 @@ export default async function PlatformLayout({
       label: "Übersicht",
       icon: "⌂",
       description: "Das Wichtigste auf einen Blick",
+      group: "Start",
     },
     ...(hasPlatformPermission(identity.platformRole, "platform.tenants.manage")
       ? [
@@ -25,7 +26,8 @@ export default async function PlatformLayout({
             href: "/admin/mandanten",
             label: "Mandanten",
             icon: "M",
-            description: "Kunden, Domains und Onboarding",
+            description: "Instanzen, Domains und Einrichtung",
+            group: "Kunden & Vertrieb",
           },
         ]
       : []),
@@ -36,6 +38,53 @@ export default async function PlatformLayout({
             label: "Akquise",
             icon: "A",
             description: "Leads und nächste Schritte",
+            group: "Kunden & Vertrieb",
+          },
+        ]
+      : []),
+    ...(hasPlatformPermission(identity.platformRole, "platform.security.manage")
+      ? [
+          {
+            href: "/admin/pakete",
+            label: "Pakete & Preise",
+            icon: "€",
+            description: "Leistungen und Aufpreise",
+            group: "Kunden & Vertrieb",
+          },
+          {
+            href: "/admin/rechtliches",
+            label: "Rechtliches",
+            icon: "§",
+            description: "Impressum und Datenschutz",
+            group: "Plattform",
+          },
+          {
+            href: "/admin/medien",
+            label: "Medien",
+            icon: "▧",
+            description: "Landingpage-Bilder und Zuschnitte",
+            group: "Plattform",
+          },
+          {
+            href: "/admin/statistik",
+            label: "Statistik",
+            icon: "↗",
+            description: "Traffic nach Website und Zeitraum",
+            group: "Plattform",
+          },
+          {
+            href: "/admin/einstellungen",
+            label: "Einstellungen",
+            icon: "⚙",
+            description: "Wartungsmodus und Plattform",
+            group: "Plattform",
+          },
+          {
+            href: "/admin/system",
+            label: "Systemstatus",
+            icon: "↻",
+            description: "Schema und Migrationen",
+            group: "Betrieb & Hilfe",
           },
         ]
       : []),
@@ -49,46 +98,7 @@ export default async function PlatformLayout({
             label: "Support",
             icon: "?",
             description: "Fehler und Diagnosen",
-          },
-        ]
-      : []),
-    ...(hasPlatformPermission(identity.platformRole, "platform.security.manage")
-      ? [
-          {
-            href: "/admin/pakete",
-            label: "Pakete & Preise",
-            icon: "€",
-            description: "Leistungen und Aufpreise",
-          },
-          {
-            href: "/admin/rechtliches",
-            label: "Rechtliches",
-            icon: "§",
-            description: "Impressum und Datenschutz",
-          },
-          {
-            href: "/admin/system",
-            label: "Systemstatus",
-            icon: "↻",
-            description: "Schema und Migrationen",
-          },
-          {
-            href: "/admin/medien",
-            label: "Medien",
-            icon: "▧",
-            description: "Landingpage-Bilder und Zuschnitte",
-          },
-          {
-            href: "/admin/statistik",
-            label: "Statistik",
-            icon: "↗",
-            description: "Traffic nach Website und Zeitraum",
-          },
-          {
-            href: "/admin/einstellungen",
-            label: "Einstellungen",
-            icon: "⚙",
-            description: "Wartungsmodus und Plattform",
+            group: "Betrieb & Hilfe",
           },
         ]
       : []),

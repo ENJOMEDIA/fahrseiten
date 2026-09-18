@@ -14,7 +14,7 @@ export default async function PlatformDashboardPage() {
       visible: hasPlatformPermission(role, "platform.tenants.manage"),
       number: "01",
       title: "Kunden & Domains",
-      text: "Neue Fahrschulen einrichten, Domains begleiten und den Onboarding-Stand nachvollziehen.",
+      text: "Neue Fahrschulen einrichten, Domains begleiten und den Einrichtungsstand nachvollziehen.",
       href: "/admin/mandanten",
       action: "Mandanten verwalten",
       tone: "bg-cyan-50 text-cyan-950",

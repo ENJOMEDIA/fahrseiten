@@ -11,6 +11,12 @@ import {
   type BuilderThemeKey,
 } from "./themes";
 import {
+  builderBlockCatalog,
+  createBuilderBlockProperties,
+  type BuilderBlockType,
+} from "./block-catalog";
+import type { TenantBuilderPage } from "./tenant-pages";
+import {
   mediaCategoryLabels,
   tenantMediaCategoryValues,
   type MediaCategory,
@@ -65,13 +71,32 @@ export function BuilderDemo({
   tenantMode = false,
   canUseThemes = false,
   initialTheme,
+  initialPages,
 }: {
   media?: BuilderMedia[];
   tenantMode?: boolean;
   canUseThemes?: boolean;
   initialTheme?: string;
+  initialPages?: TenantBuilderPage[];
 }) {
-  const [blocks, setBlocks] = useState(initialBlocks);
+  const [pages, setPages] = useState<TenantBuilderPage[]>(
+    initialPages?.length
+      ? initialPages
+      : [
+          {
+            id: "local-start",
+            title: "Startseite",
+            slug: "",
+            blocks: initialBlocks,
+          },
+        ],
+  );
+  const [selectedPageId, setSelectedPageId] = useState(
+    initialPages?.[0]?.id ?? "local-start",
+  );
+  const selectedPage =
+    pages.find((page) => page.id === selectedPageId) ?? pages[0];
+  const blocks = useMemo(() => selectedPage?.blocks ?? [], [selectedPage]);
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">(
     "desktop",
@@ -88,22 +113,39 @@ export function BuilderDemo({
   );
   const [font, setFont] = useState("system");
   const [logo, setLogo] = useState("none");
-  const [pages, setPages] = useState(["Startseite", "Über uns"]);
-  const [selectedPage, setSelectedPage] = useState("Startseite");
-  const [newBlockType, setNewBlockType] = useState<
-    "hero" | "text_image" | "benefits" | "cta" | "faq" | "contact_teaser"
-  >("hero");
-  const serialized = useMemo(() => JSON.stringify(blocks), [blocks]);
+  const [newBlockType, setNewBlockType] = useState<BuilderBlockType>("hero");
+  const serialized = useMemo(
+    () => JSON.stringify({ pageId: selectedPageId, blocks }),
+    [blocks, selectedPageId],
+  );
+
+  function setBlocks(
+    update: StoredBlock[] | ((current: StoredBlock[]) => StoredBlock[]),
+  ) {
+    setPages((current) =>
+      current.map((page) => {
+        if (page.id !== selectedPageId) return page;
+        const nextBlocks =
+          typeof update === "function" ? update(page.blocks) : update;
+        return { ...page, blocks: nextBlocks };
+      }),
+    );
+  }
 
   useEffect(() => {
     const savingTimer = window.setTimeout(() => setSaveState("saving"), 0);
     const timer = window.setTimeout(async () => {
       try {
-        const response = await fetch("/api/demo/builder-draft", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: serialized,
-        });
+        const response = await fetch(
+          tenantMode ? "/api/tenant/builder-draft" : "/api/demo/builder-draft",
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: tenantMode
+              ? serialized
+              : JSON.stringify(JSON.parse(serialized).blocks),
+          },
+        );
         if (!response.ok) throw new Error();
         setSaveState("saved");
       } catch {
@@ -114,7 +156,7 @@ export function BuilderDemo({
       window.clearTimeout(savingTimer);
       window.clearTimeout(timer);
     };
-  }, [serialized]);
+  }, [serialized, tenantMode]);
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
@@ -137,40 +179,8 @@ export function BuilderDemo({
       ),
     );
   }
-  function addBlock(type: typeof newBlockType) {
-    const defaults = {
-      hero: { type: "hero", heading: "Neue Überschrift", text: "Neuer Text" },
-      text_image: {
-        type: "text_image",
-        heading: "Text und Bild",
-        paragraphs: ["Neuer Absatz"],
-        imageAlt: "",
-        imagePosition: "right",
-      },
-      benefits: {
-        type: "benefits",
-        heading: "Vorteile",
-        items: [{ title: "Vorteil", text: "Beschreibung" }],
-      },
-      cta: {
-        type: "cta",
-        heading: "Neue Aktion",
-        text: "Neuer Text",
-        actionLabel: "Mehr erfahren",
-        actionHref: "/",
-      },
-      faq: {
-        type: "faq",
-        heading: "Häufige Fragen",
-        items: [{ question: "Neue Frage", answer: "Neue Antwort" }],
-      },
-      contact_teaser: {
-        type: "contact_teaser",
-        heading: "Kontakt",
-        text: "Wir helfen gern.",
-      },
-    } satisfies Record<typeof newBlockType, BlockProperties>;
-    const properties = defaults[type];
+  function addBlock(type: BuilderBlockType) {
+    const properties = createBuilderBlockProperties(type);
     setBlocks((current) =>
       normalizePositions([
         ...current,
@@ -184,16 +194,30 @@ export function BuilderDemo({
       ]),
     );
   }
-  function publish() {
+  async function publish() {
     try {
       const valid = validateDraft(blocks);
-      setHistory((current) => [
-        ...current,
-        {
-          label: `Version ${current.length + 1}`,
-          blocks: structuredClone(valid),
-        },
-      ]);
+      if (tenantMode) {
+        setSaveState("saving");
+        const response = await fetch("/api/tenant/builder-draft", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            pageId: selectedPageId,
+            blocks: valid,
+            publish: true,
+          }),
+        });
+        if (!response.ok) throw new Error();
+        setSaveState("saved");
+      } else
+        setHistory((current) => [
+          ...current,
+          {
+            label: `Version ${current.length + 1}`,
+            blocks: structuredClone(valid),
+          },
+        ]);
       setMessage("Seite erfolgreich veröffentlicht.");
     } catch {
       setMessage(
@@ -232,24 +256,37 @@ export function BuilderDemo({
               Seite
               <select
                 className="mt-2 w-full rounded-xl border p-3"
-                value={selectedPage}
-                onChange={(event) => setSelectedPage(event.target.value)}
+                value={selectedPageId}
+                onChange={(event) => setSelectedPageId(event.target.value)}
               >
                 {pages.map((page) => (
-                  <option key={page}>{page}</option>
+                  <option key={page.id} value={page.id}>
+                    {page.title}
+                  </option>
                 ))}
               </select>
             </label>
-            <button
-              className="w-full rounded-xl border px-4 py-3 font-semibold"
-              onClick={() => {
-                const name = `Neue Seite ${pages.length}`;
-                setPages((current) => [...current, name]);
-                setSelectedPage(name);
-              }}
-            >
-              Seite anlegen
-            </button>
+            {!tenantMode ? (
+              <button
+                className="w-full rounded-xl border px-4 py-3 font-semibold"
+                onClick={() => {
+                  const id = crypto.randomUUID();
+                  const name = `Neue Seite ${pages.length + 1}`;
+                  setPages((current) => [
+                    ...current,
+                    {
+                      id,
+                      title: name,
+                      slug: `seite-${pages.length + 1}`,
+                      blocks: [],
+                    },
+                  ]);
+                  setSelectedPageId(id);
+                }}
+              >
+                Seite anlegen
+              </button>
+            ) : null}
             <div className="grid grid-cols-[1fr_auto] gap-3">
               <label className="text-sm font-semibold">
                 Blocktyp
@@ -257,15 +294,37 @@ export function BuilderDemo({
                   className="mt-1 w-full rounded-xl border p-3"
                   value={newBlockType}
                   onChange={(event) =>
-                    setNewBlockType(event.target.value as typeof newBlockType)
+                    setNewBlockType(event.target.value as BuilderBlockType)
                   }
                 >
-                  <option value="hero">Hero</option>
-                  <option value="text_image">Text mit Bild</option>
-                  <option value="benefits">Vorteile</option>
-                  <option value="cta">Call-to-Action</option>
-                  <option value="faq">FAQ</option>
-                  <option value="contact_teaser">Kontaktteaser</option>
+                  <optgroup label="Freie Seitenbausteine">
+                    {(
+                      Object.entries(builderBlockCatalog) as [
+                        BuilderBlockType,
+                        (typeof builderBlockCatalog)[BuilderBlockType],
+                      ][]
+                    )
+                      .filter(([, item]) => item.group === "layout")
+                      .map(([key, item]) => (
+                        <option key={key} value={key}>
+                          {item.label}
+                        </option>
+                      ))}
+                  </optgroup>
+                  <optgroup label="Automatische Inhaltsbereiche">
+                    {(
+                      Object.entries(builderBlockCatalog) as [
+                        BuilderBlockType,
+                        (typeof builderBlockCatalog)[BuilderBlockType],
+                      ][]
+                    )
+                      .filter(([, item]) => item.group === "content")
+                      .map(([key, item]) => (
+                        <option key={key} value={key}>
+                          {item.label}
+                        </option>
+                      ))}
+                  </optgroup>
                 </select>
               </label>
               <button
@@ -281,7 +340,7 @@ export function BuilderDemo({
                 key={block.id}
               >
                 <legend className="px-2 font-semibold">
-                  {block.properties.type}
+                  {builderBlockCatalog[block.properties.type].label}
                 </legend>
                 <label className="block text-sm">
                   Überschrift
@@ -350,6 +409,14 @@ export function BuilderDemo({
                       })}
                     </select>
                   </label>
+                ) : null}
+                {builderBlockCatalog[block.properties.type].group ===
+                "content" ? (
+                  <p className="mt-3 rounded-xl bg-cyan-50 p-3 text-xs leading-5 text-cyan-950">
+                    Dieser Bereich übernimmt die freigegebenen Angaben aus
+                    „Inhalte“. So werden Daten nur einmal gepflegt und auf der
+                    Website automatisch aktuell gehalten.
+                  </p>
                 ) : null}
                 {!block.properties.heading ? (
                   <p className="mt-2 text-sm text-red-700">

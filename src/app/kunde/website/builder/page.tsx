@@ -10,12 +10,13 @@ import {
 } from "@/modules/features/service";
 import { listTenantMedia } from "@/modules/media/repository";
 import { mediaPublicUrl } from "@/modules/media/public-url";
+import { listTenantBuilderPages } from "@/modules/builder/tenant-pages";
 
 export default async function CustomerWebsiteBuilderPage() {
   const identity = await getSessionIdentity();
   const membership = identity?.memberships[0];
   if (!membership) return <BuilderDemo />;
-  const [assets, featureSources, themes] = await Promise.all([
+  const [assets, featureSources, themes, pages] = await Promise.all([
     listTenantMedia(membership.tenantId),
     findFeatureSources(membership.tenantId, "theme_templates"),
     db
@@ -23,6 +24,7 @@ export default async function CustomerWebsiteBuilderPage() {
       .from(themeSettings)
       .where(eq(themeSettings.tenantId, membership.tenantId))
       .limit(1),
+    listTenantBuilderPages(membership.tenantId),
   ]);
   return (
     <BuilderDemo
@@ -30,6 +32,7 @@ export default async function CustomerWebsiteBuilderPage() {
         featureSources && isFeatureUsable(resolveFeatureStatus(featureSources)),
       )}
       initialTheme={themes[0]?.themeKey}
+      initialPages={pages}
       media={assets.map((asset) => ({
         id: asset.id,
         url: mediaPublicUrl(asset.id),

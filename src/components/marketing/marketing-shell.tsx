@@ -4,13 +4,15 @@ import { dashboardUrl } from "@/config/dashboard-url";
 export function MarketingShell({
   children,
   logoUrl,
+  brandName,
 }: {
   children: React.ReactNode;
   logoUrl?: string;
+  brandName?: string;
 }) {
   return (
     <>
-      <MarketingHeader logoUrl={logoUrl} />
+      <MarketingHeader brandName={brandName} logoUrl={logoUrl} />
       {children}
       <footer className="border-t border-white/10 bg-[#070b12] px-6 py-14 text-slate-300">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_auto]">

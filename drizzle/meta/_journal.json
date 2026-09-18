@@ -169,6 +169,13 @@
       "when": 1789717865305,
       "tag": "0023_website_builder_aktivieren",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1789723596268,
+      "tag": "0024_colossal_hannibal_king",
+      "breakpoints": true
     }
   ]
 }

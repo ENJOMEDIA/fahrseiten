@@ -8,6 +8,8 @@ Der Builder bearbeitet Seiten als geordnete Liste freigegebener Blöcke. Nutzer 
 
 Formularfelder richten sich nach dem Blocktyp. Ungültige Pflichtfelder werden direkt am Block angezeigt und verhindern die Veröffentlichung. Die Vorschau verwendet denselben `BlockRenderer` wie die öffentliche Website und bietet feste Desktop-, Tablet- und Mobilbreiten. Theme-Einstellungen sind auf freigegebene Farb-, Schrift- und Logooptionen begrenzt.
 
+Demo, Kundenvorschau und veröffentlichte Website werden aus derselben geordneten Blockstruktur zusammengesetzt. Ein Theme speichert ausschließlich kontrollierte Designwerte und einen Theme-Schlüssel; es erzeugt keine eigene HTML-Datei und keine zweite Seitenkopie. Änderungen am Renderer gelten dadurch konsistent für alle drei Vorlagen. Im Kundenbereich werden Entwürfe tenantgebunden gespeichert und nur nach ausdrücklicher Veröffentlichung als neue öffentliche Seitenversion gesetzt.
+
 Entwurfsänderungen werden nach kurzer Ruhezeit validiert gespeichert. Der Status „Wird gespeichert“, „Entwurf gespeichert“ oder „Speichern fehlgeschlagen“ bleibt sichtbar. Während eines laufenden oder fehlgeschlagenen Speichervorgangs aktiviert die Oberfläche den Browserhinweis für ungespeicherte Änderungen. Optimistische Zustände werden nicht als gespeichert bezeichnet, bevor der Server bestätigt hat.
 
 Veröffentlichen validiert den gesamten Entwurf. Jede erfolgreiche Veröffentlichung erzeugt eine Version. Wiederherstellen kopiert die gewählte Version in den aktuellen Entwurf; die öffentliche Version wird dadurch noch nicht verändert. Das Persistenzmodell und die spätere Datenbanktransaktion folgen ADR 0005.

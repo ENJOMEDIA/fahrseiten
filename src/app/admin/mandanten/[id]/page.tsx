@@ -60,12 +60,12 @@ export default async function TenantDetailPage({
   return (
     <CustomerPage
       title={tenant.name}
-      description="Vom einmaligen Onboarding bis zur Freigabe der Website."
+      description="Vom einmaligen Einrichtungslink bis zur Freigabe der Website."
     >
       <div className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
         <Card className="bg-slate-950 text-white">
           <p className="text-xs font-semibold tracking-wide text-cyan-300 uppercase">
-            Onboarding-Fortschritt
+            Einrichtungsfortschritt
           </p>
           <h2 className="mt-2 text-2xl font-semibold">
             Der Kundenbereich wurde angelegt.

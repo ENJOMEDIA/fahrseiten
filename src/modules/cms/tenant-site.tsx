@@ -50,14 +50,16 @@ export function TenantSite({
                 M
               </span>
             )}
-            <span>
-              <span className="block text-base font-black tracking-tight sm:text-lg">
-                {website.name}
+            {!website.theme.logoUrl ? (
+              <span>
+                <span className="block text-base font-black tracking-tight sm:text-lg">
+                  {website.name}
+                </span>
+                <span className="block text-[0.64rem] font-bold tracking-[0.18em] text-slate-500 uppercase">
+                  Einfach besser fahren lernen
+                </span>
               </span>
-              <span className="block text-[0.64rem] font-bold tracking-[0.18em] text-slate-500 uppercase">
-                Einfach besser fahren lernen
-              </span>
-            </span>
+            ) : null}
           </Link>
           <nav aria-label="Hauptnavigation" className="hidden lg:block">
             <ul className="flex items-center gap-1">
@@ -170,7 +172,7 @@ export function TenantSite({
           <p>
             © {new Date().getFullYear()} {website.name}
           </p>
-          <p>Website mit FahrSeiten erstellt</p>
+          <p>Mit FahrSeiten und viel Liebe erstellt</p>
         </div>
       </footer>
     </div>

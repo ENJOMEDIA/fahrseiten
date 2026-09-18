@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONSENT_VERSION, necessaryOnly } from "./model";
+import { consentNoticeVersion, necessaryOnly } from "./model";
 import { recordConsentEvidence, type ConsentEvidence } from "./service";
 
 describe("consent evidence", () => {
@@ -7,7 +7,13 @@ describe("consent evidence", () => {
     const rows: ConsentEvidence[] = [];
     const subjectId = "81b3e709-f07e-4f19-a36d-d734f5633104";
     await recordConsentEvidence(
-      { subjectId, noticeVersion: CONSENT_VERSION, choices: necessaryOnly },
+      {
+        subjectId,
+        noticeVersion: consentNoticeVersion([
+          { category: "statistics", label: "Statistik", services: "intern" },
+        ]),
+        choices: necessaryOnly,
+      },
       "fahrseiten.de",
       {
         async create(row) {

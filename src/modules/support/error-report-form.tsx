@@ -25,6 +25,8 @@ export function ErrorReportForm({
             summary: data.get("summary"),
             description: data.get("description"),
             website: data.get("website"),
+            pagePath: window.location.pathname,
+            browser: navigator.userAgent,
             surface,
           }),
         });

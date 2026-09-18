@@ -156,6 +156,7 @@ export default async function MarketingStartPage() {
 
   return (
     <MarketingShell
+      brandName={settings?.brandName}
       logoUrl={
         settings?.logoMediaId ? mediaPublicUrl(settings.logoMediaId) : undefined
       }

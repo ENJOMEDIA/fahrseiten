@@ -89,7 +89,22 @@ export async function getOptionalServiceConfig(
       services: env.CONSENT_MARKETING_SERVICES,
     },
   ].filter((entry) => entry.services.trim().length > 0) as OptionalService[];
-  return [...services, ...configured];
+  return [...services, ...configured].reduce<OptionalService[]>(
+    (result, item) => {
+      const existing = result.find((entry) => entry.category === item.category);
+      if (existing) {
+        existing.label =
+          item.category === "functional"
+            ? "Komfortfunktionen"
+            : item.category === "statistics"
+              ? "Statistik"
+              : "Marketing";
+        existing.services = `${existing.services}; ${item.services}`;
+      } else result.push({ ...item });
+      return result;
+    },
+    [],
+  );
 }
 
 export async function getRequestOptionalServiceConfig() {

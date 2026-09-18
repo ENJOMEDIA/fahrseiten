@@ -116,6 +116,13 @@ export const tenantOnboardingTokens = mysqlTable(
     createdByUserId: id("created_by_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "restrict" }),
+    prefill: json("prefill").$type<{
+      companyName?: string;
+      ownerName?: string;
+      ownerEmail?: string;
+      phone?: string;
+      domain?: string;
+    }>(),
     expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }).notNull(),
     usedAt: timestamp("used_at", { mode: "date", fsp: 3 }),
     createdAt: timestamp("created_at", { mode: "date", fsp: 3 })

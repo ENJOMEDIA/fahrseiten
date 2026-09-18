@@ -6,6 +6,7 @@ import { and, eq, gt, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   auditLogs,
+  backgroundJobs,
   contactForms,
   domains,
   legalDocuments,
@@ -22,6 +23,7 @@ import {
   themeSettings,
   users,
 } from "@/db/schema";
+import { env } from "@/config/env";
 import { hashPassword } from "@/modules/auth/password";
 import { createOpaqueToken, hashToken } from "@/modules/auth/tokens";
 import { normalizeHostname } from "@/modules/domains/hostname";
@@ -42,15 +44,71 @@ function slugify(value: string) {
     .slice(0, 80);
 }
 
-export async function createTenantOnboardingLink(createdByUserId: string) {
+export type TenantSetupPrefill = {
+  companyName?: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  phone?: string;
+  domain?: string;
+};
+
+export async function createTenantOnboardingLink(input: {
+  createdByUserId: string;
+  prefill: TenantSetupPrefill;
+  publicOrigin: string;
+  sendInvitation: boolean;
+}) {
   const token = createOpaqueToken();
-  await db.insert(tenantOnboardingTokens).values({
-    id: randomUUID(),
-    tokenHash: hashToken(token),
-    createdByUserId,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60_000),
+  const tokenId = randomUUID();
+  const actionUrl = new URL(
+    `/onboarding/${token}`,
+    input.publicOrigin,
+  ).toString();
+  await db.transaction(async (tx) => {
+    await tx.insert(tenantOnboardingTokens).values({
+      id: tokenId,
+      tokenHash: hashToken(token),
+      createdByUserId: input.createdByUserId,
+      prefill: input.prefill,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60_000),
+    });
+    if (input.sendInvitation && input.prefill.ownerEmail) {
+      await tx.insert(backgroundJobs).values({
+        id: randomUUID(),
+        type: "notification",
+        idempotencyKey: `instance-invitation:${tokenId}`,
+        payload: {
+          to: input.prefill.ownerEmail,
+          from: env.SMTP_FROM,
+          template: "instance_invitation",
+          values: {
+            companyName: input.prefill.companyName || "Ihre Fahrschule",
+            contactName: input.prefill.ownerName || "Fahrschul-Team",
+            actionUrl,
+            expiresInDays: 7,
+          },
+        },
+        runAt: new Date(),
+      });
+    }
   });
-  return token;
+  return { token, actionUrl };
+}
+
+export async function findTenantOnboardingPrefill(token: string) {
+  if (token.length < 32) return null;
+  const [row] = await db
+    .select({ prefill: tenantOnboardingTokens.prefill })
+    .from(tenantOnboardingTokens)
+    .where(
+      and(
+        eq(tenantOnboardingTokens.tokenHash, hashToken(token)),
+        isNull(tenantOnboardingTokens.usedAt),
+        gt(tenantOnboardingTokens.expiresAt, new Date()),
+      ),
+    )
+    .limit(1);
+  return row?.prefill ?? null;
 }
 
 export async function completeTenantOnboarding(input: unknown) {

@@ -117,7 +117,7 @@ export default async function SalesPage() {
                       className="mt-3 inline-flex rounded-xl bg-emerald-100 px-3 py-2 text-xs font-semibold text-emerald-900"
                       href="/admin/mandanten/neu"
                     >
-                      Onboarding-Link erstellen →
+                      Instanz vorbereiten →
                     </Link>
                   ) : null}
                   {lead.convertedTenantId ? (

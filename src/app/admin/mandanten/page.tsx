@@ -60,7 +60,7 @@ export default async function TenantsPage({
             className="rounded-full bg-cyan-300 px-5 py-3 font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-200"
             href="/admin/mandanten/neu"
           >
-            + Onboarding-Link erstellen
+            + Instanz erstellen
           </Link>
         </div>
         <div className="mt-6 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-3">
@@ -89,7 +89,7 @@ export default async function TenantsPage({
             Noch keine Fahrschule eingerichtet
           </p>
           <p className="mx-auto mt-2 max-w-xl text-slate-600">
-            Erstelle einen einmaligen Onboarding-Link. Sobald der Kunde das
+            Erstelle einen einmaligen Einrichtungslink. Sobald der Kunde das
             Formular abschließt, erscheint der Mandant automatisch hier.
           </p>
         </Card>
@@ -176,7 +176,7 @@ export default async function TenantsPage({
                 className="mt-5 inline-flex font-semibold text-cyan-800"
                 href={`/admin/mandanten/${tenant.id}`}
               >
-                Onboarding und Details ansehen →
+                Einrichtung und Details ansehen →
               </Link>
             </Card>
           ))}

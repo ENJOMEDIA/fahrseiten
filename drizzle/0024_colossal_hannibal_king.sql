@@ -1,0 +1,1 @@
+ALTER TABLE `tenant_onboarding_tokens` ADD `prefill` json;

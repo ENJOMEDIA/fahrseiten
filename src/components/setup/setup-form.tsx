@@ -207,7 +207,19 @@ export function PlatformSetupForm() {
   );
 }
 
-export function TenantOnboardingForm({ token }: { token: string }) {
+export function TenantOnboardingForm({
+  token,
+  prefill,
+}: {
+  token: string;
+  prefill?: {
+    companyName?: string;
+    ownerName?: string;
+    ownerEmail?: string;
+    phone?: string;
+    domain?: string;
+  };
+}) {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -233,15 +245,22 @@ export function TenantOnboardingForm({ token }: { token: string }) {
 
   return (
     <form action={submit} className="mt-8 grid gap-5 sm:grid-cols-2">
-      <Input label="Name der Fahrschule" name="companyName" required />
+      <Input
+        defaultValue={prefill?.companyName}
+        label="Name der Fahrschule"
+        name="companyName"
+        required
+      />
       <Input
         autoComplete="name"
+        defaultValue={prefill?.ownerName}
         label="Inhaber / Ansprechpartner"
         name="ownerName"
         required
       />
       <Input
         autoComplete="email"
+        defaultValue={prefill?.ownerEmail}
         label="E-Mail-Adresse"
         name="ownerEmail"
         required
@@ -268,10 +287,16 @@ export function TenantOnboardingForm({ token }: { token: string }) {
         required
       />
       <Input autoComplete="address-level2" label="Ort" name="city" required />
-      <Input autoComplete="tel" label="Telefon (optional)" name="phone" />
+      <Input
+        autoComplete="tel"
+        defaultValue={prefill?.phone}
+        label="Telefon (optional)"
+        name="phone"
+      />
       <div className="sm:col-span-2">
         <Input
           hint="Die Domain wird gespeichert, aber erst nach DNS- und SSL-Prüfung aktiviert."
+          defaultValue={prefill?.domain}
           label="Gewünschte Domain"
           name="domain"
           placeholder="fahrschule-beispiel.de"

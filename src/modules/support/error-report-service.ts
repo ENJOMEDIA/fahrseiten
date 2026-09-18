@@ -8,6 +8,8 @@ const reportSchema = z.object({
   description: z.string().trim().min(10).max(5_000),
   surface: z.enum(["marketing", "customer_backend"]),
   website: z.string().max(0),
+  pagePath: z.string().trim().max(500).optional(),
+  browser: z.string().trim().max(500).optional(),
 });
 
 export type ErrorReportRecord = {
@@ -17,6 +19,8 @@ export type ErrorReportRecord = {
   description: string;
   surface: "marketing" | "customer_backend";
   status: "new";
+  tenantId?: string | null;
+  reporterUserId?: string | null;
   createdAt: Date;
 };
 
@@ -27,15 +31,24 @@ export interface ErrorReportRepository {
 export async function submitErrorReport(
   raw: unknown,
   repository: ErrorReportRepository,
+  context: { tenantId?: string | null; reporterUserId?: string | null } = {},
 ) {
   const input = reportSchema.parse(raw);
   const record: ErrorReportRecord = {
     id: randomUUID(),
     referenceId: input.referenceId || createReferenceId(),
     summary: input.summary,
-    description: input.description,
+    description: [
+      input.description,
+      input.pagePath ? `Seite: ${input.pagePath}` : "",
+      input.browser ? `Browser: ${input.browser}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
     surface: input.surface,
     status: "new",
+    tenantId: context.tenantId,
+    reporterUserId: context.reporterUserId,
     createdAt: new Date(),
   };
   await repository.create(record);

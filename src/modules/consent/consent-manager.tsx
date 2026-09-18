@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   CONSENT_COOKIE,
-  CONSENT_VERSION,
+  consentNoticeVersion,
   type ConsentChoices,
   type ConsentState,
   necessaryOnly,
@@ -39,19 +39,20 @@ export function ConsentManager({
   optionalServices: OptionalService[];
 }) {
   const pathname = usePathname();
+  const noticeVersion = consentNoticeVersion(optionalServices);
   const [visible, setVisible] = useState(false);
   const [choices, setChoices] = useState<ConsentChoices>({ ...necessaryOnly });
 
   useEffect(() => {
     queueMicrotask(() => {
       const current = readCookie();
-      if (current) setChoices(current.choices);
+      if (current?.version === noticeVersion) setChoices(current.choices);
       else setVisible(true);
     });
     const open = () => setVisible(true);
     window.addEventListener("fahrseiten:open-consent", open);
     return () => window.removeEventListener("fahrseiten:open-consent", open);
-  }, []);
+  }, [noticeVersion]);
 
   if (
     optionalServices.length === 0 ||
@@ -62,7 +63,7 @@ export function ConsentManager({
 
   async function save(nextChoices: typeof choices, withdrawn = false) {
     const state: ConsentState = {
-      version: CONSENT_VERSION,
+      version: noticeVersion,
       choices: nextChoices,
       savedAt: new Date().toISOString(),
     };
@@ -75,7 +76,7 @@ export function ConsentManager({
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         subjectId: browserSubjectId(),
-        noticeVersion: CONSENT_VERSION,
+        noticeVersion,
         choices: nextChoices,
         withdrawn,
       }),
@@ -85,69 +86,82 @@ export function ConsentManager({
   return (
     <aside
       aria-label="Einwilligungseinstellungen"
-      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-3xl rounded-3xl border border-slate-300 bg-white p-6 shadow-2xl"
+      aria-modal="true"
+      className="consent-enter fixed inset-x-3 bottom-3 z-50 mx-auto max-w-4xl overflow-hidden rounded-[2rem] border border-white/60 bg-white/95 shadow-[0_28px_100px_rgba(15,23,42,.28)] backdrop-blur-2xl sm:inset-x-6 sm:bottom-6"
+      role="dialog"
     >
-      <h2 className="text-xl font-semibold">Datenschutz-Einstellungen</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">
-        Notwendige Funktionen sind immer aktiv. Optionale Inhalte bleiben bis zu
-        deiner Auswahl technisch blockiert. Details stehen im{" "}
-        <Link className="underline" href="/datenschutz">
-          vorläufigen Datenschutzhinweis
-        </Link>
-        .
-      </p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        {optionalServices.map(({ category: key, label, services }) => (
-          <label
-            className="flex items-center gap-2 rounded-xl border p-3"
-            key={key}
+      <div className="h-1 bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500" />
+      <div className="p-5 sm:p-7">
+        <p className="text-xs font-bold tracking-[.18em] text-cyan-700 uppercase">
+          Du entscheidest
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+          Datenschutz nach deiner Wahl
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          Notwendige Funktionen sind immer aktiv. Optionale Inhalte bleiben bis
+          zu deiner Auswahl technisch blockiert. Details stehen im{" "}
+          <Link className="underline" href="/datenschutz">
+            Datenschutzhinweis
+          </Link>
+          .
+        </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          {optionalServices.map(({ category: key, label, services }) => (
+            <label
+              className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-lg"
+              key={`${key}-${label}`}
+            >
+              <input
+                checked={choices[key]}
+                onChange={(event) =>
+                  setChoices({ ...choices, [key]: event.currentTarget.checked })
+                }
+                className="mt-1 size-5 accent-cyan-600"
+                type="checkbox"
+              />
+              <span>
+                <span className="block font-semibold">{label}</span>
+                <span className="mt-1 block text-xs leading-5 text-slate-500">
+                  {services}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold transition hover:bg-slate-100"
+            onClick={() => void save({ ...necessaryOnly }, true)}
           >
-            <input
-              checked={choices[key]}
-              onChange={(event) =>
-                setChoices({ ...choices, [key]: event.currentTarget.checked })
-              }
-              type="checkbox"
-            />
-            <span>
-              {label}
-              <span className="block text-xs text-slate-500">{services}</span>
-            </span>
-          </label>
-        ))}
-      </div>
-      <div className="mt-5 flex flex-wrap gap-3">
-        <button
-          className="rounded-full border px-5 py-2 font-semibold"
-          onClick={() => void save({ ...necessaryOnly }, true)}
-        >
-          Nur notwendige
-        </button>
-        <button
-          className="rounded-full bg-cyan-600 px-5 py-2 font-semibold text-white"
-          onClick={() => void save(choices)}
-        >
-          Auswahl speichern
-        </button>
-        <button
-          className="rounded-full bg-slate-950 px-5 py-2 font-semibold text-white"
-          onClick={() =>
-            void save({
-              necessary: true,
-              functional: optionalServices.some(
-                (item) => item.category === "functional",
-              ),
-              statistics: optionalServices.some(
-                (item) => item.category === "statistics",
-              ),
-              marketing: optionalServices.some(
-                (item) => item.category === "marketing",
-              ),
-            })
-          }
-        >
-          Allen zustimmen
-        </button>
+            Nur notwendige
+          </button>
+          <button
+            className="rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-700"
+            onClick={() => void save(choices)}
+          >
+            Auswahl speichern
+          </button>
+          <button
+            className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+            onClick={() =>
+              void save({
+                necessary: true,
+                functional: optionalServices.some(
+                  (item) => item.category === "functional",
+                ),
+                statistics: optionalServices.some(
+                  (item) => item.category === "statistics",
+                ),
+                marketing: optionalServices.some(
+                  (item) => item.category === "marketing",
+                ),
+              })
+            }
+          >
+            Allen zustimmen
+          </button>
+        </div>
       </div>
     </aside>
   );

@@ -6,8 +6,8 @@ export default async function NewTenantPage() {
   await requirePlatformPermission("platform.tenants.manage");
   return (
     <CustomerPage
-      title="Neue Fahrschule"
-      description="Sicheres, geführtes Onboarding in der gemeinsamen FahrSeiten-Datenbank."
+      title="Instanz erstellen"
+      description="Kundendaten vortragen und einen sicheren Einrichtungslink bereitstellen."
     >
       <OnboardingLinkForm />
     </CustomerPage>

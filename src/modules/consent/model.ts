@@ -11,7 +11,7 @@ export const consentChoicesSchema = z.object({
 });
 
 export const consentStateSchema = z.object({
-  version: z.literal(CONSENT_VERSION),
+  version: z.string().regex(/^consent-v1-[a-z0-9]+$/),
   choices: consentChoicesSchema,
   savedAt: z.string().datetime(),
 });
@@ -26,6 +26,25 @@ export const necessaryOnly = {
   statistics: false,
   marketing: false,
 } as const;
+
+export function consentNoticeVersion(
+  services: readonly {
+    category: ConsentCategory;
+    label: string;
+    services: string;
+  }[],
+) {
+  const source = services
+    .map(
+      (service) => `${service.category}:${service.label}:${service.services}`,
+    )
+    .sort()
+    .join("|");
+  let hash = 5381;
+  for (const character of source)
+    hash = ((hash << 5) + hash) ^ character.charCodeAt(0);
+  return `${CONSENT_VERSION}-${(hash >>> 0).toString(36)}`;
+}
 
 export function parseConsentCookie(
   value: string | undefined,

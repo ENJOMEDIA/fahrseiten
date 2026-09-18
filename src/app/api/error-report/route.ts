@@ -7,6 +7,7 @@ import {
   demoErrorReportRepository,
 } from "@/modules/support/error-report-repositories";
 import { submitErrorReport } from "@/modules/support/error-report-service";
+import { getSessionIdentity } from "@/modules/auth/session";
 import { isTrustedMutationRequest } from "@/modules/security/origin";
 
 const limiter = new AuthRateLimiter(10, 15 * 60_000, 15 * 60_000);
@@ -24,7 +25,11 @@ export async function POST(request: Request) {
       env.DEMO_DATA_MODE === "fixture" && process.env.NODE_ENV !== "production"
         ? demoErrorReportRepository
         : dbErrorReportRepository;
-    const result = await submitErrorReport(await request.json(), repository);
+    const identity = await getSessionIdentity();
+    const result = await submitErrorReport(await request.json(), repository, {
+      reporterUserId: identity?.id,
+      tenantId: identity?.memberships[0]?.tenantId,
+    });
     technicalLog("info", "error_report.received", {
       referenceId: result.referenceId,
     });

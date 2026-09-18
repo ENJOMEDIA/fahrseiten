@@ -1,10 +1,10 @@
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
-import { CONSENT_VERSION, consentChoicesSchema } from "./model";
+import { consentChoicesSchema } from "./model";
 
 const evidenceSchema = z.object({
   subjectId: z.uuid(),
-  noticeVersion: z.literal(CONSENT_VERSION),
+  noticeVersion: z.string().regex(/^consent-v1-[a-z0-9]+$/),
   choices: consentChoicesSchema,
   withdrawn: z.boolean().default(false),
 });
