@@ -8,7 +8,7 @@
     "build": "next build",
     "build:plesk": "next build && node scripts/build-sql-schema.mjs && node scripts/prepare-plesk-bundle.mjs",
     "diagnose:plesk": "node scripts/diagnose-plesk.mjs",
-    "deploy:plesk": "pnpm install --frozen-lockfile --prod=false && node --import tsx --test scripts/plesk-runtime.node-test.mjs && next build && node scripts/build-sql-schema.mjs && node scripts/prepare-plesk-bundle.mjs && node scripts/verify-plesk-bundle.mjs",
+    "deploy:plesk": "node scripts/check-plesk-dependencies.mjs && node --import tsx --test scripts/plesk-runtime.node-test.mjs && next build && node scripts/build-sql-schema.mjs && node scripts/prepare-plesk-bundle.mjs && node scripts/verify-plesk-bundle.mjs",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

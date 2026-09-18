@@ -69,7 +69,7 @@ In Plesk für `fahrseiten.de` eintragen:
 | Document Root    | `fahrseiten.de/public` |
 | Startup File     | `plesk-start.mjs`      |
 
-Als Paketmanager `pnpm` auswählen. Danach über **Skript ausführen** das Skript `deploy:plesk` starten. Es installiert die festgeschriebenen Laufzeit- und Buildabhängigkeiten selbst. Nur fortfahren, wenn der Lauf mit `Plesk-Artefakt geprüft` erfolgreich endet. Anschließend muss unter `fahrseiten.de/dist/plesk` der vollständige Build mit `app.mjs`, `server.js`, `public/`, `.next/`, `drizzle/` und `schema/` liegen.
+Als Paketmanager `pnpm` auswählen und zuerst über die Plesk-Schaltfläche **Pakete installieren** ausführen. Danach über **Skript ausführen** das Skript `deploy:plesk` starten. Das Skript prüft die installierten Abhängigkeiten, ohne einen verschachtelten zweiten pnpm-Prozess zu öffnen. Nur fortfahren, wenn der Lauf mit `Plesk-Artefakt geprüft` erfolgreich endet. Anschließend muss unter `fahrseiten.de/dist/plesk` der vollständige Build mit `app.mjs`, `server.js`, `public/`, `.next/`, `drizzle/` und `schema/` liegen.
 
 Antwortet die Domain danach bereits vor der Next.js-Routenauflösung mit HTTP 500, über **Skript ausführen** `diagnose:plesk` starten. Die Ausgabe prüft Build und Pfade; Plesk reicht die Anwendungsvariablen je nach Version nicht an Paket-Skripte weiter. Nach **Restart App** enthält `fahrseiten.de/plesk-startup-error.log` die bereinigte Startursache. Die Datei liegt außerhalb des Document Root, erhält Modus `0600` und enthält keine Secret-Werte. Erst nach Behebung der dort genannten Ursache erneut starten.
 
@@ -197,7 +197,7 @@ Ein Git-Push ändert auf dem Server zunächst nichts. Erst **Pull Updates** und 
 1. Vor jedem Update einen Plesk-Datenbankexport außerhalb des Document Root erstellen.
 2. Prüfen, dass die GitHub-Checks des gewünschten `main`-Commits erfolgreich sind.
 3. In Plesk **Pull Updates** und danach **Deploy from Repository** ausführen.
-4. Im Node.js-Toolkit über **Skript ausführen** `deploy:plesk` starten.
+4. Im Node.js-Toolkit zuerst **Pakete installieren** und danach über **Skript ausführen** `deploy:plesk` starten.
 5. Nur fortfahren, wenn das Node.js-Toolkit-Skript erfolgreich endet.
 6. Im Verzeichnis `fahrseiten.de/dist/plesk` einmal `node migrate.mjs` ausführen. Das Skript liest die Datenbankverbindung aus `FAHRSEITEN_CONFIG_FILE` beziehungsweise dem persistenten Standardpfad.
 7. Bei einem Migrationsfehler sofort stoppen und die Anwendung nicht neu starten.
