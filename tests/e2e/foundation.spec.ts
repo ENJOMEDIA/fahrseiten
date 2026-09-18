@@ -63,12 +63,18 @@ test("navigates the validated demo page tree", async ({ page }) => {
   await page.goto("/demo");
   await keepNecessaryConsent(page);
   await expect(
-    page.getByRole("heading", { level: 1, name: /Sicher ans Ziel/ }),
+    page.getByRole("heading", {
+      level: 1,
+      name: /Deine Fahrt\. Dein Tempo\. Dein Moment\./,
+    }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Über uns" }).click();
+  await page
+    .getByRole("navigation", { name: "Hauptnavigation" })
+    .getByRole("link", { name: "Über uns" })
+    .click();
   await expect(page).toHaveURL(/\/demo\/ueber-uns$/);
   await expect(
-    page.getByRole("heading", { name: "Lernen mit Ruhe und Struktur" }),
+    page.getByRole("heading", { name: "Menschen, die dir etwas zutrauen." }),
   ).toBeVisible();
 });
 
@@ -106,7 +112,7 @@ test("submits a validated local demo inquiry", async ({ page }) => {
   await page.getByLabel("E-Mail").fill("alex@example.invalid");
   await page.getByLabel("Nachricht").fill("Bitte um fiktive Informationen.");
   await page
-    .getByRole("checkbox", { name: /fiktiven Datenschutzhinweis/ })
+    .getByRole("checkbox", { name: /Datenschutzhinweis gelesen/ })
     .check();
   await page.waitForTimeout(2100);
   await page.getByRole("button", { name: "Testanfrage senden" }).click();

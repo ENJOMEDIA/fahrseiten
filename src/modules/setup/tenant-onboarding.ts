@@ -180,6 +180,7 @@ export async function findInstanceInvitationStatus(tokenId: string) {
 
 export async function findTenantOnboardingPrefill(token: string) {
   if (token.length < 32) return null;
+  if (env.DEMO_DATA_MODE === "fixture") return null;
   const [row] = await db
     .select({ prefill: tenantOnboardingTokens.prefill })
     .from(tenantOnboardingTokens)
