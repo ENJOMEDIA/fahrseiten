@@ -9,6 +9,9 @@ erDiagram
   TENANTS ||--o{ DOMAINS : nutzt
   TENANTS ||--|| SITES : betreibt
   TENANTS ||--o{ SUBSCRIPTIONS : hat
+  TENANTS ||--o{ CONTRACT_DOCUMENTS : besitzt
+  CONTRACT_DOCUMENTS ||--o{ SIGNATURE_REQUESTS : wird_unterzeichnet
+  SIGNATURE_REQUESTS ||--o{ SIGNATURE_EVENTS : protokolliert
   PLANS ||--o{ SUBSCRIPTIONS : gilt_fuer
   PLANS ||--o{ PLAN_FEATURES : enthaelt
   FEATURE_FLAGS ||--o{ PLAN_FEATURES : definiert
@@ -29,6 +32,13 @@ erDiagram
 - `domains`: normalisierte, global eindeutige Hostnamen und Onboarding-/SSL-Status.
 - `sites`: mandantengebundene Website-Grundeinstellungen einschließlich Wartungsstatus und Vorschautext.
 - `plans`, `subscriptions`: vorbereitete Tarifzuordnung ohne Zahlungsabwicklung.
+- `contract_documents`: unveränderliche tenantgebundene Vertrags-PDFs mit
+  Vertragsnummer, SHA-256-Prüfsumme, Status und optionaler signierter Fassung
+  sowie Prüfprotokoll.
+- `signature_requests`, `signature_events`: anbieterneutrale Signaturvorgänge
+  und idempotente, anhand ihres Inhalts gehashte Anbieterereignisse. Externe
+  IDs, Unterzeichner und Status sind stets zusätzlich an `tenant_id` und das
+  konkrete Vertragsdokument gebunden.
 - `feature_flags`, `plan_features`, `tenant_features`: zentrale Features, Planstandard und Mandanten-Override.
 - `legal_profiles`: validierte Anbieter- und Datenschutzangaben sowie aktivierte Rechtsmodule; Plattformprofil und Tenant-Profile bleiben über Scope und `tenant_id` getrennt.
 - `media_assets` und `media_usages`: geprüfte Bildmetadaten, stabile Speicherschlüssel und Verwendungen; Tenant-Medien tragen immer ihre `tenant_id`, Plattformmedien verwenden ausschließlich den ausdrücklich geprüften Plattformkontext.

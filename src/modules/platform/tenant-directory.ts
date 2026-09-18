@@ -6,6 +6,7 @@ import { db } from "@/db/client";
 import {
   auditLogs,
   backgroundJobs,
+  contractDocuments,
   domains,
   legalDocuments,
   invoiceRecords,
@@ -308,6 +309,14 @@ export async function deletePlatformTenant(input: {
       .select({ storageKey: invoiceRecords.storageKey })
       .from(invoiceRecords)
       .where(eq(invoiceRecords.tenantId, tenant.id));
+    const contractFiles = await tx
+      .select({
+        storageKey: contractDocuments.storageKey,
+        signedStorageKey: contractDocuments.signedStorageKey,
+        evidenceStorageKey: contractDocuments.evidenceStorageKey,
+      })
+      .from(contractDocuments)
+      .where(eq(contractDocuments.tenantId, tenant.id));
     const memberships = await tx
       .select({ userId: tenantMemberships.userId })
       .from(tenantMemberships)
@@ -372,6 +381,13 @@ export async function deletePlatformTenant(input: {
           : [asset.storageKey],
       ),
       ...invoiceFiles.map((invoice) => invoice.storageKey),
+      ...contractFiles.flatMap((contract) =>
+        [
+          contract.storageKey,
+          contract.signedStorageKey,
+          contract.evidenceStorageKey,
+        ].filter((key): key is string => Boolean(key)),
+      ),
     ];
   });
 

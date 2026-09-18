@@ -7,6 +7,7 @@ import { findPlatformTenant } from "@/modules/platform/tenant-directory";
 import { getDnsTarget } from "@/modules/platform/domain-operations";
 import { listPlatformPlans } from "@/modules/platform/plans";
 import { findTenantBilling } from "@/modules/billing/service";
+import { listTenantContractDocuments } from "@/modules/contracts/service";
 
 import { DomainManagement, TenantPlanForm } from "./domain-management";
 import {
@@ -16,6 +17,7 @@ import {
 } from "./billing-management";
 import { updateInvoiceStatusAction } from "./actions";
 import { TenantDeleteForm } from "./tenant-delete-form";
+import { PrepareContractForm, SendContractForm } from "./contract-management";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
 const timelineFormatter = new Intl.DateTimeFormat("de-DE", {
@@ -26,6 +28,14 @@ const moneyFormatter = new Intl.NumberFormat("de-DE", {
   style: "currency",
   currency: "EUR",
 });
+const contractStatusLabels = {
+  prepared: "Vorbereitet",
+  sent: "Versendet",
+  signed: "Unterzeichnet",
+  declined: "Abgelehnt",
+  expired: "Abgelaufen",
+  cancelled: "Storniert",
+} as const;
 
 const activityLabels: Record<string, string> = {
   note: "Akquise-Notiz",
@@ -45,6 +55,11 @@ const auditLabels: Record<string, string> = {
   "tenant.domain.checked": "DNS und SSL geprüft",
   "legal.published": "Rechtstext veröffentlicht",
   "legal.draft.saved": "Rechtstext-Entwurf gespeichert",
+  "contract.document.prepared": "Vertragsstand vorbereitet",
+  "contract.signature.sent": "Vertrag zur Signatur versendet",
+  "contract.signature.opened": "Vertrag zur Signatur geöffnet",
+  "contract.signature.signed": "Vertrag unterzeichnet",
+  "contract.signature.declined": "Vertragsunterschrift abgelehnt",
 };
 
 function Step({
@@ -73,7 +88,7 @@ export default async function TenantDetailPage({
   const { id } = await params;
   const tenant = await findPlatformTenant(id);
   if (!tenant) notFound();
-  const [dnsTarget, availablePlans, billing] = await Promise.all([
+  const [dnsTarget, availablePlans, billing, contracts] = await Promise.all([
     getDnsTarget().catch(() => ({
       hostname: "fahrseiten.de",
       ipv4: [] as string[],
@@ -81,6 +96,7 @@ export default async function TenantDetailPage({
     })),
     listPlatformPlans(),
     findTenantBilling(id),
+    listTenantContractDocuments(id),
   ]);
 
   const legalComplete =
@@ -366,6 +382,7 @@ export default async function TenantDetailPage({
                 Das Muster vor Unterschrift zusammen mit Angebot, AGB und AVV
                 rechtlich auf den konkreten Auftrag prüfen.
               </p>
+              <PrepareContractForm tenantId={tenant.id} />
             </>
           ) : (
             <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
@@ -387,6 +404,88 @@ export default async function TenantDetailPage({
           <BillingProfileForm profile={billing.profile} tenantId={tenant.id} />
         </Card>
       </section>
+      <Card className="mt-7 overflow-hidden p-0">
+        <div className="border-b border-slate-100 bg-gradient-to-r from-cyan-50 to-white p-6">
+          <p className="text-xs font-semibold tracking-[.16em] text-cyan-800 uppercase">
+            Digitale Unterschrift
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Vertragsakte</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Jeder vorbereitete Stand wird als unveränderliches PDF mit
+            SHA-256-Prüfsumme gespeichert. Der Versand wird freigeschaltet,
+            sobald ein eIDAS-Signaturanbieter verbunden ist.
+          </p>
+        </div>
+        <div className="space-y-3 p-6">
+          {contracts.length ? (
+            contracts.map((contract) => (
+              <div
+                className="rounded-2xl border border-slate-200 p-4"
+                key={contract.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold">{contract.contractNumber}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {formatter.format(contract.createdAt)} · Prüfsumme{" "}
+                      <span className="font-mono">
+                        {contract.sha256.slice(0, 12)}…
+                      </span>
+                    </p>
+                    {contract.signatureRequest ? (
+                      <p className="mt-1 text-xs text-slate-500">
+                        Signatur: {contract.signatureRequest.signerEmail} ·{" "}
+                        {contract.signatureRequest.provider}
+                      </p>
+                    ) : null}
+                  </div>
+                  <StatusBadge
+                    tone={contract.status === "signed" ? "success" : "warning"}
+                  >
+                    {contractStatusLabels[contract.status]}
+                  </StatusBadge>
+                </div>
+                <div className="mt-4 flex flex-wrap items-start gap-2">
+                  <a
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                    href={`/api/vertraege/${contract.id}`}
+                  >
+                    Original laden
+                  </a>
+                  {contract.signedStorageKey ? (
+                    <a
+                      className="rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-800"
+                      href={`/api/vertraege/${contract.id}?datei=signiert`}
+                    >
+                      Signierte Fassung
+                    </a>
+                  ) : null}
+                  {contract.evidenceStorageKey ? (
+                    <a
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                      href={`/api/vertraege/${contract.id}?datei=nachweis`}
+                    >
+                      Prüfprotokoll
+                    </a>
+                  ) : null}
+                  {contract.status === "prepared" ||
+                  contract.status === "expired" ? (
+                    <SendContractForm
+                      documentId={contract.id}
+                      tenantId={tenant.id}
+                    />
+                  ) : null}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
+              Noch kein Vertragsstand fixiert. Prüfe zuerst Paket, Laufzeit und
+              Rechnungsanschrift.
+            </p>
+          )}
+        </div>
+      </Card>
       <section className="mt-7 grid gap-5 xl:grid-cols-[.9fr_1.1fr]">
         <Card>
           <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">

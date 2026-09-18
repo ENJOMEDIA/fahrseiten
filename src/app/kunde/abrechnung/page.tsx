@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/layout/app-shell";
 import { Card, StatusBadge } from "@/components/ui/card";
 import { getSessionIdentity } from "@/modules/auth/session";
 import { findTenantBilling } from "@/modules/billing/service";
+import { listTenantContractDocuments } from "@/modules/contracts/service";
 
 const money = new Intl.NumberFormat("de-DE", {
   style: "currency",
@@ -16,12 +17,23 @@ const statusLabels = {
   overdue: "Überfällig",
   cancelled: "Storniert",
 } as const;
+const contractStatusLabels = {
+  prepared: "Wird vorbereitet",
+  sent: "Zur Unterschrift bereit",
+  signed: "Unterzeichnet",
+  declined: "Abgelehnt",
+  expired: "Abgelaufen",
+  cancelled: "Storniert",
+} as const;
 
 export default async function CustomerBillingPage() {
   const identity = await getSessionIdentity();
   const membership = identity?.memberships[0];
   if (!membership) redirect("/login");
-  const billing = await findTenantBilling(membership.tenantId);
+  const [billing, contracts] = await Promise.all([
+    findTenantBilling(membership.tenantId),
+    listTenantContractDocuments(membership.tenantId),
+  ]);
   return (
     <>
       <Breadcrumbs
@@ -108,6 +120,72 @@ export default async function CustomerBillingPage() {
           )}
         </Card>
       </div>
+      <Card className="mt-6 overflow-hidden p-0">
+        <div className="border-b border-slate-100 p-6">
+          <h2 className="text-2xl font-semibold">Verträge</h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Vertragsstände, elektronische Unterschrift und Prüfprotokolle an
+            einem Ort.
+          </p>
+        </div>
+        <div className="space-y-3 p-6">
+          {contracts.length ? (
+            contracts.map((contract) => (
+              <div
+                className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4"
+                key={contract.id}
+              >
+                <div>
+                  <p className="font-semibold">{contract.contractNumber}</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Erstellt am {date.format(contract.createdAt)} ·{" "}
+                    {contractStatusLabels[contract.status]}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {contract.signatureRequest?.signingUrl &&
+                  ["pending", "opened"].includes(
+                    contract.signatureRequest.status,
+                  ) ? (
+                    <a
+                      className="rounded-lg bg-cyan-700 px-3 py-2 text-xs font-semibold text-white"
+                      href={contract.signatureRequest.signingUrl}
+                    >
+                      Jetzt unterschreiben
+                    </a>
+                  ) : null}
+                  <a
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                    href={`/api/vertraege/${contract.id}`}
+                  >
+                    Vertrag laden
+                  </a>
+                  {contract.signedStorageKey ? (
+                    <a
+                      className="rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-800"
+                      href={`/api/vertraege/${contract.id}?datei=signiert`}
+                    >
+                      Signierte Fassung
+                    </a>
+                  ) : null}
+                  {contract.evidenceStorageKey ? (
+                    <a
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                      href={`/api/vertraege/${contract.id}?datei=nachweis`}
+                    >
+                      Prüfprotokoll
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-slate-500">
+              Noch kein Vertragsdokument hinterlegt.
+            </p>
+          )}
+        </div>
+      </Card>
       <Card className="mt-6 overflow-hidden p-0">
         <div className="border-b border-slate-100 p-6">
           <h2 className="text-2xl font-semibold">Rechnungshistorie</h2>

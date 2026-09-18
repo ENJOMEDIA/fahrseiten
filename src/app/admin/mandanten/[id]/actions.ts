@@ -16,6 +16,10 @@ import {
 } from "@/modules/platform/domain-operations";
 import { assignTenantPlan } from "@/modules/platform/plans";
 import { deletePlatformTenant } from "@/modules/platform/tenant-directory";
+import {
+  prepareContractDocument,
+  sendContractForSignature,
+} from "@/modules/contracts/service";
 
 export type DomainActionState = { message: string; error: boolean };
 export type TenantDeleteActionState = { message: string; error: boolean };
@@ -25,6 +29,60 @@ function parseDate(value: FormDataEntryValue | null) {
   const date = new Date(`${String(value)}T12:00:00.000Z`);
   if (Number.isNaN(date.getTime())) throw new Error("Ungültiges Datum.");
   return date;
+}
+
+export async function prepareContractAction(
+  _state: DomainActionState,
+  formData: FormData,
+): Promise<DomainActionState> {
+  const identity = await requirePlatformPermission("platform.tenants.manage");
+  const tenantId = String(formData.get("tenantId") ?? "");
+  try {
+    const contract = await prepareContractDocument({
+      tenantId,
+      actorUserId: identity.id,
+    });
+    revalidatePath(`/admin/mandanten/${tenantId}`);
+    revalidatePath("/kunde/abrechnung");
+    return {
+      message: `Vertrag ${contract.contractNumber} wurde unveränderlich vorbereitet.`,
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Vertrag konnte nicht vorbereitet werden.",
+      error: true,
+    };
+  }
+}
+
+export async function sendContractForSignatureAction(
+  _state: DomainActionState,
+  formData: FormData,
+): Promise<DomainActionState> {
+  const identity = await requirePlatformPermission("platform.tenants.manage");
+  const tenantId = String(formData.get("tenantId") ?? "");
+  try {
+    await sendContractForSignature({
+      tenantId,
+      documentId: String(formData.get("documentId") ?? ""),
+      actorUserId: identity.id,
+    });
+    revalidatePath(`/admin/mandanten/${tenantId}`);
+    revalidatePath("/kunde/abrechnung");
+    return { message: "Signaturvorgang wurde gestartet.", error: false };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Signaturvorgang konnte nicht gestartet werden.",
+      error: true,
+    };
+  }
 }
 
 export async function saveBillingProfileAction(

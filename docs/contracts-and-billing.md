@@ -57,3 +57,25 @@ AVV, Unterauftragnehmer, API, Webhooks, Export des Prüfprotokolls, Kosten und
 Löschfristen zu vergleichen. Ob für den konkreten FahrSeiten-Vertrag eine
 einfache, fortgeschrittene oder qualifizierte elektronische Signatur benötigt
 wird, ist rechtlich festzulegen.
+
+Die technische Grundlage ist inzwischen vorhanden. Ein vorbereiteter Vertrag
+wird als unveränderliche PDF-Datei im persistenten Medienverzeichnis abgelegt;
+Vertragsnummer, Dateigröße und SHA-256-Prüfsumme werden in der Datenbank
+gespeichert. Die Vertragsakte trennt Dokumente, Signaturvorgänge und
+idempotente Anbieterereignisse. Sie kann Original, signierte Fassung und
+Prüfprotokoll getrennt ausgeben. Plattformverwaltung und Kundenbereich prüfen
+den Zugriff jeweils serverseitig über Plattformrecht beziehungsweise
+Mandantenzugehörigkeit.
+
+Der Anbieter wird hinter `SignatureProvider` gekapselt. Ein Adapter muss das
+PDF übertragen, einen kurzlebigen Signatur-Link liefern, einen Vorgang
+stornieren und signierte Webhooks prüfen können. Erst nach erfolgreicher
+Webhook-Prüfung übernimmt FahrSeiten Status, signiertes PDF und Prüfprotokoll.
+Solange kein Adapter gewählt ist, bleibt `SIGNATURE_PROVIDER=disabled`; der
+Vertrag kann vorbereitet und heruntergeladen, aber nicht irreführend als
+elektronisch signiert markiert werden. `SIGNATURE_LEVEL=advanced` beschreibt
+den vorgesehenen Ausgangswert und wird bei der Anbieterauswahl rechtlich
+bestätigt.
+
+Auswahl und Kostenvergleich stehen in
+[electronic-signatures.md](electronic-signatures.md).

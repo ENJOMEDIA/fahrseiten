@@ -1139,6 +1139,125 @@ export const billingProfiles = mysqlTable("billing_profiles", {
   ...timestamps,
 });
 
+export const contractDocumentStatusValues = [
+  "prepared",
+  "sent",
+  "signed",
+  "declined",
+  "expired",
+  "cancelled",
+] as const;
+export const contractDocuments = mysqlTable(
+  "contract_documents",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    subscriptionId: id("subscription_id").references(() => subscriptions.id, {
+      onDelete: "set null",
+    }),
+    contractNumber: varchar("contract_number", { length: 80 }).notNull(),
+    version: int("version").default(1).notNull(),
+    status: mysqlEnum("status", contractDocumentStatusValues)
+      .default("prepared")
+      .notNull(),
+    sha256: varchar("sha256", { length: 64 }).notNull(),
+    storageKey: varchar("storage_key", { length: 500 }).notNull(),
+    originalName: varchar("original_name", { length: 255 }).notNull(),
+    byteSize: int("byte_size").notNull(),
+    signedStorageKey: varchar("signed_storage_key", { length: 500 }),
+    evidenceStorageKey: varchar("evidence_storage_key", { length: 500 }),
+    signedAt: timestamp("signed_at", { mode: "date", fsp: 3 }),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("contract_documents_number_unique").on(table.contractNumber),
+    index("contract_documents_tenant_created_idx").on(
+      table.tenantId,
+      table.createdAt,
+    ),
+  ],
+);
+
+export const signatureRequestStatusValues = [
+  "created",
+  "pending",
+  "opened",
+  "signed",
+  "declined",
+  "expired",
+  "cancelled",
+  "failed",
+] as const;
+export const signatureRequests = mysqlTable(
+  "signature_requests",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    contractDocumentId: id("contract_document_id")
+      .notNull()
+      .references(() => contractDocuments.id, { onDelete: "cascade" }),
+    provider: varchar("provider", { length: 80 }).notNull(),
+    externalId: varchar("external_id", { length: 190 }),
+    signerName: varchar("signer_name", { length: 160 }).notNull(),
+    signerEmail: varchar("signer_email", { length: 254 }).notNull(),
+    status: mysqlEnum("status", signatureRequestStatusValues)
+      .default("created")
+      .notNull(),
+    signingUrl: varchar("signing_url", { length: 1000 }),
+    expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }),
+    lastEventAt: timestamp("last_event_at", { mode: "date", fsp: 3 }),
+    errorCode: varchar("error_code", { length: 100 }),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("signature_requests_provider_external_unique").on(
+      table.provider,
+      table.externalId,
+    ),
+    index("signature_requests_contract_idx").on(table.contractDocumentId),
+    index("signature_requests_tenant_status_idx").on(
+      table.tenantId,
+      table.status,
+    ),
+  ],
+);
+
+export const signatureEvents = mysqlTable(
+  "signature_events",
+  {
+    id: id("id").primaryKey(),
+    signatureRequestId: id("signature_request_id")
+      .notNull()
+      .references(() => signatureRequests.id, { onDelete: "cascade" }),
+    providerEventId: varchar("provider_event_id", { length: 190 }).notNull(),
+    eventType: varchar("event_type", { length: 100 }).notNull(),
+    payloadSha256: varchar("payload_sha256", { length: 64 }).notNull(),
+    occurredAt: timestamp("occurred_at", { mode: "date", fsp: 3 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("signature_events_provider_event_unique").on(
+      table.providerEventId,
+    ),
+    index("signature_events_request_idx").on(
+      table.signatureRequestId,
+      table.occurredAt,
+    ),
+  ],
+);
+
 export const invoiceStatusValues = [
   "open",
   "paid",
