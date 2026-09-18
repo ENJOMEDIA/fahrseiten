@@ -95,6 +95,52 @@ export async function listPendingInstanceSetups() {
     }));
 }
 
+export async function cancelPendingInstanceSetup(input: {
+  setupId: string;
+  confirmation: string;
+  actorUserId: string;
+}) {
+  return db.transaction(async (tx) => {
+    const [setup] = await tx
+      .select({
+        id: tenantOnboardingTokens.id,
+        prefill: tenantOnboardingTokens.prefill,
+        usedAt: tenantOnboardingTokens.usedAt,
+      })
+      .from(tenantOnboardingTokens)
+      .where(eq(tenantOnboardingTokens.id, input.setupId))
+      .limit(1)
+      .for("update");
+    if (!setup)
+      throw new Error("Die vorbereitete Instanz wurde nicht gefunden.");
+    if (setup.usedAt)
+      throw new Error(
+        "Die Einrichtung wurde bereits abgeschlossen und kann hier nicht mehr storniert werden.",
+      );
+    const displayName = setup.prefill?.companyName || "Unbenannte Instanz";
+    if (input.confirmation.trim() !== displayName)
+      throw new Error("Der eingegebene Name stimmt nicht exakt überein.");
+
+    await tx
+      .delete(backgroundJobs)
+      .where(
+        eq(backgroundJobs.idempotencyKey, `instance-invitation:${setup.id}`),
+      );
+    await tx
+      .delete(tenantOnboardingTokens)
+      .where(eq(tenantOnboardingTokens.id, setup.id));
+    await tx.insert(auditLogs).values({
+      id: randomUUID(),
+      actorUserId: input.actorUserId,
+      action: "tenant.onboarding.cancelled",
+      entityType: "tenant_onboarding",
+      entityId: setup.id,
+      metadata: { companyName: displayName },
+    });
+    return { displayName };
+  });
+}
+
 export async function findPlatformTenant(id: string) {
   const [tenant] = await db
     .select({

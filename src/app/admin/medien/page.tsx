@@ -31,7 +31,7 @@ export default async function PlatformMediaPage() {
         categories={platformMediaCategoryValues}
         counts={categoryCounts}
       />
-      <div className="grid gap-6 xl:grid-cols-[1fr_23rem]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_19rem]">
         <div className="space-y-9">
           {groups.map((group) => (
             <section id={`media-${group.category}`} key={group.category}>
@@ -48,7 +48,7 @@ export default async function PlatformMediaPage() {
                 </div>
               </div>
               {group.assets.length ? (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {group.assets.map((asset) => (
                     <Card className="overflow-hidden p-0" key={asset.id}>
                       <div className="relative aspect-[4/3] bg-slate-100">
@@ -56,7 +56,7 @@ export default async function PlatformMediaPage() {
                           alt={asset.altText}
                           className="object-contain"
                           fill
-                          sizes="50vw"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
                           src={mediaPublicUrl(asset.id)}
                           unoptimized
                         />

@@ -59,7 +59,7 @@ export default async function MediaPage() {
         categories={tenantMediaCategoryValues}
         counts={categoryCounts}
       />
-      <div className="grid gap-5 xl:grid-cols-[1fr_23rem]">
+      <div className="grid gap-5 xl:grid-cols-[1fr_19rem]">
         <div className="space-y-9">
           {categoryGroups.map((group) => (
             <section id={`media-${group.category}`} key={group.category}>
@@ -72,7 +72,7 @@ export default async function MediaPage() {
                 </span>
               </div>
               {group.assets.length ? (
-                <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {group.assets.map((asset) => (
                     <Card className="overflow-hidden p-0" key={asset.id}>
                       <div className="relative aspect-[4/3] bg-slate-100">
@@ -80,7 +80,7 @@ export default async function MediaPage() {
                           alt={asset.altText}
                           className="object-contain p-4"
                           fill
-                          sizes="(max-width: 640px) 100vw, 33vw"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
                           src={mediaPublicUrl(asset.id)}
                           unoptimized
                         />

@@ -7,7 +7,10 @@ import {
   listPendingInstanceSetups,
   listPlatformTenants,
 } from "@/modules/platform/tenant-directory";
-import { PendingInvitationsForm } from "./pending-invitations-form";
+import {
+  CancelPendingInstanceForm,
+  PendingInvitationsForm,
+} from "./pending-invitations-form";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
 
@@ -17,6 +20,7 @@ export default async function TenantsPage({
   searchParams: Promise<{
     deleted?: string;
     mediaCleanup?: string;
+    setupCancelled?: string;
   }>;
 }) {
   await requirePlatformPermission("platform.tenants.manage");
@@ -40,6 +44,12 @@ export default async function TenantsPage({
       title="Mandanten"
       description="Alle eingerichteten Fahrschulen, Zugänge und Freigabeschritte an einem Ort."
     >
+      {notice.setupCancelled ? (
+        <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-950">
+          Die Einrichtung „{notice.setupCancelled}“ wurde storniert und der Link
+          ist nicht mehr gültig. Der Akquise-Kontakt bleibt erhalten.
+        </div>
+      ) : null}
       {notice.deleted ? (
         <div
           className={`mb-6 rounded-2xl border p-4 text-sm font-semibold ${
@@ -98,7 +108,7 @@ export default async function TenantsPage({
                 Noch nicht abgeschlossen
               </p>
               <h2 className="mt-1 text-xl font-semibold">
-                Vorbereitete Instanzen
+                Instanzen · nicht abgeschlossen
               </h2>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -112,6 +122,8 @@ export default async function TenantsPage({
             {pendingSetups.map((setup) => {
               const expired = setup.expiresAt <= new Date();
               const mailStatus = setup.invitation?.status;
+              const displayName =
+                setup.prefill.companyName || "Unbenannte Instanz";
               return (
                 <article
                   className="rounded-2xl border border-amber-100 bg-white p-4"
@@ -119,9 +131,7 @@ export default async function TenantsPage({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-semibold">
-                        {setup.prefill.companyName || "Unbenannte Instanz"}
-                      </h3>
+                      <h3 className="font-semibold">{displayName}</h3>
                       <p className="mt-1 text-sm text-slate-600">
                         {setup.prefill.ownerEmail || "Keine E-Mail-Adresse"}
                       </p>
@@ -167,6 +177,10 @@ export default async function TenantsPage({
                       SMTP-Fehler: {setup.invitation.lastErrorCode}
                     </p>
                   ) : null}
+                  <CancelPendingInstanceForm
+                    displayName={displayName}
+                    setupId={setup.id}
+                  />
                 </article>
               );
             })}
