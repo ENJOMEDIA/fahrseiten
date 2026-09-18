@@ -20,6 +20,10 @@ const createLeadSchema = z.object({
   email: z.union([z.literal(""), z.email()]),
   phone: z.string().trim().max(40),
   website: z.union([z.literal(""), z.url()]),
+  street: z.string().trim().max(180),
+  postalCode: z.string().trim().max(20),
+  city: z.string().trim().max(120),
+  country: z.string().trim().min(2).max(120),
   note: z.string().trim().max(3_000),
   nextTaskAt: z.string().trim(),
   emailPermission: z.enum(["unknown", "consent", "existing_customer"]),
@@ -95,6 +99,22 @@ export async function findSalesLeadForInstance(id: string) {
   return lead ?? null;
 }
 
+export async function findSalesLeadDetail(id: string) {
+  const leadId = z.uuid().parse(id);
+  const [lead] = await db
+    .select()
+    .from(salesLeads)
+    .where(eq(salesLeads.id, leadId))
+    .limit(1);
+  if (!lead) return null;
+  const activities = await db
+    .select()
+    .from(salesActivities)
+    .where(eq(salesActivities.leadId, leadId))
+    .orderBy(desc(salesActivities.createdAt));
+  return { ...lead, activities };
+}
+
 export async function createManualLead(raw: unknown, actorUserId: string) {
   const input = createLeadSchema.parse(raw);
   if (
@@ -113,6 +133,10 @@ export async function createManualLead(raw: unknown, actorUserId: string) {
       email: input.email || null,
       phone: input.phone || null,
       website: input.website || null,
+      street: input.street || null,
+      postalCode: input.postalCode || null,
+      city: input.city || null,
+      country: input.country,
       source: "manual",
       status: "new",
       ownerUserId: actorUserId,
@@ -143,6 +167,10 @@ export async function updateLead(input: {
   actorUserId: string;
   emailPermission: string;
   emailPermissionEvidence: string;
+  street: string;
+  postalCode: string;
+  city: string;
+  country: string;
 }) {
   const status = z.enum(salesStages).parse(input.status);
   const note = z.string().trim().max(3_000).parse(input.note);
@@ -152,6 +180,14 @@ export async function updateLead(input: {
     .trim()
     .max(2_000)
     .parse(input.emailPermissionEvidence);
+  const address = z
+    .object({
+      street: z.string().trim().max(180),
+      postalCode: z.string().trim().max(20),
+      city: z.string().trim().max(120),
+      country: z.string().trim().min(2).max(120),
+    })
+    .parse(input);
   if (
     ["consent", "existing_customer"].includes(emailPermission) &&
     emailPermissionEvidence.length < 10
@@ -185,6 +221,10 @@ export async function updateLead(input: {
             ? null
             : new Date(),
         emailOptOutAt: emailPermission === "withdrawn" ? new Date() : null,
+        street: address.street || null,
+        postalCode: address.postalCode || null,
+        city: address.city || null,
+        country: address.country,
       })
       .where(eq(salesLeads.id, input.id));
     if (note) {
@@ -272,6 +312,10 @@ export async function importSalesLeads(
         email: row.email || null,
         phone: row.phone || null,
         website: row.website || null,
+        street: row.street || null,
+        postalCode: row.postalCode || null,
+        city: row.city || null,
+        country: row.country,
         source: "csv_import",
         status: "new",
         ownerUserId: actorUserId,

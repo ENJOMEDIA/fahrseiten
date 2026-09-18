@@ -8,6 +8,7 @@ import { getDnsTarget } from "@/modules/platform/domain-operations";
 import { listPlatformPlans } from "@/modules/platform/plans";
 import { findTenantBilling } from "@/modules/billing/service";
 import { listTenantContractDocuments } from "@/modules/contracts/service";
+import { listSalesOffers } from "@/modules/offers/service";
 
 import { DomainManagement, TenantPlanForm } from "./domain-management";
 import {
@@ -88,16 +89,20 @@ export default async function TenantDetailPage({
   const { id } = await params;
   const tenant = await findPlatformTenant(id);
   if (!tenant) notFound();
-  const [dnsTarget, availablePlans, billing, contracts] = await Promise.all([
-    getDnsTarget().catch(() => ({
-      hostname: "fahrseiten.de",
-      ipv4: [] as string[],
-      ipv6: [] as string[],
-    })),
-    listPlatformPlans(),
-    findTenantBilling(id),
-    listTenantContractDocuments(id),
-  ]);
+  const [dnsTarget, availablePlans, billing, contracts, offers] =
+    await Promise.all([
+      getDnsTarget().catch(() => ({
+        hostname: "fahrseiten.de",
+        ipv4: [] as string[],
+        ipv6: [] as string[],
+      })),
+      listPlatformPlans(),
+      findTenantBilling(id),
+      listTenantContractDocuments(id),
+      tenant.originLead
+        ? listSalesOffers(tenant.originLead.id)
+        : Promise.resolve([]),
+    ]);
 
   const legalComplete =
     tenant.publishedLegal.has("imprint") &&
@@ -353,6 +358,68 @@ export default async function TenantDetailPage({
           </ol>
         </Card>
       </section>
+      <Card className="mt-7">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">
+              Vertrieb
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold">
+              Angebote aus der Interessentenakte
+            </h2>
+          </div>
+          {tenant.originLead ? (
+            <a
+              className="rounded-xl bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-950"
+              href={`/admin/akquise/${tenant.originLead.id}`}
+            >
+              Interessentenakte öffnen →
+            </a>
+          ) : null}
+        </div>
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          {offers.length ? (
+            offers.map((offer) => (
+              <article
+                className="rounded-2xl border border-slate-200 p-4"
+                key={offer.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold">{offer.offerNumber}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {offer.title} ·{" "}
+                      {moneyFormatter.format(offer.netTotalCents / 100)} netto
+                    </p>
+                  </div>
+                  <StatusBadge
+                    tone={
+                      offer.status === "accepted"
+                        ? "success"
+                        : offer.status === "declined" ||
+                            offer.status === "expired"
+                          ? "danger"
+                          : "warning"
+                    }
+                  >
+                    {offer.status}
+                  </StatusBadge>
+                </div>
+                <a
+                  className="mt-3 inline-flex rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                  href={`/api/admin/akquise/angebote/${offer.id}`}
+                >
+                  Angebots-PDF öffnen
+                </a>
+              </article>
+            ))
+          ) : (
+            <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600 lg:col-span-2">
+              Für diese Kundenakte ist noch kein Angebot dokumentiert.
+            </p>
+          )}
+        </div>
+      </Card>
       <section className="mt-7 grid gap-5 xl:grid-cols-2">
         <Card>
           <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">

@@ -843,6 +843,12 @@ export const salesLeads = mysqlTable(
     email: varchar("email", { length: 254 }),
     phone: varchar("phone", { length: 40 }),
     website: varchar("website", { length: 500 }),
+    street: varchar("street", { length: 180 }),
+    postalCode: varchar("postal_code", { length: 20 }),
+    city: varchar("city", { length: 120 }),
+    country: varchar("country", { length: 120 })
+      .default("Deutschland")
+      .notNull(),
     source: varchar("source", { length: 100 }),
     privacyTextVersion: varchar("privacy_text_version", { length: 80 }),
     emailPermission: varchar("email_permission", { length: 40 })
@@ -910,6 +916,91 @@ export const salesActivities = mysqlTable(
   },
   (table) => [
     index("sales_activities_lead_idx").on(table.leadId, table.createdAt),
+  ],
+);
+
+export const postalDispatchStatusValues = [
+  "prepared",
+  "submitted",
+  "failed",
+] as const;
+export const postalDispatches = mysqlTable(
+  "postal_dispatches",
+  {
+    id: id("id").primaryKey(),
+    leadId: id("lead_id")
+      .notNull()
+      .references(() => salesLeads.id, { onDelete: "cascade" }),
+    provider: varchar("provider", { length: 80 })
+      .default("onlinebrief24")
+      .notNull(),
+    providerJobId: varchar("provider_job_id", { length: 80 }),
+    providerStatus: varchar("provider_status", { length: 80 }),
+    mode: mysqlEnum("mode", ["test", "live"]).notNull(),
+    status: mysqlEnum("status", postalDispatchStatusValues)
+      .default("prepared")
+      .notNull(),
+    color: boolean("color").default(true).notNull(),
+    storageKey: varchar("storage_key", { length: 500 }).notNull(),
+    originalName: varchar("original_name", { length: 255 }).notNull(),
+    sha256: varchar("sha256", { length: 64 }).notNull(),
+    byteSize: int("byte_size").notNull(),
+    errorCode: varchar("error_code", { length: 160 }),
+    submittedAt: timestamp("submitted_at", { mode: "date", fsp: 3 }),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index("postal_dispatches_lead_created_idx").on(
+      table.leadId,
+      table.createdAt,
+    ),
+    uniqueIndex("postal_dispatches_provider_job_unique").on(
+      table.provider,
+      table.providerJobId,
+    ),
+  ],
+);
+
+export type SalesOfferItem = {
+  description: string;
+  quantity: number;
+  unitPriceCents: number;
+};
+export const salesOfferStatusValues = [
+  "draft",
+  "sent",
+  "accepted",
+  "declined",
+  "expired",
+] as const;
+export const salesOffers = mysqlTable(
+  "sales_offers",
+  {
+    id: id("id").primaryKey(),
+    leadId: id("lead_id")
+      .notNull()
+      .references(() => salesLeads.id, { onDelete: "cascade" }),
+    offerNumber: varchar("offer_number", { length: 80 }).notNull(),
+    title: varchar("title", { length: 180 }).notNull(),
+    status: mysqlEnum("status", salesOfferStatusValues)
+      .default("draft")
+      .notNull(),
+    validUntil: timestamp("valid_until", { mode: "date", fsp: 3 }).notNull(),
+    introduction: text("introduction"),
+    items: json("items").$type<SalesOfferItem[]>().notNull(),
+    netTotalCents: int("net_total_cents").notNull(),
+    vatRateBasisPoints: int("vat_rate_basis_points").default(1900).notNull(),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("sales_offers_number_unique").on(table.offerNumber),
+    index("sales_offers_lead_created_idx").on(table.leadId, table.createdAt),
   ],
 );
 export const salesEmailTemplates = mysqlTable(

@@ -9,6 +9,7 @@ export function SalesNav() {
       {[
         ["/admin/akquise", "Pipeline"],
         ["/admin/akquise/kontakte", "Kontakte & CSV"],
+        ["/admin/akquise/briefe", "Briefakquise"],
         ["/admin/akquise/vorlagen", "E-Mail-Vorlagen"],
       ].map(([href, label]) => (
         <Link

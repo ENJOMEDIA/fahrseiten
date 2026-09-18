@@ -31,6 +31,10 @@ export async function createLeadAction(
         email: formData.get("email"),
         phone: formData.get("phone"),
         website: formData.get("website"),
+        street: formData.get("street"),
+        postalCode: formData.get("postalCode"),
+        city: formData.get("city"),
+        country: formData.get("country"),
         note: formData.get("note"),
         nextTaskAt: formData.get("nextTaskAt"),
         emailPermission: formData.get("emailPermission"),
@@ -157,6 +161,10 @@ export async function updateLeadAction(
       emailPermissionEvidence: String(
         formData.get("emailPermissionEvidence") ?? "",
       ),
+      street: String(formData.get("street") ?? ""),
+      postalCode: String(formData.get("postalCode") ?? ""),
+      city: String(formData.get("city") ?? ""),
+      country: String(formData.get("country") ?? "Deutschland"),
     });
     revalidatePath("/admin/akquise");
     return { message: "Akquise-Stand wurde gespeichert.", error: false };

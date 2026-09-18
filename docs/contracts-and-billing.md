@@ -1,9 +1,24 @@
 # Verträge und Abrechnungsverlauf
 
-Stand: 18. September 2026. Accountable bleibt das führende System für die
+Stand: 19. September 2026. Accountable bleibt das führende System für die
 Erstellung, Zustellung und steuerliche Archivierung wiederkehrender Rechnungen.
 FahrSeiten bildet die operative Kundenakte ab und erzeugt selbst keine
 steuerliche Rechnung.
+
+## Angebote und Akten
+
+Jeder Akquise-Kontakt besitzt eine eigene Interessentenakte mit Stammdaten,
+Postanschrift, Wiedervorlage, Notizen, Briefvorgängen, Angeboten und
+Aktivitätshistorie. Der Angebotsbearbeiter verwaltet frei beschreibbare
+Positionen, Menge, Nettopreis, Umsatzsteuersatz, Gültigkeit und Status. Er
+erzeugt ein personalisiertes Angebots-PDF und kann den Stand als versendet,
+angenommen oder abgelehnt dokumentieren. Eine Annahme setzt den Lead auf
+`gewonnen`; die anschließende Instanzeinrichtung verknüpft dieselbe Lead-ID mit
+der späteren Kundenakte.
+
+Nach der Instanzeinrichtung ist die Fahrschule unter **Kundenakten** erreichbar.
+Dort werden Akquise-Historie, Paket, Laufzeit, Rechnungsanschrift,
+Rechnungskopien, Vertrags-PDFs und Signaturstatus gemeinsam dargestellt.
 
 Je Mandant werden eine separate Rechnungsanschrift, Paketzuordnung,
 Mindestlaufzeit, Abrechnungsrhythmus und der nächste erwartete Rechnungstermin

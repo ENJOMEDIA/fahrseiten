@@ -330,6 +330,35 @@ export function CreateLeadForm() {
           />
         </label>
         <label className="text-sm font-semibold">
+          Straße und Hausnummer
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
+            name="street"
+          />
+        </label>
+        <label className="text-sm font-semibold">
+          PLZ
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
+            name="postalCode"
+          />
+        </label>
+        <label className="text-sm font-semibold">
+          Ort
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
+            name="city"
+          />
+        </label>
+        <label className="text-sm font-semibold">
+          Land
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
+            defaultValue="Deutschland"
+            name="country"
+          />
+        </label>
+        <label className="text-sm font-semibold">
           Wiedervorlage
           <input
             className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
@@ -394,6 +423,10 @@ export function LeadControls({
     emailOptOutAt: Date | null;
     postalResponse: string | null;
     campaignUrl: string;
+    street: string | null;
+    postalCode: string | null;
+    city: string | null;
+    country: string;
   };
 }) {
   const [state, action, pending] = useActionState(
@@ -442,6 +475,40 @@ export function LeadControls({
           name="note"
           placeholder="Gespräch, Ergebnis oder nächster Schritt …"
         />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="text-xs font-semibold text-slate-700 sm:col-span-2">
+            Straße und Hausnummer
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.street ?? ""}
+              name="street"
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">
+            PLZ
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.postalCode ?? ""}
+              name="postalCode"
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">
+            Ort
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.city ?? ""}
+              name="city"
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700 sm:col-span-2">
+            Land
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.country}
+              name="country"
+            />
+          </label>
+        </div>
         <label className="block text-xs font-semibold text-slate-700">
           E-Mail-Freigabe
           <select

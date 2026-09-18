@@ -197,6 +197,12 @@ export default async function SalesPage() {
                       : "Manuell"}
                   </StatusBadge>
                   <h3 className="mt-3 font-semibold">{lead.companyName}</h3>
+                  <Link
+                    className="mt-2 inline-flex text-xs font-semibold text-cyan-800"
+                    href={`/admin/akquise/${lead.id}`}
+                  >
+                    Interessentenakte öffnen →
+                  </Link>
                   {lead.contactName ? (
                     <p className="mt-1 text-xs text-slate-500">
                       {lead.contactName}
@@ -268,6 +274,10 @@ export default async function SalesPage() {
                       emailOptOutAt: lead.emailOptOutAt,
                       postalResponse: lead.postalResponse,
                       campaignUrl: postalCampaignUrl(lead.id),
+                      street: lead.street,
+                      postalCode: lead.postalCode,
+                      city: lead.city,
+                      country: lead.country,
                     }}
                   />
                 </Card>

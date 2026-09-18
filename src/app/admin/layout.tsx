@@ -24,9 +24,9 @@ export default async function PlatformLayout({
       ? [
           {
             href: "/admin/mandanten",
-            label: "Mandanten",
+            label: "Kundenakten",
             icon: "M",
-            description: "Instanzen, Domains und Einrichtung",
+            description: "Historie, Verträge, Rechnungen und Instanzen",
             group: "Kunden & Vertrieb",
           },
         ]
