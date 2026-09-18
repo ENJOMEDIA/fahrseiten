@@ -64,7 +64,14 @@ export async function deliverEmailJob(
   } catch (error) {
     await repository.markFailed(
       deliveryKey,
-      error instanceof Error ? error.name.slice(0, 80) : "UnknownError",
+      typeof error === "object" &&
+        error &&
+        "code" in error &&
+        typeof error.code === "string"
+        ? error.code.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80)
+        : error instanceof Error
+          ? error.name.slice(0, 80)
+          : "UnknownError",
     );
     throw error;
   }

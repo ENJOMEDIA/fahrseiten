@@ -5,24 +5,32 @@ export function MarketingShell({
   children,
   logoUrl,
   brandName,
+  showBrandName = true,
 }: {
   children: React.ReactNode;
   logoUrl?: string;
   brandName?: string;
+  showBrandName?: boolean;
 }) {
   return (
     <>
-      <MarketingHeader brandName={brandName} logoUrl={logoUrl} />
+      <MarketingHeader
+        brandName={brandName}
+        logoUrl={logoUrl}
+        showBrandName={showBrandName}
+      />
       {children}
       <footer className="border-t border-white/10 bg-[#070b12] px-6 py-14 text-slate-300">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_auto]">
           <div>
-            <p className="text-lg font-semibold tracking-tight text-white">
-              FahrSeiten
-              <span className="ml-2 text-xs font-medium tracking-wide text-slate-500">
-                by ENJO MEDIA
-              </span>
-            </p>
+            {showBrandName ? (
+              <p className="text-lg font-semibold tracking-tight text-white">
+                {brandName ?? "FahrSeiten"}
+                <span className="ml-2 text-xs font-medium tracking-wide text-slate-500">
+                  by ENJO MEDIA
+                </span>
+              </p>
+            ) : null}
             <p className="mt-3 max-w-xl text-sm leading-6 text-slate-400">
               Websites, Inhalte und digitale Kundenkontakte für Fahrschulen –
               zentral, verständlich und auf der eigenen Domain.

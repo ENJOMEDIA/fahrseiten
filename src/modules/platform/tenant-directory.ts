@@ -1,10 +1,11 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   auditLogs,
+  backgroundJobs,
   domains,
   legalDocuments,
   mediaAssets,
@@ -12,6 +13,7 @@ import {
   subscriptions,
   plans,
   tenantMemberships,
+  tenantOnboardingTokens,
   tenants,
   users,
 } from "@/db/schema";
@@ -57,6 +59,40 @@ export async function listPlatformTenants() {
     )
     .leftJoin(plans, eq(plans.id, subscriptions.planId))
     .orderBy(desc(tenants.createdAt));
+}
+
+export async function listPendingInstanceSetups() {
+  const setups = await db
+    .select({
+      id: tenantOnboardingTokens.id,
+      prefill: tenantOnboardingTokens.prefill,
+      expiresAt: tenantOnboardingTokens.expiresAt,
+      createdAt: tenantOnboardingTokens.createdAt,
+    })
+    .from(tenantOnboardingTokens)
+    .where(isNull(tenantOnboardingTokens.usedAt))
+    .orderBy(desc(tenantOnboardingTokens.createdAt))
+    .limit(100);
+  const keys = setups.map((setup) => `instance-invitation:${setup.id}`);
+  const jobs = keys.length
+    ? await db
+        .select({
+          idempotencyKey: backgroundJobs.idempotencyKey,
+          status: backgroundJobs.status,
+          lastErrorCode: backgroundJobs.lastErrorCode,
+          completedAt: backgroundJobs.completedAt,
+        })
+        .from(backgroundJobs)
+        .where(inArray(backgroundJobs.idempotencyKey, keys))
+    : [];
+  const jobByKey = new Map(jobs.map((job) => [job.idempotencyKey, job]));
+  return setups
+    .filter((setup) => setup.prefill)
+    .map((setup) => ({
+      ...setup,
+      prefill: setup.prefill!,
+      invitation: jobByKey.get(`instance-invitation:${setup.id}`) ?? null,
+    }));
 }
 
 export async function findPlatformTenant(id: string) {

@@ -2,6 +2,7 @@ import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
 import { requirePlatformPermission } from "@/modules/platform/access";
 import { listSalesPipeline } from "@/modules/platform/sales-crm";
+import { listPendingInstanceSetups } from "@/modules/platform/tenant-directory";
 import {
   salesStageLabels,
   salesStages,
@@ -17,7 +18,10 @@ const formatter = new Intl.DateTimeFormat("de-DE", {
 
 export default async function SalesPage() {
   await requirePlatformPermission("platform.sales.manage");
-  const leads = await listSalesPipeline();
+  const [leads, pendingSetups] = await Promise.all([
+    listSalesPipeline(),
+    listPendingInstanceSetups(),
+  ]);
   const due = leads.filter(
     (lead) =>
       lead.nextTaskAt &&
@@ -30,6 +34,27 @@ export default async function SalesPage() {
       description="Echte Website-Anfragen und manuell erfasste Kontakte vom Erstkontakt bis zum Abschluss verwalten."
     >
       <SalesNav />
+      {pendingSetups.length ? (
+        <Card className="mb-6 border-cyan-200 bg-cyan-50">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold tracking-[.16em] text-cyan-700 uppercase">
+                Instanzeinrichtung
+              </p>
+              <h2 className="mt-1 font-semibold">
+                {pendingSetups.length} vorbereitete Instanz(en) warten auf
+                Abschluss
+              </h2>
+            </div>
+            <Link
+              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
+              href="/admin/mandanten"
+            >
+              Status ansehen →
+            </Link>
+          </div>
+        </Card>
+      ) : null}
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card className="surface-lift">
           <p className="text-sm text-slate-500">Interessenten</p>
@@ -110,6 +135,17 @@ export default async function SalesPage() {
                   {lead.latestActivity?.note ? (
                     <p className="mt-3 line-clamp-3 text-xs leading-5 text-slate-600">
                       {lead.latestActivity.note}
+                    </p>
+                  ) : null}
+                  {lead.latestOutreach ? (
+                    <p
+                      className={`mt-3 rounded-lg px-2 py-1 text-xs font-semibold ${lead.latestOutreach.status === "completed" ? "bg-emerald-100 text-emerald-900" : lead.latestOutreach.status === "failed" ? "bg-red-100 text-red-900" : "bg-amber-100 text-amber-900"}`}
+                    >
+                      {lead.latestOutreach.status === "completed"
+                        ? "E-Mail vom SMTP-Server angenommen"
+                        : lead.latestOutreach.status === "failed"
+                          ? `E-Mail fehlgeschlagen${lead.latestOutreach.lastErrorCode ? `: ${lead.latestOutreach.lastErrorCode}` : ""}`
+                          : "E-Mail-Versand wartet"}
                     </p>
                   ) : null}
                   {lead.status === "won" && !lead.convertedTenantId ? (

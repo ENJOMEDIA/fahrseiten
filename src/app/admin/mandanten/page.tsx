@@ -3,7 +3,11 @@ import Link from "next/link";
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
 import { requirePlatformPermission } from "@/modules/platform/access";
-import { listPlatformTenants } from "@/modules/platform/tenant-directory";
+import {
+  listPendingInstanceSetups,
+  listPlatformTenants,
+} from "@/modules/platform/tenant-directory";
+import { processPendingInvitations } from "./actions";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
 
@@ -17,7 +21,10 @@ export default async function TenantsPage({
 }) {
   await requirePlatformPermission("platform.tenants.manage");
   const notice = await searchParams;
-  const tenantRows = await listPlatformTenants();
+  const [tenantRows, pendingSetups] = await Promise.all([
+    listPlatformTenants(),
+    listPendingInstanceSetups(),
+  ]);
   const activeDomains = tenantRows.filter(
     (tenant) => tenant.domainStatus === "active",
   ).length;
@@ -82,6 +89,97 @@ export default async function TenantsPage({
           </div>
         </div>
       </div>
+
+      {pendingSetups.length ? (
+        <section className="mb-7 rounded-[2rem] border border-amber-200 bg-amber-50 p-5 sm:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold tracking-[.16em] text-amber-700 uppercase">
+                Noch nicht abgeschlossen
+              </p>
+              <h2 className="mt-1 text-xl font-semibold">
+                Vorbereitete Instanzen
+              </h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-900">
+                {pendingSetups.length} offen
+              </span>
+              <form action={processPendingInvitations}>
+                <button
+                  className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white"
+                  type="submit"
+                >
+                  Ausstehenden Versand jetzt prüfen
+                </button>
+              </form>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
+            {pendingSetups.map((setup) => {
+              const expired = setup.expiresAt <= new Date();
+              const mailStatus = setup.invitation?.status;
+              return (
+                <article
+                  className="rounded-2xl border border-amber-100 bg-white p-4"
+                  key={setup.id}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold">
+                        {setup.prefill.companyName || "Unbenannte Instanz"}
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {setup.prefill.ownerEmail || "Keine E-Mail-Adresse"}
+                      </p>
+                    </div>
+                    <StatusBadge
+                      tone={
+                        expired || mailStatus === "failed"
+                          ? "danger"
+                          : mailStatus === "completed"
+                            ? "success"
+                            : "warning"
+                      }
+                    >
+                      {expired
+                        ? "Link abgelaufen"
+                        : mailStatus === "completed"
+                          ? "E-Mail versendet"
+                          : mailStatus === "failed"
+                            ? "Versandfehler"
+                            : mailStatus === "retry"
+                              ? "Versand wird wiederholt"
+                              : mailStatus
+                                ? "Versand wartet"
+                                : "Link erstellt"}
+                    </StatusBadge>
+                  </div>
+                  <dl className="mt-4 grid gap-2 text-xs text-slate-500 sm:grid-cols-2">
+                    <div>
+                      <dt>Domain</dt>
+                      <dd className="font-semibold text-slate-800">
+                        {setup.prefill.domain || "Noch offen"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Gültig bis</dt>
+                      <dd className="font-semibold text-slate-800">
+                        {formatter.format(setup.expiresAt)}
+                      </dd>
+                    </div>
+                  </dl>
+                  {setup.invitation?.lastErrorCode ? (
+                    <p className="mt-3 rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-800">
+                      SMTP-Fehler: {setup.invitation.lastErrorCode}
+                    </p>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {tenantRows.length === 0 ? (
         <Card className="py-14 text-center">

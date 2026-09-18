@@ -15,6 +15,8 @@ import {
   navigationItems,
   pageBlocks,
   pageVersions,
+  salesActivities,
+  salesLeads,
   sitePages,
   sites,
   tenantMemberships,
@@ -91,8 +93,53 @@ export async function createTenantOnboardingLink(input: {
         runAt: new Date(),
       });
     }
+    if (input.prefill.ownerEmail) {
+      const [existingLead] = await tx
+        .select({ id: salesLeads.id })
+        .from(salesLeads)
+        .where(eq(salesLeads.email, input.prefill.ownerEmail))
+        .limit(1);
+      const leadId = existingLead?.id ?? randomUUID();
+      if (!existingLead)
+        await tx.insert(salesLeads).values({
+          id: leadId,
+          companyName: input.prefill.companyName || "Vorbereitete Instanz",
+          contactName: input.prefill.ownerName || null,
+          email: input.prefill.ownerEmail,
+          phone: input.prefill.phone || null,
+          website: input.prefill.domain
+            ? /^(https?:\/\/)/i.test(input.prefill.domain)
+              ? input.prefill.domain
+              : `https://${input.prefill.domain}`
+            : null,
+          source: "instance_setup",
+          status: "interested",
+          ownerUserId: input.createdByUserId,
+        });
+      await tx.insert(salesActivities).values({
+        id: randomUUID(),
+        leadId,
+        actorUserId: input.createdByUserId,
+        activityType: "instance_setup_created",
+        note: input.sendInvitation
+          ? "Instanz vorbereitet und Einladungs-E-Mail eingeplant."
+          : "Instanz vorbereitet und persönlicher Einrichtungslink erstellt.",
+      });
+    }
   });
-  return { token, actionUrl };
+  return { token, tokenId, actionUrl };
+}
+
+export async function findInstanceInvitationStatus(tokenId: string) {
+  const [job] = await db
+    .select({
+      status: backgroundJobs.status,
+      lastErrorCode: backgroundJobs.lastErrorCode,
+    })
+    .from(backgroundJobs)
+    .where(eq(backgroundJobs.idempotencyKey, `instance-invitation:${tokenId}`))
+    .limit(1);
+  return job ?? null;
 }
 
 export async function findTenantOnboardingPrefill(token: string) {
@@ -325,6 +372,11 @@ export async function completeTenantOnboarding(input: unknown) {
       .update(tenantOnboardingTokens)
       .set({ usedAt: new Date() })
       .where(eq(tenantOnboardingTokens.id, onboarding.id));
+
+    await tx
+      .update(salesLeads)
+      .set({ status: "won", convertedTenantId: tenantId })
+      .where(eq(salesLeads.email, parsed.ownerEmail));
     await tx.insert(auditLogs).values({
       id: randomUUID(),
       tenantId,

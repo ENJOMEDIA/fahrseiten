@@ -81,6 +81,7 @@ export const users = mysqlTable(
 export const platformSettings = mysqlTable("platform_settings", {
   id: id("id").primaryKey(),
   brandName: varchar("brand_name", { length: 160 }).notNull(),
+  showBrandName: boolean("show_brand_name").default(true).notNull(),
   companyName: varchar("company_name", { length: 160 }).notNull(),
   ownerName: varchar("owner_name", { length: 160 }).notNull(),
   contactEmail: varchar("contact_email", { length: 254 }).notNull(),

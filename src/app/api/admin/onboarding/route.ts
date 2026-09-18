@@ -4,7 +4,11 @@ import { z } from "zod";
 import { hasPlatformPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
 import { isTrustedMutationRequest } from "@/modules/security/origin";
-import { createTenantOnboardingLink } from "@/modules/setup/tenant-onboarding";
+import {
+  createTenantOnboardingLink,
+  findInstanceInvitationStatus,
+} from "@/modules/setup/tenant-onboarding";
+import { runNotificationScheduler } from "@/modules/notifications/runtime";
 
 export async function POST(request: Request) {
   if (!isTrustedMutationRequest(request))
@@ -46,11 +50,16 @@ export async function POST(request: Request) {
       ),
     ),
   });
+  if (input.sendInvitation) await runNotificationScheduler().catch(() => null);
+  const invitation = input.sendInvitation
+    ? await findInstanceInvitationStatus(result.tokenId)
+    : null;
   return NextResponse.json(
     {
       url: result.actionUrl,
       expiresInDays: 7,
       invitationQueued: input.sendInvitation,
+      invitationProcessed: invitation?.status === "completed",
     },
     { status: 201 },
   );

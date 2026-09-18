@@ -55,6 +55,14 @@ export async function runDueJobs(
   return { claimed: jobs.length, completed, failed };
 }
 function safeErrorCode(error: unknown) {
-  const name = error instanceof Error ? error.name : "UnknownError";
-  return name.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80) || "UnknownError";
+  const rawCode =
+    typeof error === "object" &&
+    error &&
+    "code" in error &&
+    typeof error.code === "string"
+      ? error.code
+      : error instanceof Error
+        ? error.name
+        : "UnknownError";
+  return rawCode.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80) || "UnknownError";
 }

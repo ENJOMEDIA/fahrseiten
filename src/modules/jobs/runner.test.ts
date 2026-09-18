@@ -56,4 +56,20 @@ describe("job runner", () => {
     });
     expect(repo.fail).toHaveBeenCalledWith("job-1", 3, "Error");
   });
+  it("keeps a safe provider error code without persisting the message", async () => {
+    const repo = repository(job);
+    await runDueJobs(repo, async () => {
+      const error = new Error("SMTP password must stay private") as Error & {
+        code: string;
+      };
+      error.code = "EAUTH";
+      throw error;
+    });
+    expect(repo.retry).toHaveBeenCalledWith(
+      "job-1",
+      1,
+      expect.any(Date),
+      "EAUTH",
+    );
+  });
 });

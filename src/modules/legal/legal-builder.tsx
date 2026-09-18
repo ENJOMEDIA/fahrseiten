@@ -155,6 +155,7 @@ export function LegalBuilder({
     result: state,
   });
   const [registerType, setRegisterType] = useState(profile.data.registerType);
+  const [legalForm, setLegalForm] = useState(profile.data.legalForm);
   const [regulated, setRegulated] = useState(profile.data.regulatedActivity);
   const [journalistic, setJournalistic] = useState(
     profile.data.journalisticContent,
@@ -167,8 +168,12 @@ export function LegalBuilder({
     ),
   );
   const preview = useMemo(
-    () => createStructuredLegalDocuments({ data: profile.data, modules }),
-    [modules, profile.data],
+    () =>
+      createStructuredLegalDocuments({
+        data: { ...profile.data, legalForm },
+        modules,
+      }),
+    [legalForm, modules, profile.data],
   );
 
   return (
@@ -203,8 +208,13 @@ export function LegalBuilder({
             Rechtsform
             <select
               className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal"
-              defaultValue={profile.data.legalForm}
+              value={legalForm}
               name="legalForm"
+              onChange={(event) =>
+                setLegalForm(
+                  event.target.value as LegalProfileData["legalForm"],
+                )
+              }
             >
               <option value="individual">Einzelunternehmen</option>
               <option value="gbr">GbR</option>

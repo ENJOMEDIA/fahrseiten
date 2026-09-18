@@ -1,10 +1,10 @@
 import "server-only";
 
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, like } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db/client";
-import { salesActivities, salesLeads } from "@/db/schema";
+import { backgroundJobs, salesActivities, salesLeads } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { salesStages, type LeadStatus } from "./sales-stages";
 import type { SalesCsvRow } from "./sales-csv";
@@ -28,21 +28,38 @@ function parseTaskDate(value: string) {
 }
 
 export async function listSalesPipeline() {
-  const [leads, activities] = await Promise.all([
+  const [leads, activities, outreachJobs] = await Promise.all([
     db
       .select()
       .from(salesLeads)
       .orderBy(asc(salesLeads.status), desc(salesLeads.updatedAt)),
     db.select().from(salesActivities).orderBy(desc(salesActivities.createdAt)),
+    db
+      .select({
+        idempotencyKey: backgroundJobs.idempotencyKey,
+        status: backgroundJobs.status,
+        lastErrorCode: backgroundJobs.lastErrorCode,
+        completedAt: backgroundJobs.completedAt,
+      })
+      .from(backgroundJobs)
+      .where(like(backgroundJobs.idempotencyKey, "sales:%"))
+      .orderBy(desc(backgroundJobs.updatedAt)),
   ]);
   const latestByLead = new Map<string, (typeof activities)[number]>();
   for (const activity of activities) {
     if (!latestByLead.has(activity.leadId))
       latestByLead.set(activity.leadId, activity);
   }
+  const latestOutreachByLead = new Map<string, (typeof outreachJobs)[number]>();
+  for (const job of outreachJobs) {
+    const leadId = job.idempotencyKey.split(":")[1];
+    if (leadId && !latestOutreachByLead.has(leadId))
+      latestOutreachByLead.set(leadId, job);
+  }
   return leads.map((lead) => ({
     ...lead,
     latestActivity: latestByLead.get(lead.id) ?? null,
+    latestOutreach: latestOutreachByLead.get(lead.id) ?? null,
   }));
 }
 

@@ -139,6 +139,11 @@ export function OutreachForm({
     phone: string | null;
     website: string | null;
     status: string;
+    latestOutreach?: {
+      status: string;
+      lastErrorCode: string | null;
+      completedAt: Date | null;
+    } | null;
   }[];
   templates: { id: string; name: string }[];
 }) {
@@ -181,6 +186,7 @@ export function OutreachForm({
               <th className="p-4">Kontakt</th>
               <th className="p-4">Webseite</th>
               <th className="p-4">Status</th>
+              <th className="p-4">E-Mail</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -217,6 +223,15 @@ export function OutreachForm({
                   )}
                 </td>
                 <td className="p-4">{lead.status}</td>
+                <td className="p-4 text-xs font-semibold">
+                  {!lead.latestOutreach
+                    ? "Noch nicht versendet"
+                    : lead.latestOutreach.status === "completed"
+                      ? "SMTP angenommen"
+                      : lead.latestOutreach.status === "failed"
+                        ? `Fehler${lead.latestOutreach.lastErrorCode ? `: ${lead.latestOutreach.lastErrorCode}` : ""}`
+                        : "Versand wartet"}
+                </td>
               </tr>
             ))}
           </tbody>

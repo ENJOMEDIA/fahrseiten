@@ -16,6 +16,8 @@ Der Browser speichert die Auswahl für höchstens 180 Tage. Änderungen am Versi
 
 `privacy_requests` bildet Export- und Löschanforderungen mit Status und nur gehashter Anfordereradresse ab. `retention_policies` hält später je Datenkategorie festzulegende Aufbewahrungswerte. `subprocessors` macht die Liste eingesetzter Unterauftragnehmer konfigurierbar. Es sind noch keine geschäftlich oder rechtlich verbindlichen Fristen, Anbieter oder Rechtsgrundlagen hinterlegt.
 
+Für Akquise-E-Mails protokolliert die Plattform ausschließlich den technischen Job- und SMTP-Status. Unsichtbare Öffnungspixel sind nicht aktiv: Die Datenschutzkonferenz weist darauf hin, dass E-Mail-Tracking-Pixel eine vorherige Einwilligung der empfangenden Person benötigen. Zusätzlich ist vor jeder Werbe-E-Mail zu prüfen und zu dokumentieren, ob die Voraussetzungen des § 7 UWG erfüllt sind. „Vom SMTP-Server angenommen“ bedeutet weder sicher zugestellt noch gelesen.
+
 ## Grenzen und manuelle Prüfung
 
 - MySQL war lokal nicht verfügbar; Migration und Repository müssen vor Staging gegen eine Testdatenbank geprüft werden.
@@ -38,4 +40,4 @@ Art. 13 DSGVO verlangt unter anderem Informationen zu Verantwortlichem, Zwecken 
 
 Nach § 25 TDDDG benötigen nicht unbedingt erforderliche Zugriffe auf das Endgerät grundsätzlich eine vorherige Einwilligung; die Ausnahmen gelten nur für Übertragung oder einen ausdrücklich gewünschten, unbedingt erforderlichen Dienst. Art. 7 DSGVO verlangt unter anderem Nachweisbarkeit und einen ebenso einfachen Widerruf. Die Kategorien bleiben daher standardmäßig aus, Ablehnung und Zustimmung stehen auf derselben Ebene, und die Einstellungen bleiben erneut erreichbar.
 
-Primärquellen: [§ 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html), [§ 25 TDDDG](https://www.gesetze-im-internet.de/ttdsg/__25.html), [DSGVO auf EUR-Lex](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679), [Artikel 50 EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/2026-07-27/eng), [§ 18 MStV](https://www.die-medienanstalten.de/fileadmin/user_upload/Rechtsgrundlagen/Gesetze_Staatsvertraege/Medienstaatsvertrag_MStV.pdf).
+Primärquellen: [§ 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html), [§ 25 TDDDG](https://www.gesetze-im-internet.de/ttdsg/__25.html), [§ 7 UWG](https://www.gesetze-im-internet.de/uwg_2004/__7.html), [DSGVO auf EUR-Lex](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679), [DSK-Hinweis zu E-Mail-Tracking-Pixeln](https://datenschutzkonferenz-online.de/media/pm/DSK_PM_110_DSK.pdf), [Artikel 50 EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/2026-07-27/eng), [§ 18 MStV](https://www.die-medienanstalten.de/fileadmin/user_upload/Rechtsgrundlagen/Gesetze_Staatsvertraege/Medienstaatsvertrag_MStV.pdf).

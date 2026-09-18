@@ -25,6 +25,7 @@ export function OnboardingLinkForm() {
     const result = (await response.json()) as {
       url?: string;
       invitationQueued?: boolean;
+      invitationProcessed?: boolean;
       message?: string;
     };
     setPending(false);
@@ -36,9 +37,11 @@ export function OnboardingLinkForm() {
     }
     setUrl(result.url);
     setMessage(
-      result.invitationQueued
-        ? "Die Instanz ist vorbereitet. Die Einladungs-E-Mail wurde für den Versand eingeplant."
-        : "Die Instanz ist vorbereitet. Der persönliche Link ist sieben Tage gültig und wird nur jetzt vollständig angezeigt.",
+      result.invitationProcessed
+        ? "Die Instanz ist vorbereitet und die Einladungs-E-Mail wurde über den eingerichteten SMTP-Server versendet."
+        : result.invitationQueued
+          ? "Die Instanz ist vorbereitet. Der Versand wartet oder wird nach einem SMTP-Fehler automatisch wiederholt. Den genauen Status siehst du in der Mandantenübersicht."
+          : "Die Instanz ist vorbereitet. Der persönliche Link ist sieben Tage gültig und wird nur jetzt vollständig angezeigt.",
     );
   }
 

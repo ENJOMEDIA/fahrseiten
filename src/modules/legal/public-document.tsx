@@ -23,14 +23,61 @@ export function PublicLegalDocument({
           ← {brandName}
         </Link>
         <h1 className="mt-8 text-3xl font-semibold">{title}</h1>
-        <div className="mt-8 leading-7 whitespace-pre-wrap text-slate-700">
-          {content}
-        </div>
+        <LegalContent content={content} title={title} />
         {title === "Datenschutz" && optionalServices.length ? (
           <PrivacyServiceNotice services={optionalServices} />
         ) : null}
       </article>
     </main>
+  );
+}
+
+function LegalContent({ content, title }: { content: string; title: string }) {
+  const sections = content
+    .split(/\n{2,}/)
+    .map((section) => section.trim())
+    .filter(
+      (section) =>
+        section &&
+        ![title, "Impressum", "Datenschutzerklärung"].includes(section),
+    );
+  return (
+    <div className="mt-9 space-y-8 text-slate-700">
+      {sections.map((section, index) => {
+        const [heading, ...lines] = section.split("\n");
+        const isHeading =
+          /^\d+\./.test(heading) ||
+          /^(Angaben gemäß|Anbieter|Anschrift|Vertretung|Kontakt|Handelsregister|Partnerschaftsregister|Genossenschaftsregister|Vereinsregister|Umsatzsteuer|Zuständige|Verantwortlich)/.test(
+            heading,
+          );
+        return (
+          <section
+            className={index === 0 ? "" : "border-t border-slate-100 pt-7"}
+            key={`${heading}-${index}`}
+          >
+            {isHeading ? (
+              <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+                {heading}
+              </h2>
+            ) : null}
+            <div
+              className={`${isHeading ? "mt-3" : ""} space-y-1 text-[0.97rem] leading-7`}
+            >
+              {(isHeading ? lines : [heading, ...lines]).map(
+                (line, lineIndex) => (
+                  <p
+                    className={line === "" ? "h-2" : ""}
+                    key={`${line}-${lineIndex}`}
+                  >
+                    {line}
+                  </p>
+                ),
+              )}
+            </div>
+          </section>
+        );
+      })}
+    </div>
   );
 }
 

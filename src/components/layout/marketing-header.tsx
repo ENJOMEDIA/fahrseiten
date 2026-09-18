@@ -6,9 +6,11 @@ import { dashboardUrl } from "@/config/dashboard-url";
 export function MarketingHeader({
   logoUrl,
   brandName = "FahrSeiten",
+  showBrandName = true,
 }: {
   logoUrl?: string;
   brandName?: string;
+  showBrandName?: boolean;
 }) {
   const links = [
     ["Funktionen", "/funktionen"],
@@ -42,7 +44,7 @@ export function MarketingHeader({
               F
             </span>
           )}
-          {!logoUrl ? (
+          {!logoUrl && showBrandName ? (
             <span>
               {brandName}
               <span className="ml-2 hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">

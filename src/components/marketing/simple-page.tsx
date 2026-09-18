@@ -98,6 +98,7 @@ export async function SimpleMarketingPage({
   ) : (
     <MarketingShell
       brandName={settings?.brandName}
+      showBrandName={settings?.showBrandName}
       logoUrl={
         settings?.logoMediaId ? mediaPublicUrl(settings.logoMediaId) : undefined
       }
