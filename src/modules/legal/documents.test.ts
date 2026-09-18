@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createStructuredLegalDocuments,
+  createPlatformTermsDraft,
   createLegalDrafts,
   defaultLegalModules,
   parseLegalProfileForm,
@@ -117,5 +118,45 @@ describe("legal document publication", () => {
       analytics: false,
       payments: false,
     });
+  });
+
+  it("adds postal acquisition only to the platform privacy draft", () => {
+    const data = {
+      companyName: "ENJO MEDIA",
+      legalForm: "individual" as const,
+      representativeName: "Erika Beispiel",
+      street: "Beispielweg 1",
+      postalCode: "12345",
+      city: "Berlin",
+      country: "Deutschland",
+      email: "kontakt@example.invalid",
+      phone: "",
+      registerType: "none" as const,
+      registerCourt: "",
+      registerNumber: "",
+      vatId: "",
+      regulatedActivity: false,
+      supervisoryAuthority: "",
+      journalisticContent: false,
+      editorialResponsible: "",
+      privacyContactEmail: "datenschutz@example.invalid",
+      dataProtectionOfficerRequired: false,
+      dataProtectionOfficerEmail: "",
+      hostingProvider: "Beispiel Hosting GmbH",
+      inquiryRetentionMonths: 6 as const,
+    };
+    const platform = createStructuredLegalDocuments({
+      data,
+      modules: defaultLegalModules,
+      platformPostalAcquisition: true,
+    });
+    const tenant = createStructuredLegalDocuments({
+      data,
+      modules: defaultLegalModules,
+    });
+
+    expect(platform.privacy).toContain("Postalische Akquise");
+    expect(tenant.privacy).not.toContain("Postalische Akquise");
+    expect(createPlatformTermsDraft(data)).toContain("[Festlegen:");
   });
 });

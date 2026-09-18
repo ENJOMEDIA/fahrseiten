@@ -392,6 +392,8 @@ export function LeadControls({
     emailPermission: string;
     emailPermissionEvidence: string | null;
     emailOptOutAt: Date | null;
+    postalResponse: string | null;
+    campaignUrl: string;
   };
 }) {
   const [state, action, pending] = useActionState(
@@ -477,6 +479,42 @@ export function LeadControls({
         </button>
         <Result state={state} />
       </form>
+      <details className="mt-4 rounded-xl border border-cyan-100 bg-cyan-50 p-3">
+        <summary className="cursor-pointer text-xs font-semibold text-cyan-950">
+          Brief-Link & QR-Code
+        </summary>
+        <p className="mt-3 text-xs leading-5 text-slate-600">
+          Dieser persönliche Link führt zur gesonderten Akquise-Landingpage und
+          darf nur im Brief an diesen Kontakt verwendet werden.
+        </p>
+        <input
+          className="mt-3 min-h-10 w-full rounded-lg border border-cyan-200 bg-white px-3 text-xs"
+          readOnly
+          value={lead.campaignUrl}
+        />
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-semibold text-white"
+            href={lead.campaignUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Landingpage öffnen
+          </a>
+          <a
+            className="rounded-lg border border-cyan-300 bg-white px-3 py-2 text-xs font-semibold text-cyan-900"
+            download
+            href={`/api/admin/akquise/${lead.id}/qr`}
+          >
+            QR-Code als SVG
+          </a>
+        </div>
+        {lead.postalResponse ? (
+          <p className="mt-3 text-xs font-semibold text-emerald-800">
+            Antwort gespeichert: {lead.postalResponse}
+          </p>
+        ) : null}
+      </details>
       <details className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3">
         <summary className="cursor-pointer text-xs font-semibold text-red-800">
           Kontakt vollständig löschen

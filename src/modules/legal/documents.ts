@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { LegalModuleSettings, LegalProfileData } from "@/db/schema";
 
 export const legalDocumentInputSchema = z.object({
-  type: z.enum(["imprint", "privacy"]),
+  type: z.enum(["imprint", "privacy", "terms"]),
   content: z.string().trim().min(80).max(100_000),
   version: z.number().int().positive(),
   warningAcknowledged: z.literal(true),
@@ -16,13 +16,26 @@ const requiredPrivacyMarkers = [
   "Speicherdauer",
   "Betroffenenrechte",
 ];
+const requiredTermsMarkers = [
+  "Geltungsbereich",
+  "Leistungsumfang",
+  "Vertragsschluss",
+  "Vergütung",
+  "Laufzeit",
+  "Haftung",
+  "Datenschutz",
+];
 
 export function publicationWarnings(
-  type: "imprint" | "privacy",
+  type: "imprint" | "privacy" | "terms",
   content: string,
 ) {
   const required =
-    type === "imprint" ? requiredImprintMarkers : requiredPrivacyMarkers;
+    type === "imprint"
+      ? requiredImprintMarkers
+      : type === "privacy"
+        ? requiredPrivacyMarkers
+        : requiredTermsMarkers;
   return required
     .filter(
       (marker) =>
@@ -31,6 +44,51 @@ export function publicationWarnings(
           .includes(marker.toLocaleLowerCase("de")),
     )
     .map((marker) => `Pflichtbereich „${marker}“ fehlt.`);
+}
+
+export function createPlatformTermsDraft(data: LegalProfileData) {
+  return `Allgemeine Geschäftsbedingungen – ENTWURF
+
+1. Geltungsbereich
+Diese Allgemeinen Geschäftsbedingungen gelten für Verträge zwischen ${data.companyName} und gewerblich handelnden Fahrschulen über die Bereitstellung und Betreuung der FahrSeiten-Plattform.
+
+2. Leistungsumfang
+Der konkrete Leistungsumfang ergibt sich aus dem ausgewählten Paket, dem individuellen Angebot und der Auftragsbestätigung. Zusatzleistungen wie Fotografie, Medienproduktion, Texterstellung, Domainumzüge oder individuelle Anpassungen werden nur geschuldet, wenn sie ausdrücklich vereinbart wurden.
+
+3. Vertragsschluss
+[Festlegen: Wie werden Angebot, Annahme, Onboarding und Beginn des kostenpflichtigen Vertrags verbindlich?]
+
+4. Mitwirkungspflichten des Kunden
+Der Kunde stellt richtige und vollständige Inhalte, Kontaktdaten, Rechtstexte, Bildrechte und erforderliche Zugänge rechtzeitig bereit. Er prüft die von ihm veröffentlichten Inhalte und rechtlichen Angaben vor der Freigabe.
+
+5. Domains und Drittanbieter
+[Festlegen: Wer wird Domaininhaber, wer trägt laufende Domain-, Hosting- und Drittanbieterkosten und wie erfolgt ein Anbieterwechsel?]
+
+6. Vergütung und Fälligkeit
+[Festlegen: Einrichtungspreis, monatliche Abrechnung, Zahlungsziel, Umsatzsteuer, Verzug und Preise für Zusatzleistungen.]
+
+7. Laufzeit und Kündigung
+[Festlegen: Mindestlaufzeit, Verlängerung, ordentliche Kündigungsfrist und Folgen einer Vertragsbeendigung.]
+
+8. Verfügbarkeit, Wartung und Änderungen
+[Festlegen: zugesagte Verfügbarkeit, angekündigte Wartungsfenster, Sicherheitsupdates und zulässige Weiterentwicklung der Plattform.]
+
+9. Rechte an Inhalten und Medien
+Der Kunde versichert, die erforderlichen Rechte an bereitgestellten Texten, Marken, Logos, Fotos und sonstigen Medien zu besitzen. Rechte an individuell erstellten Foto- und Medienleistungen richten sich nach dem jeweiligen Angebot.
+
+10. Datenschutz und Auftragsverarbeitung
+Die Parteien beachten die anwendbaren Datenschutzvorschriften. Soweit ${data.companyName} personenbezogene Daten im Auftrag des Kunden verarbeitet, wird vor Beginn der Verarbeitung eine gesonderte Vereinbarung zur Auftragsverarbeitung geschlossen.
+
+11. Haftung
+[Durch Rechtsberatung festlegen: Haftungsumfang, Kardinalpflichten, Datenverlust, höhere Gewalt und Haftungshöchstgrenzen.]
+
+12. Datenexport und Vertragsende
+[Festlegen: Exportformat, Bereitstellungsfrist, Löschfrist, Domainübertragung und kostenpflichtige Unterstützungsleistungen nach Vertragsende.]
+
+13. Schlussbestimmungen
+[Festlegen: anwendbares Recht, Gerichtsstand für Unternehmer, Textform und Umgang mit unwirksamen Bestimmungen.]
+
+Dieser Entwurf enthält offene geschäftliche und rechtliche Entscheidungen. Er darf erst nach Vervollständigung und anwaltlicher Prüfung veröffentlicht oder in Verträge einbezogen werden.`;
 }
 
 export function validateLegalPublication(raw: unknown) {
@@ -222,8 +280,9 @@ export function parseLegalProfileForm(formData: FormData) {
 export function createStructuredLegalDocuments(input: {
   data: LegalProfileData;
   modules: LegalModuleSettings;
+  platformPostalAcquisition?: boolean;
 }) {
-  const { data, modules } = input;
+  const { data, modules, platformPostalAcquisition = false } = input;
   const address = `${data.street}\n${data.postalCode} ${data.city}\n${data.country}`;
   const imprintSections = [
     `Impressum\n\nAngaben gemäß § 5 DDG und § 18 Abs. 1 MStV\n\nAnbieter\n${data.companyName}\nRechtsform: ${legalFormLabels[data.legalForm]}\n\nAnschrift\n${address}`,
@@ -272,14 +331,14 @@ export function createStructuredLegalDocuments(input: {
       `${privacySections.length + 1}. Einwilligungsverwaltung\nDie Website speichert die Auswahl zu optionalen Diensten, damit diese Entscheidung beachtet und nachgewiesen werden kann. Technisch erforderliche Speicherungen erfolgen nach § 25 Abs. 2 Nr. 2 TDDDG; optionale Dienste werden erst nach einer Einwilligung gemäß § 25 Abs. 1 TDDDG und Art. 6 Abs. 1 lit. a DSGVO geladen. Eine Einwilligung kann jederzeit über die Cookie-Einstellungen widerrufen werden.`,
     );
   }
+  if (platformPostalAcquisition) {
+    privacySections.push(
+      `${privacySections.length + 1}. Postalische Akquise und Rückmeldungen\nFür gezielt ausgewählte Geschäftskontakte verarbeiten wir Firmenanschrift, öffentlich zugängliche geschäftliche Kontaktdaten, Datenquelle, Versandstatus und Rückmeldung zur Direktwerbung. Rechtsgrundlage für die postalische Ansprache und die interne Dokumentation ist Art. 6 Abs. 1 lit. f DSGVO. Über den persönlichen Rückmeldelink kann Interesse erklärt oder jeder weitere Werbekontakt abgelehnt werden. Eine freiwillige Einwilligung in E-Mail-Informationen wird getrennt erfasst und per Double-Opt-in bestätigt; Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Ein Widerruf oder Werbewiderspruch wird dauerhaft in einer Sperrliste berücksichtigt.`,
+    );
+  }
   const optionalModules: Array<[keyof LegalModuleSettings, string, string]> = [
     ["maps", "Kartendienste", "interaktive Karten und Standortdarstellungen"],
     ["analytics", "Reichweitenmessung", "statistische Nutzungsanalysen"],
-    [
-      "marketing",
-      "Marketing und Anzeigen",
-      "Kampagnenmessung und personalisierte Werbung",
-    ],
     ["video", "Externe Videos", "eingebettete Videoinhalte"],
     [
       "messaging",

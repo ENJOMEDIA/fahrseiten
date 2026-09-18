@@ -25,7 +25,7 @@ import {
 
 import { defaultLegalModules, validateLegalPublication } from "./documents";
 
-export type LegalType = "imprint" | "privacy";
+export type LegalType = "imprint" | "privacy" | "terms";
 
 export type LegalProfile = {
   data: LegalProfileData;

@@ -45,6 +45,14 @@ const builtinTemplates = [
       "Guten Tag {{Ansprechpartner}},\n\nFahrSeiten startet mit dem, was sofort zählt: einer schnellen Fahrschulwebsite, eigener Domain, einfach pflegbaren Klassen, Preisen, Kursen, Team, Fuhrpark und Kontaktanfragen.\n\nDarauf bauen wir weiter. Geplant sind unter anderem Fahrstundenplanung, Schülerverwaltung, automatische Erinnerungen und unterstützte Werbekampagnen – Schritt für Schritt in derselben Plattform.\n\nEine Beispiel-Website: {{Beispiel-Webseite}}\n\nWenn Sie Ihren Webauftritt modernisieren und bei der Entwicklung früh mitreden möchten, stelle ich Ihnen FahrSeiten gern persönlich vor.\n\nFreundliche Grüße\nENJO MEDIA",
     styleKey: "sunrise" as const,
   },
+  {
+    id: "builtin-postal-interest",
+    name: "Brief-Rückmeldung: Interesse bestätigt",
+    subjectTemplate: "{{Fahrschule}}: So kann FahrSeiten für euch aussehen",
+    bodyTemplate:
+      "Guten Tag {{Ansprechpartner}},\n\ndanke für das Interesse an FahrSeiten und die bestätigte E-Mail-Adresse. Mit FahrSeiten lassen sich Website, Inhalte, Fahrzeuge, Kurse und Anfragen zentral verwalten – ohne Technikstress und auf der eigenen Domain.\n\nJetzt live entdecken: {{Beispiel-Webseite}}\n\nWir melden uns persönlich, um die Anforderungen von {{Fahrschule}} und die nächsten Schritte zu besprechen.\n\nViele Grüße\nENJO MEDIA",
+    styleKey: "cyan" as const,
+  },
 ].map((template) => ({
   ...template,
   active: true,

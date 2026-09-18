@@ -32,6 +32,7 @@ function MaintenanceLegalShell({
         <div className="mx-auto flex max-w-5xl flex-wrap gap-x-6 gap-y-3">
           <Link href="/impressum">Impressum</Link>
           <Link href="/datenschutz">Datenschutz</Link>
+          <Link href="/agb">AGB</Link>
           <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
           <Link className="font-semibold text-slate-950" href={dashboardUrl()}>
             Kundenlogin

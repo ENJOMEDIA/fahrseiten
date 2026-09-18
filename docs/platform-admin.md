@@ -1,6 +1,6 @@
 # Plattformverwaltung und Akquise
 
-Stand: 17. September 2026.
+Stand: 18. September 2026.
 
 ## Rollen und Grenzen
 
@@ -18,6 +18,14 @@ Leads speichern Fahrschule, Ansprechperson, Kontaktdaten, bestehende Website, Qu
 
 Ein gewonnener Lead wird innerhalb einer gesperrten Repository-Transaktion in einen Mandanten umgewandelt. Unternehmensname und vorhandene Kontaktdaten werden übernommen. `converted_tenant_id` macht Wiederholungen idempotent und verhindert doppelte Mandanten durch denselben Vorgang. Die konkrete Dublettenprüfung über normalisierte Firmendaten bleibt eine manuelle Fachentscheidung.
 
+### Brief-Rückmeldung
+
+Jeder Kontakt besitzt einen signierten persönlichen Brief-Link und einen als SVG herunterladbaren QR-Code. Die neue Seite `/brief/{leadId}` ist ausschließlich für die postalische Akquise bestimmt und verändert weder die Produktwebsite noch die Beispielwebsite. Sie bietet die Antworten „Interesse“, „weitere Informationen per E-Mail“ und „kein Interesse“ an.
+
+Bei den beiden positiven Antworten wird eine E-Mail-Einwilligung separat erfasst und per Double-Opt-in bestätigt. Erst danach wird die Informationsmail mit Link zur Beispielwebsite geplant. „Kein Interesse“ erzeugt keine Einwilligung, stoppt offene Akquise-Nachrichten und dokumentiert die Sperre. Der genaue Ablauf ist unter [Postalische Akquise](postal-acquisition.md) beschrieben.
+
+Die Versandwarteschlange benötigt den eingerichteten SMTP-Zugang und Cronjob. Ein externer Briefdienst ist noch nicht angebunden.
+
 ## Manuelle Prüfung
 
 1. Mit jeder Plattformrolle anmelden und die sichtbare Navigation vergleichen.
@@ -25,3 +33,4 @@ Ein gewonnener Lead wird innerhalb einer gesperrten Repository-Transaktion in ei
 3. Einen rein fiktiven Lead durch alle Stufen führen, Aktivitäten und Wiedervorlage erfassen.
 4. Einen gewonnenen Lead zweimal umwandeln; beide Aufrufe müssen dieselbe Tenant-ID liefern.
 5. Eine Supportansicht ohne ausreichenden Grund öffnen; der Vorgang muss scheitern. Mit Grund muss ein Audit-Eintrag entstehen.
+6. Einen Brief-Link und dessen QR-Code mit einem fiktiven Kontakt prüfen; positive Rückmeldung einschließlich Double-Opt-in sowie Ablehnung getrennt testen.

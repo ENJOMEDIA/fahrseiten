@@ -9,6 +9,7 @@ const paths = [
   "/login",
   "/impressum",
   "/datenschutz",
+  "/agb",
   "/cookie-einstellungen",
   "/fehler-melden",
 ];

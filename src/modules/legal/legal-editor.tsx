@@ -14,7 +14,7 @@ export function LegalEditor({
   status,
   action: saveAction,
 }: {
-  type: "imprint" | "privacy";
+  type: "imprint" | "privacy" | "terms";
   content: string;
   status: "draft" | "published" | "archived";
   action: (
@@ -29,7 +29,11 @@ export function LegalEditor({
       <input name="type" type="hidden" value={type} />
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-xl font-semibold">
-          {type === "imprint" ? "Impressum" : "Datenschutz"}
+          {type === "imprint"
+            ? "Impressum"
+            : type === "privacy"
+              ? "Datenschutz"
+              : "Allgemeine Geschäftsbedingungen"}
         </h2>
         <span className="rounded-full border px-3 py-1 text-xs font-semibold">
           {status === "published" ? "Veröffentlicht" : "Entwurf"}

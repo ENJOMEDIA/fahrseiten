@@ -5,6 +5,7 @@ import { Card, StatusBadge } from "@/components/ui/card";
 import { requirePlatformPermission } from "@/modules/platform/access";
 import { listSalesPipeline } from "@/modules/platform/sales-crm";
 import { listPendingInstanceSetups } from "@/modules/platform/tenant-directory";
+import { postalCampaignUrl } from "@/modules/platform/postal-campaign";
 import {
   salesStageLabels,
   salesStages,
@@ -265,6 +266,8 @@ export default async function SalesPage() {
                       emailPermission: lead.emailPermission,
                       emailPermissionEvidence: lead.emailPermissionEvidence,
                       emailOptOutAt: lead.emailOptOutAt,
+                      postalResponse: lead.postalResponse,
+                      campaignUrl: postalCampaignUrl(lead.id),
                     }}
                   />
                 </Card>

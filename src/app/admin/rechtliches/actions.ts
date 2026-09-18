@@ -30,7 +30,10 @@ export async function savePlatformLegalAction(
         consentManagement: true,
       },
     };
-    const documents = createStructuredLegalDocuments(profile);
+    const documents = createStructuredLegalDocuments({
+      ...profile,
+      platformPostalAcquisition: true,
+    });
     await savePlatformLegalProfile(identity.id, profile);
     await savePlatformLegalDocument(identity.id, {
       type: "imprint",
@@ -55,6 +58,38 @@ export async function savePlatformLegalAction(
     return {
       message:
         error instanceof Error ? error.message : "Speichern fehlgeschlagen.",
+      error: true,
+    };
+  }
+}
+
+export async function savePlatformTermsAction(
+  _state: LegalActionState,
+  formData: FormData,
+): Promise<LegalActionState> {
+  const identity = await requirePlatformPermission("platform.security.manage");
+  try {
+    const content = String(formData.get("content") ?? "");
+    const publish = formData.get("intent") === "publish";
+    await savePlatformLegalDocument(identity.id, {
+      type: "terms",
+      content,
+      publish,
+    });
+    revalidatePath("/admin/rechtliches");
+    revalidatePath("/agb");
+    return {
+      message: publish
+        ? "Die AGB wurden als geprüfte Fassung veröffentlicht."
+        : "Der AGB-Entwurf wurde gespeichert.",
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "AGB konnten nicht gespeichert werden.",
       error: true,
     };
   }

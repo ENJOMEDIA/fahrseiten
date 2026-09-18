@@ -848,6 +848,26 @@ export const salesLeads = mysqlTable(
       fsp: 3,
     }),
     emailOptOutAt: timestamp("email_opt_out_at", { mode: "date", fsp: 3 }),
+    postalResponse: varchar("postal_response", { length: 40 }),
+    postalResponseAt: timestamp("postal_response_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    postalResponseEmail: varchar("postal_response_email", { length: 254 }),
+    postalConsentTextVersion: varchar("postal_consent_text_version", {
+      length: 80,
+    }),
+    postalConfirmationTokenHash: varchar("postal_confirmation_token_hash", {
+      length: 64,
+    }),
+    postalConfirmationExpiresAt: timestamp("postal_confirmation_expires_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    postalConfirmedAt: timestamp("postal_confirmed_at", {
+      mode: "date",
+      fsp: 3,
+    }),
     status: mysqlEnum("status", leadStatusValues).default("new").notNull(),
     ownerUserId: id("owner_user_id").references(() => users.id, {
       onDelete: "set null",
@@ -1137,7 +1157,7 @@ export const tenantFeatures = mysqlTable(
 );
 
 export const legalDocumentScopeValues = ["platform", "tenant"] as const;
-export const legalDocumentTypeValues = ["imprint", "privacy"] as const;
+export const legalDocumentTypeValues = ["imprint", "privacy", "terms"] as const;
 export const legalDocumentStatusValues = [
   "draft",
   "published",

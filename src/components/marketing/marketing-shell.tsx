@@ -42,6 +42,7 @@ export function MarketingShell({
           >
             <Link href="/impressum">Impressum</Link>
             <Link href="/datenschutz">Datenschutz</Link>
+            <Link href="/agb">AGB</Link>
             <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
             <Link href="/fehler-melden">Fehler melden</Link>
           </nav>
