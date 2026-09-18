@@ -38,6 +38,7 @@ export default async function LegalPage() {
       {profile ? (
         <LegalBuilder
           action={saveLegalAction}
+          autoSave
           imprintStatus={latest("imprint")?.status ?? "draft"}
           privacyStatus={latest("privacy")?.status ?? "draft"}
           profile={profile}

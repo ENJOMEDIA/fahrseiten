@@ -162,6 +162,13 @@
       "when": 1789717419133,
       "tag": "0022_parallel_madame_web",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1789717865305,
+      "tag": "0023_website_builder_aktivieren",
+      "breakpoints": true
     }
   ]
 }

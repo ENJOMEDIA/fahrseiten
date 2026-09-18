@@ -7,7 +7,7 @@ export const featureCatalog = {
   website_builder: {
     title: "Website-Builder",
     description: "Seiten und kontrollierte Blöcke bearbeiten.",
-    availability: "planned",
+    availability: "available",
   },
   content_modules: {
     title: "Fahrschul-Inhalte",
@@ -54,6 +54,12 @@ export const featureCatalog = {
     title: "Priorisierter Support",
     description: "Anliegen werden im Betrieb bevorzugt bearbeitet.",
     availability: "available",
+  },
+  team_management: {
+    title: "Benutzerverwaltung",
+    description:
+      "Mitarbeitende einladen und Zugriffe als Owner, Editor oder Betrachter steuern.",
+    availability: "planned",
   },
   lesson_reminders: {
     title: "Fahrstundenerinnerungen",

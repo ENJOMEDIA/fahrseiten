@@ -7,6 +7,20 @@ export default function CustomerFeaturesPage() {
       title="Funktionen"
       description="Bereits verfügbare Plattformfunktionen und transparent gekennzeichnete Erweiterungen."
     >
+      <section className="mb-7 overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white">
+        <p className="text-xs font-semibold tracking-[.18em] text-cyan-300 uppercase">
+          Eine Plattform, die mitwächst
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold">
+          Website heute. Mehr digitale Fahrschule Schritt für Schritt.
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+          Verfügbare Funktionen kannst du bereits nutzen. Geplante Module wie
+          Benutzerverwaltung, Terminplanung, Erinnerungen und Kampagnen sind
+          klar gekennzeichnet und werden später in denselben Kundenbereich
+          integriert.
+        </p>
+      </section>
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {Object.entries(featureCatalog).map(([key, feature]) => {
           const active = feature.availability === "available";

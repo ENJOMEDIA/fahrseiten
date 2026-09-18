@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useId } from "react";
+import { useAutoSave } from "@/components/forms/auto-save";
 
 export type MaintenanceActionState = {
   message: string;
@@ -31,11 +32,16 @@ export function MaintenanceForm({
   demoAvailableDuringMaintenance?: boolean;
 }) {
   const [state, action, pending] = useActionState(saveAction, initialState);
+  const formId = useId();
+  const autoSave = useAutoSave({ formId, pending, result: state });
 
   return (
     <form
       action={action}
       className="max-w-2xl space-y-5 rounded-2xl border bg-white p-6"
+      id={formId}
+      onChange={autoSave.onChange}
+      onSubmit={autoSave.onSubmit}
     >
       {!legalReady ? (
         <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
@@ -100,6 +106,7 @@ export function MaintenanceForm({
       <button
         className="rounded-xl bg-cyan-600 px-4 py-3 font-semibold text-white disabled:cursor-wait disabled:opacity-60"
         disabled={pending}
+        data-auto-save-submit
         type="submit"
       >
         {pending ? "Wird gespeichert …" : "Wartungsmodus speichern"}

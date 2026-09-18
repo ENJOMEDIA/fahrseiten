@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/cn";
 import { logoutAction } from "@/modules/auth/actions";
+import { AutoSaveIndicator } from "@/components/forms/auto-save";
 
 type NavItem = {
   href: string;
@@ -89,6 +90,7 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-[#f3f6f8] lg:grid lg:grid-cols-[19rem_1fr]">
+      <AutoSaveIndicator />
       <aside className="app-sidebar sticky top-0 hidden h-screen overflow-y-auto border-r border-white/5 bg-[#080d16] px-5 py-6 text-white lg:flex lg:flex-col">
         <Link className="flex items-center gap-3" href="/">
           {logoUrl ? (
@@ -194,6 +196,70 @@ export function AppShell({
               <p className="mt-0.5 font-semibold text-slate-950">{title}</p>
             </div>
             <div className="flex items-center gap-3">
+              <details className="group relative">
+                <summary
+                  aria-label="Benachrichtigungen öffnen"
+                  className="relative grid size-10 cursor-pointer list-none place-items-center rounded-full border border-slate-200 bg-white text-slate-600 hover:border-cyan-300 hover:text-cyan-800"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                    <path d="M10 21h4" />
+                  </svg>
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-0 right-0 size-2.5 rounded-full border-2 border-white bg-cyan-500"
+                  />
+                </summary>
+                <div className="absolute top-12 right-0 z-50 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                  <div className="border-b border-slate-100 px-5 py-4">
+                    <p className="font-semibold">Produkt-Hinweise</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Neuigkeiten aus deinem Arbeitsbereich
+                    </p>
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    <Link
+                      className="block px-5 py-4 hover:bg-cyan-50"
+                      href={
+                        eyebrow === "Kundenverwaltung"
+                          ? "/kunde/website/builder"
+                          : "/admin/pakete"
+                      }
+                    >
+                      <span className="text-sm font-semibold">
+                        Website-Builder verfügbar
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-500">
+                        Seiten, Medien und Designvorlagen lassen sich zentral
+                        verwalten.
+                      </span>
+                    </Link>
+                    <Link
+                      className="block px-5 py-4 hover:bg-cyan-50"
+                      href={
+                        eyebrow === "Kundenverwaltung"
+                          ? "/kunde/funktionen"
+                          : "/admin/mandanten"
+                      }
+                    >
+                      <span className="text-sm font-semibold">
+                        FahrSeiten wächst weiter
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-500">
+                        Benutzerverwaltung, Terminplanung, Erinnerungen und
+                        weitere Module sind transparent vorbereitet.
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+              </details>
               <span className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800">
                 <span className="size-2 rounded-full bg-emerald-500" />
                 Sicher angemeldet

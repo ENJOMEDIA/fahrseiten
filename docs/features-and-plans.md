@@ -16,7 +16,7 @@ Der Kundenbereich zeigt „Verfügbar“ für aktive und „In Planung“ für k
 
 ## Vorbereitete Schlüssel
 
-Neben `website_builder` sind `lesson_reminders`, `lesson_booking`, `advanced_crm`, `sms`, `whatsapp`, `payments` und `analytics` als `coming_soon` vorbereitet. Diese Einträge enthalten keine Fachlogik und stellen keine Lieferzusage dar.
+Der `website_builder` ist als Kernfunktion verfügbar und in allen drei Paketen enthalten. `lesson_reminders`, `lesson_booking`, `advanced_crm`, `sms`, `whatsapp`, `payments` und `analytics` sind als `coming_soon` vorbereitet. Diese geplanten Einträge enthalten noch keine vollständige Fachlogik und stellen keine Lieferzusage dar.
 
 ## Manuelle Prüfung
 
