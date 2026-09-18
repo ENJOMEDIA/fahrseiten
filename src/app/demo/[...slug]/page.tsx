@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { demoWebsite, findDemoPage } from "@/modules/cms/demo-content";
-import { TenantSite } from "@/modules/cms/tenant-site";
+import { DemoSite } from "@/modules/cms/demo-site";
 import { DemoContactForm } from "@/modules/contacts/contact-form";
 
 export default async function TenantDemoSubpage({
@@ -13,7 +13,7 @@ export default async function TenantDemoSubpage({
   const page = findDemoPage(slug.join("/"));
   if (!page) notFound();
   return (
-    <TenantSite
+    <DemoSite
       afterContent={page.slug === "kontakt" ? <DemoContactForm /> : null}
       page={page}
       website={demoWebsite}

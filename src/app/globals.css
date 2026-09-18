@@ -335,3 +335,170 @@ textarea {
   bottom: -22rem;
   background: radial-gradient(circle, rgb(59 130 246 / 0.18), transparent 70%);
 }
+
+/* Öffentliche Tenant-Websites: dieselben Theme-Werte werden im Builder verwendet. */
+.tenant-site {
+  --tenant-soft: color-mix(in srgb, var(--tenant-primary) 8%, white);
+  --tenant-shadow: color-mix(in srgb, var(--tenant-accent) 13%, transparent);
+  overflow: clip;
+}
+
+.tenant-header {
+  box-shadow: 0 12px 35px rgb(15 23 42 / 0.035);
+}
+
+.tenant-hero-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(2 6 23 / 0.96) 0%,
+      rgb(2 6 23 / 0.78) 48%,
+      rgb(2 6 23 / 0.12) 100%
+    ),
+    linear-gradient(0deg, rgb(2 6 23 / 0.54), transparent 55%);
+}
+
+.tenant-hero-glow {
+  background: color-mix(in srgb, var(--tenant-primary) 42%, transparent);
+  animation: tenant-glow 8s ease-in-out infinite;
+}
+
+.tenant-cta {
+  background:
+    radial-gradient(
+      circle at 85% 10%,
+      color-mix(in srgb, var(--tenant-primary) 72%, white),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      var(--tenant-accent),
+      color-mix(in srgb, var(--tenant-accent) 72%, var(--tenant-primary))
+    );
+  box-shadow: 0 32px 80px var(--tenant-shadow);
+}
+
+.tenant-contact,
+.tenant-footer {
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      color-mix(in srgb, var(--tenant-primary) 25%, transparent),
+      transparent 35rem
+    ),
+    var(--tenant-accent);
+}
+
+.tenant-team-portrait {
+  background:
+    radial-gradient(
+      circle at 70% 20%,
+      rgb(255 255 255 / 0.25),
+      transparent 28%
+    ),
+    linear-gradient(135deg, var(--tenant-primary), var(--tenant-accent));
+}
+
+.tenant-content-card,
+.tenant-feature-card,
+.tenant-media-frame {
+  box-shadow: 0 20px 50px var(--tenant-shadow);
+}
+
+.tenant-section {
+  position: relative;
+}
+
+.tenant-section::before {
+  position: absolute;
+  inset: 0 auto auto 50%;
+  width: min(70rem, 92vw);
+  height: 1px;
+  content: "";
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--tenant-primary) 20%, transparent),
+    transparent
+  );
+}
+
+[data-theme="calm_cyan"] .tenant-hero h1 {
+  letter-spacing: -0.06em;
+}
+
+[data-theme="urban_night"] .tenant-header {
+  border-bottom-color: rgb(255 255 255 / 0.08);
+  background: rgb(2 6 23 / 0.9);
+  color: white;
+}
+
+[data-theme="urban_night"] .tenant-header a,
+[data-theme="urban_night"] .tenant-header span {
+  color: inherit;
+}
+
+[data-theme="urban_night"] .tenant-header a[aria-current="page"] {
+  background: var(--tenant-primary);
+}
+
+[data-theme="urban_night"] .tenant-mobile-menu summary {
+  border-color: rgb(255 255 255 / 0.15);
+  background: rgb(255 255 255 / 0.08);
+}
+
+[data-theme="urban_night"] .tenant-mobile-menu nav {
+  background: #020617;
+}
+
+[data-theme="urban_night"] .tenant-hero h1,
+[data-theme="urban_night"] .tenant-section h2 {
+  letter-spacing: -0.055em;
+  text-transform: none;
+}
+
+[data-theme="urban_night"] .tenant-feature-card:nth-child(2) {
+  transform: translateY(1.5rem);
+  background: var(--tenant-accent);
+  color: white;
+}
+
+[data-theme="urban_night"] .tenant-feature-card:nth-child(2) p {
+  color: rgb(255 255 255 / 0.62);
+}
+
+[data-theme="warm_motion"] .tenant-hero-overlay {
+  background: linear-gradient(
+    90deg,
+    rgb(41 37 36 / 0.94),
+    rgb(41 37 36 / 0.6) 58%,
+    rgb(41 37 36 / 0.08)
+  );
+}
+
+[data-theme="warm_motion"] .tenant-content-card,
+[data-theme="warm_motion"] .tenant-feature-card {
+  border-color: #fed7aa;
+}
+
+[data-theme="warm_motion"] .tenant-section.bg-slate-50 {
+  background: #fff7ed;
+}
+
+@keyframes tenant-glow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2rem, 2rem, 0) scale(1.08);
+  }
+}
+
+@media (max-width: 639px) {
+  .demo-theme-switcher {
+    transform: scale(0.9);
+    transform-origin: right bottom;
+  }
+}

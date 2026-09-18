@@ -1,8 +1,10 @@
 import { parseStoredBlocks } from "./block-schema";
 import type { PublishedPage, TenantWebsite } from "./types";
 
+const tenantId = "10000000-0000-4000-8000-000000000001";
+
 export const demoWebsite: TenantWebsite = {
-  tenantId: "10000000-0000-4000-8000-000000000001",
+  tenantId,
   name: "Fahrschule Morgenrot",
   maintenanceMode: false,
   maintenanceMessage: "Fiktive Vorschau",
@@ -10,25 +12,96 @@ export const demoWebsite: TenantWebsite = {
   navigation: [
     { id: "nav-home", label: "Start", href: "/demo", position: 0 },
     {
+      id: "nav-training",
+      label: "Ausbildung",
+      href: "/demo/ausbildung",
+      position: 1,
+    },
+    { id: "nav-fleet", label: "Fuhrpark", href: "/demo/fuhrpark", position: 2 },
+    {
       id: "nav-about",
       label: "Über uns",
       href: "/demo/ueber-uns",
-      position: 1,
+      position: 3,
     },
-    { id: "nav-contact", label: "Kontakt", href: "/demo/kontakt", position: 2 },
+    { id: "nav-contact", label: "Kontakt", href: "/demo/kontakt", position: 4 },
   ],
-  theme: { primaryColor: "#0891b2", accentColor: "#0f172a" },
+  theme: {
+    themeKey: "urban_night",
+    primaryColor: "#2563eb",
+    accentColor: "#020617",
+  },
 };
+
+const licenseItems = [
+  {
+    id: "class-b",
+    position: 0,
+    active: true,
+    key: "B",
+    title: "Pkw",
+    description:
+      "Dein Weg in die mobile Freiheit – strukturiert, persönlich und mit moderner Lernbegleitung.",
+    minimumAge: 18,
+  },
+  {
+    id: "class-b197",
+    position: 1,
+    active: true,
+    key: "B197",
+    title: "Automatik mit Schaltkompetenz",
+    description:
+      "Entspannt lernen und nach den vorgeschriebenen Schaltstunden flexibel unterwegs sein.",
+    minimumAge: 18,
+  },
+  {
+    id: "class-a",
+    position: 2,
+    active: true,
+    key: "A",
+    title: "Motorrad",
+    description:
+      "Sicheres Handling, vorausschauendes Fahren und echte Freude auf zwei Rädern.",
+    minimumAge: 24,
+  },
+];
+
+const fleetItems = [
+  {
+    id: "vehicle-blue",
+    position: 0,
+    active: true,
+    name: "Morgenrot Blue",
+    category: "Klasse B",
+    transmission: "manual" as const,
+    description:
+      "Direktes Fahrgefühl, moderne Assistenzsysteme und ein übersichtliches Cockpit für deine Schaltausbildung.",
+    imageUrl: "/demo/fleet-blue.webp",
+    imageAlt: "Blauer kompakter Fahrschulwagen vor einem modernen Gebäude",
+  },
+  {
+    id: "vehicle-electric",
+    position: 1,
+    active: true,
+    name: "Morgenrot Electric",
+    category: "B197 & B",
+    transmission: "automatic" as const,
+    description:
+      "Leise, intuitiv und elektrisch: konzentriere dich ganz auf Verkehr, Blickführung und sicheres Entscheiden.",
+    imageUrl: "/demo/fleet-electric.webp",
+    imageAlt: "Weißer elektrischer Fahrschulwagen auf einem Übungsplatz",
+  },
+];
 
 const pages: PublishedPage[] = [
   {
-    tenantId: demoWebsite.tenantId,
+    tenantId,
     slug: "",
-    title: "Sicher ans Ziel",
-    version: 1,
+    title: "Start",
+    version: 2,
     seo: {
-      title: "Fahrschule Morgenrot – Demo",
-      description: "Fiktive Demo-Fahrschule für FahrSeiten.",
+      title: "Fahrschule Morgenrot – Deine Fahrt beginnt hier",
+      description: "Interaktive FahrSeiten-Demo mit fiktiven Inhalten.",
       noIndex: true,
     },
     blocks: parseStoredBlocks([
@@ -39,13 +112,13 @@ const pages: PublishedPage[] = [
         visible: true,
         properties: {
           type: "hero",
-          eyebrow: "Fiktive Demo-Fahrschule",
-          heading: "Sicher ans Ziel – Schritt für Schritt",
-          text: "Persönliche Ausbildung, klare Abläufe und ein ruhiges Lernumfeld.",
-          actionLabel: "Kontakt aufnehmen",
-          actionHref: "/demo/kontakt",
+          eyebrow: "Fahrausbildung neu gedacht",
+          heading: "Deine Fahrt. Dein Tempo. Dein Moment.",
+          text: "Vom ersten Theorieabend bis zur Prüfung: Wir machen deinen Weg zum Führerschein klar, persönlich und überraschend entspannt.",
+          actionLabel: "Ausbildung entdecken",
+          actionHref: "/demo/ausbildung",
           imageUrl: "/demo/hero-driving-school.webp",
-          imageAlt: "Türkiser Fahrschulwagen in einer modernen Stadt",
+          imageAlt: "Türkiser Fahrschulwagen fährt durch eine moderne Stadt",
         },
       },
       {
@@ -55,58 +128,193 @@ const pages: PublishedPage[] = [
         visible: true,
         properties: {
           type: "benefits",
-          heading: "Darum Morgenrot",
+          heading: "Fahren lernen, ohne den Überblick zu verlieren.",
           items: [
             {
-              title: "Persönlich",
-              text: "Feste Ansprechpersonen begleiten dich.",
+              title: "Ein klarer Fahrplan",
+              text: "Du weißt jederzeit, was als Nächstes ansteht – von den Unterlagen bis zur praktischen Prüfung.",
             },
             {
-              title: "Transparent",
-              text: "Leistungen und nächste Schritte bleiben nachvollziehbar.",
+              title: "Training, das zu dir passt",
+              text: "Persönliche Begleitung, verständliche Erklärungen und Termine passend zu deinem Alltag.",
             },
-            { title: "Flexibel", text: "Lernen passend zu deinem Alltag." },
+            {
+              title: "Modern aufgestellt",
+              text: "Aktuelle Fahrzeuge, digitale Abläufe und transparente Informationen an einem Ort.",
+            },
           ],
+        },
+      },
+      {
+        id: "home-story",
+        schemaVersion: 1,
+        position: 2,
+        visible: true,
+        properties: {
+          type: "text_image",
+          heading: "Eine Fahrschule, die dir Sicherheit gibt.",
+          paragraphs: [
+            "Fahren lernen ist aufregend. Darum nehmen wir uns Zeit, erklären verständlich und bauen jede Fahrstunde auf deinem persönlichen Fortschritt auf.",
+            "Bei uns triffst du auf ein ruhiges Team, moderne Fahrzeuge und einen Ablauf, der sich nicht komplizierter macht als nötig.",
+          ],
+          imageUrl: "/demo/fleet-electric.webp",
+          imageAlt:
+            "Modernes elektrisches Fahrschulfahrzeug der Demo-Fahrschule",
+          imagePosition: "left",
         },
       },
       {
         id: "home-classes",
         schemaVersion: 1,
-        position: 2,
+        position: 3,
         visible: true,
         properties: {
           type: "license_classes",
-          heading: "Führerscheinklassen",
+          heading: "Welcher Führerschein passt zu deinem nächsten Kapitel?",
+          items: licenseItems,
+        },
+      },
+      {
+        id: "home-fleet",
+        schemaVersion: 1,
+        position: 4,
+        visible: true,
+        properties: {
+          type: "fleet",
+          heading: "Dein Lernplatz auf vier Rädern.",
+          items: fleetItems,
+        },
+      },
+      {
+        id: "home-testimonials",
+        schemaVersion: 1,
+        position: 5,
+        visible: true,
+        properties: {
+          type: "testimonials",
+          heading: "So könnte sich eine gute Ausbildung anfühlen.",
           items: [
             {
-              id: "class-b",
+              id: "voice-1",
               position: 0,
               active: true,
-              key: "B",
-              title: "Pkw",
-              description: "Fiktive Beispielausbildung für Pkw.",
-              minimumAge: 18,
+              displayName: "Lea, 19",
+              quote:
+                "Ich wusste immer, wo ich stehe. Das hat mir vor der Prüfung unglaublich viel Ruhe gegeben.",
+              rating: 5,
+              sourceLabel: "fiktive Demo-Stimme",
             },
             {
-              id: "class-a",
+              id: "voice-2",
               position: 1,
               active: true,
-              key: "A",
-              title: "Motorrad",
-              description: "Fiktive Beispielausbildung für Motorräder.",
-              minimumAge: 24,
+              displayName: "Noah, 23",
+              quote:
+                "Geduldig erklärt, flexibel geplant und im Auto sofort wohlgefühlt. Genau so hatte ich es mir gewünscht.",
+              rating: 5,
+              sourceLabel: "fiktive Demo-Stimme",
+            },
+            {
+              id: "voice-3",
+              position: 2,
+              active: true,
+              displayName: "Mila, 31",
+              quote:
+                "Mit B197 konnte ich entspannt starten und trotzdem das Schalten sicher lernen.",
+              rating: 5,
+              sourceLabel: "fiktive Demo-Stimme",
             },
           ],
         },
       },
       {
-        id: "home-prices",
+        id: "home-faq",
         schemaVersion: 1,
-        position: 3,
+        position: 6,
+        visible: true,
+        properties: {
+          type: "faq",
+          heading: "Fragen, die vor dem Start wichtig sind.",
+          items: [
+            {
+              question: "Wie läuft die Anmeldung ab?",
+              answer:
+                "Nach deiner Anfrage besprechen wir Klasse, Zeitplan und benötigte Unterlagen. Anschließend erhältst du einen klaren Überblick über die nächsten Schritte.",
+            },
+            {
+              question: "Kann ich mit Automatik beginnen?",
+              answer:
+                "Ja. In dieser fiktiven Demo wird auch die Ausbildung B197 gezeigt, bei der Automatik und vorgeschriebene Schaltkompetenz verbunden werden.",
+            },
+            {
+              question: "Sind Preise und Termine auf dieser Seite echt?",
+              answer:
+                "Nein. Morgenrot ist eine vollständig fiktive Fahrschule. Alle Namen, Preise, Termine, Bewertungen und Kontaktdaten dienen nur als Produktbeispiel.",
+            },
+          ],
+        },
+      },
+      {
+        id: "home-contact",
+        schemaVersion: 1,
+        position: 7,
+        visible: true,
+        properties: {
+          type: "contact_teaser",
+          heading: "Bereit für deinen ersten Schritt?",
+          text: "Sag uns, was du vorhast. In einem kurzen Gespräch klären wir, welche Ausbildung zu dir passt.",
+          phone: "+49 30 0000000",
+          email: "hallo@morgenrot.invalid",
+        },
+      },
+    ]),
+  },
+  {
+    tenantId,
+    slug: "ausbildung",
+    title: "Ausbildung",
+    version: 1,
+    seo: {
+      title: "Ausbildung & Preise – Fahrschule Morgenrot",
+      description: "Fiktive Klassen, Kurse und Preise der FahrSeiten-Demo.",
+      noIndex: true,
+    },
+    blocks: parseStoredBlocks([
+      {
+        id: "training-hero",
+        schemaVersion: 1,
+        position: 0,
+        visible: true,
+        properties: {
+          type: "hero",
+          eyebrow: "Ausbildung mit System",
+          heading: "Dein Führerschein beginnt mit einem guten Plan.",
+          text: "Wähle deine Klasse, entdecke passende Kurse und behalte die Beispielkosten von Anfang an im Blick.",
+          actionLabel: "Unverbindlich anfragen",
+          actionHref: "/demo/kontakt",
+          imageUrl: "/demo/hero-driving-school.webp",
+          imageAlt: "Fahrschulwagen in einer modernen Stadt",
+        },
+      },
+      {
+        id: "training-classes",
+        schemaVersion: 1,
+        position: 1,
+        visible: true,
+        properties: {
+          type: "license_classes",
+          heading: "Drei Wege. Ein Ziel: sicher ankommen.",
+          items: licenseItems,
+        },
+      },
+      {
+        id: "training-prices",
+        schemaVersion: 1,
+        position: 2,
         visible: true,
         properties: {
           type: "prices",
-          heading: "Beispielpreise",
+          heading: "Beispielpreise, die du sofort verstehst.",
           groups: [
             {
               id: "prices-b",
@@ -115,20 +323,63 @@ const pages: PublishedPage[] = [
               title: "Klasse B",
               items: [
                 {
-                  id: "price-base",
+                  id: "b-base",
                   position: 0,
                   active: true,
                   label: "Grundbetrag",
                   amount: "499.00",
-                  currency: "EUR",
+                  currency: "EUR" as const,
                 },
                 {
-                  id: "price-drive",
+                  id: "b-drive",
                   position: 1,
                   active: true,
-                  label: "Fahrstunde",
+                  label: "Übungsfahrt",
                   amount: "69.00",
-                  currency: "EUR",
+                  currency: "EUR" as const,
+                  unit: "45 Minuten",
+                },
+                {
+                  id: "b-special",
+                  position: 2,
+                  active: true,
+                  label: "Sonderfahrt",
+                  amount: "79.00",
+                  currency: "EUR" as const,
+                  unit: "45 Minuten",
+                },
+              ],
+            },
+            {
+              id: "prices-b197",
+              position: 1,
+              active: true,
+              title: "Klasse B197",
+              items: [
+                {
+                  id: "b197-base",
+                  position: 0,
+                  active: true,
+                  label: "Grundbetrag",
+                  amount: "549.00",
+                  currency: "EUR" as const,
+                },
+                {
+                  id: "b197-auto",
+                  position: 1,
+                  active: true,
+                  label: "Automatikstunde",
+                  amount: "72.00",
+                  currency: "EUR" as const,
+                  unit: "45 Minuten",
+                },
+                {
+                  id: "b197-switch",
+                  position: 2,
+                  active: true,
+                  label: "Schaltstunde",
+                  amount: "69.00",
+                  currency: "EUR" as const,
                   unit: "45 Minuten",
                 },
               ],
@@ -137,25 +388,42 @@ const pages: PublishedPage[] = [
         },
       },
       {
-        id: "home-courses",
+        id: "training-courses",
         schemaVersion: 1,
-        position: 4,
+        position: 3,
         visible: true,
         properties: {
           type: "courses",
-          heading: "Kurse",
+          heading: "Termine, die in deinen Kalender passen.",
           items: [
             {
-              id: "course-theory",
+              id: "course-intensive",
               position: 0,
               active: true,
               title: "Theorie-Intensivkurs",
-              description: "Fiktiver Kompaktkurs ohne Buchungsfunktion.",
+              description:
+                "Alle Pflichtlektionen kompakt in zwei Wochen – mit Zeit für Fragen und Wiederholung.",
               dates: [
                 {
-                  id: "date-1",
+                  id: "intensive-oct",
                   startsAt: "2026-10-12T16:00:00+02:00",
-                  endsAt: "2026-10-12T19:00:00+02:00",
+                  endsAt: "2026-10-23T19:00:00+02:00",
+                  timezone: "Europe/Berlin",
+                },
+              ],
+            },
+            {
+              id: "course-first-aid",
+              position: 1,
+              active: true,
+              title: "Erste-Hilfe-Tag",
+              description:
+                "Praxisnaher Partnerkurs als Beispiel für zusätzliche Termine auf der Website.",
+              dates: [
+                {
+                  id: "aid-oct",
+                  startsAt: "2026-10-24T09:00:00+02:00",
+                  endsAt: "2026-10-24T16:30:00+02:00",
                   timezone: "Europe/Berlin",
                 },
               ],
@@ -164,73 +432,191 @@ const pages: PublishedPage[] = [
         },
       },
       {
-        id: "home-team",
+        id: "training-cta",
         schemaVersion: 1,
-        position: 5,
+        position: 4,
         visible: true,
         properties: {
-          type: "team",
-          heading: "Unser Demo-Team",
-          items: [
-            {
-              id: "team-1",
-              position: 0,
-              active: true,
-              name: "Mara Beispiel",
-              role: "Fahrlehrerin",
-              bio: "Fiktive Person für die lokale Produktdemo.",
-              qualifications: ["Klassen A und B"],
-            },
-          ],
+          type: "cta",
+          heading: "Noch unsicher, welche Klasse passt?",
+          text: "Wir sortieren Voraussetzungen, Ablauf und Beispielkosten gemeinsam mit dir.",
+          actionLabel: "Gespräch anfragen",
+          actionHref: "/demo/kontakt",
+        },
+      },
+    ]),
+  },
+  {
+    tenantId,
+    slug: "fuhrpark",
+    title: "Fuhrpark",
+    version: 1,
+    seo: {
+      title: "Fuhrpark – Fahrschule Morgenrot",
+      description: "Fiktiver Fuhrpark der FahrSeiten-Demo.",
+      noIndex: true,
+    },
+    blocks: parseStoredBlocks([
+      {
+        id: "fleet-hero",
+        schemaVersion: 1,
+        position: 0,
+        visible: true,
+        properties: {
+          type: "hero",
+          eyebrow: "Dein Platz zum Lernen",
+          heading: "Technik, die Sicherheit leicht macht.",
+          text: "Schaltung oder Automatik, klassisch oder elektrisch: Du lernst in einem Umfeld, in dem du dich auf das Wesentliche konzentrieren kannst.",
+          actionLabel: "Probefahrt anfragen",
+          actionHref: "/demo/kontakt",
+          imageUrl: "/demo/fleet-blue.webp",
+          imageAlt: "Blauer Fahrschulwagen vor dem Schulungsgebäude",
         },
       },
       {
-        id: "home-fleet",
+        id: "fleet-list",
         schemaVersion: 1,
-        position: 6,
+        position: 1,
         visible: true,
         properties: {
           type: "fleet",
-          heading: "Fuhrpark",
+          heading: "Zwei Fahrzeuge. Viele Möglichkeiten.",
+          items: fleetItems,
+        },
+      },
+      {
+        id: "fleet-benefits",
+        schemaVersion: 1,
+        position: 2,
+        visible: true,
+        properties: {
+          type: "benefits",
+          heading: "Damit du dich vom ersten Moment an wohlfühlst.",
           items: [
             {
-              id: "vehicle-1",
-              position: 0,
-              active: true,
-              name: "Morgenrot Blue",
-              category: "Pkw",
-              transmission: "manual",
-              description:
-                "Übersichtlicher Schaltwagen mit modernen Assistenzsystemen – ideal für deine ersten Kilometer.",
-              imageUrl: "/demo/fleet-blue.webp",
-              imageAlt: "Blauer kompakter Fahrschulwagen",
+              title: "Übersichtlich",
+              text: "Klare Cockpits und gute Rundumsicht unterstützen dich in jeder Lernphase.",
             },
             {
-              id: "vehicle-2",
-              position: 1,
-              active: true,
-              name: "Morgenrot Electric",
-              category: "Elektro-Pkw",
-              transmission: "automatic",
-              description:
-                "Leises Automatik-Fahrzeug für eine entspannte Ausbildung und die B197-Ergänzung.",
-              imageUrl: "/demo/fleet-electric.webp",
-              imageAlt: "Weißer elektrischer Fahrschulwagen",
+              title: "Aktuell",
+              text: "Assistenzsysteme werden verständlich erklärt und sinnvoll in die Ausbildung integriert.",
+            },
+            {
+              title: "Flexibel",
+              text: "Schaltung, Automatik und B197 lassen sich passend zu deinem Ziel kombinieren.",
             },
           ],
         },
       },
       {
-        id: "home-locations",
+        id: "fleet-cta",
         schemaVersion: 1,
-        position: 7,
+        position: 3,
+        visible: true,
+        properties: {
+          type: "cta",
+          heading: "Welches Fahrzeug passt zu dir?",
+          text: "Lerne beide Varianten kennen und entscheide mit einem sicheren Gefühl.",
+          actionLabel: "Kontakt aufnehmen",
+          actionHref: "/demo/kontakt",
+        },
+      },
+    ]),
+  },
+  {
+    tenantId,
+    slug: "ueber-uns",
+    title: "Über uns",
+    version: 2,
+    seo: { title: "Über uns – Fahrschule Morgenrot", noIndex: true },
+    blocks: parseStoredBlocks([
+      {
+        id: "about-hero",
+        schemaVersion: 1,
+        position: 0,
+        visible: true,
+        properties: {
+          type: "hero",
+          eyebrow: "Fiktiv. Aber realistisch gedacht.",
+          heading: "Menschen, die dir etwas zutrauen.",
+          text: "Unsere Demo-Fahrschule zeigt, wie Persönlichkeit, klare Inhalte und moderne Gestaltung zusammenwirken können.",
+          actionLabel: "Team kennenlernen",
+          actionHref: "/demo/ueber-uns#team",
+          imageUrl: "/demo/hero-driving-school.webp",
+          imageAlt: "Fahrschulwagen der fiktiven Fahrschule Morgenrot",
+        },
+      },
+      {
+        id: "about-story",
+        schemaVersion: 1,
+        position: 1,
+        visible: true,
+        properties: {
+          type: "text_image",
+          heading: "Geduld ist bei uns kein Extra.",
+          paragraphs: [
+            "Morgenrot ist ein fiktives Beispiel. Die Haltung dahinter ist trotzdem konkret: Gute Ausbildung beginnt mit Zuhören, klaren Erklärungen und einem Plan, den Fahrschüler wirklich verstehen.",
+            "Alle Abschnitte dieser Website stammen aus kontrollierten FahrSeiten-Bausteinen. Inhalte können gepflegt werden, ohne dabei Gestaltung und mobile Darstellung aus dem Blick zu verlieren.",
+          ],
+          imageUrl: "/demo/fleet-electric.webp",
+          imageAlt: "Elektrisches Ausbildungsfahrzeug in heller Umgebung",
+          imagePosition: "right",
+        },
+      },
+      {
+        id: "about-team",
+        schemaVersion: 1,
+        position: 2,
+        visible: true,
+        properties: {
+          type: "team",
+          heading: "Ein Team, das Ruhe ins Lernen bringt.",
+          items: [
+            {
+              id: "team-mara",
+              position: 0,
+              active: true,
+              name: "Mara Beispiel",
+              role: "Fahrlehrerin & Inhaberin",
+              bio: "Erklärt präzise, bleibt ruhig und findet für jede Lernsituation einen neuen Blickwinkel.",
+              qualifications: [
+                "Klassen A & B",
+                "B197",
+                "Ausbildungsfahrlehrerin",
+              ],
+            },
+            {
+              id: "team-jan",
+              position: 1,
+              active: true,
+              name: "Jan Muster",
+              role: "Fahrlehrer",
+              bio: "Verbindet lockere Fahrstunden mit klarer Struktur und ehrlichem Feedback.",
+              qualifications: ["Klasse B", "Automatik", "Theorieunterricht"],
+            },
+            {
+              id: "team-lina",
+              position: 2,
+              active: true,
+              name: "Lina Demo",
+              role: "Organisation",
+              bio: "Behält Termine und Unterlagen im Blick und macht den Einstieg angenehm unkompliziert.",
+              qualifications: ["Anmeldung", "Terminplanung", "Erstberatung"],
+            },
+          ],
+        },
+      },
+      {
+        id: "about-locations",
+        schemaVersion: 1,
+        position: 3,
         visible: true,
         properties: {
           type: "locations",
-          heading: "Standort",
+          heading: "Hier könnte Ausbildung zuhause sein.",
           items: [
             {
-              id: "location-1",
+              id: "location-city",
               position: 0,
               active: true,
               name: "Morgenrot Lernstudio",
@@ -246,64 +632,82 @@ const pages: PublishedPage[] = [
                   closesAt: "18:00",
                   closed: false,
                 },
-                { weekday: 7, closed: true },
+                {
+                  weekday: 3,
+                  opensAt: "10:00",
+                  closesAt: "18:00",
+                  closed: false,
+                },
+                {
+                  weekday: 5,
+                  opensAt: "10:00",
+                  closesAt: "16:00",
+                  closed: false,
+                },
+              ],
+            },
+            {
+              id: "location-north",
+              position: 1,
+              active: true,
+              name: "Treffpunkt Nord",
+              street: "Musterallee 24",
+              postalCode: "00000",
+              city: "Musterstadt",
+              phone: "+49 30 0000000",
+              email: "hallo@morgenrot.invalid",
+              openingHours: [
+                {
+                  weekday: 2,
+                  opensAt: "12:00",
+                  closesAt: "19:00",
+                  closed: false,
+                },
+                {
+                  weekday: 4,
+                  opensAt: "12:00",
+                  closesAt: "19:00",
+                  closed: false,
+                },
               ],
             },
           ],
         },
       },
+    ]),
+  },
+  {
+    tenantId,
+    slug: "kontakt",
+    title: "Kontakt",
+    version: 2,
+    seo: { title: "Kontakt – Fahrschule Morgenrot", noIndex: true },
+    blocks: parseStoredBlocks([
       {
-        id: "home-testimonials",
+        id: "contact-hero",
         schemaVersion: 1,
-        position: 8,
+        position: 0,
         visible: true,
         properties: {
-          type: "testimonials",
-          heading: "Fiktive Stimmen",
-          items: [
-            {
-              id: "testimonial-1",
-              position: 0,
-              active: true,
-              displayName: "Alex Demo",
-              quote: "Die Abläufe waren klar und verständlich erklärt.",
-              rating: 5,
-              sourceLabel: "manuell gepflegte Demo",
-            },
-          ],
+          type: "hero",
+          eyebrow: "Der erste Schritt ist leicht",
+          heading: "Sag Hallo. Wir klären den Rest.",
+          text: "Welche Klasse, welche Unterlagen, welcher Zeitplan? Schick eine fiktive Testanfrage und erlebe den vollständigen Kontaktweg.",
+          actionLabel: "Zum Formular",
+          actionHref: "/demo/kontakt#kontaktformular",
+          imageUrl: "/demo/hero-driving-school.webp",
+          imageAlt: "Moderner Fahrschulwagen in der Stadt",
         },
       },
       {
-        id: "home-faq",
+        id: "contact-details",
         schemaVersion: 1,
-        position: 9,
-        visible: true,
-        properties: {
-          type: "faq",
-          heading: "Häufige Fragen",
-          items: [
-            {
-              question: "Ist das eine echte Fahrschule?",
-              answer:
-                "Nein. Alle Inhalte dieser Website sind ausschließlich fiktive Demo-Daten.",
-            },
-            {
-              question: "Wie starte ich?",
-              answer:
-                "Nutze den Kontaktbereich für eine unverbindliche Demo-Anfrage.",
-            },
-          ],
-        },
-      },
-      {
-        id: "home-contact",
-        schemaVersion: 1,
-        position: 10,
+        position: 1,
         visible: true,
         properties: {
           type: "contact_teaser",
-          heading: "Noch Fragen?",
-          text: "Wir erklären dir den fiktiven Ablauf gern.",
+          heading: "Direkt, freundlich und ohne Fachchinesisch.",
+          text: "Diese Kontaktdaten sind bewusst ungültige Demo-Daten. Das Formular darunter dient ausschließlich zum Testen der Anwendung.",
           phone: "+49 30 0000000",
           email: "hallo@morgenrot.invalid",
         },
@@ -311,57 +715,10 @@ const pages: PublishedPage[] = [
     ]),
   },
   {
-    tenantId: demoWebsite.tenantId,
-    slug: "ueber-uns",
-    title: "Über uns",
-    version: 1,
-    seo: { title: "Über uns – Fahrschule Morgenrot", noIndex: true },
-    blocks: parseStoredBlocks([
-      {
-        id: "about",
-        schemaVersion: 1,
-        position: 0,
-        visible: true,
-        properties: {
-          type: "text_image",
-          heading: "Lernen mit Ruhe und Struktur",
-          paragraphs: [
-            "Morgenrot ist eine vollständig fiktive Fahrschule für die lokale Produktdemo.",
-            "Der kontrollierte Blocktyp gibt Struktur und Darstellung sicher vor.",
-          ],
-          imageAlt: "Abstrakte Demo-Bildfläche",
-          imagePosition: "right",
-        },
-      },
-    ]),
-  },
-  {
-    tenantId: demoWebsite.tenantId,
-    slug: "kontakt",
-    title: "Kontakt",
-    version: 1,
-    seo: { title: "Kontakt – Fahrschule Morgenrot", noIndex: true },
-    blocks: parseStoredBlocks([
-      {
-        id: "contact",
-        schemaVersion: 1,
-        position: 0,
-        visible: true,
-        properties: {
-          type: "cta",
-          heading: "Lass uns sprechen",
-          text: "Diese Kontaktdaten sind fiktiv und dienen nur der Demo.",
-          actionLabel: "E-Mail schreiben",
-          actionHref: "mailto:hallo@morgenrot.invalid",
-        },
-      },
-    ]),
-  },
-  {
-    tenantId: demoWebsite.tenantId,
+    tenantId,
     slug: "impressum",
     title: "Impressum",
-    version: 1,
+    version: 2,
     seo: { title: "Impressum – Fahrschule Morgenrot", noIndex: true },
     blocks: parseStoredBlocks([
       {
@@ -375,18 +732,19 @@ const pages: PublishedPage[] = [
           paragraphs: [
             "Fahrschule Morgenrot ist ein vollständig fiktives Anschauungsbeispiel. Beispielweg 1, 00000 Musterstadt.",
             "Vertreten durch: Mara Beispiel. Kontakt: hallo@morgenrot.invalid. Es findet kein realer Geschäftsbetrieb statt.",
+            "Die produktive Plattform erzeugt rechtliche Inhaltsbausteine anhand der gepflegten Stammdaten und aktivierten Module. Die verantwortliche Fahrschule muss diese Angaben vor Veröffentlichung prüfen.",
           ],
-          imageAlt: "Fiktive rechtliche Angaben",
+          imageAlt: "Abstrakte Bildfläche für rechtliche Angaben",
           imagePosition: "right",
         },
       },
     ]),
   },
   {
-    tenantId: demoWebsite.tenantId,
+    tenantId,
     slug: "datenschutz",
     title: "Datenschutz",
-    version: 1,
+    version: 2,
     seo: { title: "Datenschutz – Fahrschule Morgenrot", noIndex: true },
     blocks: parseStoredBlocks([
       {
@@ -398,10 +756,10 @@ const pages: PublishedPage[] = [
           type: "text_image",
           heading: "Datenschutz in dieser Demo",
           paragraphs: [
-            "Diese Vorschau verwendet ausschließlich fiktive Inhalte. Das Demo-Kontaktformular versendet keine Nachricht und speichert keine echten Anfragen.",
-            "Auf einer Kundenseite erzeugt FahrSeiten die Datenschutzbausteine passend zu den aktivierten Funktionen. Die verantwortliche Fahrschule prüft und veröffentlicht die Angaben.",
+            "Diese Vorschau verwendet ausschließlich fiktive Inhalte. Bitte gib im Demo-Kontaktformular keine echten Personen- oder Kundendaten ein.",
+            "Auf einer Kundenseite erzeugt FahrSeiten Datenschutzbausteine passend zu den aktivierten Funktionen und Einwilligungen. Die verantwortliche Fahrschule prüft und veröffentlicht die Angaben.",
           ],
-          imageAlt: "Datenschutz-Hinweis",
+          imageAlt: "Abstrakte Bildfläche zum Datenschutz",
           imagePosition: "right",
         },
       },
@@ -412,5 +770,4 @@ const pages: PublishedPage[] = [
 export function findDemoPage(slug: string): PublishedPage | null {
   return pages.find((page) => page.slug === slug) ?? null;
 }
-
 export const demoPages = pages;

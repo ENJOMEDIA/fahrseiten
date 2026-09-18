@@ -6,9 +6,9 @@ export function DemoContactForm() {
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
   return (
-    <section className="bg-white px-6 py-20">
+    <section className="bg-white px-6 py-24" id="kontaktformular">
       <form
-        className="mx-auto max-w-2xl rounded-3xl border border-slate-200 p-6 sm:p-8"
+        className="mx-auto max-w-3xl rounded-[var(--radius-card)] border border-slate-200 p-6 shadow-xl sm:p-10"
         onSubmit={async (event) => {
           event.preventDefault();
           const form = event.currentTarget;
