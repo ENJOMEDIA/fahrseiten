@@ -25,6 +25,13 @@ function mapAsset(row: typeof mediaAssets.$inferSelect): MediaAssetRecord {
     altText: row.altText,
     description: row.description ?? undefined,
     archivedAt: row.archivedAt ?? undefined,
+    optimizedStorageKey: row.optimizedStorageKey ?? undefined,
+    optimizedByteSize: row.optimizedByteSize ?? undefined,
+    cropAspect: row.cropAspect,
+    cropX: row.cropX,
+    cropY: row.cropY,
+    cropZoom: row.cropZoom,
+    processingStatus: row.processingStatus,
   };
 }
 
@@ -75,6 +82,15 @@ export async function listTenantMedia(tenantId: string) {
     .where(
       and(eq(mediaAssets.tenantId, tenantId), isNull(mediaAssets.archivedAt)),
     )
+    .orderBy(desc(mediaAssets.createdAt));
+  return rows.map(mapAsset);
+}
+
+export async function listPlatformMedia() {
+  const rows = await db
+    .select()
+    .from(mediaAssets)
+    .where(and(isNull(mediaAssets.tenantId), isNull(mediaAssets.archivedAt)))
     .orderBy(desc(mediaAssets.createdAt));
   return rows.map(mapAsset);
 }

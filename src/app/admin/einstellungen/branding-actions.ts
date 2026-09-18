@@ -9,6 +9,7 @@ import {
 } from "@/modules/media/repository";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { uploadImage } from "@/modules/media/service";
+import { queueMediaOptimization } from "@/modules/media/processing";
 import { requirePlatformPermission } from "@/modules/platform/access";
 
 export type BrandAssetActionState = { message: string; error: boolean };
@@ -40,6 +41,15 @@ export async function uploadPlatformBrandAsset(
     });
     if (kind === "favicon") await setPlatformFavicon(asset.id);
     else await setPlatformLogo(asset.id);
+    if (!["image/svg+xml", "image/x-icon"].includes(asset.mimeType))
+      await queueMediaOptimization({
+        tenantId: null,
+        mediaId: asset.id,
+        cropAspect: "original",
+        cropX: 50,
+        cropY: 50,
+        cropZoom: 100,
+      });
     revalidatePath("/admin/einstellungen");
     revalidatePath("/", "layout");
     return {

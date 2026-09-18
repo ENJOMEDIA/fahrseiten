@@ -14,6 +14,7 @@ import {
   chooseTenantLogo,
   uploadTenantMedia,
 } from "./actions";
+import { MediaCropForm } from "./media-crop-form";
 
 export default async function MediaPage() {
   const identity = await getSessionIdentity();
@@ -79,6 +80,17 @@ export default async function MediaPage() {
                       {asset.width} × {asset.height} px ·{" "}
                       {Math.ceil(asset.byteSize / 1024)} KB
                     </p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">
+                      Optimierung:{" "}
+                      {asset.processingStatus === "ready"
+                        ? "WebP bereit"
+                        : asset.processingStatus === "failed"
+                          ? "Fehlgeschlagen"
+                          : asset.processingStatus === "queued" ||
+                              asset.processingStatus === "processing"
+                            ? "Wird verarbeitet"
+                            : "Original"}
+                    </p>
                     {branding.logoMediaId !== asset.id ? (
                       <form action={chooseTenantLogo} className="mt-3">
                         <input name="mediaId" type="hidden" value={asset.id} />
@@ -90,6 +102,15 @@ export default async function MediaPage() {
                         </button>
                       </form>
                     ) : null}
+                    <MediaCropForm
+                      imageUrl={mediaPublicUrl(asset.id)}
+                      mediaId={asset.id}
+                      processable={
+                        !["image/svg+xml", "image/x-icon"].includes(
+                          asset.mimeType,
+                        )
+                      }
+                    />
                     {branding.faviconMediaId !== asset.id ? (
                       <form action={chooseTenantFavicon} className="mt-2">
                         <input name="mediaId" type="hidden" value={asset.id} />

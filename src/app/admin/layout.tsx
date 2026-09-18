@@ -73,6 +73,18 @@ export default async function PlatformLayout({
             description: "Schema und Migrationen",
           },
           {
+            href: "/admin/medien",
+            label: "Medien",
+            icon: "▧",
+            description: "Landingpage-Bilder und Zuschnitte",
+          },
+          {
+            href: "/admin/statistik",
+            label: "Statistik",
+            icon: "↗",
+            description: "Traffic nach Website und Zeitraum",
+          },
+          {
             href: "/admin/einstellungen",
             label: "Einstellungen",
             icon: "⚙",

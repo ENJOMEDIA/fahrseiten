@@ -14,6 +14,7 @@ import { contentModules } from "@/modules/customer/navigation";
 import { databaseMediaRepository } from "@/modules/media/repository";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { uploadImage } from "@/modules/media/service";
+import { queueMediaOptimization } from "@/modules/media/processing";
 
 export type ContentActionState = { message: string; error: boolean };
 
@@ -60,6 +61,14 @@ export async function createContentEntryAction(
           repository: databaseMediaRepository,
         });
         formData.set("imageMediaId", asset.id);
+        await queueMediaOptimization({
+          tenantId: membership.tenantId,
+          mediaId: asset.id,
+          cropAspect: "4:3",
+          cropX: 50,
+          cropY: 50,
+          cropZoom: 100,
+        });
       } else {
         const mediaId = String(formData.get("imageMediaId") ?? "");
         if (mediaId) {

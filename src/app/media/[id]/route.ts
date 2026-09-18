@@ -10,11 +10,17 @@ export async function GET(
   const { id } = await params;
   const asset = await findPublicMedia(id);
   if (!asset) notFound();
-  const bytes = await getMediaStorage().read(asset.storageKey);
+  const optimized =
+    asset.processingStatus === "ready" && asset.optimizedStorageKey;
+  const bytes = await getMediaStorage().read(
+    optimized ? asset.optimizedStorageKey! : asset.storageKey,
+  );
   return new Response(bytes, {
     headers: {
-      "Content-Type": asset.mimeType,
-      "Content-Length": String(asset.byteSize),
+      "Content-Type": optimized ? "image/webp" : asset.mimeType,
+      "Content-Length": String(
+        optimized ? asset.optimizedByteSize : asset.byteSize,
+      ),
       "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
       "Content-Security-Policy":
         "default-src 'none'; style-src 'unsafe-inline'; sandbox",

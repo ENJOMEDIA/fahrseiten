@@ -139,7 +139,10 @@ export async function deletePlatformTenant(input: {
 
   const storageKeys = await db.transaction(async (tx) => {
     const assets = await tx
-      .select({ storageKey: mediaAssets.storageKey })
+      .select({
+        storageKey: mediaAssets.storageKey,
+        optimizedStorageKey: mediaAssets.optimizedStorageKey,
+      })
       .from(mediaAssets)
       .where(eq(mediaAssets.tenantId, tenant.id));
     const memberships = await tx
@@ -172,7 +175,11 @@ export async function deletePlatformTenant(input: {
       entityId: tenant.id,
       metadata: { mediaFiles: assets.length },
     });
-    return assets.map((asset) => asset.storageKey);
+    return assets.flatMap((asset) =>
+      asset.optimizedStorageKey
+        ? [asset.storageKey, asset.optimizedStorageKey]
+        : [asset.storageKey],
+    );
   });
 
   const cleanup = await Promise.allSettled(

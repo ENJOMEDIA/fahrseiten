@@ -9,10 +9,12 @@ export function PublicLegalDocument({
   brandName,
   title,
   content,
+  optionalServices = [],
 }: {
   brandName: string;
   title: string;
   content: string;
+  optionalServices?: OptionalService[];
 }) {
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12 text-slate-950">
@@ -24,8 +26,38 @@ export function PublicLegalDocument({
         <div className="mt-8 leading-7 whitespace-pre-wrap text-slate-700">
           {content}
         </div>
+        {title === "Datenschutz" && optionalServices.length ? (
+          <PrivacyServiceNotice services={optionalServices} />
+        ) : null}
       </article>
     </main>
+  );
+}
+
+export function PrivacyServiceNotice({
+  services,
+}: {
+  services: OptionalService[];
+}) {
+  if (!services.length) return null;
+  return (
+    <section className="mt-8 rounded-2xl border border-cyan-100 bg-cyan-50 p-6">
+      <h2 className="text-xl font-semibold">
+        Aktuell aktivierte optionale Dienste
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-slate-700">
+        Diese Übersicht wird automatisch aus den aktivierten Modulen erzeugt.
+        Die Dienste bleiben technisch blockiert, bis eine passende Einwilligung
+        erteilt wurde.
+      </p>
+      <ul className="mt-4 space-y-3">
+        {services.map((service, index) => (
+          <li key={`${service.category}-${index}`}>
+            <strong>{service.label}:</strong> {service.services}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

@@ -21,6 +21,13 @@ export type MediaAssetRecord = z.infer<typeof metadataSchema> & {
   width: number;
   height: number;
   archivedAt?: Date;
+  optimizedStorageKey?: string;
+  optimizedByteSize?: number;
+  cropAspect?: "original" | "16:9" | "4:3" | "1:1";
+  cropX?: number;
+  cropY?: number;
+  cropZoom?: number;
+  processingStatus?: "original" | "queued" | "processing" | "ready" | "failed";
 };
 
 export interface MediaRepository {

@@ -54,6 +54,11 @@ export default async function TenantSitePlaceholder({
           brandName={website.name}
           content={document.content}
           title={legalType === "imprint" ? "Impressum" : "Datenschutz"}
+          optionalServices={
+            legalType === "privacy"
+              ? await getOptionalServiceConfig(context.tenantId)
+              : []
+          }
         />
       );
   }
@@ -61,7 +66,7 @@ export default async function TenantSitePlaceholder({
     return (
       <PublicCookieSettings
         brandName={website.name}
-        optionalServices={getOptionalServiceConfig()}
+        optionalServices={await getOptionalServiceConfig(context.tenantId)}
       />
     );
   if (website.maintenanceMode) {

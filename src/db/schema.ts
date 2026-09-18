@@ -615,12 +615,56 @@ export const mediaAssets = mysqlTable(
     height: int("height").notNull(),
     altText: varchar("alt_text", { length: 300 }).notNull(),
     description: text("description"),
+    optimizedStorageKey: varchar("optimized_storage_key", { length: 500 }),
+    optimizedByteSize: int("optimized_byte_size"),
+    cropAspect: mysqlEnum("crop_aspect", ["original", "16:9", "4:3", "1:1"])
+      .default("original")
+      .notNull(),
+    cropX: int("crop_x").default(50).notNull(),
+    cropY: int("crop_y").default(50).notNull(),
+    cropZoom: int("crop_zoom").default(100).notNull(),
+    processingStatus: mysqlEnum("processing_status", [
+      "original",
+      "queued",
+      "processing",
+      "ready",
+      "failed",
+    ])
+      .default("original")
+      .notNull(),
     archivedAt: timestamp("archived_at", { mode: "date", fsp: 3 }),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("media_assets_storage_key_unique").on(table.storageKey),
     index("media_assets_tenant_idx").on(table.tenantId),
+  ],
+);
+
+export const trafficHourly = mysqlTable(
+  "traffic_hourly",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id").references(() => tenants.id, {
+      onDelete: "cascade",
+    }),
+    scope: mysqlEnum("scope", ["platform", "tenant", "demo"]).notNull(),
+    hostname: varchar("hostname", { length: 253 }).notNull(),
+    path: varchar("path", { length: 300 }).notNull(),
+    hour: timestamp("hour", { mode: "date", fsp: 0 }).notNull(),
+    views: int("views").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("traffic_hourly_bucket_unique").on(
+      table.tenantId,
+      table.scope,
+      table.hostname,
+      table.path,
+      table.hour,
+    ),
+    index("traffic_hourly_time_idx").on(table.hour),
+    index("traffic_hourly_tenant_time_idx").on(table.tenantId, table.hour),
   ],
 );
 

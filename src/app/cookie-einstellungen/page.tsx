@@ -2,8 +2,8 @@ import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { OpenConsentSettingsButton } from "@/modules/consent/consent-manager";
 import { OptionalContent } from "@/modules/consent/optional-content";
 import { getOptionalServiceConfig } from "@/modules/consent/config";
-export default function CookieSettingsPage() {
-  const optionalServiceConfig = getOptionalServiceConfig();
+export default async function CookieSettingsPage() {
+  const optionalServiceConfig = await getOptionalServiceConfig();
   return (
     <SimpleMarketingPage
       availableDuringMaintenance

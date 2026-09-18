@@ -5,6 +5,10 @@ import { runDueJobs } from "@/modules/jobs/runner";
 import { deliverEmailJob } from "./delivery";
 import { dbDeliveryRepository } from "./db-delivery-repository";
 import { CatchMailTransport, SmtpMailTransport } from "./mail-transport";
+import { processMediaJob } from "@/modules/media/processing";
+import { db } from "@/db/client";
+import { trafficHourly } from "@/db/schema";
+import { lt } from "drizzle-orm";
 
 const catchTransport = new CatchMailTransport();
 const transport =
@@ -18,8 +22,13 @@ const transport =
       })
     : catchTransport;
 export async function runNotificationScheduler() {
-  return runDueJobs(dbJobRepository, async (job) => {
-    if (job.type !== "notification") throw new Error("UnsupportedJobType");
-    await deliverEmailJob(job, dbDeliveryRepository, transport);
+  const result = await runDueJobs(dbJobRepository, async (job) => {
+    if (job.type === "notification")
+      return deliverEmailJob(job, dbDeliveryRepository, transport);
+    if (job.type === "media_optimize") return processMediaJob(job);
+    throw new Error("UnsupportedJobType");
   });
+  const retentionLimit = new Date(Date.now() - 90 * 86_400_000);
+  await db.delete(trafficHourly).where(lt(trafficHourly.hour, retentionLimit));
+  return result;
 }

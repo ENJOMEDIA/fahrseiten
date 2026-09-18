@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ConsentManager } from "@/modules/consent/consent-manager";
-import { getOptionalServiceConfig } from "@/modules/consent/config";
+import { getRequestOptionalServiceConfig } from "@/modules/consent/config";
+import { TrafficTracker } from "@/modules/analytics/traffic-tracker";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,14 +21,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const optionalServices = await getRequestOptionalServiceConfig();
   return (
     <html lang="de" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         {children}
-        <ConsentManager optionalServices={getOptionalServiceConfig()} />
+        <ConsentManager optionalServices={optionalServices} />
+        <TrafficTracker
+          enabled={optionalServices.some(
+            (service) => service.category === "statistics",
+          )}
+        />
       </body>
     </html>
   );

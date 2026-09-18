@@ -12,6 +12,7 @@ import {
 } from "@/modules/media/repository";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { uploadImage } from "@/modules/media/service";
+import { queueMediaOptimization } from "@/modules/media/processing";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
 
 async function requireWritableTenant() {
@@ -50,6 +51,28 @@ export async function uploadTenantMedia(formData: FormData) {
   const usage = String(formData.get("usage") ?? "library");
   if (usage === "logo") await setTenantLogo(context.tenantId, asset.id);
   if (usage === "favicon") await setTenantFavicon(context.tenantId, asset.id);
+  if (!["image/svg+xml", "image/x-icon"].includes(asset.mimeType))
+    await queueMediaOptimization({
+      tenantId: context.tenantId,
+      mediaId: asset.id,
+      cropAspect: "original",
+      cropX: 50,
+      cropY: 50,
+      cropZoom: 100,
+    });
+  revalidatePath("/kunde/medien");
+}
+
+export async function cropTenantMedia(formData: FormData) {
+  const context = await requireWritableTenant();
+  await queueMediaOptimization({
+    tenantId: context.tenantId,
+    mediaId: String(formData.get("mediaId")),
+    cropAspect: String(formData.get("cropAspect")) as "original",
+    cropX: formData.get("cropX"),
+    cropY: formData.get("cropY"),
+    cropZoom: formData.get("cropZoom"),
+  });
   revalidatePath("/kunde/medien");
 }
 

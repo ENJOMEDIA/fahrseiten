@@ -1,12 +1,15 @@
 import { connection } from "next/server";
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { findPublishedPlatformLegalDocument } from "@/modules/legal/repository";
+import { getOptionalServiceConfig } from "@/modules/consent/config";
+import { PrivacyServiceNotice } from "@/modules/legal/public-document";
 
 export default async function PrivacyPage() {
   await connection();
-  const document = await findPublishedPlatformLegalDocument("privacy").catch(
-    () => null,
-  );
+  const [document, services] = await Promise.all([
+    findPublishedPlatformLegalDocument("privacy").catch(() => null),
+    getOptionalServiceConfig(),
+  ]);
   return (
     <SimpleMarketingPage
       availableDuringMaintenance
@@ -17,6 +20,7 @@ export default async function PrivacyPage() {
       {document ? (
         <article className="rounded-3xl border bg-white p-8 leading-7 whitespace-pre-wrap text-slate-700">
           {document.content}
+          <PrivacyServiceNotice services={services} />
         </article>
       ) : (
         <article className="prose max-w-none rounded-3xl border bg-white p-8">
