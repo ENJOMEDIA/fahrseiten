@@ -43,4 +43,16 @@ describe("Onlinebrief24 payload", () => {
       auth: { apiKey: "key", apiSecret: "secret", mode: "test" },
     });
   });
+
+  it("treats an already removed provider job as locally deletable", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, { status: 404 }),
+    );
+    await expect(
+      deleteOnlinebrief(
+        { apiKey: "key", apiSecret: "secret", mode: "test" },
+        "6035143",
+      ),
+    ).resolves.toMatchObject({ status: 404 });
+  });
 });

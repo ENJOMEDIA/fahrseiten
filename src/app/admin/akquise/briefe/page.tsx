@@ -12,9 +12,11 @@ import { listPlatformMedia } from "@/modules/media/repository";
 import { listSalesPipeline } from "@/modules/platform/sales-crm";
 
 import {
+  ArchivePostalForm,
   DeletePostalForm,
   PreparePostalForm,
   SubmitPostalForm,
+  SyncPostalStatusForm,
 } from "./postal-forms";
 import { SalesNav } from "../sales-nav";
 
@@ -23,14 +25,39 @@ const formatter = new Intl.DateTimeFormat("de-DE", {
   timeStyle: "short",
 });
 
-export default async function PostalAcquisitionPage() {
+function providerStatusLabel(status: string | null) {
+  if (!status) return "noch nicht geprüft";
+  return (
+    {
+      draft: "im Testwarenkorb",
+      queue: "in der Warteschlange",
+      hold: "angehalten",
+      done: "verarbeitet",
+      canceled: "storniert",
+      nicht_mehr_vorhanden: "beim Anbieter entfernt",
+    }[status] ?? status
+  );
+}
+
+export default async function PostalAcquisitionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
   await requirePlatformPermission("platform.sales.manage");
-  const [leads, dispatches, media, templates] = await Promise.all([
+  const [query, leads, allDispatches, media, templates] = await Promise.all([
+    searchParams,
     listSalesPipeline(),
     listPostalDispatches(),
     listPlatformMedia(),
     listPostalLetterTemplates(),
   ]);
+  const showArchived = query.view === "archiv";
+  const activeCount = allDispatches.filter((item) => !item.archivedAt).length;
+  const archivedCount = allDispatches.length - activeCount;
+  const dispatches = allDispatches.filter((item) =>
+    showArchived ? Boolean(item.archivedAt) : !item.archivedAt,
+  );
   const configuration = onlinebriefConfiguration();
   return (
     <CustomerPage
@@ -53,6 +80,11 @@ export default async function PostalAcquisitionPage() {
           Im Testmodus wird laut Anbieter nichts unmittelbar produziert. Der
           Auftrag landet zur Prüfung im OnlineBrief24-Warenkorb und wird dort
           nach sieben Tagen automatisch gelöscht.
+        </p>
+        <p className="mt-1 leading-6">
+          Der vorhandene Fünf-Minuten-Scheduler gleicht übertragene Aufträge
+          automatisch mit OnlineBrief24 ab. Du kannst den Abgleich zusätzlich
+          jederzeit manuell starten.
         </p>
       </div>
       <section className="grid gap-6 xl:grid-cols-[.75fr_1.25fr]">
@@ -93,6 +125,7 @@ export default async function PostalAcquisitionPage() {
                 .map((template) => ({
                   id: template.id,
                   name: template.name,
+                  kickerTemplate: template.kickerTemplate,
                   headlineTemplate: template.headlineTemplate,
                   bodyTemplate: template.bodyTemplate,
                 }))}
@@ -107,9 +140,21 @@ export default async function PostalAcquisitionPage() {
               </p>
               <h2 className="mt-2 text-2xl font-semibold">Versandhistorie</h2>
             </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
-              {dispatches.length} Vorgänge
-            </span>
+            <SyncPostalStatusForm />
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+            <Link
+              className={`rounded-full px-4 py-2 text-xs font-semibold ${!showArchived ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}
+              href="/admin/akquise/briefe"
+            >
+              Aktiv · {activeCount}
+            </Link>
+            <Link
+              className={`rounded-full px-4 py-2 text-xs font-semibold ${showArchived ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}
+              href="/admin/akquise/briefe?view=archiv"
+            >
+              Archiv · {archivedCount}
+            </Link>
           </div>
           <div className="mt-5 space-y-3">
             {dispatches.length ? (
@@ -142,7 +187,7 @@ export default async function PostalAcquisitionPage() {
                       }
                     >
                       {dispatch.status === "submitted"
-                        ? `Übertragen · ${dispatch.providerStatus ?? "angenommen"}`
+                        ? `OnlineBrief24 · ${providerStatusLabel(dispatch.providerStatus)}`
                         : dispatch.status === "failed"
                           ? "Fehlgeschlagen"
                           : "Vorbereitet"}
@@ -166,6 +211,19 @@ export default async function PostalAcquisitionPage() {
                       {dispatch.errorCode}
                     </p>
                   ) : null}
+                  {dispatch.providerJobId ? (
+                    <div className="mt-3 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+                      <p>
+                        Letzter Anbieterabgleich:{" "}
+                        {dispatch.providerCheckedAt
+                          ? formatter.format(dispatch.providerCheckedAt)
+                          : "noch nicht durchgeführt"}
+                      </p>
+                      <div className="mt-2">
+                        <SyncPostalStatusForm dispatchId={dispatch.id} />
+                      </div>
+                    </div>
+                  ) : null}
                   {dispatch.status === "prepared" ? (
                     <SubmitPostalForm
                       dispatchId={dispatch.id}
@@ -176,6 +234,10 @@ export default async function PostalAcquisitionPage() {
                   <DeletePostalForm
                     dispatchId={dispatch.id}
                     submitted={dispatch.status === "submitted"}
+                  />
+                  <ArchivePostalForm
+                    archived={Boolean(dispatch.archivedAt)}
+                    dispatchId={dispatch.id}
                   />
                 </article>
               ))

@@ -929,6 +929,9 @@ export const postalLetterTemplates = mysqlTable(
   {
     id: id("id").primaryKey(),
     name: varchar("name", { length: 160 }).notNull(),
+    kickerTemplate: varchar("kicker_template", { length: 120 })
+      .default("FAHRSEITEN FÜR FAHRSCHULEN")
+      .notNull(),
     headlineTemplate: varchar("headline_template", { length: 180 }).notNull(),
     bodyTemplate: text("body_template").notNull(),
     active: boolean("active").default(true).notNull(),
@@ -962,6 +965,11 @@ export const postalDispatches = mysqlTable(
     byteSize: int("byte_size").notNull(),
     errorCode: varchar("error_code", { length: 160 }),
     submittedAt: timestamp("submitted_at", { mode: "date", fsp: 3 }),
+    providerCheckedAt: timestamp("provider_checked_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    archivedAt: timestamp("archived_at", { mode: "date", fsp: 3 }),
     createdByUserId: id("created_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),

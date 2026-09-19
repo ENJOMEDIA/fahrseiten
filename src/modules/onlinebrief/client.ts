@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { request as httpsRequest } from "node:https";
 import { z } from "zod";
 
 const API_URL = "https://api.onlinebrief24.de/v1";
@@ -11,6 +12,18 @@ const responseSchema = z.object({
     .object({
       id: z.number(),
       status: z.string(),
+    })
+    .passthrough(),
+});
+
+const printJobResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: z
+    .object({
+      id: z.number(),
+      status: z.string(),
+      updated_at: z.string().optional(),
     })
     .passthrough(),
 });
@@ -103,6 +116,11 @@ export async function deleteOnlinebrief(
     signal: AbortSignal.timeout(30_000),
   });
   const body = await response.json().catch(() => null);
+  if (response.status === 404)
+    return {
+      status: 404,
+      message: "Print job is no longer available",
+    };
   if (!response.ok)
     throw new Error(
       `OnlineBrief24 konnte den Auftrag nicht löschen (${response.status}). Aufträge lassen sich dort nur innerhalb von 15 Minuten und nicht mehr im Status „done“ löschen.`,
@@ -111,4 +129,59 @@ export async function deleteOnlinebrief(
     .object({ status: z.number(), message: z.string() })
     .passthrough()
     .parse(body);
+}
+
+export async function getOnlinebrief(
+  credentials: OnlinebriefCredentials,
+  providerJobId: string,
+) {
+  const jobId = z.string().regex(/^\d+$/).parse(providerJobId);
+  const payload = JSON.stringify({
+    auth: {
+      apiKey: credentials.apiKey,
+      apiSecret: credentials.apiSecret,
+      mode: credentials.mode,
+    },
+  });
+  const response = await new Promise<{ status: number; body: unknown }>(
+    (resolve, reject) => {
+      const request = httpsRequest(
+        `${API_URL}/printjobs/${jobId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(payload),
+          },
+          timeout: 30_000,
+        },
+        (incoming) => {
+          const chunks: Buffer[] = [];
+          incoming.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+          incoming.on("end", () => {
+            const raw = Buffer.concat(chunks).toString("utf8");
+            let body: unknown = null;
+            try {
+              body = raw ? JSON.parse(raw) : null;
+            } catch {
+              body = null;
+            }
+            resolve({ status: incoming.statusCode ?? 500, body });
+          });
+        },
+      );
+      request.on("timeout", () =>
+        request.destroy(new Error("OnlineBrief24-Statusabfrage abgelaufen.")),
+      );
+      request.on("error", reject);
+      request.write(payload);
+      request.end();
+    },
+  );
+  if (response.status === 404) return null;
+  if (response.status < 200 || response.status >= 300)
+    throw new Error(
+      `OnlineBrief24-Statusabfrage fehlgeschlagen (${response.status}).`,
+    );
+  return printJobResponseSchema.parse(response.body).data;
 }

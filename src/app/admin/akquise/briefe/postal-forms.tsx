@@ -3,9 +3,11 @@
 import { useActionState, useState } from "react";
 
 import {
+  archivePostalDispatchAction,
   deletePostalDispatchAction,
   preparePostalDispatchAction,
   submitPostalDispatchAction,
+  syncPostalStatusesAction,
   type PostalActionState,
 } from "./actions";
 
@@ -20,6 +22,59 @@ function Result({ state }: { state: PostalActionState }) {
       {state.message}
     </p>
   ) : null;
+}
+
+export function ArchivePostalForm({
+  dispatchId,
+  archived,
+}: {
+  dispatchId: string;
+  archived: boolean;
+}) {
+  const [state, action, pending] = useActionState(
+    archivePostalDispatchAction,
+    initialState,
+  );
+  return (
+    <form action={action} className="mt-3">
+      <input name="dispatchId" type="hidden" value={dispatchId} />
+      <input name="archived" type="hidden" value={archived ? "no" : "yes"} />
+      <button
+        className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-50"
+        disabled={pending}
+        type="submit"
+      >
+        {pending
+          ? "Wird aktualisiert …"
+          : archived
+            ? "Aus Archiv zurückholen"
+            : "Vorgang archivieren"}
+      </button>
+      <Result state={state} />
+    </form>
+  );
+}
+
+export function SyncPostalStatusForm({ dispatchId }: { dispatchId?: string }) {
+  const [state, action, pending] = useActionState(
+    syncPostalStatusesAction,
+    initialState,
+  );
+  return (
+    <form action={action}>
+      {dispatchId ? (
+        <input name="dispatchId" type="hidden" value={dispatchId} />
+      ) : null}
+      <button
+        className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+        disabled={pending}
+        type="submit"
+      >
+        {pending ? "Status wird geprüft …" : "OnlineBrief24-Status prüfen"}
+      </button>
+      <Result state={state} />
+    </form>
+  );
 }
 
 export function DeletePostalForm({
@@ -68,6 +123,7 @@ export function PreparePostalForm({
   templates: {
     id: string;
     name: string;
+    kickerTemplate: string;
     headlineTemplate: string;
     bodyTemplate: string;
   }[];
@@ -77,6 +133,9 @@ export function PreparePostalForm({
     initialState,
   );
   const firstTemplate = templates[0];
+  const [kicker, setKicker] = useState(
+    firstTemplate?.kickerTemplate ?? "FAHRSEITEN FÜR FAHRSCHULEN",
+  );
   const [headline, setHeadline] = useState(
     firstTemplate?.headlineTemplate ??
       "Ihre Website sollte mitfahren – nicht aufhalten.",
@@ -117,6 +176,7 @@ export function PreparePostalForm({
               (item) => item.id === event.target.value,
             );
             if (!template) return;
+            setKicker(template.kickerTemplate);
             setHeadline(template.headlineTemplate);
             setBodyText(template.bodyTemplate);
           }}
@@ -131,6 +191,17 @@ export function PreparePostalForm({
           Die Vorlage füllt Überschrift und Text. Beides kann für diesen Brief
           noch angepasst werden.
         </span>
+      </label>
+      <label className="block text-sm font-semibold">
+        Prägnante Catcher-Zeile
+        <input
+          className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+          maxLength={120}
+          name="kicker"
+          onChange={(event) => setKicker(event.target.value)}
+          required
+          value={kicker}
+        />
       </label>
       <label className="block text-sm font-semibold">
         Überschrift

@@ -1,7 +1,16 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { desc, eq } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  isNotNull,
+  isNull,
+  lt,
+  notInArray,
+  or,
+} from "drizzle-orm";
 import sharp from "sharp";
 import { z } from "zod";
 
@@ -17,7 +26,7 @@ import {
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { postalCampaignUrl } from "@/modules/platform/postal-campaign";
 
-import { deleteOnlinebrief, submitOnlinebrief } from "./client";
+import { deleteOnlinebrief, getOnlinebrief, submitOnlinebrief } from "./client";
 import { createAcquisitionLetterPdf } from "./letter-pdf";
 import { personalizePostalTemplate } from "./templates";
 
@@ -85,7 +94,7 @@ export async function listPostalDispatches(leadId?: string) {
     ? await query
         .where(eq(postalDispatches.leadId, z.uuid().parse(leadId)))
         .orderBy(desc(postalDispatches.createdAt))
-    : await query.orderBy(desc(postalDispatches.createdAt)).limit(100);
+    : await query.orderBy(desc(postalDispatches.createdAt)).limit(200);
   return rows.map((row) => ({ ...row.dispatch, companyName: row.companyName }));
 }
 
@@ -93,6 +102,7 @@ export async function preparePostalDispatch(input: {
   leadId: string;
   actorUserId: string;
   color: boolean;
+  kicker: string;
   headline: string;
   bodyText: string;
   imageMediaId: string;
@@ -100,6 +110,7 @@ export async function preparePostalDispatch(input: {
   const content = z
     .object({
       headline: z.string().trim().min(10).max(160),
+      kicker: z.string().trim().min(3).max(120),
       bodyText: z.string().trim().min(80).max(1_200),
       imageMediaId: z.union([z.literal(""), z.uuid()]),
     })
@@ -129,6 +140,7 @@ export async function preparePostalDispatch(input: {
     brandLogoPng,
     heroImagePng,
     createdAt: new Date(),
+    kicker: personalizePostalTemplate(content.kicker, lead),
     headline: personalizePostalTemplate(content.headline, lead),
     bodyText: personalizePostalTemplate(content.bodyText, lead),
     leadId: lead.id,
@@ -313,4 +325,99 @@ export async function deletePostalDispatch(input: {
     });
   });
   return { providerDeleted: dispatch.status === "submitted" };
+}
+
+export async function setPostalDispatchArchived(input: {
+  dispatchId: string;
+  archived: boolean;
+  actorUserId: string;
+}) {
+  const id = z.uuid().parse(input.dispatchId);
+  const [dispatch] = await db
+    .select({ leadId: postalDispatches.leadId })
+    .from(postalDispatches)
+    .where(eq(postalDispatches.id, id))
+    .limit(1);
+  if (!dispatch) throw new Error("Der Briefvorgang wurde nicht gefunden.");
+  await db.transaction(async (tx) => {
+    await tx
+      .update(postalDispatches)
+      .set({ archivedAt: input.archived ? new Date() : null })
+      .where(eq(postalDispatches.id, id));
+    await tx.insert(salesActivities).values({
+      id: createId(),
+      leadId: dispatch.leadId,
+      actorUserId: input.actorUserId,
+      activityType: input.archived
+        ? "postal_letter_archived"
+        : "postal_letter_restored",
+      note: input.archived
+        ? "Der Briefvorgang wurde archiviert."
+        : "Der Briefvorgang wurde aus dem Archiv wiederhergestellt.",
+    });
+  });
+}
+
+export async function syncPostalDispatchStatuses(input?: {
+  dispatchId?: string;
+  force?: boolean;
+}) {
+  if (!env.ONLINEBRIEF_API_KEY || !env.ONLINEBRIEF_API_SECRET)
+    return { checked: 0, updated: 0, failed: 0 };
+  const credentials = {
+    apiKey: env.ONLINEBRIEF_API_KEY,
+    apiSecret: env.ONLINEBRIEF_API_SECRET,
+  };
+  const staleBefore = new Date(Date.now() - 4 * 60_000);
+  const conditions = [
+    eq(postalDispatches.status, "submitted"),
+    isNotNull(postalDispatches.providerJobId),
+    or(
+      isNull(postalDispatches.providerStatus),
+      notInArray(postalDispatches.providerStatus, [
+        "done",
+        "canceled",
+        "nicht_mehr_vorhanden",
+      ]),
+    )!,
+  ];
+  if (input?.dispatchId)
+    conditions.push(eq(postalDispatches.id, z.uuid().parse(input.dispatchId)));
+  if (!input?.force)
+    conditions.push(
+      or(
+        isNull(postalDispatches.providerCheckedAt),
+        lt(postalDispatches.providerCheckedAt, staleBefore),
+      )!,
+    );
+  const dispatches = await db
+    .select()
+    .from(postalDispatches)
+    .where(and(...conditions))
+    .orderBy(desc(postalDispatches.submittedAt))
+    .limit(input?.dispatchId ? 1 : 10);
+  const results = await Promise.allSettled(
+    dispatches.map(async (dispatch) => {
+      const remote = await getOnlinebrief(
+        {
+          ...credentials,
+          mode: dispatch.mode,
+        },
+        dispatch.providerJobId!,
+      );
+      const providerStatus = remote?.status ?? "nicht_mehr_vorhanden";
+      await db
+        .update(postalDispatches)
+        .set({ providerStatus, providerCheckedAt: new Date() })
+        .where(eq(postalDispatches.id, dispatch.id));
+      return providerStatus !== dispatch.providerStatus;
+    }),
+  );
+  const updated = results.filter(
+    (result) => result.status === "fulfilled" && result.value,
+  ).length;
+  const failed = results.filter(
+    (result) => result.status === "rejected",
+  ).length;
+  return { checked: dispatches.length, updated, failed };
 }

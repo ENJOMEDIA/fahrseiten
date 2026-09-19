@@ -178,10 +178,12 @@ bei Verdacht sofort ausgetauscht werden. Der weiterhin vorhandene
 Bearer-geschützte POST-Aufruf über `dist/plesk/cron.mjs` bleibt eine Alternative
 für Server ohne diese Chroot-Einschränkung.
 
-Der Onlinebrief24-Adapter benötigt aktuell keinen eigenen Cronjob. Test- oder
-Live-Aufträge dürfen erst durch eine ausdrückliche Admin-Aktion entstehen. Eine
-spätere automatische Statusabfrage wird als eigener, idempotenter Job ergänzt
-und nicht über verdeckte Dauerläufe aktiviert.
+Der Onlinebrief24-Adapter benötigt keinen eigenen Cronjob. Test- oder
+Live-Aufträge entstehen weiterhin nur durch eine ausdrückliche Admin-Aktion.
+Der vorhandene Fünf-Minuten-Scheduler gleicht anschließend den Status bereits
+übertragener Aufträge mit OnlineBrief24 ab. Endzustände werden nicht wiederholt
+abgefragt; zusätzlich steht in der Briefakquise eine manuelle Statusprüfung zur
+Verfügung.
 
 ## 12. Wartungsmodus, Rechtstexte und Freigabe
 

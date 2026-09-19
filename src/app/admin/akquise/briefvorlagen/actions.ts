@@ -16,6 +16,7 @@ export async function saveLetterTemplateAction(
     await savePostalLetterTemplate(
       {
         name: formData.get("name"),
+        kickerTemplate: formData.get("kickerTemplate"),
         headlineTemplate: formData.get("headlineTemplate"),
         bodyTemplate: formData.get("bodyTemplate"),
         active: true,

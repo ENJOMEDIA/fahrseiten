@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import {
   deletePostalDispatch,
   preparePostalDispatch,
+  setPostalDispatchArchived,
   submitPreparedPostalDispatch,
+  syncPostalDispatchStatuses,
 } from "@/modules/onlinebrief/service";
 import { requirePlatformPermission } from "@/modules/platform/access";
 
@@ -21,6 +23,7 @@ export async function preparePostalDispatchAction(
       leadId: String(formData.get("leadId") ?? ""),
       actorUserId: identity.id,
       color: formData.get("color") === "yes",
+      kicker: String(formData.get("kicker") ?? ""),
       headline: String(formData.get("headline") ?? ""),
       bodyText: String(formData.get("bodyText") ?? ""),
       imageMediaId: String(formData.get("imageMediaId") ?? ""),
@@ -94,6 +97,65 @@ export async function submitPostalDispatchAction(
         error instanceof Error
           ? error.message
           : "Die Übertragung an OnlineBrief24 ist fehlgeschlagen.",
+      error: true,
+    };
+  }
+}
+
+export async function archivePostalDispatchAction(
+  _state: PostalActionState,
+  formData: FormData,
+): Promise<PostalActionState> {
+  const identity = await requirePlatformPermission("platform.sales.manage");
+  try {
+    const archived = formData.get("archived") === "yes";
+    await setPostalDispatchArchived({
+      dispatchId: String(formData.get("dispatchId") ?? ""),
+      archived,
+      actorUserId: identity.id,
+    });
+    revalidatePath("/admin/akquise/briefe");
+    return {
+      message: archived
+        ? "Der Briefvorgang wurde archiviert."
+        : "Der Briefvorgang ist wieder aktiv.",
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Der Archivstatus konnte nicht geändert werden.",
+      error: true,
+    };
+  }
+}
+
+export async function syncPostalStatusesAction(
+  _state: PostalActionState,
+  formData: FormData,
+): Promise<PostalActionState> {
+  await requirePlatformPermission("platform.sales.manage");
+  try {
+    const dispatchId = String(formData.get("dispatchId") ?? "") || undefined;
+    const result = await syncPostalDispatchStatuses({
+      dispatchId,
+      force: true,
+    });
+    revalidatePath("/admin/akquise/briefe");
+    return {
+      message: result.checked
+        ? `${result.checked} Auftrag geprüft, ${result.updated} Statusänderung erkannt${result.failed ? `, ${result.failed} Abfrage fehlgeschlagen` : ""}.`
+        : "Es gibt aktuell keinen übertragenen Auftrag zum Prüfen.",
+      error: result.failed > 0,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Der OnlineBrief24-Status konnte nicht geprüft werden.",
       error: true,
     };
   }

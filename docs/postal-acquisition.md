@@ -14,10 +14,16 @@ wird mit Modus, Prüfsumme, Anbieter-Auftragsnummer, Status und Fehlercode in de
 Kundenhistorie gespeichert.
 
 Unter **Briefvorlagen** stehen drei mitgelieferte Vertriebstexte bereit.
-Zusätzliche Vorlagen werden mit Überschrift, Text und den Platzhaltern
+Zusätzliche Vorlagen werden mit Catcher-Zeile, Überschrift, Text und den Platzhaltern
 `{{Fahrschule}}` und `{{Ansprechpartner}}` gespeichert. Bei der
-PDF-Erstellung füllt eine Auswahl beide Textfelder; die konkrete Fassung bleibt
-vor dem Erzeugen bearbeitbar.
+PDF-Erstellung füllt eine Auswahl Catcher, Überschrift und Brieftext; die
+konkrete Fassung bleibt vor dem Erzeugen bearbeitbar.
+
+Das PDF interpretiert Absätze und zusammenhängende Zeilen mit `•` oder `-` als
+gestaltete Nutzenliste. Die Catcher-Zeile, die Überschrift auf einem Farbverlauf,
+ein hervorgehobener Einstieg und die kompakte QR-Fläche bilden eine feste
+visuelle Hierarchie. Dadurch bleiben eigene Vorlagen kontrolliert einseitig,
+ohne freien HTML-Code in den Brief einzuschleusen.
 
 Der sichere Ausgangswert ist `ONLINEBRIEF_MODE=test`. Laut Anbieter landen diese Aufträge nur im OnlineBrief24-Warenkorb und werden nicht unmittelbar produziert. Ein kostenpflichtiger Liveversand ist nur mit `ONLINEBRIEF_MODE=live` möglich und verlangt in der Oberfläche zusätzlich die erneute Eingabe der festen Lead-ID. Auftragsverarbeitungsvertrag, Kosten, Adressquelle und rechtliche Freigabe bleiben vor dem ersten echten Versand zu prüfen.
 
@@ -65,6 +71,14 @@ OnlineBrief24-Endpunkt `DELETE /v1/printjobs/{id}` auf. Laut Anbieter ist die
 Löschung nur innerhalb von 15 Minuten nach Übertragung und nicht mehr im Status
 `done` möglich. Schlägt sie beim Anbieter fehl, bleiben lokaler Datensatz und
 PDF erhalten.
+
+Übertragene Aufträge werden durch den bestehenden Fünf-Minuten-Scheduler über
+`GET /v1/printjobs/{id}` abgeglichen. Zusätzlich gibt es in der
+Versandhistorie eine manuelle Statusprüfung. FahrSeiten zeigt die
+Anbieterzustände `draft`, `queue`, `hold`, `done` und `canceled` in deutscher
+Form an; ein beim Anbieter nicht mehr vorhandener Testauftrag wird entsprechend
+gekennzeichnet. Abgeschlossene oder reine Testvorgänge lassen sich lokal
+archivieren und über den Archiv-Reiter weiterhin nachvollziehen.
 
 Quelle: [Onlinebrief24 API-Dokumentation](https://www.onlinebrief24.de/briefe-uebertragen/api)
 

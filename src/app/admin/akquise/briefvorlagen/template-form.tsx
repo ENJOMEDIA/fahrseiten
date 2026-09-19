@@ -37,6 +37,16 @@ export function LetterTemplateForm() {
           />
         </label>
         <label className="block text-sm font-semibold">
+          Catcher-Zeile
+          <input
+            className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+            maxLength={120}
+            name="kickerTemplate"
+            placeholder="WENIGER PFLEGE. MEHR ZEIT FÜRS FAHREN."
+            required
+          />
+        </label>
+        <label className="block text-sm font-semibold">
           Überschrift
           <input
             className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"

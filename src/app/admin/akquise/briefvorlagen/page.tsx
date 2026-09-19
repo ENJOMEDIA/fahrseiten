@@ -34,6 +34,9 @@ export default async function PostalTemplatesPage() {
                   Aktiv
                 </span>
               </div>
+              <p className="mt-4 text-xs font-bold tracking-[.14em] text-cyan-700 uppercase">
+                {template.kickerTemplate}
+              </p>
               <p className="mt-4 text-lg font-semibold text-slate-900">
                 {template.headlineTemplate}
               </p>
