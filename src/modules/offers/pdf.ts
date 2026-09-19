@@ -26,6 +26,7 @@ const money = new Intl.NumberFormat("de-DE", {
 });
 
 export async function createSalesOfferPdf(input: {
+  brandLogoPng?: Uint8Array;
   offerNumber: string;
   title: string;
   validUntil: Date;
@@ -33,6 +34,7 @@ export async function createSalesOfferPdf(input: {
   items: SalesOfferItem[];
   netTotalCents: number;
   vatRateBasisPoints: number;
+  smallBusinessExempt: boolean;
   recipient: {
     companyName: string;
     contactName: string | null;
@@ -54,6 +56,9 @@ export async function createSalesOfferPdf(input: {
   const page = document.addPage([WIDTH, HEIGHT]);
   const regular = await document.embedFont(StandardFonts.Helvetica);
   const bold = await document.embedFont(StandardFonts.HelveticaBold);
+  const brandLogo = input.brandLogoPng
+    ? await document.embedPng(input.brandLogoPng)
+    : null;
   page.drawRectangle({
     x: 0,
     y: 690,
@@ -61,13 +66,31 @@ export async function createSalesOfferPdf(input: {
     height: 152,
     color: rgb(0.035, 0.067, 0.12),
   });
-  page.drawText("FAHRSEITEN", {
-    x: 48,
-    y: 786,
-    size: 12,
-    font: bold,
-    color: rgb(0.25, 0.9, 0.9),
-  });
+  if (brandLogo) {
+    const dimensions = brandLogo.scaleToFit(145, 42);
+    page.drawRectangle({
+      x: 44,
+      y: 773,
+      width: dimensions.width + 16,
+      height: dimensions.height + 12,
+      color: rgb(1, 1, 1),
+      opacity: 0.96,
+    });
+    page.drawImage(brandLogo, {
+      x: 52,
+      y: 779,
+      width: dimensions.width,
+      height: dimensions.height,
+    });
+  } else {
+    page.drawText("FAHRSEITEN", {
+      x: 48,
+      y: 786,
+      size: 12,
+      font: bold,
+      color: rgb(0.25, 0.9, 0.9),
+    });
+  }
   page.drawText("Persönliches Angebot", {
     x: 48,
     y: 741,
@@ -79,6 +102,13 @@ export async function createSalesOfferPdf(input: {
     `${input.offerNumber} · gültig bis ${input.validUntil.toLocaleDateString("de-DE")}`,
     { x: 48, y: 714, size: 9, font: regular, color: rgb(0.78, 0.84, 0.9) },
   );
+  page.drawText(`Erstellt am ${new Date().toLocaleDateString("de-DE")}`, {
+    x: 430,
+    y: 786,
+    size: 8,
+    font: regular,
+    color: rgb(0.78, 0.84, 0.9),
+  });
 
   let y = 650;
   const recipient = [
@@ -191,35 +221,107 @@ export async function createSalesOfferPdf(input: {
     (input.netTotalCents * input.vatRateBasisPoints) / 10_000,
   );
   const grossCents = input.netTotalCents + vatCents;
-  const totals = [
-    ["Netto", input.netTotalCents],
-    [
-      `Umsatzsteuer ${(input.vatRateBasisPoints / 100).toLocaleString("de-DE")} %`,
-      vatCents,
-    ],
-    ["Gesamt", grossCents],
-  ] as const;
+  const totals: readonly (readonly [string, number])[] =
+    input.smallBusinessExempt
+      ? [["Angebotssumme", input.netTotalCents]]
+      : [
+          ["Netto", input.netTotalCents],
+          [
+            `Umsatzsteuer ${(input.vatRateBasisPoints / 100).toLocaleString("de-DE")} %`,
+            vatCents,
+          ],
+          ["Gesamt", grossCents],
+        ];
   y -= 4;
   totals.forEach(([label, cents], index) => {
     page.drawText(label, {
       x: 372,
       y,
-      size: index === 2 ? 10 : 9,
-      font: index === 2 ? bold : regular,
+      size: index === totals.length - 1 ? 10 : 9,
+      font: index === totals.length - 1 ? bold : regular,
       color: rgb(0.08, 0.13, 0.18),
     });
     page.drawText(money.format(cents / 100), {
       x: 482,
       y,
-      size: index === 2 ? 10 : 9,
-      font: index === 2 ? bold : regular,
+      size: index === totals.length - 1 ? 10 : 9,
+      font: index === totals.length - 1 ? bold : regular,
       color: rgb(0.08, 0.13, 0.18),
     });
     y -= 18;
   });
+  if (input.smallBusinessExempt) {
+    y -= 2;
+    const taxNotice =
+      "Umsatzsteuerbefreit nach § 19 UStG (Kleinunternehmerregelung). Es wird keine Umsatzsteuer ausgewiesen.";
+    for (const line of wrap(taxNotice, bold, 8, 300)) {
+      page.drawText(line, {
+        x: 247,
+        y,
+        size: 8,
+        font: bold,
+        color: rgb(0.03, 0.45, 0.52),
+      });
+      y -= 12;
+    }
+  }
+  const infoBoxY = Math.max(120, y - 142);
+  page.drawRectangle({
+    x: 48,
+    y: infoBoxY,
+    width: 499,
+    height: 118,
+    color: rgb(0.95, 0.98, 0.99),
+    borderColor: rgb(0.78, 0.9, 0.92),
+    borderWidth: 0.8,
+  });
+  page.drawText("So geht es weiter", {
+    x: 62,
+    y: infoBoxY + 94,
+    size: 10,
+    font: bold,
+    color: rgb(0.03, 0.18, 0.27),
+  });
+  page.drawText(
+    "1. Angebot abstimmen   2. Leistungen bestätigen   3. Einrichtung starten",
+    {
+      x: 62,
+      y: infoBoxY + 74,
+      size: 8.3,
+      font: regular,
+      color: rgb(0.18, 0.25, 0.31),
+    },
+  );
+  page.drawText("Persönliche Begleitung", {
+    x: 62,
+    y: infoBoxY + 49,
+    size: 8,
+    font: bold,
+    color: rgb(0.03, 0.45, 0.52),
+  });
+  page.drawText(
+    "Vom ersten Aufbau bis zur Übergabe bleibt ENJO MEDIA direkt erreichbar.",
+    {
+      x: 62,
+      y: infoBoxY + 34,
+      size: 7.7,
+      font: regular,
+      color: rgb(0.36, 0.41, 0.47),
+    },
+  );
+  page.drawText(
+    "Leistungsumfang, Laufzeit und Zahlungsbedingungen werden im anschließenden Vertrag festgehalten.",
+    {
+      x: 62,
+      y: infoBoxY + 18,
+      size: 7.4,
+      font: regular,
+      color: rgb(0.36, 0.41, 0.47),
+    },
+  );
   page.drawText(
     "Dieses Angebot wird zusammen mit Leistungsbeschreibung, Vertrag und den vereinbarten Bedingungen verbindlich.",
-    { x: 48, y: 82, size: 7.5, font: regular, color: rgb(0.42, 0.46, 0.52) },
+    { x: 48, y: 92, size: 7.5, font: regular, color: rgb(0.42, 0.46, 0.52) },
   );
   page.drawText(
     `${input.sender.companyName} · ${input.sender.representativeName} · ${input.sender.street} · ${input.sender.postalCode} ${input.sender.city} · ${input.sender.email}`,

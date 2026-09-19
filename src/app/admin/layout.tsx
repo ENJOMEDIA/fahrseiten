@@ -24,15 +24,22 @@ export default async function PlatformLayout({
       ? [
           {
             href: "/admin/mandanten",
-            label: "Kundenakten",
-            icon: "M",
-            description: "Historie, Verträge, Rechnungen und Instanzen",
-            group: "Kunden & Vertrieb",
+            label: "Instanzen & Domains",
+            icon: "D",
+            description: "Websites, DNS, SSL und Zugänge",
+            group: "Plattform",
           },
         ]
       : []),
     ...(hasPlatformPermission(identity.platformRole, "platform.sales.manage")
       ? [
+          {
+            href: "/admin/kunden",
+            label: "Kundenakten",
+            icon: "M",
+            description: "Historie, Angebote und Kundenstatus",
+            group: "Kunden & Vertrieb",
+          },
           {
             href: "/admin/akquise",
             label: "Akquise",

@@ -993,6 +993,9 @@ export const salesOffers = mysqlTable(
     items: json("items").$type<SalesOfferItem[]>().notNull(),
     netTotalCents: int("net_total_cents").notNull(),
     vatRateBasisPoints: int("vat_rate_basis_points").default(1900).notNull(),
+    smallBusinessExempt: boolean("small_business_exempt")
+      .default(false)
+      .notNull(),
     createdByUserId: id("created_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),

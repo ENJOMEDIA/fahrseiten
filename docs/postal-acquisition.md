@@ -13,8 +13,12 @@ Der sichere Ausgangswert ist `ONLINEBRIEF_MODE=test`. Laut Anbieter landen diese
 ## Ablauf
 
 1. Ein berechtigter Plattformbenutzer legt im Akquise-CRM einen Kontakt an.
-2. In der Interessentenakte werden die vollständige Postanschrift und der persönliche Brief-Link gepflegt. Derselbe Link kann weiterhin einzeln als SVG-QR-Code heruntergeladen werden.
-3. Unter **Briefakquise** erzeugt die Plattform ein personalisiertes PDF. Nach der Sichtprüfung kann es in den Testwarenkorb oder nach gesonderter Livefreigabe in die Produktion übertragen werden.
+2. In der Kundenakte werden die vollständige Postanschrift und der persönliche Brief-Link gepflegt. Derselbe Link kann weiterhin einzeln als SVG-QR-Code heruntergeladen werden.
+3. Unter **Briefakquise** werden Kundenakte, Überschrift, Brieftext und optional
+   ein Bild aus dem Plattform-Medienbereich ausgewählt. Die Plattform erzeugt
+   daraus ein personalisiertes PDF mit Logo, Absender, Empfänger, Datum,
+   Lead-ID und QR-Code. Nach der Sichtprüfung kann es in den Testwarenkorb oder
+   nach gesonderter Livefreigabe in die Produktion übertragen werden.
 4. Die angeschriebene Fahrschule öffnet die gesonderte Rückmeldeseite und kann die Produktbeispielseite unverbindlich ansehen.
 5. Sie wählt genau eine Rückmeldung:
    - Interesse,

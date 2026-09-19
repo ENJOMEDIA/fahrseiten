@@ -27,7 +27,7 @@ export const customerNavigation = [
     href: "/kunde/anfragen",
     label: "Anfragen",
     icon: "@",
-    description: "Interessenten beantworten",
+    description: "Anfragen beantworten",
   },
   {
     href: "/kunde/domain",

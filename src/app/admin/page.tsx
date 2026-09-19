@@ -23,7 +23,7 @@ export default async function PlatformDashboardPage() {
       visible: hasPlatformPermission(role, "platform.sales.manage"),
       number: "02",
       title: "Akquise",
-      text: "Interessenten, Gesprächsnotizen und nächste Schritte übersichtlich an einem Ort halten.",
+      text: "Kundenakten, Gesprächsnotizen und nächste Schritte übersichtlich an einem Ort halten.",
       href: "/admin/akquise",
       action: "Akquise öffnen",
       tone: "bg-indigo-50 text-indigo-950",
@@ -126,11 +126,7 @@ export default async function PlatformDashboardPage() {
           </h2>
           <ol className="mt-7 grid gap-4 sm:grid-cols-3">
             {[
-              [
-                "1",
-                "Kontakt erfassen",
-                "Interessent und Bedarf dokumentieren.",
-              ],
+              ["1", "Kontakt erfassen", "Kundenakte und Bedarf dokumentieren."],
               ["2", "Mandant anlegen", "Sicheren Einmal-Link erzeugen."],
               ["3", "Domain freigeben", "DNS, SSL und Inhalte kontrollieren."],
             ].map(([number, title, text]) => (

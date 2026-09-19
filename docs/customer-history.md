@@ -18,7 +18,10 @@ Die Kundennummer wird deterministisch aus der zufälligen Tenant-UUID abgeleitet
 
 ## Kundenakte
 
-Die Mandantendetailseite dient als Kundenakte. Sie zeigt:
+Die zentrale Übersicht **Kundenakten** führt Akquise-Kontakte und aktive Kunden
+ohne doppelte Karte zusammen. Jede Fahrschule behält dieselbe Akte; ein
+farbiger Status kennzeichnet ihre Phase von Neu bis Aktiver Kunde. Die
+Aktenansicht zeigt:
 
 - Kundennummer, Lead-ID und Tenant-ID,
 - Ursprung und Stand der Akquise,
@@ -28,7 +31,10 @@ Die Mandantendetailseite dient als Kundenakte. Sie zeigt:
 - aktive und frühere Paketzuweisungen,
 - die bei jeder Paketzuweisung geltenden Einrichtungs- und Monatspreise.
 
-Alle Ereignisse werden chronologisch zusammengeführt. Technische Systemprotokolle und fachliche Akquise-Aktivitäten bleiben getrennte Datenbestände; die Kundenakte stellt sie nur gemeinsam dar.
+Alle Ereignisse werden chronologisch zusammengeführt. Technische
+Systemprotokolle und fachliche Akquise-Aktivitäten bleiben getrennte
+Datenbestände; die Kundenakte stellt sie gemeinsam dar. **Instanzen & Domains**
+bleibt die technische Betriebsansicht für Website, Zugang, DNS und SSL.
 
 ## Einrichtung und Löschung
 

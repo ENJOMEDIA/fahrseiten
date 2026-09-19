@@ -64,7 +64,7 @@ export default async function SalesLeadDetailPage({
   return (
     <CustomerPage
       title={lead.companyName}
-      description="Durchgängige Interessentenakte von der ersten Ansprache bis zur Kundeninstanz."
+      description="Durchgängige Kundenakte von der ersten Ansprache bis zur laufenden Kundeninstanz."
     >
       <SalesNav />
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -92,7 +92,7 @@ export default async function SalesLeadDetailPage({
           <p className="text-xs font-bold tracking-[.16em] text-cyan-700 uppercase">
             Stammdaten
           </p>
-          <h2 className="mt-2 text-2xl font-semibold">Interessentenakte</h2>
+          <h2 className="mt-2 text-2xl font-semibold">Kundenakte</h2>
           <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-slate-500">Ansprechperson</dt>
@@ -149,7 +149,7 @@ export default async function SalesLeadDetailPage({
               className="mt-5 inline-flex rounded-xl bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-950"
               href={`/admin/mandanten/${lead.convertedTenantId}`}
             >
-              Zugehörige Kundenakte öffnen →
+              Technische Instanz öffnen →
             </Link>
           ) : null}
         </Card>

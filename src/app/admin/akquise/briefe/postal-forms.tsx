@@ -23,8 +23,10 @@ function Result({ state }: { state: PostalActionState }) {
 
 export function PreparePostalForm({
   leads,
+  media,
 }: {
   leads: { id: string; companyName: string; addressComplete: boolean }[];
+  media: { id: string; label: string }[];
 }) {
   const [state, action, pending] = useActionState(
     preparePostalDispatchAction,
@@ -33,7 +35,7 @@ export function PreparePostalForm({
   return (
     <form action={action} className="space-y-4">
       <label className="block text-sm font-semibold">
-        Interessentenakte
+        Kundenakte
         <select
           className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
           name="leadId"
@@ -48,6 +50,40 @@ export function PreparePostalForm({
             >
               {lead.companyName}
               {lead.addressComplete ? "" : " – Anschrift fehlt"}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block text-sm font-semibold">
+        Überschrift
+        <input
+          className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+          defaultValue="Eine Website, die Ihrer Fahrschule Arbeit abnimmt."
+          name="headline"
+          required
+        />
+      </label>
+      <label className="block text-sm font-semibold">
+        Persönlicher Brieftext
+        <textarea
+          className="mt-2 min-h-48 w-full rounded-xl border border-slate-300 p-3 leading-6 font-normal"
+          defaultValue={
+            "FahrSeiten verbindet einen modernen Webauftritt mit einem übersichtlichen Arbeitsbereich: Klassen, Preise, Kurse, Fahrzeuge, Team, Standorte und Anfragen lassen sich selbst pflegen – ohne technischen Daueraufwand. Gestaltung und Bausteine bleiben dabei bewusst geführt, damit die Seite auch nach Änderungen hochwertig wirkt.\n\nScannen Sie Ihren persönlichen QR-Code. Dort können Sie unverbindlich Interesse anmelden, weitere Informationen anfordern oder jede weitere Ansprache ablehnen."
+          }
+          name="bodyText"
+          required
+        />
+      </label>
+      <label className="block text-sm font-semibold">
+        Optionales Bild aus dem Plattform-Medienbereich
+        <select
+          className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+          name="imageMediaId"
+        >
+          <option value="">Ohne zusätzliches Bild</option>
+          {media.map((asset) => (
+            <option key={asset.id} value={asset.id}>
+              {asset.label}
             </option>
           ))}
         </select>

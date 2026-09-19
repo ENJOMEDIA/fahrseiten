@@ -7,6 +7,7 @@ import {
   onlinebriefConfiguration,
 } from "@/modules/onlinebrief/service";
 import { requirePlatformPermission } from "@/modules/platform/access";
+import { listPlatformMedia } from "@/modules/media/repository";
 import { listSalesPipeline } from "@/modules/platform/sales-crm";
 
 import { PreparePostalForm, SubmitPostalForm } from "./postal-forms";
@@ -19,9 +20,10 @@ const formatter = new Intl.DateTimeFormat("de-DE", {
 
 export default async function PostalAcquisitionPage() {
   await requirePlatformPermission("platform.sales.manage");
-  const [leads, dispatches] = await Promise.all([
+  const [leads, dispatches, media] = await Promise.all([
     listSalesPipeline(),
     listPostalDispatches(),
+    listPlatformMedia(),
   ]);
   const configuration = onlinebriefConfiguration();
   return (
@@ -55,7 +57,9 @@ export default async function PostalAcquisitionPage() {
           <h2 className="mt-2 text-2xl font-semibold">Brief-PDF erzeugen</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Empfängeranschrift, persönliche Lead-ID und QR-Code werden fest in
-            das PDF eingebaut. Prüfe das PDF vor jeder Übertragung.
+            das PDF eingebaut. Logo, Text und ein optionales Motiv lassen sich
+            direkt vor der Erzeugung zusammenstellen. Prüfe das PDF vor jeder
+            Übertragung.
           </p>
           <div className="mt-5">
             <PreparePostalForm
@@ -66,6 +70,12 @@ export default async function PostalAcquisitionPage() {
                   lead.street && lead.postalCode && lead.city,
                 ),
               }))}
+              media={media
+                .filter((asset) => asset.mimeType.startsWith("image/"))
+                .map((asset) => ({
+                  id: asset.id,
+                  label: asset.description || asset.originalName,
+                }))}
             />
           </div>
         </Card>

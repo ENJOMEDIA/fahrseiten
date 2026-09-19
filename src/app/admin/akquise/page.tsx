@@ -73,7 +73,7 @@ export default async function SalesPage() {
       ) : null}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card className="surface-lift">
-          <p className="text-sm text-slate-500">Interessenten</p>
+          <p className="text-sm text-slate-500">Kundenakten im Vertrieb</p>
           <p className="mt-1 text-3xl font-semibold">{leads.length}</p>
         </Card>
         <Card className="surface-lift">
@@ -201,7 +201,7 @@ export default async function SalesPage() {
                     className="mt-2 inline-flex text-xs font-semibold text-cyan-800"
                     href={`/admin/akquise/${lead.id}`}
                   >
-                    Interessentenakte öffnen →
+                    Kundenakte öffnen →
                   </Link>
                   {lead.contactName ? (
                     <p className="mt-1 text-xs text-slate-500">

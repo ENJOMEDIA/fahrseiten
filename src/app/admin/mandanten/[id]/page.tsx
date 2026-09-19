@@ -365,7 +365,7 @@ export default async function TenantDetailPage({
               Vertrieb
             </p>
             <h2 className="mt-2 text-2xl font-semibold">
-              Angebote aus der Interessentenakte
+              Angebote aus der Kundenakte
             </h2>
           </div>
           {tenant.originLead ? (
@@ -373,7 +373,7 @@ export default async function TenantDetailPage({
               className="rounded-xl bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-950"
               href={`/admin/akquise/${tenant.originLead.id}`}
             >
-              Interessentenakte öffnen →
+              Kundenakte öffnen →
             </a>
           ) : null}
         </div>

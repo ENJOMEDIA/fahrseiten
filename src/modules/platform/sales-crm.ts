@@ -204,7 +204,7 @@ export async function updateLead(input: {
       .from(salesLeads)
       .where(eq(salesLeads.id, input.id))
       .limit(1);
-    if (!existing[0]) throw new Error("Interessent wurde nicht gefunden.");
+    if (!existing[0]) throw new Error("Die Kundenakte wurde nicht gefunden.");
     if (existing[0].emailOptOutAt && emailPermission !== "withdrawn")
       throw new Error(
         "Die Abmeldung ist dauerhaft gesperrt und kann nicht über die Bearbeitung aufgehoben werden.",

@@ -25,7 +25,8 @@ export async function createSalesOfferAction(
       descriptions: formData.getAll("description").map(String),
       quantities: formData.getAll("quantity").map(String),
       unitPrices: formData.getAll("unitPrice").map(String),
-      vatRate: String(formData.get("vatRate") ?? "19"),
+      vatRate: String(formData.get("vatRate") ?? "0"),
+      smallBusinessExempt: formData.get("smallBusinessExempt") === "yes",
     });
     revalidatePath(`/admin/akquise/${formData.get("leadId")}`);
     revalidatePath("/admin/akquise");

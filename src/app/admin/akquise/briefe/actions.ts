@@ -20,6 +20,9 @@ export async function preparePostalDispatchAction(
       leadId: String(formData.get("leadId") ?? ""),
       actorUserId: identity.id,
       color: formData.get("color") === "yes",
+      headline: String(formData.get("headline") ?? ""),
+      bodyText: String(formData.get("bodyText") ?? ""),
+      imageMediaId: String(formData.get("imageMediaId") ?? ""),
     });
     revalidatePath("/admin/akquise/briefe");
     revalidatePath("/admin/akquise");

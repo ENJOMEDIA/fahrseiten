@@ -12,7 +12,13 @@ import {
 } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { findPlatformLegalProfile } from "@/modules/legal/repository";
+import {
+  findPlatformLogoId,
+  findPublicMedia,
+} from "@/modules/media/repository";
+import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { priceToCents } from "@/modules/platform/pricing";
+import sharp from "sharp";
 
 import { createSalesOfferPdf } from "./pdf";
 
@@ -42,6 +48,7 @@ export async function createSalesOffer(input: {
   quantities: string[];
   unitPrices: string[];
   vatRate: string;
+  smallBusinessExempt: boolean;
 }) {
   const parsed = z
     .object({
@@ -58,7 +65,9 @@ export async function createSalesOffer(input: {
   const vatRate = Number(parsed.vatRate.replace(",", "."));
   if (!Number.isFinite(vatRate) || vatRate < 0 || vatRate > 100)
     throw new Error("Bitte einen gültigen Umsatzsteuersatz angeben.");
-  const vatRateBasisPoints = Math.round(vatRate * 100);
+  const vatRateBasisPoints = input.smallBusinessExempt
+    ? 0
+    : Math.round(vatRate * 100);
   const items: SalesOfferItem[] = input.descriptions.flatMap(
     (description, index) => {
       const text = z.string().trim().max(300).parse(description);
@@ -82,7 +91,7 @@ export async function createSalesOffer(input: {
     .from(salesLeads)
     .where(eq(salesLeads.id, parsed.leadId))
     .limit(1);
-  if (!lead) throw new Error("Die Interessentenakte wurde nicht gefunden.");
+  if (!lead) throw new Error("Die Kundenakte wurde nicht gefunden.");
   const id = createId();
   const offerNumber = `AN-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${id.slice(0, 8).toUpperCase()}`;
   const netTotalCents = items.reduce(
@@ -100,6 +109,7 @@ export async function createSalesOffer(input: {
       items,
       netTotalCents,
       vatRateBasisPoints,
+      smallBusinessExempt: input.smallBusinessExempt,
       createdByUserId: parsed.actorUserId,
     });
     await tx
@@ -162,18 +172,20 @@ export async function buildSalesOfferPdf(offerId: string) {
     .where(eq(salesOffers.id, z.uuid().parse(offerId)))
     .limit(1);
   if (!offer) return null;
-  const [[lead], sender] = await Promise.all([
+  const [[lead], sender, brandLogoPng] = await Promise.all([
     db
       .select()
       .from(salesLeads)
       .where(eq(salesLeads.id, offer.leadId))
       .limit(1),
     findPlatformLegalProfile(),
+    loadOfferLogo().catch(() => undefined),
   ]);
   if (!lead || !sender)
     throw new Error("Für das Angebot fehlen Kontakt- oder Anbieterangaben.");
   const bytes = await createSalesOfferPdf({
     ...offer,
+    brandLogoPng,
     recipient: {
       companyName: lead.companyName,
       contactName: lead.contactName,
@@ -192,4 +204,23 @@ export async function buildSalesOfferPdf(offerId: string) {
     },
   });
   return { offer, bytes };
+}
+
+async function loadOfferLogo() {
+  const logoId = await findPlatformLogoId();
+  if (!logoId) return undefined;
+  const asset = await findPublicMedia(logoId);
+  if (!asset) return undefined;
+  const source = await getMediaStorage().read(asset.storageKey);
+  return new Uint8Array(
+    await sharp(source)
+      .resize({
+        width: 620,
+        height: 168,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .png()
+      .toBuffer(),
+  );
 }

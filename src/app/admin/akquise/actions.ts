@@ -43,13 +43,13 @@ export async function createLeadAction(
       identity.id,
     );
     revalidatePath("/admin/akquise");
-    return { message: "Interessent wurde angelegt.", error: false };
+    return { message: "Die Kundenakte wurde angelegt.", error: false };
   } catch (error) {
     return {
       message:
         error instanceof Error
           ? error.message
-          : "Interessent konnte nicht angelegt werden.",
+          : "Die Kundenakte konnte nicht angelegt werden.",
       error: true,
     };
   }

@@ -282,7 +282,7 @@ export function CreateLeadForm() {
   return (
     <details className="group rounded-[2rem] border border-cyan-100 bg-cyan-50 p-5">
       <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-cyan-950">
-        <span>+ Interessent manuell anlegen</span>
+        <span>+ Kundenakte manuell anlegen</span>
         <span className="text-xl transition group-open:rotate-45">+</span>
       </summary>
       <form
@@ -401,7 +401,7 @@ export function CreateLeadForm() {
             disabled={pending}
             type="submit"
           >
-            {pending ? "Legt an …" : "Interessent anlegen"}
+            {pending ? "Legt an …" : "Kundenakte anlegen"}
           </button>
           <Result state={state} />
         </div>

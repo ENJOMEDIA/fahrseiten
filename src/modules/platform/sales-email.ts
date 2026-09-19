@@ -11,6 +11,8 @@ import {
   salesLeads,
 } from "@/db/schema";
 import { createId } from "@/lib/ids";
+import { findPlatformLogoId } from "@/modules/media/repository";
+import { mediaPublicUrl } from "@/modules/media/public-url";
 import { salesUnsubscribeUrl } from "./sales-unsubscribe";
 
 const templateSchema = z.object({
@@ -26,7 +28,7 @@ const builtinTemplates = [
     name: "Persönlicher Website-Impuls",
     subjectTemplate: "{{Fahrschule}}: moderner Webauftritt ohne Technikstress",
     bodyTemplate:
-      "Guten Tag {{Ansprechpartner}},\n\nviele Fahrschulen leisten täglich starke Arbeit – doch die Website kann mit neuen Kursen, Preisen und Fahrzeugen oft nicht Schritt halten. Genau dafür entwickeln wir FahrSeiten.\n\nIhre Fahrschule erhält einen modernen Auftritt auf der eigenen Domain und ein übersichtliches Dashboard, in dem Inhalte ohne Technikkenntnisse gepflegt werden können.\n\nEin Beispiel finden Sie hier: {{Beispiel-Webseite}}\n\nDarf ich Ihnen in 15 Minuten zeigen, wie FahrSeiten für {{Fahrschule}} aussehen könnte?\n\nFreundliche Grüße\nENJO MEDIA",
+      "Guten Tag {{Ansprechpartner}},\n\neine Fahrschulwebsite sollte nicht jedes Mal zum Technikprojekt werden, nur weil sich ein Kurs, ein Preis oder ein Fahrzeug ändert. Genau an diesem Punkt setzt FahrSeiten an.\n\nSie bekommen einen hochwertigen Auftritt auf Ihrer eigenen Domain und pflegen die Inhalte später in einem klaren Dashboard selbst. Wenn Sie Unterstützung brauchen, bleibt ENJO MEDIA persönlich erreichbar.\n\nSo kann eine FahrSeite aussehen: {{Beispiel-Webseite}}\n\nWenn Sie mögen, skizziere ich Ihnen in einem kurzen Gespräch, wie der Auftritt von {{Fahrschule}} aufgebaut sein könnte.\n\nBeste Grüße\nEnrico Vogt · ENJO MEDIA",
     styleKey: "cyan" as const,
   },
   {
@@ -34,7 +36,7 @@ const builtinTemplates = [
     name: "Startup mit Fahrschul-Fokus",
     subjectTemplate: "Wir bauen die digitale Zukunft für Fahrschulen",
     bodyTemplate:
-      "Guten Tag {{Ansprechpartner}},\n\nmit FahrSeiten bauen wir bei ENJO MEDIA eine neue Plattform speziell für Fahrschulen auf – eigenständig entwickelt, einfach bedienbar und mit dem Anspruch, daraus etwas wirklich Großes zu machen.\n\nViele gute Fahrschulen sind online kaum sichtbar oder können ihren Auftritt nur umständlich aktuell halten. FahrSeiten verbindet deshalb Website, Inhalte und Anfragen an einem Ort.\n\nSo kann das aussehen: {{Beispiel-Webseite}}\n\nWir suchen Fahrschulen, die früh dabei sein und die Plattform mit echtem Praxisfeedback mitgestalten möchten. Wäre ein kurzes Kennenlernen interessant?\n\nBeste Grüße\nENJO MEDIA",
+      "Guten Tag {{Ansprechpartner}},\n\nFahrSeiten ist unser neues Produkt für Fahrschulen – eigenständig entwickelt bei ENJO MEDIA und mit einer ziemlich klaren Idee: Ein guter Webauftritt darf im Alltag weder Zeit fressen noch Fachwissen voraussetzen.\n\nDeshalb verbinden wir Website, Inhalte und Anfragen in einer Oberfläche, die auch zwischen Unterricht, Prüfungen und Büroarbeit verständlich bleibt. Wir stehen am Anfang, wollen daraus aber bewusst eine große, langfristige Plattform bauen.\n\nEinen Eindruck bekommen Sie hier: {{Beispiel-Webseite}}\n\nWir suchen gerade Fahrschulen, die früh dabei sein und ihre Praxiserfahrung einbringen möchten. Hätten Sie Lust auf ein unverbindliches Kennenlernen?\n\nViele Grüße\nEnrico Vogt · ENJO MEDIA",
     styleKey: "midnight" as const,
   },
   {
@@ -42,7 +44,7 @@ const builtinTemplates = [
     name: "Website heute, Plattform morgen",
     subjectTemplate: "Mehr als eine Website für {{Fahrschule}}",
     bodyTemplate:
-      "Guten Tag {{Ansprechpartner}},\n\nFahrSeiten startet mit dem, was sofort zählt: einer schnellen Fahrschulwebsite, eigener Domain, einfach pflegbaren Klassen, Preisen, Kursen, Team, Fuhrpark und Kontaktanfragen.\n\nDarauf bauen wir weiter. Geplant sind unter anderem Fahrstundenplanung, Schülerverwaltung, automatische Erinnerungen und unterstützte Werbekampagnen – Schritt für Schritt in derselben Plattform.\n\nEine Beispiel-Website: {{Beispiel-Webseite}}\n\nWenn Sie Ihren Webauftritt modernisieren und bei der Entwicklung früh mitreden möchten, stelle ich Ihnen FahrSeiten gern persönlich vor.\n\nFreundliche Grüße\nENJO MEDIA",
+      "Guten Tag {{Ansprechpartner}},\n\nFahrSeiten beginnt dort, wo sofort Entlastung entsteht: bei einer schnellen Website, die Sie selbst aktuell halten können. Klassen, Preise, Kurse, Team, Fuhrpark, Standorte und Anfragen liegen übersichtlich an einem Ort.\n\nUnd die Plattform wächst mit: Fahrstundenplanung, Schülerverwaltung, Erinnerungen und unterstützte Werbekampagnen sind als nächste Ausbaustufen vorgesehen. Sie müssen später also nicht wieder bei null anfangen.\n\nHier können Sie den Ansatz direkt ansehen: {{Beispiel-Webseite}}\n\nWenn das für {{Fahrschule}} interessant klingt, zeige ich Ihnen gern persönlich, was heute schon möglich ist und was als Nächstes kommt.\n\nBeste Grüße\nEnrico Vogt · ENJO MEDIA",
     styleKey: "sunrise" as const,
   },
   {
@@ -115,6 +117,7 @@ function renderHtml(
   text: string,
   styleKey: "cyan" | "midnight" | "sunrise" = "cyan",
   unsubscribeUrl: string,
+  logoUrl?: string,
 ) {
   const styles = {
     cyan: { background: "#ecfeff", accent: "#0891b2", ink: "#0f172a" },
@@ -131,7 +134,10 @@ function renderHtml(
       return `<p style="margin:24px 0"><a href="${escapeHtml(exampleUrl)}" style="display:inline-block;background:${styles.accent};color:#fff;text-decoration:none;font-weight:700;padding:13px 20px;border-radius:999px">Beispiel-Website ansehen</a></p>`;
     })
     .join("");
-  return `<div style="background:${styles.background};padding:36px 16px;font-family:Arial,sans-serif;color:${styles.ink}"><div style="max-width:640px;margin:auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,.10)"><div style="height:7px;background:${styles.accent}"></div><div style="padding:34px"><div style="font-size:20px;font-weight:800;color:${styles.accent};margin-bottom:26px">FahrSeiten <span style="font-size:12px;color:#64748b">by ENJO MEDIA</span></div>${paragraphs}<div style="font-size:12px;line-height:1.55;color:#64748b;border-top:1px solid #e2e8f0;padding-top:18px;margin-top:26px"><p>Sie erhalten diese Nachricht von ENJO MEDIA auf Grundlage einer dokumentierten Kontaktfreigabe. Sie können weitere Akquise-E-Mails jederzeit ablehnen.</p><p style="margin:16px 0 0"><a href="${escapeHtml(unsubscribeUrl)}" style="display:inline-block;color:#991b1b;font-weight:700;text-decoration:underline">Weitere Akquise-E-Mails abbestellen</a></p></div></div></div></div>`;
+  const logo = logoUrl
+    ? `<img alt="FahrSeiten by ENJO MEDIA" src="${escapeHtml(logoUrl)}" style="display:block;max-width:180px;max-height:52px;width:auto;height:auto">`
+    : `<div style="font-size:20px;font-weight:800;color:${styles.accent}">FahrSeiten <span style="font-size:12px;color:#64748b">by ENJO MEDIA</span></div>`;
+  return `<div style="background:${styles.background};padding:42px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:${styles.ink}"><div style="max-width:640px;margin:auto;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 24px 70px rgba(15,23,42,.12)"><div style="height:8px;background:linear-gradient(90deg,${styles.accent},#67e8f9)"></div><div style="padding:38px 38px 18px"><div style="margin-bottom:30px">${logo}<div style="margin-top:12px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#64748b">Websites für Fahrschulen. Einfach im Alltag.</div></div>${paragraphs}<div style="margin:30px 0 4px;padding:18px 20px;border-radius:18px;background:#f8fafc;font-size:13px;line-height:1.6;color:#334155"><strong style="color:${styles.accent}">Persönlich statt anonym:</strong> Bei Fragen sprechen Sie direkt mit ENJO MEDIA – von der ersten Idee bis zur laufenden Seite.</div><div style="font-size:12px;line-height:1.6;color:#64748b;border-top:1px solid #e2e8f0;padding-top:20px;margin-top:28px"><p>Sie erhalten diese Nachricht auf Grundlage einer dokumentierten Kontaktfreigabe.</p><p style="margin:14px 0 0"><a href="${escapeHtml(unsubscribeUrl)}" style="display:inline-block;color:#991b1b;font-weight:700;text-decoration:underline">Keine weiteren Akquise-E-Mails erhalten</a></p></div></div><div style="padding:15px 38px 22px;color:#94a3b8;font-size:11px">FahrSeiten · ein Produkt von ENJO MEDIA</div></div></div>`;
 }
 
 export async function queueSalesOutreach(input: {
@@ -183,6 +189,10 @@ export async function queueSalesOutreach(input: {
       "Für alle ausgewählten Kontakte muss eine dokumentierte E-Mail-Freigabe vorliegen; abgemeldete Kontakte bleiben gesperrt.",
     );
   const now = new Date();
+  const platformLogoId = await findPlatformLogoId();
+  const logoUrl = platformLogoId
+    ? new URL(mediaPublicUrl(platformLogoId), env.APP_BASE_URL).toString()
+    : undefined;
   await db.transaction(async (tx) => {
     for (const lead of leads) {
       const id = createId();
@@ -207,6 +217,7 @@ export async function queueSalesOutreach(input: {
               text,
               builtinTemplate?.styleKey ?? "cyan",
               unsubscribeUrl,
+              logoUrl,
             ),
           },
         },

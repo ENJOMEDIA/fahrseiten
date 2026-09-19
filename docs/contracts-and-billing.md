@@ -7,14 +7,16 @@ steuerliche Rechnung.
 
 ## Angebote und Akten
 
-Jeder Akquise-Kontakt besitzt eine eigene Interessentenakte mit Stammdaten,
+Jeder Akquise-Kontakt besitzt von Beginn an eine Kundenakte mit Stammdaten,
 Postanschrift, Wiedervorlage, Notizen, Briefvorgängen, Angeboten und
 Aktivitätshistorie. Der Angebotsbearbeiter verwaltet frei beschreibbare
-Positionen, Menge, Nettopreis, Umsatzsteuersatz, Gültigkeit und Status. Er
+Positionen, Menge, Preis, Steuerbehandlung, Gültigkeit und Status. Optionale
+Positionen wie Fotografie werden nur bei Bedarf ergänzt und können vollständig
+entfernt werden. Er
 erzeugt ein personalisiertes Angebots-PDF und kann den Stand als versendet,
 angenommen oder abgelehnt dokumentieren. Eine Annahme setzt den Lead auf
 `gewonnen`; die anschließende Instanzeinrichtung verknüpft dieselbe Lead-ID mit
-der späteren Kundenakte.
+der technischen Kundeninstanz.
 
 Nach der Instanzeinrichtung ist die Fahrschule unter **Kundenakten** erreichbar.
 Dort werden Akquise-Historie, Paket, Laufzeit, Rechnungsanschrift,
@@ -29,6 +31,15 @@ Fälligkeit, Bruttobetrag und externer Referenz hinterlegen sowie den Status auf
 offen, bezahlt, überfällig oder storniert setzen. Der Kunde sieht diese Angaben
 unter **Vertrag & Rechnungen**; die Oberfläche weist ausdrücklich darauf hin,
 dass die Rechnung separat zugestellt wird.
+
+Neue Angebote verwenden standardmäßig die explizite Auswahl
+**Kleinunternehmerregelung nach § 19 UStG**. In diesem Fall wird keine
+Umsatzsteuerposition berechnet oder ausgewiesen; das PDF enthält stattdessen
+den Hinweis „Umsatzsteuerbefreit nach § 19 UStG (Kleinunternehmerregelung). Es
+wird keine Umsatzsteuer ausgewiesen.“ Wird die Auswahl bewusst deaktiviert,
+kann ein Umsatzsteuersatz angegeben werden. Die Einstellung ist ein
+kaufmännischer Snapshot je Angebot und ersetzt keine Prüfung des jeweils
+geltenden Steuerstatus.
 
 Rechnungskopien liegen im persistenten, nicht von Git verwalteten
 Medienverzeichnis. Der Download prüft serverseitig Plattformberechtigung oder

@@ -21,6 +21,11 @@ function wrapText(text: string, font: PDFFont, size: number, width: number) {
 }
 
 export type AcquisitionLetterInput = {
+  brandLogoPng?: Uint8Array;
+  heroImagePng?: Uint8Array;
+  createdAt: Date;
+  headline: string;
+  bodyText: string;
   leadId: string;
   campaignUrl: string;
   recipient: {
@@ -56,6 +61,12 @@ export async function createAcquisitionLetterPdf(
     color: { dark: "#07111f", light: "#ffffff" },
   });
   const qr = await document.embedPng(qrBytes);
+  const brandLogo = input.brandLogoPng
+    ? await document.embedPng(input.brandLogoPng)
+    : null;
+  const heroImage = input.heroImagePng
+    ? await document.embedPng(input.heroImagePng)
+    : null;
 
   page.drawText(
     `${input.sender.companyName} · ${input.sender.street} · ${input.sender.postalCode} ${input.sender.city}`,
@@ -87,19 +98,36 @@ export async function createAcquisitionLetterPdf(
     height: PAGE_HEIGHT,
     color: rgb(0.03, 0.67, 0.76),
   });
-  page.drawText("FAHRSEITEN", {
-    x: 387,
-    y: 782,
-    size: 17,
-    font: bold,
-    color: rgb(0.03, 0.18, 0.27),
-  });
-  page.drawText("by ENJO MEDIA", {
-    x: 449,
-    y: 766,
-    size: 7.5,
-    font: bold,
-    color: rgb(0.03, 0.55, 0.63),
+  if (brandLogo) {
+    const dimensions = brandLogo.scaleToFit(150, 46);
+    page.drawImage(brandLogo, {
+      x: 540 - dimensions.width,
+      y: 785 - dimensions.height,
+      width: dimensions.width,
+      height: dimensions.height,
+    });
+  } else {
+    page.drawText("FAHRSEITEN", {
+      x: 387,
+      y: 782,
+      size: 17,
+      font: bold,
+      color: rgb(0.03, 0.18, 0.27),
+    });
+    page.drawText("by ENJO MEDIA", {
+      x: 449,
+      y: 766,
+      size: 7.5,
+      font: bold,
+      color: rgb(0.03, 0.55, 0.63),
+    });
+  }
+  page.drawText(`Datum: ${input.createdAt.toLocaleDateString("de-DE")}`, {
+    x: 420,
+    y: 650,
+    size: 8,
+    font: regular,
+    color: rgb(0.35, 0.4, 0.47),
   });
 
   let y = 606;
@@ -125,22 +153,32 @@ export async function createAcquisitionLetterPdf(
   drawParagraph(
     `${input.recipient.contactName ? `Guten Tag ${input.recipient.contactName},` : "Guten Tag,"}`,
   );
-  drawParagraph(
-    "Ihre Fahrschulwebsite darf genauso modern sein wie Ihre Ausbildung.",
-    {
-      bold: true,
-      size: 16,
-    },
-  );
-  drawParagraph(
-    "FahrSeiten ist eine neue Plattform von ENJO MEDIA, mit der Fahrschulen ihre Website, Inhalte, Anfragen und wichtigen Rechtstexte an einem Ort verwalten können. Klar aufgebaut, ohne technischen Daueraufwand und mit persönlicher Begleitung.",
-  );
-  drawParagraph(
-    "Sie pflegen Führerscheinklassen, Preise, Kurse, Fahrzeuge, Team und Standorte selbst. Für das Design stehen kontrollierte Bausteine und Vorlagen bereit – damit die Seite hochwertig bleibt, auch wenn Inhalte später eigenständig geändert werden.",
-  );
-  drawParagraph(
-    "Scannen Sie den persönlichen QR-Code und wählen Sie unverbindlich aus, ob Sie Interesse haben, weitere Informationen wünschen oder keine weitere Ansprache möchten.",
-  );
+  drawParagraph(input.headline, { bold: true, size: 16 });
+  if (heroImage) {
+    const dimensions = heroImage.scaleToFit(470, 92);
+    page.drawRectangle({
+      x: 55,
+      y: y - 98,
+      width: 485,
+      height: 98,
+      color: rgb(0.94, 0.98, 0.99),
+    });
+    page.drawImage(heroImage, {
+      x: 62 + (471 - dimensions.width) / 2,
+      y: y - 95 + (92 - dimensions.height) / 2,
+      width: dimensions.width,
+      height: dimensions.height,
+    });
+    y -= 112;
+  }
+  input.bodyText
+    .split(/\n\n+/)
+    .filter(Boolean)
+    .forEach((paragraph) => drawParagraph(paragraph));
+  if (y < 280)
+    throw new Error(
+      "Der Brieftext ist für das einseitige Layout zu lang. Bitte kürze ihn oder entferne das Bild.",
+    );
 
   page.drawRectangle({
     x: 55,

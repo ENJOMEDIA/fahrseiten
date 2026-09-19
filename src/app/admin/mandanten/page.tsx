@@ -41,8 +41,8 @@ export default async function TenantsPage({
 
   return (
     <CustomerPage
-      title="Kundenakten"
-      description="Alle Fahrschulen mit Historie, Vertrag, Rechnung, Zugang, Domain und Freigabeschritten."
+      title="Instanzen & Domains"
+      description="Technische Websites, Zugänge, Domains, SSL-Status und offene Einrichtungsschritte verwalten."
     >
       {notice.setupCancelled ? (
         <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-950">
@@ -70,7 +70,7 @@ export default async function TenantsPage({
           <div>
             <p className="text-sm text-slate-400">Kundenbestand</p>
             <p className="mt-1 text-3xl font-semibold">
-              {tenantRows.length} Kundenakten
+              {tenantRows.length} Instanzen
             </p>
           </div>
           <Link

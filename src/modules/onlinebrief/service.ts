@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { desc, eq } from "drizzle-orm";
+import sharp from "sharp";
 import { z } from "zod";
 
 import { env } from "@/config/env";
@@ -9,11 +10,39 @@ import { db } from "@/db/client";
 import { postalDispatches, salesActivities, salesLeads } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { findPlatformLegalProfile } from "@/modules/legal/repository";
+import {
+  findPlatformLogoId,
+  findPublicMedia,
+} from "@/modules/media/repository";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { postalCampaignUrl } from "@/modules/platform/postal-campaign";
 
 import { submitOnlinebrief } from "./client";
 import { createAcquisitionLetterPdf } from "./letter-pdf";
+
+async function loadPlatformImage(
+  mediaId: string | null,
+  size: { width: number; height: number },
+) {
+  if (!mediaId) return undefined;
+  const asset = await findPublicMedia(mediaId);
+  if (!asset || asset.tenantId)
+    throw new Error(
+      "Das ausgewählte Motiv gehört nicht zu den Plattformmedien.",
+    );
+  const source = await getMediaStorage().read(asset.storageKey);
+  return new Uint8Array(
+    await sharp(source)
+      .resize({
+        width: size.width,
+        height: size.height,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .png()
+      .toBuffer(),
+  );
+}
 
 async function findPostalLead(leadId: string) {
   const id = z.uuid().parse(leadId);
@@ -25,7 +54,7 @@ async function findPostalLead(leadId: string) {
   if (!lead) throw new Error("Der Akquise-Kontakt wurde nicht gefunden.");
   if (!lead.street || !lead.postalCode || !lead.city)
     throw new Error(
-      "Für den Brief fehlen Straße, PLZ oder Ort in der Interessentenakte.",
+      "Für den Brief fehlen Straße, PLZ oder Ort in der Kundenakte.",
     );
   return {
     ...lead,
@@ -62,10 +91,28 @@ export async function preparePostalDispatch(input: {
   leadId: string;
   actorUserId: string;
   color: boolean;
+  headline: string;
+  bodyText: string;
+  imageMediaId: string;
 }) {
-  const [lead, sender] = await Promise.all([
+  const content = z
+    .object({
+      headline: z.string().trim().min(10).max(160),
+      bodyText: z.string().trim().min(80).max(1_200),
+      imageMediaId: z.union([z.literal(""), z.uuid()]),
+    })
+    .parse(input);
+  const logoId = await findPlatformLogoId();
+  const [lead, sender, brandLogoPng, heroImagePng] = await Promise.all([
     findPostalLead(input.leadId),
     findPlatformLegalProfile(),
+    loadPlatformImage(logoId, { width: 620, height: 168 }).catch(
+      () => undefined,
+    ),
+    loadPlatformImage(content.imageMediaId || null, {
+      width: 1_100,
+      height: 240,
+    }),
   ]);
   if (!sender)
     throw new Error(
@@ -73,6 +120,11 @@ export async function preparePostalDispatch(input: {
     );
   const dispatchId = createId();
   const bytes = await createAcquisitionLetterPdf({
+    brandLogoPng,
+    heroImagePng,
+    createdAt: new Date(),
+    headline: content.headline,
+    bodyText: content.bodyText,
     leadId: lead.id,
     campaignUrl: postalCampaignUrl(lead.id),
     recipient: {

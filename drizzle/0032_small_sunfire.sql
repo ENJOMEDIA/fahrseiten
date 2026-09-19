@@ -1,0 +1,1 @@
+ALTER TABLE `sales_offers` ADD `small_business_exempt` boolean DEFAULT false NOT NULL;
