@@ -3,9 +3,10 @@ import { getSessionIdentity } from "@/modules/auth/session";
 import { LegalBuilder } from "@/modules/legal/legal-builder";
 import {
   findLatestTenantLegalDocuments,
-  findRequiredTenantLegalModules,
+  findTenantLegalRequirements,
   findTenantLegalProfile,
 } from "@/modules/legal/repository";
+import { findMissingRequiredLegalModules } from "@/modules/legal/requirements";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
 import { saveLegalAction } from "./actions";
 import { isTenantFeatureEnabled } from "@/modules/features/access";
@@ -25,13 +26,13 @@ export default async function LegalPage() {
           activeTenantIds: identity.memberships.map((item) => item.tenantId),
         })
       : null;
-  const [documents, profile, requiredModules] = context
+  const [documents, profile, requirements] = context
     ? await Promise.all([
         findLatestTenantLegalDocuments(context),
         findTenantLegalProfile(context),
-        findRequiredTenantLegalModules(context.tenantId),
+        findTenantLegalRequirements(context.tenantId),
       ])
-    : [[], null, []];
+    : [[], null, { modules: [], tenantTermsFeatures: [] }];
   const latest = (type: "imprint" | "privacy") =>
     documents.find((document) => document.documentType === type);
 
@@ -47,7 +48,14 @@ export default async function LegalPage() {
           imprintStatus={latest("imprint")?.status ?? "draft"}
           privacyStatus={latest("privacy")?.status ?? "draft"}
           profile={profile}
-          requiredModules={requiredModules}
+          missingRequiredModules={findMissingRequiredLegalModules(
+            profile.modules,
+            requirements.modules,
+          )}
+          requiredModules={requirements.modules}
+          tenantTermsFeatures={requirements.tenantTermsFeatures.map(
+            (feature) => feature.title,
+          )}
         />
       ) : (
         <p className="rounded-2xl border border-amber-300 bg-amber-50 p-5">

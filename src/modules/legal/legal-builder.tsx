@@ -10,6 +10,19 @@ import { createStructuredLegalDocuments } from "./documents";
 
 const initialState: LegalActionState = { message: "", error: false };
 
+const legalModuleLabels: Record<keyof LegalModuleSettings, string> = {
+  contactForm: "Kontaktformular",
+  emailDelivery: "E-Mail-Versand",
+  consentManagement: "Consent-Steuerung",
+  maps: "Karten",
+  analytics: "Statistik",
+  marketing: "Marketing",
+  video: "externe Videos",
+  messaging: "SMS und Messenger",
+  onlineBooking: "Online-Terminbuchung",
+  payments: "Online-Zahlungen",
+};
+
 const moduleOptions: Array<{
   key: keyof LegalModuleSettings;
   title: string;
@@ -135,6 +148,8 @@ export function LegalBuilder({
   imprintStatus,
   privacyStatus,
   requiredModules = [],
+  missingRequiredModules = [],
+  tenantTermsFeatures = [],
 }: {
   action: (
     state: LegalActionState,
@@ -145,6 +160,8 @@ export function LegalBuilder({
   imprintStatus: "draft" | "published" | "archived";
   privacyStatus: "draft" | "published" | "archived";
   requiredModules?: Array<keyof LegalModuleSettings>;
+  missingRequiredModules?: Array<keyof LegalModuleSettings>;
+  tenantTermsFeatures?: string[];
 }) {
   const [state, action, pending] = useActionState(saveAction, initialState);
   const autoSaveFormId = useId();
@@ -185,6 +202,43 @@ export function LegalBuilder({
       onSubmit={autoSaveState.onSubmit}
     >
       {autoSaveState.indicator}
+      {missingRequiredModules.length > 0 ? (
+        <section className="rounded-3xl border border-amber-300 bg-amber-50 p-6 text-amber-950 shadow-sm sm:p-8">
+          <p className="text-xs font-bold tracking-[.18em] uppercase">
+            Rechtstexte aktualisieren
+          </p>
+          <h2 className="mt-2 text-xl font-semibold">
+            Das gebuchte Paket enthält neue datenrelevante Funktionen.
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6">
+            FahrSeiten hat die passenden Bausteine in dieser Vorschau bereits
+            ergänzt:{" "}
+            {missingRequiredModules
+              .map((module) => legalModuleLabels[module])
+              .join(", ")}
+            . Prüfe die tatsächlichen Anbieter und Abläufe und veröffentliche
+            anschließend die neue Fassung. Die bisher veröffentlichte Fassung
+            wird nicht ungeprüft überschrieben.
+          </p>
+        </section>
+      ) : null}
+      {tenantTermsFeatures.length > 0 ? (
+        <section className="rounded-3xl border border-rose-300 bg-rose-50 p-6 text-rose-950 shadow-sm sm:p-8">
+          <p className="text-xs font-bold tracking-[.18em] uppercase">
+            Eigene Kundenbedingungen erforderlich
+          </p>
+          <h2 className="mt-2 text-xl font-semibold">
+            Transaktionale Funktionen sind rechtlich noch nicht freigegeben.
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6">
+            Für {tenantTermsFeatures.join(", ")} können eigene Buchungs-,
+            Zahlungs-, Storno- oder Widerrufsbedingungen der Fahrschule
+            erforderlich sein. Die FahrSeiten-AGB regeln nur den Vertrag
+            zwischen ENJO MEDIA und der Fahrschule und werden deshalb nicht als
+            Kunden-AGB übernommen.
+          </p>
+        </section>
+      ) : null}
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 bg-slate-950 px-6 py-6 text-white sm:px-8">
           <p className="text-xs font-semibold tracking-[.18em] text-cyan-300 uppercase">

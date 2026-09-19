@@ -16,8 +16,8 @@ import {
 } from "@/db/schema";
 import type { LegalModuleSettings, LegalProfileData } from "@/db/schema";
 import type { TenantContext } from "@/modules/tenancy/tenant-context";
-import type { FeatureKey } from "@/modules/features/catalog";
-import { findFeatureSources } from "@/modules/features/repository";
+import { featureCatalog, type FeatureKey } from "@/modules/features/catalog";
+import { listTenantFeatureStatuses } from "@/modules/features/repository";
 import {
   isFeatureUsable,
   resolveFeatureStatus,
@@ -32,40 +32,36 @@ export type LegalProfile = {
   modules: LegalModuleSettings;
 };
 
-const featureLegalModuleMap: Partial<
-  Record<FeatureKey, keyof LegalModuleSettings>
-> = {
-  lesson_booking: "onlineBooking",
-  sms: "messaging",
-  whatsapp: "messaging",
-  payments: "payments",
-  analytics: "analytics",
-  ad_campaigns: "marketing",
-};
-
-export async function findRequiredTenantLegalModules(tenantId: string) {
-  const entries = Object.entries(featureLegalModuleMap) as Array<
-    [FeatureKey, keyof LegalModuleSettings]
+export async function findTenantLegalRequirements(tenantId: string) {
+  const entries = Object.entries(featureCatalog) as Array<
+    [FeatureKey, (typeof featureCatalog)[FeatureKey]]
   >;
-  const sources = await Promise.all(
-    entries.map(async ([feature, module]) => ({
-      module,
-      sources: await findFeatureSources(tenantId, feature),
-    })),
-  );
-  return [
+  const sources = await listTenantFeatureStatuses(tenantId);
+  const active = entries
+    .map(([feature, definition]) => ({ feature, definition }))
+    .filter(({ feature }) => {
+      const source = sources[feature];
+      return source && isFeatureUsable(resolveFeatureStatus(source));
+    });
+  const modules = [
     "contactForm",
     "emailDelivery",
     "consentManagement",
-    ...sources
-      .filter(
-        (entry) =>
-          entry.sources && isFeatureUsable(resolveFeatureStatus(entry.sources)),
-      )
-      .map((entry) => entry.module),
+    ...active.flatMap((entry) => entry.definition.legalModules),
   ].filter((module, index, all) => all.indexOf(module) === index) as Array<
     keyof LegalModuleSettings
   >;
+  const tenantTermsFeatures = active
+    .filter((entry) => entry.definition.tenantTermsRequired)
+    .map((entry) => ({
+      feature: entry.feature,
+      title: entry.definition.title,
+    }));
+  return { modules, tenantTermsFeatures };
+}
+
+export async function findRequiredTenantLegalModules(tenantId: string) {
+  return (await findTenantLegalRequirements(tenantId)).modules;
 }
 
 export async function enforceRequiredTenantLegalModules(
