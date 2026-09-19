@@ -2,11 +2,16 @@
 
 import { useActionState } from "react";
 
-import type { ContentModuleKey } from "@/modules/content/management";
+import type {
+  ContentModuleKey,
+  ManagedContentEntry,
+} from "@/modules/content/management";
 import {
   createContentEntryAction,
+  deleteContentEntryAction,
   toggleContentEntryAction,
   type ContentActionState,
+  updateContentEntryAction,
 } from "./actions";
 
 const initialState: ContentActionState = { message: "", error: false };
@@ -28,15 +33,19 @@ export function ContentEntryForm({
   media = [],
   canCreate = true,
   lockedMessage,
+  entry,
+  heading,
 }: {
   module: ContentModuleKey;
   singular: string;
   media?: { id: string; label: string }[];
   canCreate?: boolean;
   lockedMessage?: string;
+  entry?: ManagedContentEntry;
+  heading?: string;
 }) {
   const [state, action, pending] = useActionState(
-    createContentEntryAction,
+    entry ? updateContentEntryAction : createContentEntryAction,
     initialState,
   );
   return (
@@ -44,9 +53,13 @@ export function ContentEntryForm({
       action={action}
       className="rounded-2xl border border-slate-200 bg-white p-5"
       encType="multipart/form-data"
+      id={entry ? undefined : "new-entry"}
     >
       <input name="module" type="hidden" value={module} />
-      <h2 className="font-semibold">{singular} anlegen</h2>
+      {entry ? <input name="id" type="hidden" value={entry.id} /> : null}
+      <h2 className="font-semibold">
+        {heading ?? `${singular} ${entry ? "bearbeiten" : "hinzufügen"}`}
+      </h2>
       {!canCreate && lockedMessage ? (
         <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-5 text-amber-900">
           {lockedMessage}
@@ -57,6 +70,7 @@ export function ContentEntryForm({
           Bezeichnung
           <input
             className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+            defaultValue={entry?.title}
             name="title"
             required
           />
@@ -67,6 +81,7 @@ export function ContentEntryForm({
               Kürzel
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.key}
                 name="key"
                 required
               />
@@ -75,6 +90,7 @@ export function ContentEntryForm({
               Mindestalter
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.minimumAge}
                 min="0"
                 name="minimumAge"
                 type="number"
@@ -88,6 +104,7 @@ export function ContentEntryForm({
               Rolle
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.role}
                 name="role"
                 required
               />
@@ -96,10 +113,17 @@ export function ContentEntryForm({
               Qualifikationen
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.qualifications}
                 name="qualifications"
                 placeholder="Mit Komma trennen"
               />
             </label>
+            <EntryImageFields
+              currentMediaId={entry?.fields.imageMediaId}
+              label="Teamfoto"
+              media={media}
+              placeholder="Porträt von Max Mustermann"
+            />
           </>
         ) : null}
         {module === "fahrzeuge" ? (
@@ -175,6 +199,7 @@ export function ContentEntryForm({
               Kategorie
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.category}
                 name="category"
                 required
               />
@@ -183,47 +208,19 @@ export function ContentEntryForm({
               Getriebe
               <select
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.transmission ?? "manual"}
                 name="transmission"
               >
                 <option value="manual">Schaltung</option>
                 <option value="automatic">Automatik</option>
               </select>
             </label>
-            <label className="block text-sm font-semibold">
-              Bild aus der Mediathek
-              <select
-                className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
-                name="imageMediaId"
-              >
-                <option value="">Kein vorhandenes Bild</option>
-                {media.map((asset) => (
-                  <option key={asset.id} value={asset.id}>
-                    {asset.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-sm font-semibold">
-              Oder neues Fahrzeugfoto hochladen
-              <input
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                className="mt-1 block w-full text-sm font-normal"
-                name="imageFile"
-                type="file"
-              />
-              <span className="mt-1 block text-xs font-normal text-slate-500">
-                PNG, JPG, WebP oder SVG bis 8 MB. Der Upload landet automatisch
-                in der Mediathek.
-              </span>
-            </label>
-            <label className="block text-sm font-semibold">
-              Bildbeschreibung
-              <input
-                className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
-                name="imageAlt"
-                placeholder="Blauer Fahrschulwagen vor dem Standort"
-              />
-            </label>
+            <EntryImageFields
+              currentMediaId={entry?.fields.imageMediaId}
+              label="Fahrzeugfoto"
+              media={media}
+              placeholder="Blauer Fahrschulwagen vor dem Standort"
+            />
           </>
         ) : null}
         {module === "standorte" ? (
@@ -232,6 +229,7 @@ export function ContentEntryForm({
               Straße und Hausnummer
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.street}
                 name="street"
                 required
               />
@@ -241,6 +239,7 @@ export function ContentEntryForm({
                 PLZ
                 <input
                   className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                  defaultValue={entry?.fields.postalCode}
                   name="postalCode"
                   required
                 />
@@ -249,6 +248,7 @@ export function ContentEntryForm({
                 Ort
                 <input
                   className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                  defaultValue={entry?.fields.city}
                   name="city"
                   required
                 />
@@ -258,6 +258,7 @@ export function ContentEntryForm({
               Telefon
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.phone}
                 name="phone"
               />
             </label>
@@ -265,6 +266,7 @@ export function ContentEntryForm({
               E-Mail
               <input
                 className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.email}
                 name="email"
                 type="email"
               />
@@ -276,6 +278,7 @@ export function ContentEntryForm({
             Beschreibung
             <textarea
               className="mt-1 min-h-24 w-full rounded-xl border border-slate-300 p-3 font-normal"
+              defaultValue={entry?.fields.description}
               name="description"
             />
           </label>
@@ -286,7 +289,101 @@ export function ContentEntryForm({
         disabled={pending || !canCreate}
         type="submit"
       >
-        {pending ? "Speichert …" : canCreate ? "Speichern" : "Paket erweitern"}
+        {pending
+          ? "Speichert …"
+          : canCreate
+            ? entry
+              ? "Änderungen speichern"
+              : "Hinzufügen"
+            : "Paket erweitern"}
+      </button>
+      <Result state={state} />
+    </form>
+  );
+}
+
+function EntryImageFields({
+  media,
+  currentMediaId,
+  label,
+  placeholder,
+}: {
+  media: { id: string; label: string }[];
+  currentMediaId?: string;
+  label: string;
+  placeholder: string;
+}) {
+  return (
+    <>
+      <label className="block text-sm font-semibold">
+        {label} aus der Mediathek
+        <select
+          className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+          defaultValue={currentMediaId ?? ""}
+          name="imageMediaId"
+        >
+          <option value="">Kein Bild verwenden</option>
+          {media.map((asset) => (
+            <option key={asset.id} value={asset.id}>
+              {asset.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block text-sm font-semibold">
+        Oder neues {label.toLowerCase()} hochladen
+        <input
+          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          className="mt-1 block w-full text-sm font-normal"
+          name="imageFile"
+          type="file"
+        />
+        <span className="mt-1 block text-xs font-normal text-slate-500">
+          PNG, JPG, WebP oder SVG bis 8 MB. Das Bild wird in der passenden
+          Medienkategorie abgelegt und optimiert.
+        </span>
+      </label>
+      <label className="block text-sm font-semibold">
+        Bildbeschreibung
+        <input
+          className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+          name="imageAlt"
+          placeholder={placeholder}
+        />
+      </label>
+    </>
+  );
+}
+
+export function DeleteContentEntryForm({
+  module,
+  id,
+  title,
+}: {
+  module: ContentModuleKey;
+  id: string;
+  title: string;
+}) {
+  const [state, action, pending] = useActionState(
+    deleteContentEntryAction,
+    initialState,
+  );
+  return (
+    <form
+      action={action}
+      onSubmit={(event) => {
+        if (!window.confirm(`„${title}“ wirklich dauerhaft löschen?`))
+          event.preventDefault();
+      }}
+    >
+      <input name="module" type="hidden" value={module} />
+      <input name="id" type="hidden" value={id} />
+      <button
+        className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+        disabled={pending}
+        type="submit"
+      >
+        {pending ? "Löscht …" : "Löschen"}
       </button>
       <Result state={state} />
     </form>

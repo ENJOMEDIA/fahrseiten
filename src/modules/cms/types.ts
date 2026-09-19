@@ -30,6 +30,7 @@ export type TenantWebsite = {
   navigation: SiteNavigationItem[];
   theme: {
     themeKey?: string;
+    fontKey?: string;
     primaryColor: string;
     accentColor: string;
     logoUrl?: string;

@@ -20,6 +20,51 @@ function wrapText(text: string, font: PDFFont, size: number, width: number) {
   return lines;
 }
 
+export type LetterBodySegment =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; text: string }
+  | { type: "bullets"; items: string[] };
+
+export function parseLetterBody(value: string): LetterBodySegment[] {
+  const segments: LetterBodySegment[] = [];
+  let paragraph: string[] = [];
+  let bullets: string[] = [];
+  const flushParagraph = () => {
+    const text = paragraph.join(" ").trim();
+    if (text) segments.push({ type: "paragraph", text });
+    paragraph = [];
+  };
+  const flushBullets = () => {
+    if (bullets.length) segments.push({ type: "bullets", items: bullets });
+    bullets = [];
+  };
+  for (const rawLine of value.replaceAll("\r\n", "\n").split("\n")) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushParagraph();
+      flushBullets();
+      continue;
+    }
+    const bullet = line.match(/^[•*-]\s+(.+)$/);
+    if (bullet) {
+      flushParagraph();
+      bullets.push(bullet[1]);
+      continue;
+    }
+    flushBullets();
+    const heading = line.match(/^(?:#{1,3}\s+|\*\*)(.+?)(?:\*\*)?$/);
+    if (heading && (line.startsWith("#") || line.startsWith("**"))) {
+      flushParagraph();
+      segments.push({ type: "heading", text: heading[1] });
+      continue;
+    }
+    paragraph.push(line);
+  }
+  flushParagraph();
+  flushBullets();
+  return segments;
+}
+
 export type AcquisitionLetterInput = {
   brandLogoPng?: Uint8Array;
   heroImagePng?: Uint8Array;
@@ -234,24 +279,32 @@ export async function createAcquisitionLetterPdf(
     });
     y -= 62;
   }
-  const bodyBlocks = input.bodyText.split(/\n\n+/).filter(Boolean);
-  bodyBlocks.forEach((block, blockIndex) => {
-    const bulletLines = block
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-    if (
-      bulletLines.length &&
-      bulletLines.every((line) => /^[•-]\s/.test(line))
-    ) {
-      bulletLines.forEach((line) => {
+  const bodySegments = parseLetterBody(input.bodyText);
+  let paragraphIndex = 0;
+  bodySegments.forEach((segment) => {
+    if (segment.type === "heading") {
+      for (const line of wrapText(segment.text, bold, 11.2, 460)) {
+        page.drawText(line, {
+          x: 56,
+          y,
+          size: 11.2,
+          font: bold,
+          color: rgb(0.02, 0.45, 0.53),
+        });
+        y -= 15;
+      }
+      y -= 3;
+      return;
+    }
+    if (segment.type === "bullets") {
+      segment.items.forEach((item) => {
         page.drawCircle({
           x: 63,
           y: y + 3,
           size: 3.2,
           color: rgb(0.03, 0.65, 0.7),
         });
-        const lines = wrapText(line.replace(/^[•-]\s*/, ""), bold, 9.4, 448);
+        const lines = wrapText(item, bold, 9.4, 448);
         lines.forEach((item, index) =>
           page.drawText(item, {
             x: 76,
@@ -266,8 +319,8 @@ export async function createAcquisitionLetterPdf(
       y -= 3;
       return;
     }
-    if (blockIndex === 0) {
-      const lines = wrapText(block, regular, 10.2, 438);
+    if (paragraphIndex === 0) {
+      const lines = wrapText(segment.text, regular, 10.2, 438);
       const height = lines.length * 15 + 20;
       page.drawRectangle({
         x: 55,
@@ -293,9 +346,11 @@ export async function createAcquisitionLetterPdf(
         }),
       );
       y -= height + 7;
+      paragraphIndex += 1;
       return;
     }
-    drawParagraph(block, { size: 9.6 });
+    drawParagraph(segment.text, { size: 9.6 });
+    paragraphIndex += 1;
   });
   if (y < 248)
     throw new Error(

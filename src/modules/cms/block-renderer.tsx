@@ -397,13 +397,24 @@ function Block({
                 className="tenant-content-card overflow-hidden rounded-[var(--radius-card)] border border-slate-200 bg-white shadow-sm"
                 key={item.id}
               >
-                <div className="tenant-team-portrait relative grid aspect-[4/3] place-items-center text-7xl font-black text-white/90">
-                  <span>
-                    {item.name
-                      .split(" ")
-                      .map((part) => part[0])
-                      .join("")}
-                  </span>
+                <div className="tenant-team-portrait relative grid aspect-[4/3] place-items-center overflow-hidden text-7xl font-black text-white/90">
+                  {item.imageUrl ? (
+                    <Image
+                      alt={item.imageAlt || `Teamfoto ${item.name}`}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      height={600}
+                      src={item.imageUrl}
+                      unoptimized
+                      width={800}
+                    />
+                  ) : (
+                    <span>
+                      {item.name
+                        .split(" ")
+                        .map((part) => part[0])
+                        .join("")}
+                    </span>
+                  )}
                   <span className="absolute right-8 bottom-6 text-sm opacity-60">
                     0{index + 1}
                   </span>

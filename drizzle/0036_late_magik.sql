@@ -1,0 +1,2 @@
+ALTER TABLE `team_members` ADD `image_media_id` varchar(36);--> statement-breakpoint
+ALTER TABLE `team_members` ADD CONSTRAINT `team_members_image_media_id_media_assets_id_fk` FOREIGN KEY (`image_media_id`) REFERENCES `media_assets`(`id`) ON DELETE set null ON UPDATE no action;

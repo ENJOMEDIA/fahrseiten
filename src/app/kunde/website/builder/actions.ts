@@ -9,7 +9,11 @@ import { hasTenantPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
 import { db } from "@/db/client";
 import { themeSettings } from "@/db/schema";
-import { builderThemeValues, builderThemes } from "@/modules/builder/themes";
+import {
+  builderFontValues,
+  builderThemeValues,
+  builderThemes,
+} from "@/modules/builder/themes";
 import { findFeatureSources } from "@/modules/features/repository";
 import {
   isFeatureUsable,
@@ -38,6 +42,7 @@ export async function saveTenantBuilderTheme(formData: FormData) {
   if (!sources || !isFeatureUsable(resolveFeatureStatus(sources)))
     throw new Error("Designvorlagen sind ab dem Paket Wachstum verfügbar.");
   const themeKey = z.enum(builderThemeValues).parse(formData.get("themeKey"));
+  const fontKey = z.enum(builderFontValues).parse(formData.get("fontKey"));
   const theme = builderThemes[themeKey];
   await db
     .update(themeSettings)
@@ -45,6 +50,7 @@ export async function saveTenantBuilderTheme(formData: FormData) {
       themeKey,
       primaryColor: theme.primary,
       accentColor: theme.accent,
+      fontKey,
     })
     .where(eq(themeSettings.tenantId, context.tenantId));
   revalidatePath("/kunde/website/builder");

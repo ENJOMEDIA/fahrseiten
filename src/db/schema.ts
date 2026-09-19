@@ -535,6 +535,9 @@ export const teamMembers = mysqlTable(
     role: varchar("role", { length: 120 }).notNull(),
     bio: text("bio"),
     qualifications: json("qualifications").$type<string[]>().notNull(),
+    imageMediaId: id("image_media_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
   },
   (table) => [
     index("team_members_tenant_position_idx").on(

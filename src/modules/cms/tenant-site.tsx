@@ -22,6 +22,7 @@ export function TenantSite({
     <div
       className="tenant-site min-h-screen bg-white text-slate-950"
       data-theme={website.theme.themeKey ?? "calm_cyan"}
+      data-font={website.theme.fontKey ?? "system_sans"}
       style={
         {
           "--tenant-primary": website.theme.primaryColor,

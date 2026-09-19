@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { StoredBlock } from "@/modules/cms/block-schema";
-import { duplicateBlock, moveBlock, validateDraft } from "./state";
+import { duplicateBlock, moveBlock, moveBlockTo, validateDraft } from "./state";
 
 const blocks: StoredBlock[] = [
   {
@@ -37,6 +37,18 @@ describe("builder state", () => {
       "a",
       "copy",
       "b",
+    ]));
+  it("moves a dragged block to the selected position", () =>
+    expect(
+      moveBlockTo(
+        [...blocks, { ...blocks[0], id: "c", position: 2 }],
+        "a",
+        "c",
+      ).map((item) => [item.id, item.position]),
+    ).toEqual([
+      ["b", 0],
+      ["c", 1],
+      ["a", 2],
     ]));
   it("prevents publishing invalid drafts", () =>
     expect(() =>

@@ -42,6 +42,23 @@ async function checkTls(hostname: string) {
   });
 }
 
+async function checkApplicationRoute(hostname: string, sslActive: boolean) {
+  const protocol = sslActive ? "https" : "http";
+  try {
+    const response = await fetch(`${protocol}://${hostname}/api/health`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+      redirect: "manual",
+      signal: AbortSignal.timeout(7_000),
+    });
+    if (!response.ok) return false;
+    const body = (await response.json()) as { service?: unknown };
+    return body.service === "fahrseiten";
+  } catch {
+    return false;
+  }
+}
+
 export async function getDnsTarget() {
   const hostname = normalizeHostname(new URL(env.APP_BASE_URL).hostname);
   return { hostname, ...(await addresses(hostname)) };
@@ -58,7 +75,17 @@ export async function inspectTenantDomain(hostname: string) {
     hasIntersection(actual.ipv6, target.ipv6) ||
     normalized === target.hostname;
   const sslActive = dnsMatches ? await checkTls(normalized) : false;
-  return { hostname: normalized, target, actual, dnsMatches, sslActive };
+  const appReachable = dnsMatches
+    ? await checkApplicationRoute(normalized, sslActive)
+    : false;
+  return {
+    hostname: normalized,
+    target,
+    actual,
+    dnsMatches,
+    sslActive,
+    appReachable,
+  };
 }
 
 export async function checkAndPersistTenantDomain(input: {
@@ -77,11 +104,13 @@ export async function checkAndPersistTenantDomain(input: {
   await db
     .update(domains)
     .set({
-      status: result.dnsMatches
-        ? result.sslActive
-          ? "active"
-          : "verified"
-        : "verification_required",
+      status: !result.dnsMatches
+        ? "verification_required"
+        : !result.appReachable
+          ? "error"
+          : result.sslActive
+            ? "active"
+            : "verified",
       verifiedAt: result.dnsMatches ? new Date() : null,
       sslStatus: result.sslActive
         ? "active"

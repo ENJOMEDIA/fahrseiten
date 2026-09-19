@@ -685,6 +685,8 @@ export default async function TenantDetailPage({
               <DomainManagement
                 domainId={tenant.domainId}
                 hostname={tenant.domain}
+                sslStatus={tenant.sslStatus ?? "unknown"}
+                status={tenant.domainStatus ?? "pending"}
                 tenantId={tenant.id}
               />
             ) : (

@@ -86,14 +86,13 @@ test("edits, previews, publishes and restores in the controlled builder", async 
   await expect(
     page.getByRole("heading", { name: "Website-Builder" }),
   ).toBeVisible();
-  const heading = page.getByLabel("Überschrift").first();
+  const heading = page.getByLabel("Überschrift", { exact: true }).first();
   await heading.fill("Sicher und entspannt zum Führerschein");
   await expect(page.getByText("Entwurf gespeichert")).toBeVisible();
-  await page.getByRole("button", { name: "mobile" }).click();
-  await expect(page.getByRole("button", { name: "mobile" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await page.getByRole("button", { name: "Mobil", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Mobil", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Veröffentlichen" }).click();
   await expect(
     page.getByText("Seite erfolgreich veröffentlicht."),

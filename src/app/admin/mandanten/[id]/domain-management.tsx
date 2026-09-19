@@ -78,10 +78,14 @@ export function DomainManagement({
   tenantId,
   domainId,
   hostname,
+  status,
+  sslStatus,
 }: {
   tenantId: string;
   domainId: string;
   hostname: string;
+  status: string;
+  sslStatus: string;
 }) {
   const [updateState, updateAction, updatePending] = useActionState(
     updateDomainAction,
@@ -93,6 +97,16 @@ export function DomainManagement({
   );
   return (
     <div className="mt-5 grid gap-3">
+      <div className="grid gap-2 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
+        <p>
+          <span className="block text-xs text-slate-500">Domainstatus</span>
+          <span className="font-semibold">{status}</span>
+        </p>
+        <p>
+          <span className="block text-xs text-slate-500">SSL-Status</span>
+          <span className="font-semibold">{sslStatus}</span>
+        </p>
+      </div>
       <form
         action={updateAction}
         className="grid gap-3 sm:grid-cols-[1fr_auto]"
@@ -133,6 +147,17 @@ export function DomainManagement({
         </button>
         <Feedback state={checkState} />
       </form>
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+        <p className="font-semibold">Zusätzlich in Plesk erforderlich</p>
+        <p className="mt-1">
+          Die Kundendomain muss als Domain-Alias beziehungsweise zusätzliche
+          Domain auf dasselbe Hosting und denselben Node.js-Startpunkt wie
+          fahrseiten.de gelegt werden. DNS allein leitet die Anfrage zwar zum
+          Server, verbindet sie in Plesk aber noch nicht automatisch mit dieser
+          Anwendung. Danach SSL für die Kundendomain ausstellen und hier erneut
+          „DNS & SSL jetzt prüfen“ ausführen.
+        </p>
+      </div>
     </div>
   );
 }

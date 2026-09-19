@@ -185,6 +185,11 @@ export async function hydrateTenantContentBlocks(
               role: item.role,
               bio: item.bio ?? "",
               qualifications: item.qualifications,
+              imageMediaId: item.imageMediaId ?? undefined,
+              imageUrl: item.imageMediaId
+                ? mediaPublicUrl(item.imageMediaId)
+                : undefined,
+              imageAlt: item.name,
             })),
           },
         };

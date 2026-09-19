@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { domains, tenants } from "@/db/schema";
@@ -21,7 +21,7 @@ export async function findActiveTenantByDomain(
     .where(
       and(
         eq(domains.hostname, hostname),
-        eq(domains.status, "active"),
+        inArray(domains.status, ["verified", "active"]),
         eq(tenants.status, "active"),
       ),
     )

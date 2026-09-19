@@ -33,6 +33,19 @@ export function duplicateBlock(
     ...blocks.slice(current + 1),
   ]);
 }
+export function moveBlockTo(
+  blocks: readonly StoredBlock[],
+  movingId: string,
+  targetId: string,
+) {
+  const from = blocks.findIndex((block) => block.id === movingId);
+  const to = blocks.findIndex((block) => block.id === targetId);
+  if (from < 0 || to < 0 || from === to) return [...blocks];
+  const next = [...blocks];
+  const [moving] = next.splice(from, 1);
+  next.splice(to, 0, moving);
+  return normalizePositions(next);
+}
 export function validateDraft(blocks: unknown) {
   return parseStoredBlocks(blocks);
 }

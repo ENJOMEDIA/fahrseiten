@@ -9,9 +9,15 @@ export const moneySchema = z
   .string()
   .regex(/^\d{1,8}\.\d{2}$/, "Geldbeträge benötigen zwei Dezimalstellen.");
 export const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
+export const licenseClassKeySchema = z
+  .string()
+  .trim()
+  .min(1, "Das Klassenkürzel ist erforderlich.")
+  .max(30, "Das Klassenkürzel darf höchstens 30 Zeichen enthalten.")
+  .transform((value) => value.toUpperCase());
 
 export const licenseClassSchema = baseItem.extend({
-  key: z.string().min(1).max(30),
+  key: licenseClassKeySchema,
   title: z.string().min(1).max(120),
   description: z.string().max(2_000),
   minimumAge: z.number().int().min(14).max(99).optional(),
@@ -48,6 +54,9 @@ export const teamMemberSchema = baseItem.extend({
   role: z.string().min(1).max(120),
   bio: z.string().max(2_000),
   qualifications: z.array(z.string().min(1).max(100)).max(20),
+  imageMediaId: z.uuid().optional(),
+  imageUrl: z.string().max(500).optional(),
+  imageAlt: z.string().max(300).optional(),
 });
 export const vehicleSchema = baseItem.extend({
   name: z.string().min(1).max(160),

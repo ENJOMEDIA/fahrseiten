@@ -235,12 +235,14 @@ export async function checkDomainAction(
     revalidatePath(`/admin/mandanten/${tenantId}`);
     revalidatePath("/admin/mandanten");
     return {
-      message: result.dnsMatches
-        ? result.sslActive
-          ? "DNS und HTTPS sind korrekt. Die Domain ist aktiv."
-          : "DNS zeigt korrekt auf FahrSeiten. Das SSL-Zertifikat ist noch nicht aktiv."
-        : "Die Domain zeigt noch nicht auf das FahrSeiten-Ziel. Prüfe die angezeigten DNS-Einträge.",
-      error: !result.dnsMatches,
+      message: !result.dnsMatches
+        ? "Die Domain zeigt noch nicht auf das FahrSeiten-Ziel. Prüfe die angezeigten DNS-Einträge."
+        : !result.appReachable
+          ? "DNS zeigt auf den richtigen Server, aber die Domain erreicht noch nicht die FahrSeiten-App. Ordne sie in Plesk derselben Node.js-Anwendung wie fahrseiten.de zu und entferne alte Website-Zuordnungen."
+          : result.sslActive
+            ? "DNS, FahrSeiten-Routing und HTTPS sind korrekt. Die Domain ist aktiv."
+            : "DNS und FahrSeiten-Routing funktionieren. Das SSL-Zertifikat ist noch nicht aktiv.",
+      error: !result.dnsMatches || !result.appReachable,
     };
   } catch (error) {
     return {

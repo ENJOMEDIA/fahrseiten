@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { assertTenantRows, courseSchema, moneySchema } from "./schemas";
+import {
+  assertTenantRows,
+  courseSchema,
+  licenseClassKeySchema,
+  moneySchema,
+} from "./schemas";
 
 describe("driving school content", () => {
+  it("accepts one-character license class keys", () => {
+    expect(licenseClassKeySchema.parse("b")).toBe("B");
+  });
+
   it("keeps prices as exact decimal strings", () => {
     expect(moneySchema.parse("499.00")).toBe("499.00");
     expect(() => moneySchema.parse(499.001)).toThrow();

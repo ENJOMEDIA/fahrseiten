@@ -358,6 +358,32 @@ textarea {
   overflow: clip;
 }
 
+[data-font="system_sans"] {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+[data-font="friendly_sans"] {
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+[data-font="geometric_sans"] {
+  font-family: Avenir, Montserrat, Futura, Arial, sans-serif;
+}
+
+[data-font="editorial_serif"] {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+[data-font="editorial_serif"] h1,
+[data-font="editorial_serif"] h2,
+[data-font="editorial_serif"] h3 {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+[data-font="classic_serif"] {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
 .tenant-header {
   box-shadow: 0 12px 35px rgb(15 23 42 / 0.035);
 }
@@ -467,6 +493,41 @@ textarea {
   background: #020617;
 }
 
+[data-theme="urban_night"].tenant-site {
+  background: #020617;
+}
+
+[data-theme="urban_night"] .tenant-hero {
+  min-height: 42rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+
+[data-theme="urban_night"] .tenant-section {
+  background: #07111f !important;
+  color: white;
+}
+
+[data-theme="urban_night"] .tenant-section:nth-of-type(even) {
+  background: #0f172a !important;
+}
+
+[data-theme="urban_night"] .tenant-section p {
+  color: rgb(226 232 240 / 0.72);
+}
+
+[data-theme="urban_night"] .tenant-content-card,
+[data-theme="urban_night"] .tenant-feature-card {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.055);
+  color: white;
+  box-shadow: none;
+}
+
+[data-theme="urban_night"] .tenant-content-card span,
+[data-theme="urban_night"] .tenant-content-card a {
+  color: inherit;
+}
+
 [data-theme="urban_night"] .tenant-hero h1,
 [data-theme="urban_night"] .tenant-section h2 {
   letter-spacing: -0.055em;
@@ -490,6 +551,36 @@ textarea {
     rgb(41 37 36 / 0.6) 58%,
     rgb(41 37 36 / 0.08)
   );
+}
+
+[data-theme="warm_motion"].tenant-site {
+  background: #fffaf5;
+}
+
+[data-theme="warm_motion"] .tenant-header {
+  background: rgb(255 250 245 / 0.92);
+}
+
+[data-theme="warm_motion"] .tenant-hero {
+  min-height: 38rem;
+  margin: 1rem;
+  border-radius: 2.5rem;
+}
+
+[data-theme="warm_motion"] .tenant-section {
+  background: #fffaf5 !important;
+}
+
+[data-theme="warm_motion"] .tenant-section:nth-of-type(even) {
+  background: #ffedd5 !important;
+}
+
+[data-theme="warm_motion"] .tenant-feature-card:nth-child(odd) {
+  transform: rotate(-0.7deg);
+}
+
+[data-theme="warm_motion"] .tenant-feature-card:nth-child(even) {
+  transform: translateY(1rem) rotate(0.7deg);
 }
 
 [data-theme="warm_motion"] .tenant-content-card,

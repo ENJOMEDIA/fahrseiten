@@ -6,8 +6,11 @@ import type { BlockProperties, StoredBlock } from "@/modules/cms/block-schema";
 import { uploadTenantMedia } from "@/app/kunde/medien/actions";
 import { saveTenantBuilderTheme } from "@/app/kunde/website/builder/actions";
 import {
+  builderFonts,
+  builderFontValues,
   builderThemes,
   builderThemeValues,
+  type BuilderFontKey,
   type BuilderThemeKey,
 } from "./themes";
 import {
@@ -24,6 +27,7 @@ import {
 import {
   duplicateBlock,
   moveBlock,
+  moveBlockTo,
   normalizePositions,
   validateDraft,
 } from "./state";
@@ -66,18 +70,144 @@ type BuilderMedia = {
   category: MediaCategory;
 };
 
+function ThemeMiniature({ theme }: { theme: BuilderThemeKey }) {
+  const colors = builderThemes[theme];
+  return (
+    <span
+      aria-hidden="true"
+      className={`relative block h-14 w-20 shrink-0 overflow-hidden border border-slate-200 bg-white shadow-sm ${
+        theme === "urban_night"
+          ? "rounded-md bg-slate-950"
+          : theme === "warm_motion"
+            ? "rounded-2xl bg-orange-50"
+            : "rounded-xl"
+      }`}
+    >
+      <span
+        className={`absolute inset-x-1.5 top-1.5 h-6 ${theme === "warm_motion" ? "rounded-xl" : "rounded-sm"}`}
+        style={{
+          background: `linear-gradient(125deg, ${colors.accent}, ${colors.primary})`,
+        }}
+      />
+      <span
+        className={`absolute bottom-1.5 left-1.5 h-4 bg-white/95 ${theme === "urban_night" ? "w-8 rounded-sm" : theme === "warm_motion" ? "w-11 -rotate-2 rounded-lg" : "w-11 rounded-md"}`}
+      />
+      <span
+        className={`absolute right-1.5 bottom-1.5 h-4 ${theme === "urban_night" ? "w-6 translate-y-0.5 rounded-sm bg-blue-500" : theme === "warm_motion" ? "w-5 rotate-2 rounded-lg bg-orange-500" : "w-5 rounded-md bg-cyan-500"}`}
+      />
+    </span>
+  );
+}
+
+function DesignSetup({
+  theme,
+  font,
+  setTheme,
+  setFont,
+  tenantMode,
+  canUseThemes,
+}: {
+  theme: BuilderThemeKey;
+  font: BuilderFontKey;
+  setTheme: (theme: BuilderThemeKey) => void;
+  setFont: (font: BuilderFontKey) => void;
+  tenantMode: boolean;
+  canUseThemes: boolean;
+}) {
+  const locked = tenantMode && !canUseThemes;
+  return (
+    <div className="rounded-2xl border border-cyan-200 bg-cyan-50/60 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold tracking-[.16em] text-cyan-800 uppercase">
+            Schritt 1
+          </p>
+          <h2 className="mt-1 text-lg font-semibold">Design auswählen</h2>
+          <p className="mt-1 text-xs leading-5 text-slate-600">
+            Wähle zuerst den Grundstil. Danach bearbeitest du Seiten und
+            Inhalte.
+          </p>
+        </div>
+        {locked ? (
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+            Ab Wachstum
+          </span>
+        ) : null}
+      </div>
+      <form action={saveTenantBuilderTheme} className="mt-4 space-y-4">
+        <div className="grid gap-2">
+          {builderThemeValues.map((key) => (
+            <label
+              className={`cursor-pointer rounded-xl border bg-white p-3 ${theme === key ? "border-cyan-500 ring-2 ring-cyan-100" : "border-slate-200"}`}
+              key={key}
+            >
+              <span className="flex items-center gap-3">
+                <input
+                  checked={theme === key}
+                  disabled={locked}
+                  name="themeKey"
+                  onChange={() => setTheme(key)}
+                  type="radio"
+                  value={key}
+                />
+                <span className="flex-1">
+                  <span className="block text-sm font-semibold">
+                    {builderThemes[key].name}
+                  </span>
+                  <span className="block text-xs text-slate-500">
+                    {builderThemes[key].description}
+                  </span>
+                </span>
+                <ThemeMiniature theme={key} />
+              </span>
+            </label>
+          ))}
+        </div>
+        <label className="block text-sm font-semibold">
+          Schriftstil
+          <select
+            className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal"
+            disabled={locked}
+            name="fontKey"
+            value={font}
+            onChange={(event) => setFont(event.target.value as BuilderFontKey)}
+          >
+            {builderFontValues.map((key) => (
+              <option key={key} value={key}>
+                {builderFonts[key].name} – {builderFonts[key].description}
+              </option>
+            ))}
+          </select>
+        </label>
+        {tenantMode && canUseThemes ? (
+          <button
+            className="w-full rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white"
+            type="submit"
+          >
+            Design übernehmen
+          </button>
+        ) : null}
+      </form>
+    </div>
+  );
+}
+
 export function BuilderDemo({
   media = [],
   tenantMode = false,
   canUseThemes = false,
   initialTheme,
+  initialFont,
   initialPages,
+  contentPresets = {},
 }: {
   media?: BuilderMedia[];
   tenantMode?: boolean;
   canUseThemes?: boolean;
   initialTheme?: string;
+  initialFont?: string;
   initialPages?: TenantBuilderPage[];
+  contentPresets?: Partial<Record<BuilderBlockType, BlockProperties>>;
 }) {
   const [pages, setPages] = useState<TenantBuilderPage[]>(
     initialPages?.length
@@ -105,15 +235,20 @@ export function BuilderDemo({
   const [history, setHistory] = useState<
     { label: string; blocks: StoredBlock[] }[]
   >([]);
-  const [navigation, setNavigation] = useState("Start, Über uns, Kontakt");
   const [theme, setTheme] = useState<BuilderThemeKey>(
     builderThemeValues.includes(initialTheme as BuilderThemeKey)
       ? (initialTheme as BuilderThemeKey)
       : "calm_cyan",
   );
-  const [font, setFont] = useState("system");
-  const [logo, setLogo] = useState("none");
-  const [newBlockType, setNewBlockType] = useState<BuilderBlockType>("hero");
+  const [font, setFont] = useState<BuilderFontKey>(
+    builderFontValues.includes(initialFont as BuilderFontKey)
+      ? (initialFont as BuilderFontKey)
+      : "system_sans",
+  );
+  const [expandedBlockId, setExpandedBlockId] = useState<string | null>(
+    initialPages?.[0]?.blocks[0]?.id ?? initialBlocks[0].id,
+  );
+  const [draggingBlockId, setDraggingBlockId] = useState<string | null>(null);
   const serialized = useMemo(
     () => JSON.stringify({ pageId: selectedPageId, blocks }),
     [blocks, selectedPageId],
@@ -180,12 +315,15 @@ export function BuilderDemo({
     );
   }
   function addBlock(type: BuilderBlockType) {
-    const properties = createBuilderBlockProperties(type);
+    const properties = structuredClone(
+      contentPresets[type] ?? createBuilderBlockProperties(type),
+    );
+    const id = crypto.randomUUID();
     setBlocks((current) =>
       normalizePositions([
         ...current,
         {
-          id: crypto.randomUUID(),
+          id,
           schemaVersion: 1,
           position: current.length,
           visible: true,
@@ -193,6 +331,7 @@ export function BuilderDemo({
         },
       ]),
     );
+    setExpandedBlockId(id);
   }
   async function publish() {
     try {
@@ -232,7 +371,7 @@ export function BuilderDemo({
         <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-cyan-700">
-              Lokale Fixture-Umgebung
+              {tenantMode ? "Website gestalten" : "Builder ausprobieren"}
             </p>
             <h1 className="text-3xl font-semibold">Website-Builder</h1>
           </div>
@@ -252,6 +391,26 @@ export function BuilderDemo({
             aria-label="Bearbeitung"
             className="space-y-4 rounded-3xl bg-white p-5 shadow-sm"
           >
+            <DesignSetup
+              canUseThemes={canUseThemes}
+              font={font}
+              setFont={setFont}
+              setTheme={setTheme}
+              tenantMode={tenantMode}
+              theme={theme}
+            />
+            <div className="border-t border-slate-200 pt-4">
+              <p className="text-xs font-bold tracking-[.16em] text-cyan-800 uppercase">
+                Schritt 2
+              </p>
+              <h2 className="mt-1 text-lg font-semibold">
+                Seite und Bereiche bearbeiten
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Öffne nur den Bereich, den du gerade ändern möchtest. Alles wird
+                automatisch als Entwurf gespeichert.
+              </p>
+            </div>
             <label className="block text-sm font-semibold">
               Seite
               <select
@@ -287,62 +446,89 @@ export function BuilderDemo({
                 Seite anlegen
               </button>
             ) : null}
-            <div className="grid grid-cols-[1fr_auto] gap-3">
-              <label className="text-sm font-semibold">
-                Blocktyp
-                <select
-                  className="mt-1 w-full rounded-xl border p-3"
-                  value={newBlockType}
-                  onChange={(event) =>
-                    setNewBlockType(event.target.value as BuilderBlockType)
-                  }
-                >
-                  <optgroup label="Freie Seitenbausteine">
+            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="font-semibold">Bereich hinzufügen</h3>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                Inhaltsbereiche übernehmen automatisch deine bereits gepflegten
+                Klassen, Fahrzeuge, Teammitglieder und Standorte.
+              </p>
+              {(["layout", "content"] as const).map((group) => (
+                <div className="mt-4" key={group}>
+                  <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
+                    {group === "layout"
+                      ? "Texte und Seitenelemente"
+                      : "Bereits gepflegte Inhalte"}
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
                     {(
                       Object.entries(builderBlockCatalog) as [
                         BuilderBlockType,
                         (typeof builderBlockCatalog)[BuilderBlockType],
                       ][]
                     )
-                      .filter(([, item]) => item.group === "layout")
+                      .filter(([, item]) => item.group === group)
                       .map(([key, item]) => (
-                        <option key={key} value={key}>
+                        <button
+                          className="min-h-12 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-sm font-semibold shadow-sm hover:border-cyan-400 hover:bg-cyan-50"
+                          key={key}
+                          onClick={() => addBlock(key)}
+                        >
+                          <span className="mr-2 text-cyan-700">＋</span>
                           {item.label}
-                        </option>
+                        </button>
                       ))}
-                  </optgroup>
-                  <optgroup label="Automatische Inhaltsbereiche">
-                    {(
-                      Object.entries(builderBlockCatalog) as [
-                        BuilderBlockType,
-                        (typeof builderBlockCatalog)[BuilderBlockType],
-                      ][]
-                    )
-                      .filter(([, item]) => item.group === "content")
-                      .map(([key, item]) => (
-                        <option key={key} value={key}>
-                          {item.label}
-                        </option>
-                      ))}
-                  </optgroup>
-                </select>
-              </label>
-              <button
-                className="self-end rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white"
-                onClick={() => addBlock(newBlockType)}
-              >
-                Hinzufügen
-              </button>
-            </div>
+                  </div>
+                </div>
+              ))}
+            </section>
+            {blocks.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
+                Diese Seite ist noch leer. Wähle oben einfach den gewünschten
+                Bereich aus.
+              </p>
+            ) : null}
             {blocks.map((block, index) => (
-              <fieldset
-                className="rounded-2xl border border-slate-200 p-4"
+              <details
+                className={`rounded-2xl border p-4 transition ${draggingBlockId === block.id ? "border-cyan-500 bg-cyan-50 opacity-70" : "border-slate-200"}`}
+                draggable
                 key={block.id}
+                onDragEnd={() => setDraggingBlockId(null)}
+                onDragOver={(event) => event.preventDefault()}
+                onDragStart={(event) => {
+                  setDraggingBlockId(block.id);
+                  event.dataTransfer.effectAllowed = "move";
+                  event.dataTransfer.setData("text/plain", block.id);
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  const movingId =
+                    draggingBlockId || event.dataTransfer.getData("text/plain");
+                  if (movingId)
+                    setBlocks((current) =>
+                      moveBlockTo(current, movingId, block.id),
+                    );
+                  setDraggingBlockId(null);
+                }}
+                onToggle={(event) => {
+                  if (event.currentTarget.open) setExpandedBlockId(block.id);
+                  else if (expandedBlockId === block.id)
+                    setExpandedBlockId(null);
+                }}
+                open={expandedBlockId === block.id}
               >
-                <legend className="px-2 font-semibold">
+                <summary className="cursor-pointer font-semibold">
+                  <span aria-hidden="true" className="mr-2 text-slate-400">
+                    ⠿
+                  </span>
+                  {index + 1}.{" "}
                   {builderBlockCatalog[block.properties.type].label}
-                </legend>
-                <label className="block text-sm">
+                  {!block.visible ? " · ausgeblendet" : ""}
+                </summary>
+                <p className="mt-2 text-xs text-slate-500">
+                  Zum Sortieren die Karte ziehen oder die Schaltflächen unten
+                  verwenden.
+                </p>
+                <label className="mt-4 block text-sm">
                   Überschrift
                   <input
                     aria-invalid={!block.properties.heading}
@@ -432,7 +618,7 @@ export function BuilderDemo({
                       setBlocks((current) => moveBlock(current, block.id, -1))
                     }
                   >
-                    ↑
+                    Nach oben
                   </button>
                   <button
                     aria-label={`${block.properties.heading} nach unten`}
@@ -442,7 +628,7 @@ export function BuilderDemo({
                       setBlocks((current) => moveBlock(current, block.id, 1))
                     }
                   >
-                    ↓
+                    Nach unten
                   </button>
                   <button
                     className="rounded-lg border px-3 py-2"
@@ -468,141 +654,77 @@ export function BuilderDemo({
                   >
                     {block.visible ? "Ausblenden" : "Einblenden"}
                   </button>
-                </div>
-              </fieldset>
-            ))}
-            <label className="block text-sm font-semibold">
-              Navigation
-              <input
-                className="mt-2 w-full rounded-xl border p-3"
-                value={navigation}
-                onChange={(event) => setNavigation(event.target.value)}
-              />
-            </label>
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-semibold">Designvorlage</h2>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    Drei kontrollierte Themes sorgen für ein stimmiges Layout
-                    auf allen Geräten.
-                  </p>
-                </div>
-                {!canUseThemes && tenantMode ? (
-                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
-                    Ab Wachstum
-                  </span>
-                ) : null}
-              </div>
-              <form action={saveTenantBuilderTheme} className="mt-4">
-                <div className="grid gap-2">
-                  {builderThemeValues.map((key) => (
-                    <label
-                      className={`cursor-pointer rounded-xl border p-3 ${theme === key ? "border-cyan-500 bg-cyan-50" : "border-slate-200"}`}
-                      key={key}
-                    >
-                      <span className="flex items-center gap-3">
-                        <input
-                          checked={theme === key}
-                          disabled={tenantMode && !canUseThemes}
-                          name="themeKey"
-                          onChange={() => setTheme(key)}
-                          type="radio"
-                          value={key}
-                        />
-                        <span className="flex-1">
-                          <span className="block text-sm font-semibold">
-                            {builderThemes[key].name}
-                          </span>
-                          <span className="block text-xs text-slate-500">
-                            {builderThemes[key].description}
-                          </span>
-                        </span>
-                        <span
-                          className="size-7 rounded-full border-4 border-white shadow"
-                          style={{
-                            backgroundColor: builderThemes[key].primary,
-                          }}
-                        />
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                {tenantMode && canUseThemes ? (
                   <button
-                    className="mt-3 w-full rounded-xl border px-4 py-2 text-sm font-semibold"
-                    type="submit"
+                    className="rounded-lg border border-red-200 px-3 py-2 text-red-700 hover:bg-red-50"
+                    onClick={() =>
+                      setBlocks((current) =>
+                        normalizePositions(
+                          current.filter((item) => item.id !== block.id),
+                        ),
+                      )
+                    }
                   >
-                    Design anwenden
+                    Entfernen
                   </button>
-                ) : null}
-              </form>
-            </div>
-            <label className="block text-sm font-semibold">
-              Schriftvariante
-              <select
-                className="mt-2 w-full rounded-xl border p-3"
-                value={font}
-                onChange={(event) => setFont(event.target.value)}
-              >
-                <option value="system">System Sans</option>
-                <option value="serif-heading">Serif Überschriften</option>
-              </select>
-            </label>
+                </div>
+              </details>
+            ))}
             {tenantMode ? (
-              <form
-                action={uploadTenantMedia}
-                className="rounded-2xl border border-dashed border-slate-300 p-4"
-              >
-                <h2 className="font-semibold">Neues Bild hochladen</h2>
+              <details className="rounded-2xl border border-dashed border-slate-300 p-4">
+                <summary className="cursor-pointer font-semibold">
+                  Neues Bild hochladen
+                </summary>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
                   Das Bild wird optimiert und gleichzeitig im gewählten Bereich
                   deiner Medienbibliothek abgelegt.
                 </p>
-                <input name="usage" type="hidden" value="library" />
-                <input
-                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
-                  className="mt-3 block w-full text-sm"
-                  name="file"
-                  required
-                  type="file"
-                />
-                <input
-                  className="mt-3 w-full rounded-xl border p-2 text-sm"
-                  name="altText"
-                  placeholder="Kurze Bildbeschreibung"
-                  required
-                />
-                <select
-                  className="mt-3 w-full rounded-xl border p-2 text-sm"
-                  defaultValue="content"
-                  name="category"
-                >
-                  {tenantMediaCategoryValues.map((category) => (
-                    <option key={category} value={category}>
-                      {mediaCategoryLabels[category]}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  className="mt-3 w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-                  type="submit"
-                >
-                  Hochladen & einsortieren
-                </button>
-              </form>
+                <form action={uploadTenantMedia}>
+                  <input name="usage" type="hidden" value="library" />
+                  <input
+                    accept="image/svg+xml,image/png,image/jpeg,image/webp"
+                    className="mt-3 block w-full text-sm"
+                    name="file"
+                    required
+                    type="file"
+                  />
+                  <input
+                    className="mt-3 w-full rounded-xl border p-2 text-sm"
+                    name="altText"
+                    placeholder="Kurze Bildbeschreibung"
+                    required
+                  />
+                  <select
+                    className="mt-3 w-full rounded-xl border p-2 text-sm"
+                    defaultValue="content"
+                    name="category"
+                  >
+                    {tenantMediaCategoryValues.map((category) => (
+                      <option key={category} value={category}>
+                        {mediaCategoryLabels[category]}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="mt-3 w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                    type="submit"
+                  >
+                    Hochladen & einsortieren
+                  </button>
+                </form>
+              </details>
             ) : null}
-            <label className="block text-sm font-semibold">
-              Logo
-              <select
-                className="mt-2 w-full rounded-xl border p-3"
-                value={logo}
-                onChange={(event) => setLogo(event.target.value)}
-              >
-                <option value="none">Kein Logo</option>
-                <option value="">Noch kein Medium ausgewählt</option>
-              </select>
-            </label>
+            <div className="border-t border-slate-200 pt-4">
+              <p className="text-xs font-bold tracking-[.16em] text-cyan-800 uppercase">
+                Schritt 3
+              </p>
+              <h2 className="mt-1 text-lg font-semibold">
+                Vorschau prüfen und veröffentlichen
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Nutze rechts die Geräteansicht. Erst „Veröffentlichen“ übernimmt
+                den gespeicherten Entwurf auf die Website.
+              </p>
+            </div>
             <button
               className="w-full rounded-xl bg-cyan-600 px-4 py-3 font-semibold text-white"
               onClick={publish}
@@ -632,7 +754,10 @@ export function BuilderDemo({
               </div>
             ) : null}
           </section>
-          <section aria-label="Vorschau">
+          <section
+            aria-label="Vorschau"
+            className="self-start xl:sticky xl:top-5"
+          >
             <div
               className="mb-3 flex gap-2"
               role="group"
@@ -645,12 +770,17 @@ export function BuilderDemo({
                   key={value}
                   onClick={() => setDevice(value)}
                 >
-                  {value}
+                  {value === "desktop"
+                    ? "Desktop"
+                    : value === "tablet"
+                      ? "Tablet"
+                      : "Mobil"}
                 </button>
               ))}
             </div>
             <div
               className={`mx-auto overflow-hidden rounded-3xl bg-white shadow-lg transition-[max-width] ${device === "mobile" ? "max-w-[390px]" : device === "tablet" ? "max-w-[800px]" : "max-w-none"}`}
+              data-font={font}
               data-theme={theme}
               style={
                 {
