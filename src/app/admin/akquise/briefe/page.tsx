@@ -6,11 +6,16 @@ import {
   listPostalDispatches,
   onlinebriefConfiguration,
 } from "@/modules/onlinebrief/service";
+import { listPostalLetterTemplates } from "@/modules/onlinebrief/templates";
 import { requirePlatformPermission } from "@/modules/platform/access";
 import { listPlatformMedia } from "@/modules/media/repository";
 import { listSalesPipeline } from "@/modules/platform/sales-crm";
 
-import { PreparePostalForm, SubmitPostalForm } from "./postal-forms";
+import {
+  DeletePostalForm,
+  PreparePostalForm,
+  SubmitPostalForm,
+} from "./postal-forms";
 import { SalesNav } from "../sales-nav";
 
 const formatter = new Intl.DateTimeFormat("de-DE", {
@@ -20,10 +25,11 @@ const formatter = new Intl.DateTimeFormat("de-DE", {
 
 export default async function PostalAcquisitionPage() {
   await requirePlatformPermission("platform.sales.manage");
-  const [leads, dispatches, media] = await Promise.all([
+  const [leads, dispatches, media, templates] = await Promise.all([
     listSalesPipeline(),
     listPostalDispatches(),
     listPlatformMedia(),
+    listPostalLetterTemplates(),
   ]);
   const configuration = onlinebriefConfiguration();
   return (
@@ -71,10 +77,24 @@ export default async function PostalAcquisitionPage() {
                 ),
               }))}
               media={media
-                .filter((asset) => asset.mimeType.startsWith("image/"))
+                .filter(
+                  (asset) =>
+                    asset.mimeType.startsWith("image/") &&
+                    asset.category !== "branding" &&
+                    asset.width >= 600 &&
+                    asset.height >= 200,
+                )
                 .map((asset) => ({
                   id: asset.id,
                   label: asset.description || asset.originalName,
+                }))}
+              templates={templates
+                .filter((template) => template.active)
+                .map((template) => ({
+                  id: template.id,
+                  name: template.name,
+                  headlineTemplate: template.headlineTemplate,
+                  bodyTemplate: template.bodyTemplate,
                 }))}
             />
           </div>
@@ -153,6 +173,10 @@ export default async function PostalAcquisitionPage() {
                       mode={dispatch.mode}
                     />
                   ) : null}
+                  <DeletePostalForm
+                    dispatchId={dispatch.id}
+                    submitted={dispatch.status === "submitted"}
+                  />
                 </article>
               ))
             ) : (

@@ -50,7 +50,7 @@ export async function findPostalCampaignLead(leadId: string, token: string) {
 const responseSchema = z
   .object({
     leadId: z.uuid(),
-    token: z.string().regex(/^[a-f0-9]{64}$/),
+    token: z.string().regex(/^(?:[a-f0-9]{32}|[a-f0-9]{64})$/),
     response: z.enum(postalResponseValues),
     email: z.union([z.literal(""), z.email()]),
     acknowledged: z.literal(true),

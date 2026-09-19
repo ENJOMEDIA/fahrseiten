@@ -4,9 +4,20 @@ Stand: 18. September 2026.
 
 ## Ziel und Abgrenzung
 
-FahrSeiten kann einen persönlichen, signierten Link und einen QR-Code für einen vorhandenen Akquise-Kontakt erzeugen. Der Link ist für einen adressierten Brief bestimmt und führt auf eine eigene Rückmeldeseite unter `/brief/{leadId}`. Die bestehende Produktwebsite und die Beispielwebsite unter `/demo` bleiben davon getrennt.
+FahrSeiten kann einen persönlichen, signierten Link und einen QR-Code für einen vorhandenen Akquise-Kontakt erzeugen. Der Link ist für einen adressierten Brief bestimmt und führt auf eine eigene Rückmeldeseite unter `/brief/{leadId}/{token}`. Die bestehende Produktwebsite und die Beispielwebsite unter `/demo` bleiben davon getrennt.
 
-Die Plattform erzeugt inzwischen personalisierte A4-Briefe mit Empfängeranschrift, fester Lead-ID, signiertem Rückmeldelink und QR-Code. Unter **Akquise → Briefakquise** kann das PDF geprüft und anschließend kontrolliert an OnlineBrief24 übertragen werden. Jeder Vorgang wird mit Modus, Prüfsumme, Anbieter-Auftragsnummer, Status und Fehlercode in der Lead-Historie gespeichert.
+Die Plattform erzeugt inzwischen personalisierte A4-Briefe mit
+fenstergerecht positionierter Empfängeranschrift, fester Lead-ID, signiertem
+Rückmeldelink und QR-Code. Unter **Akquise → Briefakquise** kann das PDF geprüft
+und anschließend kontrolliert an OnlineBrief24 übertragen werden. Jeder Vorgang
+wird mit Modus, Prüfsumme, Anbieter-Auftragsnummer, Status und Fehlercode in der
+Kundenhistorie gespeichert.
+
+Unter **Briefvorlagen** stehen drei mitgelieferte Vertriebstexte bereit.
+Zusätzliche Vorlagen werden mit Überschrift, Text und den Platzhaltern
+`{{Fahrschule}}` und `{{Ansprechpartner}}` gespeichert. Bei der
+PDF-Erstellung füllt eine Auswahl beide Textfelder; die konkrete Fassung bleibt
+vor dem Erzeugen bearbeitbar.
 
 Der sichere Ausgangswert ist `ONLINEBRIEF_MODE=test`. Laut Anbieter landen diese Aufträge nur im OnlineBrief24-Warenkorb und werden nicht unmittelbar produziert. Ein kostenpflichtiger Liveversand ist nur mit `ONLINEBRIEF_MODE=live` möglich und verlangt in der Oberfläche zusätzlich die erneute Eingabe der festen Lead-ID. Auftragsverarbeitungsvertrag, Kosten, Adressquelle und rechtliche Freigabe bleiben vor dem ersten echten Versand zu prüfen.
 
@@ -15,7 +26,8 @@ Der sichere Ausgangswert ist `ONLINEBRIEF_MODE=test`. Laut Anbieter landen diese
 1. Ein berechtigter Plattformbenutzer legt im Akquise-CRM einen Kontakt an.
 2. In der Kundenakte werden die vollständige Postanschrift und der persönliche Brief-Link gepflegt. Derselbe Link kann weiterhin einzeln als SVG-QR-Code heruntergeladen werden.
 3. Unter **Briefakquise** werden Kundenakte, Überschrift, Brieftext und optional
-   ein Bild aus dem Plattform-Medienbereich ausgewählt. Die Plattform erzeugt
+   ein Bild aus dem Plattform-Medienbereich ausgewählt. Branding-Medien wie
+   Logo und Favicon werden nicht als großflächiges Briefmotiv angeboten. Die Plattform erzeugt
    daraus ein personalisiertes PDF mit Logo, Absender, Empfänger, Datum,
    Lead-ID und QR-Code. Nach der Sichtprüfung kann es in den Testwarenkorb oder
    nach gesonderter Livefreigabe in die Produktion übertragen werden.
@@ -47,6 +59,13 @@ Preis und der Auftrag im Onlinebrief24-Warenkorb manuell zu prüfen. Der
 Testmodus überträgt den Auftrag jetzt aktiv in diesen Warenkorb; erst der
 ausdrücklich freigegebene Livemodus löst eine unmittelbare Produktion aus.
 
+Lokale Entwürfe können mit ihrer PDF-Datei gelöscht werden. Bei bereits
+übertragenen Vorgängen ruft FahrSeiten zuerst den dokumentierten
+OnlineBrief24-Endpunkt `DELETE /v1/printjobs/{id}` auf. Laut Anbieter ist die
+Löschung nur innerhalb von 15 Minuten nach Übertragung und nicht mehr im Status
+`done` möglich. Schlägt sie beim Anbieter fehl, bleiben lokaler Datensatz und
+PDF erhalten.
+
 Quelle: [Onlinebrief24 API-Dokumentation](https://www.onlinebrief24.de/briefe-uebertragen/api)
 
 ## Datenschutz und Nachweis
@@ -64,7 +83,8 @@ Der AGB-Entwurf ersetzt keine rechtliche Prüfung. E-Mail-Werbeeinwilligungen we
 ## Manuelle Prüfung
 
 1. Einen ausschließlich fiktiven Lead mit vollständiger Postanschrift anlegen.
-2. Unter **Briefakquise** das PDF erzeugen und Empfänger, Absender, Lead-ID, Link und QR-Code prüfen.
+2. Unter **Briefakquise** eine Vorlage wählen, das PDF erzeugen und Empfänger
+   im Fensterbereich, Absender, Datum, Lead-ID und QR-Code prüfen.
 3. Den Auftrag mit `ONLINEBRIEF_MODE=test` übertragen und im OnlineBrief24-Warenkorb kontrollieren. Dort nicht produktiv absenden.
 4. Prüfen, dass Link und QR-Code ausschließlich diesen Lead adressieren und ungültige Signaturen abgewiesen werden.
 5. „Interesse“ ohne Einwilligung absenden; der Vorgang muss scheitern.

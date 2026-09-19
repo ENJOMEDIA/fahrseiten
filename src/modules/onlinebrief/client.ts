@@ -84,3 +84,31 @@ export async function submitOnlinebrief(input: {
     );
   return responseSchema.parse(body);
 }
+
+export async function deleteOnlinebrief(
+  credentials: OnlinebriefCredentials,
+  providerJobId: string,
+) {
+  const jobId = z.string().regex(/^\d+$/).parse(providerJobId);
+  const response = await fetch(`${API_URL}/printjobs/${jobId}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      auth: {
+        apiKey: credentials.apiKey,
+        apiSecret: credentials.apiSecret,
+        mode: credentials.mode,
+      },
+    }),
+    signal: AbortSignal.timeout(30_000),
+  });
+  const body = await response.json().catch(() => null);
+  if (!response.ok)
+    throw new Error(
+      `OnlineBrief24 konnte den Auftrag nicht löschen (${response.status}). Aufträge lassen sich dort nur innerhalb von 15 Minuten und nicht mehr im Status „done“ löschen.`,
+    );
+  return z
+    .object({ status: z.number(), message: z.string() })
+    .passthrough()
+    .parse(body);
+}

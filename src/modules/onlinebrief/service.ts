@@ -17,12 +17,14 @@ import {
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { postalCampaignUrl } from "@/modules/platform/postal-campaign";
 
-import { submitOnlinebrief } from "./client";
+import { deleteOnlinebrief, submitOnlinebrief } from "./client";
 import { createAcquisitionLetterPdf } from "./letter-pdf";
+import { personalizePostalTemplate } from "./templates";
 
 async function loadPlatformImage(
   mediaId: string | null,
   size: { width: number; height: number },
+  fit: "inside" | "cover" = "inside",
 ) {
   if (!mediaId) return undefined;
   const asset = await findPublicMedia(mediaId);
@@ -36,7 +38,7 @@ async function loadPlatformImage(
       .resize({
         width: size.width,
         height: size.height,
-        fit: "inside",
+        fit,
         withoutEnlargement: true,
       })
       .png()
@@ -109,10 +111,14 @@ export async function preparePostalDispatch(input: {
     loadPlatformImage(logoId, { width: 620, height: 168 }).catch(
       () => undefined,
     ),
-    loadPlatformImage(content.imageMediaId || null, {
-      width: 1_100,
-      height: 240,
-    }),
+    loadPlatformImage(
+      content.imageMediaId || null,
+      {
+        width: 1_100,
+        height: 240,
+      },
+      "cover",
+    ),
   ]);
   if (!sender)
     throw new Error(
@@ -123,8 +129,8 @@ export async function preparePostalDispatch(input: {
     brandLogoPng,
     heroImagePng,
     createdAt: new Date(),
-    headline: content.headline,
-    bodyText: content.bodyText,
+    headline: personalizePostalTemplate(content.headline, lead),
+    bodyText: personalizePostalTemplate(content.bodyText, lead),
     leadId: lead.id,
     campaignUrl: postalCampaignUrl(lead.id),
     recipient: {
@@ -258,4 +264,53 @@ export async function findPostalDispatchForDownload(dispatchId: string) {
     .where(eq(postalDispatches.id, z.uuid().parse(dispatchId)))
     .limit(1);
   return dispatch ?? null;
+}
+
+export async function deletePostalDispatch(input: {
+  dispatchId: string;
+  actorUserId: string;
+}) {
+  const id = z.uuid().parse(input.dispatchId);
+  const [dispatch] = await db
+    .select()
+    .from(postalDispatches)
+    .where(eq(postalDispatches.id, id))
+    .limit(1);
+  if (!dispatch) throw new Error("Der Briefvorgang wurde nicht gefunden.");
+
+  if (dispatch.status === "submitted") {
+    if (
+      !dispatch.providerJobId ||
+      !env.ONLINEBRIEF_API_KEY ||
+      !env.ONLINEBRIEF_API_SECRET
+    )
+      throw new Error(
+        "Der übertragene Auftrag kann ohne Anbieter-ID und OnlineBrief24-Zugang nicht gelöscht werden.",
+      );
+    await deleteOnlinebrief(
+      {
+        apiKey: env.ONLINEBRIEF_API_KEY,
+        apiSecret: env.ONLINEBRIEF_API_SECRET,
+        mode: dispatch.mode,
+      },
+      dispatch.providerJobId,
+    );
+  }
+
+  await getMediaStorage().delete(dispatch.storageKey);
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(postalDispatches)
+      .where(eq(postalDispatches.id, dispatch.id));
+    await tx.insert(salesActivities).values({
+      id: createId(),
+      leadId: dispatch.leadId,
+      actorUserId: input.actorUserId,
+      activityType: "postal_letter_deleted",
+      note: dispatch.providerJobId
+        ? `OnlineBrief24-Auftrag ${dispatch.providerJobId} und lokales PDF wurden gelöscht.`
+        : "Der vorbereitete Brief und das lokale PDF wurden gelöscht.",
+    });
+  });
+  return { providerDeleted: dispatch.status === "submitted" };
 }

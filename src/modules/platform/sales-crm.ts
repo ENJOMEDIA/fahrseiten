@@ -6,11 +6,13 @@ import { z } from "zod";
 import { db } from "@/db/client";
 import {
   backgroundJobs,
+  postalDispatches,
   salesActivities,
   salesLeads,
   tenantOnboardingTokens,
 } from "@/db/schema";
 import { createId } from "@/lib/ids";
+import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { salesStages, type LeadStatus } from "./sales-stages";
 import type { SalesCsvRow } from "./sales-csv";
 
@@ -244,7 +246,7 @@ export async function deleteSalesLead(input: {
   confirmation: string;
 }) {
   const id = z.uuid().parse(input.id);
-  return db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     const [lead] = await tx
       .select({
         companyName: salesLeads.companyName,
@@ -274,6 +276,17 @@ export async function deleteSalesLead(input: {
       );
     if (input.confirmation.trim() !== lead.companyName)
       throw new Error("Der eingegebene Name stimmt nicht überein.");
+    const dispatches = await tx
+      .select({
+        status: postalDispatches.status,
+        storageKey: postalDispatches.storageKey,
+      })
+      .from(postalDispatches)
+      .where(eq(postalDispatches.leadId, id));
+    if (dispatches.some((dispatch) => dispatch.status === "submitted"))
+      throw new Error(
+        "Mindestens ein Brief wurde an OnlineBrief24 übertragen. Lösche oder storniere diesen Auftrag zuerst unter Briefakquise.",
+      );
 
     // Versandjobs enthalten keinen Fremdschlüssel zum Lead. Sie werden deshalb
     // vor dem Kontakt entfernt; Zustellnachweise hängen daran und folgen per CASCADE.
@@ -281,8 +294,21 @@ export async function deleteSalesLead(input: {
       .delete(backgroundJobs)
       .where(like(backgroundJobs.idempotencyKey, `sales:${id}:%`));
     await tx.delete(salesLeads).where(eq(salesLeads.id, id));
-    return { companyName: lead.companyName };
+    return {
+      companyName: lead.companyName,
+      storageKeys: dispatches.map((dispatch) => dispatch.storageKey),
+    };
   });
+  const cleanup = await Promise.allSettled(
+    result.storageKeys.map((storageKey) =>
+      getMediaStorage().delete(storageKey),
+    ),
+  );
+  return {
+    companyName: result.companyName,
+    mediaCleanupFailed: cleanup.filter((item) => item.status === "rejected")
+      .length,
+  };
 }
 
 export async function importSalesLeads(

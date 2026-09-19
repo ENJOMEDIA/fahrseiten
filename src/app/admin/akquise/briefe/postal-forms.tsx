@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
+  deletePostalDispatchAction,
   preparePostalDispatchAction,
   submitPostalDispatchAction,
   type PostalActionState,
@@ -21,16 +22,68 @@ function Result({ state }: { state: PostalActionState }) {
   ) : null;
 }
 
+export function DeletePostalForm({
+  dispatchId,
+  submitted,
+}: {
+  dispatchId: string;
+  submitted: boolean;
+}) {
+  const [state, action, pending] = useActionState(
+    deletePostalDispatchAction,
+    initialState,
+  );
+  return (
+    <details className="mt-3 rounded-xl border border-red-100 bg-red-50 p-3">
+      <summary className="cursor-pointer text-xs font-semibold text-red-800">
+        Briefvorgang löschen
+      </summary>
+      <p className="mt-2 text-xs leading-5 text-red-900">
+        {submitted
+          ? "FahrSeiten versucht zuerst, den Auftrag bei OnlineBrief24 zu löschen. Das ist laut Anbieter nur innerhalb von 15 Minuten und nicht mehr nach Abschluss möglich."
+          : "Der lokale PDF-Entwurf und der Briefvorgang werden entfernt. Die Löschung bleibt in der Kundenhistorie nachvollziehbar."}
+      </p>
+      <form action={action} className="mt-3">
+        <input name="dispatchId" type="hidden" value={dispatchId} />
+        <button
+          className="rounded-xl bg-red-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+          disabled={pending}
+          type="submit"
+        >
+          {pending ? "Wird gelöscht …" : "Jetzt endgültig löschen"}
+        </button>
+        <Result state={state} />
+      </form>
+    </details>
+  );
+}
+
 export function PreparePostalForm({
   leads,
   media,
+  templates,
 }: {
   leads: { id: string; companyName: string; addressComplete: boolean }[];
   media: { id: string; label: string }[];
+  templates: {
+    id: string;
+    name: string;
+    headlineTemplate: string;
+    bodyTemplate: string;
+  }[];
 }) {
   const [state, action, pending] = useActionState(
     preparePostalDispatchAction,
     initialState,
+  );
+  const firstTemplate = templates[0];
+  const [headline, setHeadline] = useState(
+    firstTemplate?.headlineTemplate ??
+      "Ihre Website sollte mitfahren – nicht aufhalten.",
+  );
+  const [bodyText, setBodyText] = useState(
+    firstTemplate?.bodyTemplate ??
+      "FahrSeiten verbindet einen modernen Webauftritt mit einem übersichtlichen Arbeitsbereich.",
   );
   return (
     <form action={action} className="space-y-4">
@@ -55,23 +108,49 @@ export function PreparePostalForm({
         </select>
       </label>
       <label className="block text-sm font-semibold">
+        Briefvorlage
+        <select
+          className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+          defaultValue={firstTemplate?.id ?? ""}
+          onChange={(event) => {
+            const template = templates.find(
+              (item) => item.id === event.target.value,
+            );
+            if (!template) return;
+            setHeadline(template.headlineTemplate);
+            setBodyText(template.bodyTemplate);
+          }}
+        >
+          {templates.map((template) => (
+            <option key={template.id} value={template.id}>
+              {template.name}
+            </option>
+          ))}
+        </select>
+        <span className="mt-1 block text-xs font-normal text-slate-500">
+          Die Vorlage füllt Überschrift und Text. Beides kann für diesen Brief
+          noch angepasst werden.
+        </span>
+      </label>
+      <label className="block text-sm font-semibold">
         Überschrift
         <input
           className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
-          defaultValue="Eine Website, die Ihrer Fahrschule Arbeit abnimmt."
           name="headline"
+          onChange={(event) => setHeadline(event.target.value)}
           required
+          value={headline}
         />
       </label>
       <label className="block text-sm font-semibold">
         Persönlicher Brieftext
         <textarea
           className="mt-2 min-h-48 w-full rounded-xl border border-slate-300 p-3 leading-6 font-normal"
-          defaultValue={
-            "FahrSeiten verbindet einen modernen Webauftritt mit einem übersichtlichen Arbeitsbereich: Klassen, Preise, Kurse, Fahrzeuge, Team, Standorte und Anfragen lassen sich selbst pflegen – ohne technischen Daueraufwand. Gestaltung und Bausteine bleiben dabei bewusst geführt, damit die Seite auch nach Änderungen hochwertig wirkt.\n\nScannen Sie Ihren persönlichen QR-Code. Dort können Sie unverbindlich Interesse anmelden, weitere Informationen anfordern oder jede weitere Ansprache ablehnen."
-          }
+          maxLength={1200}
           name="bodyText"
+          onChange={(event) => setBodyText(event.target.value)}
           required
+          value={bodyText}
         />
       </label>
       <label className="block text-sm font-semibold">

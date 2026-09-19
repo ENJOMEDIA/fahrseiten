@@ -17,7 +17,7 @@ import {
   type LeadStatus,
 } from "@/modules/platform/sales-stages";
 
-import { LeadControls } from "../sales-forms";
+import { LeadControls, LeadDeletePanel } from "../sales-forms";
 import { SalesNav } from "../sales-nav";
 import { updateSalesOfferStatusAction } from "./actions";
 import { OfferEditor } from "./offer-editor";
@@ -335,6 +335,11 @@ export default async function SalesLeadDetailPage({
           </Link>
         </div>
       </Card>
+      <LeadDeletePanel
+        blocked={Boolean(lead.convertedTenantId)}
+        companyName={lead.companyName}
+        id={lead.id}
+      />
     </CustomerPage>
   );
 }

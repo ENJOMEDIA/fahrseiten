@@ -1,3 +1,5 @@
+import { createHmac } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -16,9 +18,21 @@ describe("postal campaign links", () => {
       createPostalCampaignUrl(leadId, "https://fahrseiten.de", secret),
     );
 
-    expect(url.pathname).toBe(`/brief/${leadId}`);
-    expect(url.searchParams.get("token")).toBe(token);
+    expect(token).toHaveLength(32);
+    expect(url.pathname).toBe(`/brief/${leadId}/${token}`);
+    expect(url.search).toBe("");
     expect(verifyPostalCampaignToken(leadId, token, secret)).toBe(true);
     expect(verifyPostalCampaignToken(otherLeadId, token, secret)).toBe(false);
+  });
+
+  it("keeps existing 64-character campaign links valid", () => {
+    const leadId = "8ed5caf5-1e49-42fe-a850-8ecea4dce36f";
+    const secret = "test-secret-with-at-least-24-characters";
+    const legacyToken = createHmac("sha256", secret)
+      .update(`postal-campaign:${leadId}`)
+      .digest("hex");
+
+    expect(legacyToken).toHaveLength(64);
+    expect(verifyPostalCampaignToken(leadId, legacyToken, secret)).toBe(true);
   });
 });

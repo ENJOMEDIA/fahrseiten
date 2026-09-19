@@ -192,7 +192,9 @@ export async function deleteLeadAction(
     revalidatePath("/admin/akquise");
     revalidatePath("/admin/akquise/kontakte");
     return {
-      message: `„${result.companyName}“ wurde mit Aktivitäten und Versanddaten gelöscht.`,
+      message: result.mediaCleanupFailed
+        ? `„${result.companyName}“ wurde gelöscht. ${result.mediaCleanupFailed} PDF-Datei(en) müssen technisch aus dem Speicher entfernt werden.`
+        : `„${result.companyName}“ wurde mit Aktivitäten, Versanddaten und lokalen PDFs gelöscht.`,
       error: false,
     };
   } catch (error) {

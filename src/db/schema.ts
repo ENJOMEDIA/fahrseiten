@@ -924,6 +924,21 @@ export const postalDispatchStatusValues = [
   "submitted",
   "failed",
 ] as const;
+export const postalLetterTemplates = mysqlTable(
+  "postal_letter_templates",
+  {
+    id: id("id").primaryKey(),
+    name: varchar("name", { length: 160 }).notNull(),
+    headlineTemplate: varchar("headline_template", { length: 180 }).notNull(),
+    bodyTemplate: text("body_template").notNull(),
+    active: boolean("active").default(true).notNull(),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [index("postal_letter_templates_active_idx").on(table.active)],
+);
 export const postalDispatches = mysqlTable(
   "postal_dispatches",
   {

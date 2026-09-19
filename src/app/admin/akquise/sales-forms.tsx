@@ -433,11 +433,6 @@ export function LeadControls({
     updateLeadAction,
     initialState,
   );
-  const [deleteState, deleteAction, deleting] = useActionState(
-    deleteLeadAction,
-    initialState,
-  );
-  const [confirmation, setConfirmation] = useState("");
   const dateValue = lead.nextTaskAt
     ? new Date(
         lead.nextTaskAt.getTime() -
@@ -582,32 +577,61 @@ export function LeadControls({
           </p>
         ) : null}
       </details>
-      <details className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3">
-        <summary className="cursor-pointer text-xs font-semibold text-red-800">
-          Kontakt vollständig löschen
-        </summary>
-        <form action={deleteAction} className="mt-3 space-y-3">
-          <input name="id" type="hidden" value={lead.id} />
-          <label className="block text-xs font-semibold text-red-950">
-            Zur Bestätigung „{lead.companyName}“ eingeben
-            <input
-              autoComplete="off"
-              className="mt-2 min-h-10 w-full rounded-xl border border-red-200 bg-white px-3 font-normal"
-              name="confirmation"
-              onChange={(event) => setConfirmation(event.target.value)}
-              value={confirmation}
-            />
-          </label>
-          <button
-            className="rounded-xl bg-red-700 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={confirmation.trim() !== lead.companyName || deleting}
-            type="submit"
-          >
-            {deleting ? "Wird gelöscht …" : "Kontakt endgültig löschen"}
-          </button>
-          <Result state={deleteState} />
-        </form>
-      </details>
     </details>
+  );
+}
+
+export function LeadDeletePanel({
+  id,
+  companyName,
+  blocked,
+}: {
+  id: string;
+  companyName: string;
+  blocked: boolean;
+}) {
+  const [state, action, pending] = useActionState(
+    deleteLeadAction,
+    initialState,
+  );
+  const [confirmation, setConfirmation] = useState("");
+  return (
+    <section className="mt-6 rounded-[2rem] border border-red-200 bg-red-50 p-6">
+      <p className="text-xs font-bold tracking-[.16em] text-red-700 uppercase">
+        Gefahrenbereich
+      </p>
+      <h2 className="mt-2 text-2xl font-semibold text-red-950">
+        Kundenakte vollständig löschen
+      </h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-red-900">
+        Stammdaten, Akquise-Historie, vorbereitete Briefe und Versanddaten
+        werden endgültig entfernt.
+        {blocked
+          ? " Diese Akte ist mit einer Kundeninstanz verbunden. Lösche zuerst die technische Instanz."
+          : ""}
+      </p>
+      <form action={action} className="mt-5 max-w-xl space-y-3">
+        <input name="id" type="hidden" value={id} />
+        <label className="block text-sm font-semibold text-red-950">
+          Zur Bestätigung „{companyName}“ eingeben
+          <input
+            autoComplete="off"
+            className="mt-2 min-h-11 w-full rounded-xl border border-red-300 bg-white px-3 font-normal"
+            disabled={blocked}
+            name="confirmation"
+            onChange={(event) => setConfirmation(event.target.value)}
+            value={confirmation}
+          />
+        </label>
+        <button
+          className="rounded-xl bg-red-700 px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={blocked || confirmation.trim() !== companyName || pending}
+          type="submit"
+        >
+          {pending ? "Wird gelöscht …" : "Kundenakte endgültig löschen"}
+        </button>
+        <Result state={state} />
+      </form>
+    </section>
   );
 }

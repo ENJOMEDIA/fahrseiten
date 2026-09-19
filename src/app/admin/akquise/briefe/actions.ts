@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import {
+  deletePostalDispatch,
   preparePostalDispatch,
   submitPreparedPostalDispatch,
 } from "@/modules/onlinebrief/service";
@@ -36,6 +37,35 @@ export async function preparePostalDispatchAction(
         error instanceof Error
           ? error.message
           : "Der Brief konnte nicht vorbereitet werden.",
+      error: true,
+    };
+  }
+}
+
+export async function deletePostalDispatchAction(
+  _state: PostalActionState,
+  formData: FormData,
+): Promise<PostalActionState> {
+  const identity = await requirePlatformPermission("platform.sales.manage");
+  try {
+    const result = await deletePostalDispatch({
+      dispatchId: String(formData.get("dispatchId") ?? ""),
+      actorUserId: identity.id,
+    });
+    revalidatePath("/admin/akquise/briefe");
+    revalidatePath("/admin/akquise");
+    return {
+      message: result.providerDeleted
+        ? "Der OnlineBrief24-Auftrag und das lokale PDF wurden gelöscht."
+        : "Der lokale Briefentwurf wurde gelöscht.",
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Der Briefvorgang konnte nicht gelöscht werden.",
       error: true,
     };
   }

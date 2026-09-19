@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 import { findPostalCampaignLead } from "@/modules/platform/postal-campaign";
 import { PostalResponseForm } from "./response-form";
@@ -14,7 +13,30 @@ export default async function PostalCampaignPage({
   const [{ leadId }, query] = await Promise.all([params, searchParams]);
   const token = query.token ?? "";
   const lead = await findPostalCampaignLead(leadId, token);
-  if (!lead) notFound();
+  if (!lead)
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#07111d] px-5 text-white">
+        <section className="max-w-xl rounded-[2rem] border border-white/10 bg-white/5 p-8 text-center shadow-2xl">
+          <p className="text-xs font-bold tracking-[.18em] text-cyan-300 uppercase">
+            Persönlicher FahrSeiten-Link
+          </p>
+          <h1 className="mt-4 text-3xl font-semibold">
+            Dieser Link ist unvollständig oder nicht mehr gültig.
+          </h1>
+          <p className="mt-4 leading-7 text-slate-300">
+            Bitte scanne den QR-Code auf deinem aktuellen Schreiben erneut.
+            Wurde der Brief bereits vor einer Systemaktualisierung erstellt,
+            fordere bitte einen neuen persönlichen Link an.
+          </p>
+          <Link
+            className="mt-7 inline-flex rounded-full bg-cyan-300 px-6 py-3 font-semibold text-slate-950"
+            href="/kontakt"
+          >
+            Kontakt zu FahrSeiten
+          </Link>
+        </section>
+      </main>
+    );
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#07111d] px-5 py-10 text-white sm:px-8 sm:py-16">
