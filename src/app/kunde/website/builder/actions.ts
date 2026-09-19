@@ -16,6 +16,7 @@ import {
   resolveFeatureStatus,
 } from "@/modules/features/service";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
+import { assertTenantFeature } from "@/modules/features/access";
 
 export async function saveTenantBuilderTheme(formData: FormData) {
   const identity = await getSessionIdentity();
@@ -31,6 +32,8 @@ export async function saveTenantBuilderTheme(formData: FormData) {
     userId: identity.id,
     activeTenantIds: identity.memberships.map((item) => item.tenantId),
   });
+  await assertTenantFeature(context.tenantId, "managed_website");
+  await assertTenantFeature(context.tenantId, "website_builder");
   const sources = await findFeatureSources(context.tenantId, "theme_templates");
   if (!sources || !isFeatureUsable(resolveFeatureStatus(sources)))
     throw new Error("Designvorlagen sind ab dem Paket Wachstum verfügbar.");

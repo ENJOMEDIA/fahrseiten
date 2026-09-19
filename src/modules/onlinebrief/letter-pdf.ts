@@ -381,5 +381,12 @@ export async function createAcquisitionLetterPdf(
     font: bold,
     color: rgb(0.03, 0.55, 0.63),
   });
+  page.drawText("Datenschutz und Werbewiderspruch: fahrseiten.de/datenschutz", {
+    x: 310,
+    y: 36,
+    size: 6.3,
+    font: regular,
+    color: rgb(0.4, 0.44, 0.49),
+  });
   return new Uint8Array(await document.save());
 }

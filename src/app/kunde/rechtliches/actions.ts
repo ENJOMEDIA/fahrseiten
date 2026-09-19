@@ -15,6 +15,7 @@ import {
   saveTenantLegalProfile,
 } from "@/modules/legal/repository";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
+import { assertTenantFeature } from "@/modules/features/access";
 
 export type LegalActionState = { message: string; error: boolean };
 
@@ -36,6 +37,7 @@ export async function saveLegalAction(
     activeTenantIds: identity.memberships.map((item) => item.tenantId),
   });
   try {
+    await assertTenantFeature(context.tenantId, "legal_consent");
     const publish = formData.get("intent") === "publish";
     const submittedProfile = parseLegalProfileForm(formData);
     const profile = {

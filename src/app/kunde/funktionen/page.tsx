@@ -1,7 +1,22 @@
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
 import { featureCatalog } from "@/modules/features/catalog";
-export default function CustomerFeaturesPage() {
+import { getSessionIdentity } from "@/modules/auth/session";
+import { getTenantFeatureStatusMap } from "@/modules/features/access";
+import { isFeatureUsable } from "@/modules/features/service";
+import { redirect } from "next/navigation";
+
+export default async function CustomerFeaturesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ feature?: string }>;
+}) {
+  const membership = (await getSessionIdentity())?.memberships[0];
+  if (!membership) redirect("/login");
+  const [statuses, query] = await Promise.all([
+    getTenantFeatureStatusMap(membership.tenantId),
+    searchParams,
+  ]);
   return (
     <CustomerPage
       title="Funktionen"
@@ -23,13 +38,22 @@ export default function CustomerFeaturesPage() {
       </section>
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {Object.entries(featureCatalog).map(([key, feature]) => {
-          const active = feature.availability === "available";
+          const status = statuses[key as keyof typeof statuses];
+          const active = isFeatureUsable(status);
+          const planned = feature.availability === "planned";
+          const selected = query.feature === key;
           return (
-            <Card key={key}>
+            <Card className={selected ? "ring-2 ring-cyan-500" : ""} key={key}>
               <div className="flex justify-between gap-3">
                 <h2 className="font-semibold">{feature.title}</h2>
-                <StatusBadge tone={active ? "success" : "neutral"}>
-                  {active ? "Verfügbar" : "In Planung"}
+                <StatusBadge
+                  tone={active ? "success" : planned ? "neutral" : "warning"}
+                >
+                  {active
+                    ? "In deinem Paket"
+                    : planned
+                      ? "In Planung"
+                      : "Nicht im Paket"}
                 </StatusBadge>
               </div>
               <p className="mt-3 text-sm text-slate-600">
@@ -37,11 +61,16 @@ export default function CustomerFeaturesPage() {
               </p>
               {active ? (
                 <p className="mt-4 text-sm font-semibold text-cyan-800">
-                  Im Kundenbereich nutzbar
+                  Im Kundenbereich freigeschaltet
                 </p>
-              ) : (
+              ) : planned ? (
                 <p className="mt-4 text-sm text-slate-500">
                   Noch keine aktive Funktion
+                </p>
+              ) : (
+                <p className="mt-4 text-sm font-semibold text-amber-700">
+                  Kann über ein größeres Paket oder als Zusatzmodul
+                  freigeschaltet werden.
                 </p>
               )}
             </Card>

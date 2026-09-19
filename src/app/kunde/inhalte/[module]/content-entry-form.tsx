@@ -26,10 +26,14 @@ export function ContentEntryForm({
   module,
   singular,
   media = [],
+  canCreate = true,
+  lockedMessage,
 }: {
   module: ContentModuleKey;
   singular: string;
   media?: { id: string; label: string }[];
+  canCreate?: boolean;
+  lockedMessage?: string;
 }) {
   const [state, action, pending] = useActionState(
     createContentEntryAction,
@@ -43,6 +47,11 @@ export function ContentEntryForm({
     >
       <input name="module" type="hidden" value={module} />
       <h2 className="font-semibold">{singular} anlegen</h2>
+      {!canCreate && lockedMessage ? (
+        <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-5 text-amber-900">
+          {lockedMessage}
+        </p>
+      ) : null}
       <div className="mt-4 space-y-3">
         <label className="block text-sm font-semibold">
           Bezeichnung
@@ -274,10 +283,10 @@ export function ContentEntryForm({
       </div>
       <button
         className="mt-4 w-full rounded-xl bg-cyan-600 px-4 py-3 font-semibold text-white disabled:opacity-50"
-        disabled={pending}
+        disabled={pending || !canCreate}
         type="submit"
       >
-        {pending ? "Speichert …" : "Speichern"}
+        {pending ? "Speichert …" : canCreate ? "Speichern" : "Paket erweitern"}
       </button>
       <Result state={state} />
     </form>

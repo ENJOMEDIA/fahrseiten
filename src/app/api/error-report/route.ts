@@ -9,6 +9,8 @@ import {
 import { submitErrorReport } from "@/modules/support/error-report-service";
 import { getSessionIdentity } from "@/modules/auth/session";
 import { isTrustedMutationRequest } from "@/modules/security/origin";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
+import { supportPriority } from "@/modules/features/service";
 
 const limiter = new AuthRateLimiter(10, 15 * 60_000, 15 * 60_000);
 
@@ -26,9 +28,14 @@ export async function POST(request: Request) {
         ? demoErrorReportRepository
         : dbErrorReportRepository;
     const identity = await getSessionIdentity();
+    const tenantId = identity?.memberships[0]?.tenantId;
+    const hasPriority = tenantId
+      ? await isTenantFeatureEnabled(tenantId, "priority_support")
+      : false;
     const result = await submitErrorReport(await request.json(), repository, {
       reporterUserId: identity?.id,
-      tenantId: identity?.memberships[0]?.tenantId,
+      tenantId,
+      priority: supportPriority(hasPriority),
     });
     technicalLog("info", "error_report.received", {
       referenceId: result.referenceId,

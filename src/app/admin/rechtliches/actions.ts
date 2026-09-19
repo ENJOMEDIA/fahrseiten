@@ -42,6 +42,7 @@ export async function savePlatformLegalAction(
         contactForm: true,
         emailDelivery: true,
         consentManagement: true,
+        analytics: true,
       },
     };
     const documents = createStructuredLegalDocuments({

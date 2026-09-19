@@ -412,7 +412,7 @@ export function createStructuredLegalDocuments(input: {
   }
   if (modules.consentManagement) {
     privacySections.push(
-      `${privacySections.length + 1}. Einwilligungsverwaltung\nDie Website speichert die Auswahl zu optionalen Diensten, damit diese Entscheidung beachtet und nachgewiesen werden kann. Technisch erforderliche Speicherungen erfolgen nach § 25 Abs. 2 Nr. 2 TDDDG; optionale Dienste werden erst nach einer Einwilligung gemäß § 25 Abs. 1 TDDDG und Art. 6 Abs. 1 lit. a DSGVO geladen. Eine Einwilligung kann jederzeit über die Cookie-Einstellungen widerrufen werden.`,
+      `${privacySections.length + 1}. Einwilligungsverwaltung\nDie Website speichert die Auswahl zu optionalen Diensten für 180 Tage in einem Cookie und legt zum Nachweis eine pseudonymisierte, nicht unmittelbar einer Person zugeordnete Bestätigung ab. Nachweise werden nach 180 Tagen automatisch gelöscht. Technisch erforderliche Speicherungen erfolgen nach § 25 Abs. 2 Nr. 2 TDDDG; optionale Dienste werden erst nach einer Einwilligung gemäß § 25 Abs. 1 TDDDG und Art. 6 Abs. 1 lit. a DSGVO geladen. Eine Einwilligung kann jederzeit über die Cookie-Einstellungen widerrufen werden.`,
     );
   }
   if (platformPostalAcquisition) {
@@ -438,6 +438,12 @@ export function createStructuredLegalDocuments(input: {
   ];
   for (const [key, title, purpose] of optionalModules) {
     if (!modules[key]) continue;
+    if (key === "analytics") {
+      privacySections.push(
+        `${privacySections.length + 1}. Reichweitenmessung\nNach Einwilligung erfassen wir aufgerufenen Pfad, Hostname und Stunde des Aufrufs. IP-Adressen, vollständige User-Agents und dauerhafte Besucherprofile werden dabei nicht gespeichert. Die Werte werden nur stündlich zusammengefasst und nach 90 Tagen automatisch gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO in Verbindung mit § 25 Abs. 1 TDDDG. Die Einwilligung kann jederzeit über die Cookie-Einstellungen widerrufen werden.`,
+      );
+      continue;
+    }
     privacySections.push(
       `${privacySections.length + 1}. ${title}\nWenn dieser Dienst genutzt wird, werden die für ${purpose} erforderlichen Daten verarbeitet. Der Dienst wird nur nach einer passenden Einwilligung oder einer anderen im konkreten Vorgang ausgewiesenen Rechtsgrundlage aktiviert. Anbieter, Empfänger, Speicherdauer und mögliche Drittlandübermittlungen müssen vor Aktivierung in der technischen Dienstekonfiguration vollständig hinterlegt und geprüft werden.`,
     );

@@ -2,7 +2,14 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
 import { contentModules } from "@/modules/customer/navigation";
-export default function ContentOverviewPage() {
+import { getSessionIdentity } from "@/modules/auth/session";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
+import { redirect } from "next/navigation";
+export default async function ContentOverviewPage() {
+  const membership = (await getSessionIdentity())?.memberships[0];
+  if (!membership) redirect("/login");
+  if (!(await isTenantFeatureEnabled(membership.tenantId, "content_modules")))
+    redirect("/kunde/funktionen?feature=content_modules");
   return (
     <>
       <Breadcrumbs

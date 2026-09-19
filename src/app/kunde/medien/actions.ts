@@ -15,6 +15,10 @@ import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { parseTenantMediaCategory, uploadImage } from "@/modules/media/service";
 import { queueMediaOptimization } from "@/modules/media/processing";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
+import {
+  assertTenantFeature,
+  isTenantFeatureEnabled,
+} from "@/modules/features/access";
 
 async function requireWritableTenant() {
   const identity = await getSessionIdentity();
@@ -38,6 +42,10 @@ export async function uploadTenantMedia(formData: FormData) {
   if (!(file instanceof File))
     throw new Error("Bitte eine Bilddatei auswählen.");
   const usage = String(formData.get("usage") ?? "library");
+  const advancedMedia = await isTenantFeatureEnabled(
+    context.tenantId,
+    "media_branding",
+  );
   const asset = await uploadImage({
     tenantId: context.tenantId,
     bytes: new Uint8Array(await file.arrayBuffer()),
@@ -49,7 +57,9 @@ export async function uploadTenantMedia(formData: FormData) {
       category:
         usage === "logo" || usage === "favicon"
           ? "branding"
-          : parseTenantMediaCategory(formData.get("category") ?? "general"),
+          : advancedMedia
+            ? parseTenantMediaCategory(formData.get("category") ?? "general")
+            : "general",
     },
     storage: getMediaStorage(),
     repository: databaseMediaRepository,
@@ -71,6 +81,7 @@ export async function uploadTenantMedia(formData: FormData) {
 
 export async function cropTenantMedia(formData: FormData) {
   const context = await requireWritableTenant();
+  await assertTenantFeature(context.tenantId, "media_branding");
   await queueMediaOptimization({
     tenantId: context.tenantId,
     mediaId: String(formData.get("mediaId")),
@@ -84,6 +95,7 @@ export async function cropTenantMedia(formData: FormData) {
 
 export async function categorizeTenantMedia(formData: FormData) {
   const context = await requireWritableTenant();
+  await assertTenantFeature(context.tenantId, "media_branding");
   await setTenantMediaCategory(
     context.tenantId,
     String(formData.get("mediaId") ?? ""),

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export function ConsultationForm() {
   const [startedAt] = useState(() => Date.now());
@@ -101,8 +102,11 @@ export function ConsultationForm() {
           type="checkbox"
         />
         <span>
-          Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung
-          meiner Anfrage zu.
+          Ich habe die Hinweise zum Umgang mit meiner Anfrage in der{" "}
+          <Link className="font-semibold underline" href="/datenschutz">
+            Datenschutzerklärung
+          </Link>{" "}
+          zur Kenntnis genommen.
         </span>
       </label>
       <button

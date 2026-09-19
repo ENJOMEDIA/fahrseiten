@@ -39,6 +39,7 @@ export default async function PlatformLegalPage() {
               "contactForm",
               "emailDelivery",
               "consentManagement",
+              "analytics",
             ]}
           />
           <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6">

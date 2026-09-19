@@ -21,6 +21,7 @@ import {
   uploadTenantMedia,
 } from "./actions";
 import { MediaCropForm } from "./media-crop-form";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
 
 export default async function MediaPage() {
   const identity = await getSessionIdentity();
@@ -33,16 +34,19 @@ export default async function MediaPage() {
           activeTenantIds: identity.memberships.map((item) => item.tenantId),
         })
       : null;
-  const [assets, branding] = context
+  const [assets, branding, advancedMedia] = context
     ? await Promise.all([
         listTenantMedia(context.tenantId),
         findTenantBrandingIds(context.tenantId),
+        isTenantFeatureEnabled(context.tenantId, "media_branding"),
       ])
-    : [[], { logoMediaId: null, faviconMediaId: null }];
-  const categoryGroups = tenantMediaCategoryValues.map((category) => ({
-    category,
-    assets: assets.filter((asset) => asset.category === category),
-  }));
+    : [[], { logoMediaId: null, faviconMediaId: null }, false];
+  const categoryGroups = advancedMedia
+    ? tenantMediaCategoryValues.map((category) => ({
+        category,
+        assets: assets.filter((asset) => asset.category === category),
+      }))
+    : [{ category: "general" as const, assets }];
   const categoryCounts = Object.fromEntries(
     tenantMediaCategoryValues.map((category) => [
       category,
@@ -55,17 +59,30 @@ export default async function MediaPage() {
       title="Medien & Markenauftritt"
       description="Bilder verwalten und Seitenlogo sowie Browser-Favicon getrennt festlegen."
     >
-      <MediaCategoryOverview
-        categories={tenantMediaCategoryValues}
-        counts={categoryCounts}
-      />
+      {advancedMedia ? (
+        <MediaCategoryOverview
+          categories={tenantMediaCategoryValues}
+          counts={categoryCounts}
+        />
+      ) : (
+        <div className="mb-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-5 text-sm leading-6 text-cyan-950">
+          <p className="font-semibold">Medien-Grundausstattung aktiv</p>
+          <p>
+            Logo, Favicon und benötigte Seitenbilder kannst du hochladen und
+            verwenden. Kategorien, Bildzuschnitt und die erweiterte Bibliothek
+            sind ab Wachstum verfügbar.
+          </p>
+        </div>
+      )}
       <div className="grid gap-5 xl:grid-cols-[1fr_19rem]">
         <div className="space-y-9">
           {categoryGroups.map((group) => (
             <section id={`media-${group.category}`} key={group.category}>
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold">
-                  {mediaCategoryLabels[group.category]}
+                  {advancedMedia
+                    ? mediaCategoryLabels[group.category]
+                    : "Deine Medien"}
                 </h2>
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">
                   {group.assets.length} Medien
@@ -112,36 +129,38 @@ export default async function MediaPage() {
                                 ? "Wird verarbeitet"
                                 : "Original"}
                         </p>
-                        <form
-                          action={categorizeTenantMedia}
-                          className="mt-4 flex gap-2"
-                        >
-                          <input
-                            name="mediaId"
-                            type="hidden"
-                            value={asset.id}
-                          />
-                          <label className="min-w-0 flex-1 text-xs font-semibold text-slate-600">
-                            Bereich
-                            <select
-                              className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2 font-normal"
-                              defaultValue={asset.category}
-                              name="category"
-                            >
-                              {tenantMediaCategoryValues.map((category) => (
-                                <option key={category} value={category}>
-                                  {mediaCategoryLabels[category]}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                          <button
-                            className="self-end rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
-                            type="submit"
+                        {advancedMedia ? (
+                          <form
+                            action={categorizeTenantMedia}
+                            className="mt-4 flex gap-2"
                           >
-                            Verschieben
-                          </button>
-                        </form>
+                            <input
+                              name="mediaId"
+                              type="hidden"
+                              value={asset.id}
+                            />
+                            <label className="min-w-0 flex-1 text-xs font-semibold text-slate-600">
+                              Bereich
+                              <select
+                                className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2 font-normal"
+                                defaultValue={asset.category}
+                                name="category"
+                              >
+                                {tenantMediaCategoryValues.map((category) => (
+                                  <option key={category} value={category}>
+                                    {mediaCategoryLabels[category]}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            <button
+                              className="self-end rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+                              type="submit"
+                            >
+                              Verschieben
+                            </button>
+                          </form>
+                        ) : null}
                         {branding.logoMediaId !== asset.id ? (
                           <form action={chooseTenantLogo} className="mt-3">
                             <input
@@ -157,15 +176,17 @@ export default async function MediaPage() {
                             </button>
                           </form>
                         ) : null}
-                        <MediaCropForm
-                          imageUrl={mediaPublicUrl(asset.id)}
-                          mediaId={asset.id}
-                          processable={
-                            !["image/svg+xml", "image/x-icon"].includes(
-                              asset.mimeType,
-                            )
-                          }
-                        />
+                        {advancedMedia ? (
+                          <MediaCropForm
+                            imageUrl={mediaPublicUrl(asset.id)}
+                            mediaId={asset.id}
+                            processable={
+                              !["image/svg+xml", "image/x-icon"].includes(
+                                asset.mimeType,
+                              )
+                            }
+                          />
+                        ) : null}
                         {branding.faviconMediaId !== asset.id ? (
                           <form action={chooseTenantFavicon} className="mt-2">
                             <input
@@ -206,20 +227,22 @@ export default async function MediaPage() {
                 type="file"
               />
             </label>
-            <label className="block text-sm font-semibold">
-              Bereich
-              <select
-                className="mt-2 w-full rounded-xl border p-3 font-normal"
-                defaultValue="general"
-                name="category"
-              >
-                {tenantMediaCategoryValues.map((category) => (
-                  <option key={category} value={category}>
-                    {mediaCategoryLabels[category]}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {advancedMedia ? (
+              <label className="block text-sm font-semibold">
+                Bereich
+                <select
+                  className="mt-2 w-full rounded-xl border p-3 font-normal"
+                  defaultValue="general"
+                  name="category"
+                >
+                  {tenantMediaCategoryValues.map((category) => (
+                    <option key={category} value={category}>
+                      {mediaCategoryLabels[category]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             <label className="block text-sm font-semibold">
               Bildbeschreibung
               <input

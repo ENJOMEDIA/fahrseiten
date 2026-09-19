@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  canCreateLocation,
+  supportPriority,
   requireFeature,
   resolveFeatureStatus,
   setTenantFeatureOverride,
@@ -45,5 +47,18 @@ describe("feature resolution", () => {
       repository: { setOverride },
     });
     expect(setOverride).toHaveBeenCalledOnce();
+  });
+});
+
+describe("package capability rules", () => {
+  it("allows one base location and requires the module for additional locations", () => {
+    expect(canCreateLocation(0, false)).toBe(true);
+    expect(canCreateLocation(1, false)).toBe(false);
+    expect(canCreateLocation(1, true)).toBe(true);
+  });
+
+  it("maps priority support to the persisted report priority", () => {
+    expect(supportPriority(false)).toBe("normal");
+    expect(supportPriority(true)).toBe("high");
   });
 });

@@ -10,6 +10,8 @@ import {
 import { contentModules } from "@/modules/customer/navigation";
 import { ContentEntryForm, EntryVisibilityForm } from "./content-entry-form";
 import { listTenantMedia } from "@/modules/media/repository";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
+import { redirect } from "next/navigation";
 export default async function ContentModulePage({
   params,
 }: {
@@ -21,10 +23,15 @@ export default async function ContentModulePage({
   const identity = await getSessionIdentity();
   const membership = identity?.memberships[0];
   if (!membership) notFound();
+  if (!(await isTenantFeatureEnabled(membership.tenantId, "content_modules")))
+    redirect("/kunde/funktionen?feature=content_modules");
   const canWrite = hasTenantPermission(membership.role, "tenant.content.write");
-  const [entries, media] = await Promise.all([
+  const [entries, media, multiLocation] = await Promise.all([
     listTenantContentEntries(membership.tenantId, slug as ContentModuleKey),
     slug === "fahrzeuge" ? listTenantMedia(membership.tenantId) : [],
+    slug === "standorte"
+      ? isTenantFeatureEnabled(membership.tenantId, "multi_location")
+      : false,
   ]);
   return (
     <>
@@ -96,6 +103,14 @@ export default async function ContentModulePage({
         </section>
         {canWrite ? (
           <ContentEntryForm
+            canCreate={
+              slug !== "standorte" || entries.length === 0 || multiLocation
+            }
+            lockedMessage={
+              slug === "standorte" && entries.length > 0 && !multiLocation
+                ? "Ein Hauptstandort ist enthalten. Weitere Standorte benötigen das Modul „Mehrere Standorte“."
+                : undefined
+            }
             media={media.map((asset) => ({
               id: asset.id,
               label: asset.altText || asset.originalName,

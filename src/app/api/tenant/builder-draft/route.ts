@@ -8,6 +8,7 @@ import {
   saveTenantBuilderDraft,
 } from "@/modules/builder/tenant-pages";
 import { isTrustedMutationRequest } from "@/modules/security/origin";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
 
 const requestSchema = z.object({
   pageId: z.uuid(),
@@ -26,6 +27,19 @@ export async function POST(request: Request) {
     !hasTenantPermission(membership.role, "tenant.content.write")
   )
     return new NextResponse(null, { status: 403 });
+  const [websiteEnabled, builderEnabled] = await Promise.all([
+    isTenantFeatureEnabled(membership.tenantId, "managed_website"),
+    isTenantFeatureEnabled(membership.tenantId, "website_builder"),
+  ]);
+  if (!websiteEnabled || !builderEnabled)
+    return NextResponse.json(
+      {
+        saved: false,
+        message:
+          "Der Website-Builder ist im aktuellen Paket nicht freigeschaltet.",
+      },
+      { status: 403 },
+    );
   try {
     const input = requestSchema.parse(await request.json());
     if (

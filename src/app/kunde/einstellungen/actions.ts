@@ -8,6 +8,7 @@ import { hasTenantPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
 import { updateTenantMaintenance } from "@/modules/setup/maintenance";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
+import { assertTenantFeature } from "@/modules/features/access";
 
 export async function saveTenantMaintenance(
   _state: MaintenanceActionState,
@@ -28,6 +29,7 @@ export async function saveTenantMaintenance(
     activeTenantIds: identity.memberships.map((item) => item.tenantId),
   });
   try {
+    await assertTenantFeature(context.tenantId, "maintenance_preview");
     await updateTenantMaintenance(context, {
       enabled: formData.get("enabled") === "on",
       message: String(formData.get("message") ?? ""),

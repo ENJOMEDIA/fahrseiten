@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
+import { getSessionIdentity } from "@/modules/auth/session";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
+import { redirect } from "next/navigation";
 const tasks = [
   [
     "Seiten & Blöcke",
@@ -24,7 +27,11 @@ const tasks = [
     "/kunde/rechtliches",
   ],
 ] as const;
-export default function WebsiteOverviewPage() {
+export default async function WebsiteOverviewPage() {
+  const membership = (await getSessionIdentity())?.memberships[0];
+  if (!membership) redirect("/login");
+  if (!(await isTenantFeatureEnabled(membership.tenantId, "managed_website")))
+    redirect("/kunde/funktionen?feature=managed_website");
   return (
     <>
       <Breadcrumbs

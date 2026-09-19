@@ -11,11 +11,19 @@ import {
 import { listTenantMedia } from "@/modules/media/repository";
 import { mediaPublicUrl } from "@/modules/media/public-url";
 import { listTenantBuilderPages } from "@/modules/builder/tenant-pages";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
+import { redirect } from "next/navigation";
 
 export default async function CustomerWebsiteBuilderPage() {
   const identity = await getSessionIdentity();
   const membership = identity?.memberships[0];
-  if (!membership) return <BuilderDemo />;
+  if (!membership) redirect("/login");
+  const [websiteEnabled, builderEnabled] = await Promise.all([
+    isTenantFeatureEnabled(membership.tenantId, "managed_website"),
+    isTenantFeatureEnabled(membership.tenantId, "website_builder"),
+  ]);
+  if (!websiteEnabled || !builderEnabled)
+    redirect("/kunde/funktionen?feature=website_builder");
   const [assets, featureSources, themes, pages] = await Promise.all([
     listTenantMedia(membership.tenantId),
     findFeatureSources(membership.tenantId, "theme_templates"),

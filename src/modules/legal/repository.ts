@@ -493,5 +493,5 @@ export async function platformHasPublishedLegalDocuments() {
       ),
     );
   const types = new Set(documents.map((document) => document.type));
-  return types.has("imprint") && types.has("privacy");
+  return types.has("imprint") && types.has("privacy") && types.has("terms");
 }

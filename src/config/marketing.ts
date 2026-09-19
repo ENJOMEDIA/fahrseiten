@@ -20,10 +20,12 @@ export const availableMarketingFeatures = [
   "Mandantenfähige Fahrschulwebsite",
   "Kontrollierter Block-Builder",
   "Führerscheinklassen, Preise, Kurse, Team, Fahrzeuge und Standorte",
-  "Kontaktanfragen und einfache Kontaktverwaltung",
-  "Individuelle Domains technisch vorbereitet",
+  "Eigene Domain mit DNS- und SSL-Begleitung",
+  "Logo, Favicon und optimierte Seitenbilder",
 ] as const;
 export const plannedMarketingFeatures = [
+  "Kontaktanfragen und einfache Kontaktverwaltung",
+  "Benutzerverwaltung für Fahrschulteams",
   "Fahrstundenplanung",
   "Schülerverwaltung",
   "SMS und WhatsApp",

@@ -36,8 +36,9 @@ export const featureCatalog = {
     availability: "available",
   },
   media_branding: {
-    title: "Logo, Favicon & Medien",
-    description: "Eigener Markenauftritt mit sicher verwalteten Bilddateien.",
+    title: "Erweiterte Medienverwaltung",
+    description:
+      "Kategorisierte Medienbibliothek, Bildzuschnitt und optimierte Wiederverwendung im Builder.",
     availability: "available",
   },
   theme_templates: {
@@ -52,7 +53,8 @@ export const featureCatalog = {
   },
   priority_support: {
     title: "Priorisierter Support",
-    description: "Anliegen werden im Betrieb bevorzugt bearbeitet.",
+    description:
+      "Meldungen werden im Support-Dashboard hervorgehoben und priorisiert bearbeitet.",
     availability: "available",
   },
   team_management: {

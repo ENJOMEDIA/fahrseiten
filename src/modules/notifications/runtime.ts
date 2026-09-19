@@ -7,7 +7,7 @@ import { dbDeliveryRepository } from "./db-delivery-repository";
 import { CatchMailTransport, SmtpMailTransport } from "./mail-transport";
 import { processMediaJob } from "@/modules/media/processing";
 import { db } from "@/db/client";
-import { trafficHourly } from "@/db/schema";
+import { consentRecords, trafficHourly } from "@/db/schema";
 import { lt } from "drizzle-orm";
 import { syncPostalDispatchStatuses } from "@/modules/onlinebrief/service";
 
@@ -31,6 +31,9 @@ export async function runNotificationScheduler() {
   });
   const retentionLimit = new Date(Date.now() - 90 * 86_400_000);
   await db.delete(trafficHourly).where(lt(trafficHourly.hour, retentionLimit));
+  await db
+    .delete(consentRecords)
+    .where(lt(consentRecords.expiresAt, new Date()));
   const postal = await syncPostalDispatchStatuses();
   return { ...result, postal };
 }

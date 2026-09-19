@@ -10,6 +10,15 @@ export function resolveFeatureStatus(sources: FeatureSources): FeatureStatus {
 export function isFeatureUsable(status: FeatureStatus) {
   return status === "enabled" || status === "beta";
 }
+export function canCreateLocation(
+  existingLocations: number,
+  multiLocation: boolean,
+) {
+  return existingLocations === 0 || multiLocation;
+}
+export function supportPriority(prioritySupport: boolean) {
+  return prioritySupport ? ("high" as const) : ("normal" as const);
+}
 export function requireFeature(key: FeatureKey, sources: FeatureSources) {
   const status = resolveFeatureStatus(sources);
   if (!isFeatureUsable(status))

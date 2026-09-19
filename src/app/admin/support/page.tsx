@@ -55,9 +55,14 @@ export default async function SupportPage() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-semibold">{report.summary}</p>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-                    {report.referenceId}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {report.priority === "high" ? (
+                      <StatusBadge tone="warning">Priorisiert</StatusBadge>
+                    ) : null}
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                      {report.referenceId}
+                    </span>
+                  </div>
                 </div>
                 <p className="mt-2 text-sm leading-6 whitespace-pre-wrap text-slate-600">
                   {report.description}

@@ -8,10 +8,15 @@ import {
 } from "@/modules/legal/repository";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
 import { saveLegalAction } from "./actions";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
+import { redirect } from "next/navigation";
 
 export default async function LegalPage() {
   const identity = await getSessionIdentity();
   const membership = identity?.memberships[0];
+  if (!membership) redirect("/login");
+  if (!(await isTenantFeatureEnabled(membership.tenantId, "legal_consent")))
+    redirect("/kunde/funktionen?feature=legal_consent");
   const context =
     identity && membership
       ? createMembershipTenantContext({

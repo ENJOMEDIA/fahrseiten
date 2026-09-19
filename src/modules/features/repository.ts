@@ -10,6 +10,7 @@ import {
 } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import type { FeatureKey, FeatureStatus } from "./catalog";
+import { featureCatalog } from "./catalog";
 import type { FeatureOverrideRepository, FeatureSources } from "./service";
 export async function findFeatureSources(
   tenantId: string,
@@ -52,6 +53,55 @@ export async function findFeatureSources(
     planStatus: row.planStatus as FeatureStatus | null,
     tenantStatus: row.tenantStatus as FeatureStatus | null,
   };
+}
+
+export async function listTenantFeatureStatuses(tenantId: string) {
+  const keys = Object.keys(featureCatalog) as FeatureKey[];
+  const rows = await db
+    .select({
+      key: featureFlags.key,
+      defaultStatus: featureFlags.defaultStatus,
+      planStatus: planFeatures.status,
+      tenantStatus: tenantFeatures.status,
+    })
+    .from(featureFlags)
+    .leftJoin(
+      subscriptions,
+      and(
+        eq(subscriptions.tenantId, tenantId),
+        eq(subscriptions.status, "active"),
+      ),
+    )
+    .leftJoin(
+      planFeatures,
+      and(
+        eq(planFeatures.planId, subscriptions.planId),
+        eq(planFeatures.featureId, featureFlags.id),
+      ),
+    )
+    .leftJoin(
+      tenantFeatures,
+      and(
+        eq(tenantFeatures.tenantId, tenantId),
+        eq(tenantFeatures.featureId, featureFlags.id),
+      ),
+    );
+  const byKey = new Map(rows.map((row) => [row.key, row]));
+  return Object.fromEntries(
+    keys.map((key) => {
+      const row = byKey.get(key);
+      return [
+        key,
+        row
+          ? {
+              defaultStatus: row.defaultStatus as FeatureStatus,
+              planStatus: row.planStatus as FeatureStatus | null,
+              tenantStatus: row.tenantStatus as FeatureStatus | null,
+            }
+          : null,
+      ];
+    }),
+  ) as Record<FeatureKey, FeatureSources | null>;
 }
 export const dbFeatureOverrideRepository: FeatureOverrideRepository = {
   async setOverride(input) {

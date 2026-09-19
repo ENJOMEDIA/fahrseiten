@@ -76,6 +76,8 @@ describe("legal document publication", () => {
     expect(documents.privacy).toContain("Anschrift\nBeispielweg 1");
     expect(documents.privacy).toContain("Kartendienste");
     expect(documents.privacy).toContain("Reichweitenmessung");
+    expect(documents.privacy).toContain("nach 90 Tagen automatisch gelöscht");
+    expect(documents.privacy).toContain("Nachweise werden nach 180 Tagen");
     expect(documents.privacy).not.toContain("Online-Zahlungen");
     expect(publicationWarnings("imprint", documents.imprint)).toHaveLength(0);
     expect(publicationWarnings("privacy", documents.privacy)).toHaveLength(0);

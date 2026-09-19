@@ -31,6 +31,7 @@ export async function POST(request: Request) {
       phone: z.string().trim().max(40).default(""),
       domain: z.string().trim().max(253).default(""),
       leadId: z.union([z.literal(""), z.uuid()]).default(""),
+      planId: z.uuid(),
       sendInvitation: z.boolean().default(false),
     })
     .parse(await request.json().catch(() => ({})));

@@ -74,7 +74,7 @@ async function ensureFeatureFlags(
       title: feature.title,
       description: feature.description,
       defaultStatus:
-        feature.availability === "available" ? "enabled" : "coming_soon",
+        feature.availability === "available" ? "unavailable" : "coming_soon",
     });
   }
   return tx.select().from(featureFlags);

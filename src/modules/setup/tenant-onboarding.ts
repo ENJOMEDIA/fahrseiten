@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, asc, eq, gt, isNull } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import {
@@ -16,10 +16,12 @@ import {
   navigationItems,
   pageBlocks,
   pageVersions,
+  plans,
   salesActivities,
   salesLeads,
   sitePages,
   sites,
+  subscriptions,
   tenantMemberships,
   tenantOnboardingTokens,
   tenants,
@@ -54,6 +56,7 @@ export type TenantSetupPrefill = {
   ownerEmail?: string;
   phone?: string;
   domain?: string;
+  planId?: string;
 };
 
 export async function createTenantOnboardingLink(input: {
@@ -269,12 +272,36 @@ export async function completeTenantOnboarding(input: unknown) {
       { ...parsed, ownerName: parsed.ownerName, email: parsed.ownerEmail },
       { regulatedActivity: true },
     );
+    const selectedPlanId = onboarding.prefill?.planId;
+    const [selectedPlan] = await tx
+      .select()
+      .from(plans)
+      .where(
+        selectedPlanId
+          ? and(eq(plans.id, selectedPlanId), eq(plans.active, true))
+          : eq(plans.active, true),
+      )
+      .orderBy(asc(plans.position))
+      .limit(1);
+    if (!selectedPlan)
+      throw new SetupInputError(
+        "Das ausgewählte Paket ist nicht mehr verfügbar.",
+      );
 
     await tx.insert(tenants).values({
       id: tenantId,
       customerNumber,
       name: parsed.companyName,
       slug,
+    });
+    await tx.insert(subscriptions).values({
+      id: randomUUID(),
+      tenantId,
+      planId: selectedPlan.id,
+      planNameSnapshot: selectedPlan.publicName,
+      monthlyPriceCentsSnapshot: selectedPlan.monthlyPriceCents,
+      setupPriceCentsSnapshot: selectedPlan.setupPriceCents,
+      status: "active",
     });
     await tx.insert(users).values({
       id: ownerId,

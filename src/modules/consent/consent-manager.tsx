@@ -67,7 +67,8 @@ export function ConsentManager({
       choices: nextChoices,
       savedAt: new Date().toISOString(),
     };
-    document.cookie = `${CONSENT_COOKIE}=${serializeConsent(state)}; Path=/; Max-Age=15552000; SameSite=Lax`;
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${CONSENT_COOKIE}=${serializeConsent(state)}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`;
     window.dispatchEvent(new Event("fahrseiten:consent-changed"));
     setChoices(nextChoices);
     setVisible(false);

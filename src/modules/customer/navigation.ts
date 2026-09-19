@@ -1,4 +1,15 @@
-export const customerNavigation = [
+import type { FeatureKey } from "@/modules/features/catalog";
+
+export type CustomerNavigationItem = {
+  href: string;
+  label: string;
+  icon: string;
+  description: string;
+  feature?: FeatureKey;
+  planned?: boolean;
+};
+
+export const customerNavigation: readonly CustomerNavigationItem[] = [
   {
     href: "/kunde",
     label: "Dashboard",
@@ -10,12 +21,14 @@ export const customerNavigation = [
     label: "Website",
     icon: "W",
     description: "Seiten gestalten und veröffentlichen",
+    feature: "managed_website",
   },
   {
     href: "/kunde/inhalte",
     label: "Inhalte",
     icon: "I",
     description: "Angebote, Team und Standorte",
+    feature: "content_modules",
   },
   {
     href: "/kunde/medien",
@@ -28,12 +41,14 @@ export const customerNavigation = [
     label: "Anfragen",
     icon: "@",
     description: "Anfragen beantworten",
+    planned: true,
   },
   {
     href: "/kunde/domain",
     label: "Domain",
     icon: "◎",
     description: "Adresse und SSL-Status",
+    feature: "custom_domain",
   },
   {
     href: "/kunde/abrechnung",
@@ -46,12 +61,14 @@ export const customerNavigation = [
     label: "Rechtliches",
     icon: "§",
     description: "Geführte Pflichtangaben",
+    feature: "legal_consent",
   },
   {
     href: "/kunde/benutzer",
     label: "Teamzugänge",
     icon: "B",
     description: "Benutzer und Rollen",
+    planned: true,
   },
   {
     href: "/kunde/funktionen",
@@ -64,6 +81,7 @@ export const customerNavigation = [
     label: "Einstellungen",
     icon: "⚙",
     description: "Website und Wartungsmodus",
+    feature: "maintenance_preview",
   },
   {
     href: "/kunde/fehler-melden",

@@ -8,10 +8,17 @@ import { findTenantMaintenance } from "@/modules/setup/maintenance";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
 
 import { saveTenantMaintenance } from "./actions";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
+import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
   const identity = await getSessionIdentity();
   const membership = identity?.memberships[0];
+  if (!membership) redirect("/login");
+  if (
+    !(await isTenantFeatureEnabled(membership.tenantId, "maintenance_preview"))
+  )
+    redirect("/kunde/funktionen?feature=maintenance_preview");
   const canManage = Boolean(
     membership &&
     hasTenantPermission(membership.role, "tenant.settings.manage"),

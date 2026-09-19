@@ -14,6 +14,7 @@ type NavItem = {
   icon?: string;
   description?: string;
   group?: string;
+  badge?: string;
 };
 
 function Navigation({
@@ -72,7 +73,14 @@ function Navigation({
             {item.icon ?? item.label.slice(0, 1)}
           </span>
           <span className="min-w-0">
-            <span className="block font-semibold">{item.label}</span>
+            <span className="flex items-center gap-2 font-semibold">
+              {item.label}
+              {item.badge ? (
+                <span className="rounded-full bg-cyan-100 px-2 py-0.5 text-[9px] font-bold tracking-wide text-cyan-800 uppercase">
+                  {item.badge}
+                </span>
+              ) : null}
+            </span>
             {item.description && !mobile ? (
               <span
                 className={cn(

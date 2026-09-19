@@ -128,6 +128,7 @@ export const tenantOnboardingTokens = mysqlTable(
       ownerEmail?: string;
       phone?: string;
       domain?: string;
+      planId?: string;
     }>(),
     expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }).notNull(),
     usedAt: timestamp("used_at", { mode: "date", fsp: 3 }),
@@ -1687,6 +1688,9 @@ export const errorReports = mysqlTable(
     surface: varchar("surface", { length: 40 }).notNull(),
     summary: varchar("summary", { length: 180 }).notNull(),
     description: text("description").notNull(),
+    priority: mysqlEnum("priority", ["normal", "high"])
+      .default("normal")
+      .notNull(),
     status: mysqlEnum("status", errorReportStatusValues)
       .default("new")
       .notNull(),
@@ -1696,6 +1700,10 @@ export const errorReports = mysqlTable(
   (table) => [
     uniqueIndex("error_reports_reference_unique").on(table.referenceId),
     index("error_reports_tenant_status_idx").on(table.tenantId, table.status),
+    index("error_reports_priority_created_idx").on(
+      table.priority,
+      table.createdAt,
+    ),
   ],
 );
 

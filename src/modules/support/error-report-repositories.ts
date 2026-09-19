@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/db/client";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { errorReports, tenants } from "@/db/schema";
 import type {
   ErrorReportRecord,
@@ -33,11 +33,15 @@ export async function listRecentErrorReports(limit = 25) {
       description: errorReports.description,
       surface: errorReports.surface,
       status: errorReports.status,
+      priority: errorReports.priority,
       tenantName: tenants.name,
       createdAt: errorReports.createdAt,
     })
     .from(errorReports)
     .leftJoin(tenants, eq(errorReports.tenantId, tenants.id))
-    .orderBy(desc(errorReports.createdAt))
+    .orderBy(
+      sql`case when ${errorReports.priority} = 'high' then 0 else 1 end`,
+      desc(errorReports.createdAt),
+    )
     .limit(limit);
 }

@@ -15,6 +15,12 @@ import { databaseMediaRepository } from "@/modules/media/repository";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { uploadImage } from "@/modules/media/service";
 import { queueMediaOptimization } from "@/modules/media/processing";
+import {
+  assertTenantFeature,
+  isTenantFeatureEnabled,
+} from "@/modules/features/access";
+import { canCreateLocation } from "@/modules/features/service";
+import { listTenantContentEntries } from "@/modules/content/management";
 
 export type ContentActionState = { message: string; error: boolean };
 
@@ -44,6 +50,21 @@ export async function createContentEntryAction(
   const membership = await writableMembership();
   try {
     const contentModule = checkedModule(formData.get("module"));
+    await assertTenantFeature(membership.tenantId, "content_modules");
+    if (contentModule === "standorte") {
+      const locations = await listTenantContentEntries(
+        membership.tenantId,
+        "standorte",
+      );
+      const multiLocation = await isTenantFeatureEnabled(
+        membership.tenantId,
+        "multi_location",
+      );
+      if (!canCreateLocation(locations.length, multiLocation))
+        throw new Error(
+          "Ein Hauptstandort ist enthalten. Weitere Standorte benötigen das Modul „Mehrere Standorte“.",
+        );
+    }
     if (contentModule === "fahrzeuge") {
       const file = formData.get("imageFile");
       if (file instanceof File && file.size > 0) {
@@ -107,6 +128,7 @@ export async function toggleContentEntryAction(
   const membership = await writableMembership();
   try {
     const contentModule = checkedModule(formData.get("module"));
+    await assertTenantFeature(membership.tenantId, "content_modules");
     await setTenantContentEntryActive({
       tenantId: membership.tenantId,
       module: contentModule,

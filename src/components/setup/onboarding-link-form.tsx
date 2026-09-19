@@ -13,9 +13,16 @@ type OnboardingPrefill = {
 export function OnboardingLinkForm({
   leadId,
   initialValues = {},
+  plans,
 }: {
   leadId?: string;
   initialValues?: OnboardingPrefill;
+  plans: {
+    id: string;
+    name: string;
+    monthlyPriceCents: number;
+    setupPriceCents: number;
+  }[];
 }) {
   const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
@@ -34,6 +41,7 @@ export function OnboardingLinkForm({
         phone: formData.get("phone"),
         domain: formData.get("domain"),
         leadId: formData.get("leadId"),
+        planId: formData.get("planId"),
         sendInvitation,
       }),
     });
@@ -83,6 +91,35 @@ export function OnboardingLinkForm({
         </span>
       </div>
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-semibold sm:col-span-2">
+          Gebuchtes Paket
+          <select
+            className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+            name="planId"
+            required
+          >
+            <option value="">Paket auswählen</option>
+            {plans.map((plan) => (
+              <option key={plan.id} value={plan.id}>
+                {plan.name} ·{" "}
+                {(plan.monthlyPriceCents / 100).toLocaleString("de-DE", {
+                  style: "currency",
+                  currency: "EUR",
+                })}
+                /Monat ·{" "}
+                {(plan.setupPriceCents / 100).toLocaleString("de-DE", {
+                  style: "currency",
+                  currency: "EUR",
+                })}{" "}
+                Einrichtung
+              </option>
+            ))}
+          </select>
+          <span className="mt-1 block text-xs font-normal text-slate-500">
+            Die enthaltenen Funktionen werden bei Abschluss der Einrichtung
+            serverseitig freigeschaltet.
+          </span>
+        </label>
         <Field
           defaultValue={initialValues.companyName}
           label="Fahrschule / Firma"

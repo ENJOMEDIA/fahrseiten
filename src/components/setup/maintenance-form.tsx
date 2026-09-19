@@ -47,8 +47,9 @@ export function MaintenanceForm({
         <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
           <p className="font-semibold">Freischaltung noch gesperrt</p>
           <p className="mt-1 leading-6">
-            Veröffentliche zuerst ein vollständiges Impressum und eine
-            vollständige Datenschutzerklärung. Danach lässt sich der
+            Veröffentliche zuerst ein vollständiges Impressum, eine vollständige
+            Datenschutzerklärung
+            {tenant ? "." : " und die B2B-AGB."} Danach lässt sich der
             Wartungsmodus deaktivieren.
           </p>
           <Link

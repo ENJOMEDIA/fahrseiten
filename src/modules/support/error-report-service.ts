@@ -19,6 +19,7 @@ export type ErrorReportRecord = {
   description: string;
   surface: "marketing" | "customer_backend";
   status: "new";
+  priority: "normal" | "high";
   tenantId?: string | null;
   reporterUserId?: string | null;
   createdAt: Date;
@@ -31,7 +32,11 @@ export interface ErrorReportRepository {
 export async function submitErrorReport(
   raw: unknown,
   repository: ErrorReportRepository,
-  context: { tenantId?: string | null; reporterUserId?: string | null } = {},
+  context: {
+    tenantId?: string | null;
+    reporterUserId?: string | null;
+    priority?: "normal" | "high";
+  } = {},
 ) {
   const input = reportSchema.parse(raw);
   const record: ErrorReportRecord = {
@@ -47,6 +52,7 @@ export async function submitErrorReport(
       .join("\n\n"),
     surface: input.surface,
     status: "new",
+    priority: context.priority ?? "normal",
     tenantId: context.tenantId,
     reporterUserId: context.reporterUserId,
     createdAt: new Date(),

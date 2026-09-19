@@ -27,8 +27,8 @@ const productAreas = [
   },
   {
     number: "03",
-    title: "Deine Anfragen",
-    text: "Kontaktanfragen landen übersichtlich im Kundenbereich und bleiben der richtigen Fahrschule zugeordnet.",
+    title: "Dein Auftritt",
+    text: "Logo, Favicon und Seitenbilder bleiben zentral verwaltet und werden für schnelle Ladezeiten optimiert.",
     tone: "bg-indigo-50 text-indigo-950",
   },
 ] as const;
@@ -45,7 +45,7 @@ function ProductStage() {
             <span className="size-2.5 rounded-full bg-emerald-400/80" />
           </div>
           <span className="text-xs font-medium text-slate-500">
-            app.fahrseiten.de
+            fahrseiten.de/kunde
           </span>
           <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">
             Website online
@@ -55,7 +55,7 @@ function ProductStage() {
           <aside className="hidden border-r border-white/10 bg-black/15 p-5 md:block">
             <p className="text-sm font-semibold text-white">FahrSeiten</p>
             <div className="mt-8 space-y-2 text-sm text-slate-500">
-              {["Übersicht", "Website", "Inhalte", "Anfragen", "Medien"].map(
+              {["Übersicht", "Website", "Inhalte", "Medien", "Domain"].map(
                 (item, index) => (
                   <div
                     className={`rounded-xl px-3 py-2.5 ${index === 1 ? "bg-white/10 text-white" : ""}`}
@@ -179,8 +179,8 @@ export default async function MarketingStartPage() {
             </h1>
             <p className="reveal-up animation-delay-2 mx-auto mt-8 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl">
               FahrSeiten verbindet eine starke Website mit einem Kundenbereich,
-              den du wirklich verstehst. Inhalte pflegen, Anfragen beantworten
-              und deine Fahrschule präsentieren – alles an einem Ort.
+              den du wirklich verstehst. Inhalte pflegen, Seiten gestalten und
+              deine Fahrschule präsentieren – alles an einem Ort.
             </p>
             <div className="reveal-up animation-delay-3 mt-10 flex flex-wrap justify-center gap-3">
               <Link className="premium-button" href="/kontakt">
@@ -196,7 +196,7 @@ export default async function MarketingStartPage() {
               {[
                 ["Eine Plattform", "für Website und Verwaltung"],
                 ["Deine Domain", "mit deinem eigenen Auftritt"],
-                ["Klare Kontrolle", "über Inhalte und Anfragen"],
+                ["Klare Kontrolle", "über Inhalte und Medien"],
               ].map(([title, text]) => (
                 <div key={title}>
                   <p className="font-semibold text-white">{title}</p>
@@ -356,7 +356,7 @@ export default async function MarketingStartPage() {
                   Ein solides digitales Zuhause für deine Fahrschule.
                 </h2>
                 <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
-                  Der erste Fokus liegt auf Website, Inhalten und Anfragen.
+                  Der erste Fokus liegt auf Website, Inhalten und Medien.
                   Kommende Werkzeuge werden sichtbar angekündigt und erst dann
                   freigeschaltet, wenn sie wirklich einsatzbereit sind.
                 </p>

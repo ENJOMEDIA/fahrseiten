@@ -1,10 +1,10 @@
 # Tarife und Feature-Flags
 
-Stand: 17. September 2026.
+Stand: 19. September 2026.
 
 ## Auflösung
 
-Features sind zentral über stabile Schlüssel definiert. Die wirksame Reihenfolge lautet Tenant-Override, Planfreigabe, globaler Standard. Es gibt keine im Anwendungscode verteilten Vergleiche von Tarifnamen. Die vier Status sind `unavailable`, `coming_soon`, `beta` und `enabled`.
+Features sind zentral über stabile Schlüssel definiert. Die wirksame Reihenfolge lautet Tenant-Override, Planfreigabe, globaler Standard. Paketleistungen sind global standardmäßig gesperrt und werden durch die aktive Subscription oder einen protokollierten Tenant-Override freigeschaltet. Es gibt keine im Anwendungscode verteilten Vergleiche von Tarifnamen. Die vier Status sind `unavailable`, `coming_soon`, `beta` und `enabled`.
 
 Nur `beta` und `enabled` erlauben die serverseitige Nutzung. Jede direkte Route oder Serveraktion muss den Featurestatus nach dem geprüften Tenant-Kontext laden und `requireFeature` aufrufen. Das Verstecken eines Navigationseintrags reicht nicht als Zugriffsschutz.
 
@@ -12,7 +12,18 @@ Nur `beta` und `enabled` erlauben die serverseitige Nutzung. Jede direkte Route 
 
 Nur Plattformrollen mit `platform.tenants.manage` dürfen Tenant-Overrides setzen. Jede Änderung benötigt eine Begründung und schreibt in derselben Datenbanktransaktion ein Audit-Ereignis mit Tenant, Akteur, Feature, Status und Begründung. Sales und Support besitzen dieses Recht nicht.
 
-Der Kundenbereich zeigt „Verfügbar“ für aktive und „In Planung“ für kommende Funktionen. Geplante Funktionen besitzen keinen aktiven Öffnen- oder Startbutton. Tarife, Preise und konkrete Featurepakete sind weiterhin eine Geschäftsentscheidung nach OD-13.
+Der Kundenbereich zeigt „In deinem Paket“ für aktive, „Nicht im Paket“ für zubuchbare und „In Planung“ für kommende Funktionen. Geplante Funktionen besitzen keinen aktiven Öffnen- oder Startbutton. Tarife und Preise bleiben eine Geschäftsentscheidung. Die konkrete Zuordnung wird in der Plattformverwaltung gepflegt und beim Abschluss einer Instanzeinrichtung als Subscription mit Preis-Snapshot gespeichert.
+
+## Technisch durchgesetzte Paketgrenzen
+
+- Alle Pakete: öffentliche Website, Website-Builder, strukturierte Fahrschulinhalte, eigene Domain, Recht & Consent sowie Wartungsseite.
+- Medien-Grundausstattung: Logo, Favicon und notwendige Seitenbilder stehen in allen Paketen bereit.
+- Wachstum und Pole Position: drei Designvorlagen sowie die erweiterte Medienverwaltung mit Kategorien und Bildzuschnitt.
+- Pole Position: mehrere Standorte und im Support-Dashboard priorisierte Fehlermeldungen.
+
+Ein Hauptstandort ist immer enthalten. Ohne das Modul `multi_location` wird das Anlegen eines zweiten Standorts auch serverseitig abgewiesen. Direkte Requests an Builder, Inhalte, Recht, Domain und Wartung prüfen die jeweilige Freischaltung zusätzlich zur Navigation.
+
+Bei jeder neuen Instanzeinladung ist ein aktives Paket Pflicht. Ältere, bereits ausgestellte Einrichtungslinks ohne Paketauswahl erhalten beim Abschluss aus Kompatibilitätsgründen das erste aktive Paket nach der konfigurierten Reihenfolge.
 
 ## Vorbereitete Schlüssel
 

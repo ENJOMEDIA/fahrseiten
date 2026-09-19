@@ -20,8 +20,8 @@ export default function FeaturesPage() {
           ],
           [
             "03",
-            "Anfragen",
-            "Interessenten übersichtlich empfangen und bearbeiten.",
+            "Medien & Marke",
+            "Logo, Favicon und Seitenbilder zentral verwalten.",
           ],
         ].map(([number, title, description]) => (
           <article

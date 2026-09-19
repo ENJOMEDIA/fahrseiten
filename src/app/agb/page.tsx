@@ -2,20 +2,13 @@ import { connection } from "next/server";
 
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { LegalContent } from "@/modules/legal/public-document";
-import { createPlatformTerms } from "@/modules/legal/documents";
-import {
-  findPlatformLegalProfile,
-  findPublishedPlatformLegalDocument,
-} from "@/modules/legal/repository";
+import { findPublishedPlatformLegalDocument } from "@/modules/legal/repository";
 
 export default async function TermsPage() {
   await connection();
-  const [document, profile] = await Promise.all([
-    findPublishedPlatformLegalDocument("terms").catch(() => null),
-    findPlatformLegalProfile().catch(() => null),
-  ]);
-  const content =
-    document?.content ?? (profile ? createPlatformTerms(profile.data) : null);
+  const document = await findPublishedPlatformLegalDocument("terms").catch(
+    () => null,
+  );
   return (
     <SimpleMarketingPage
       availableDuringMaintenance
@@ -23,10 +16,10 @@ export default async function TermsPage() {
       title="Allgemeine Geschäftsbedingungen"
       text="Vertragsbedingungen für die Nutzung und Betreuung von FahrSeiten."
     >
-      {content ? (
+      {document ? (
         <article className="rounded-3xl border bg-white p-8">
           <LegalContent
-            content={content}
+            content={document.content}
             title="Allgemeine Geschäftsbedingungen"
           />
         </article>

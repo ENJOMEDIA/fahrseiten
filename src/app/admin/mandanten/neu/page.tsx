@@ -3,6 +3,7 @@ import { OnboardingLinkForm } from "@/components/setup/onboarding-link-form";
 import Link from "next/link";
 import { requirePlatformPermission } from "@/modules/platform/access";
 import { findSalesLeadForInstance } from "@/modules/platform/sales-crm";
+import { listPlatformPlans } from "@/modules/platform/plans";
 
 export default async function NewTenantPage({
   searchParams,
@@ -14,6 +15,7 @@ export default async function NewTenantPage({
   const lead = leadId
     ? await findSalesLeadForInstance(leadId).catch(() => null)
     : null;
+  const plans = (await listPlatformPlans()).filter((plan) => plan.active);
   return (
     <CustomerPage
       title="Instanz erstellen"
@@ -38,6 +40,12 @@ export default async function NewTenantPage({
         </div>
       ) : (
         <OnboardingLinkForm
+          plans={plans.map((plan) => ({
+            id: plan.id,
+            name: plan.publicName,
+            monthlyPriceCents: plan.monthlyPriceCents ?? 0,
+            setupPriceCents: plan.setupPriceCents ?? 0,
+          }))}
           initialValues={
             lead
               ? {

@@ -33,7 +33,7 @@ export async function updatePlatformMaintenance(input: {
     throw new Error("Die Plattform wurde noch nicht eingerichtet.");
   if (!parsed.enabled && !(await platformHasPublishedLegalDocuments())) {
     throw new Error(
-      "Impressum und Datenschutz müssen vor der Freischaltung veröffentlicht sein.",
+      "Impressum, Datenschutz und B2B-AGB müssen vor der Freischaltung veröffentlicht sein.",
     );
   }
   await db.transaction(async (tx) => {

@@ -5,12 +5,15 @@ import { Card, StatusBadge as Badge } from "@/components/ui/card";
 import { getSessionIdentity } from "@/modules/auth/session";
 import { findTenantPrimaryDomain } from "@/modules/domains/repository";
 import { getDnsTarget } from "@/modules/platform/domain-operations";
+import { isTenantFeatureEnabled } from "@/modules/features/access";
 
 export default async function DomainPage() {
   const identity = await getSessionIdentity();
   if (!identity) redirect("/login");
   const membership = identity.memberships[0];
   if (!membership) notFound();
+  if (!(await isTenantFeatureEnabled(membership.tenantId, "custom_domain")))
+    redirect("/kunde/funktionen?feature=custom_domain");
   const [domain, target] = await Promise.all([
     findTenantPrimaryDomain(membership.tenantId),
     getDnsTarget().catch(() => ({

@@ -8,6 +8,27 @@ import {
 } from "@/modules/platform/plans";
 import { formatEuro } from "@/modules/platform/pricing";
 
+const salesFeatureOrder: FeatureKey[] = [
+  "managed_website",
+  "website_builder",
+  "content_modules",
+  "custom_domain",
+  "theme_templates",
+  "media_branding",
+  "maintenance_preview",
+  "legal_consent",
+  "multi_location",
+  "priority_support",
+];
+
+function bySalesRelevance(left: string, right: string) {
+  const leftIndex = salesFeatureOrder.indexOf(left as FeatureKey);
+  const rightIndex = salesFeatureOrder.indexOf(right as FeatureKey);
+  return (
+    (leftIndex < 0 ? 999 : leftIndex) - (rightIndex < 0 ? 999 : rightIndex)
+  );
+}
+
 export default async function PricingPage() {
   await connection();
   const [allPlans, addons] = await Promise.all([
@@ -89,11 +110,13 @@ export default async function PricingPage() {
                 </div>
               ) : null}
               <ul className="mt-7 space-y-2 text-sm">
-                {plan.includedFeatures.map((key) => (
-                  <li key={key}>
-                    ✓ {featureCatalog[key as FeatureKey]?.title ?? key}
-                  </li>
-                ))}
+                {[...plan.includedFeatures]
+                  .sort(bySalesRelevance)
+                  .map((key) => (
+                    <li key={key}>
+                      ✓ {featureCatalog[key as FeatureKey]?.title ?? key}
+                    </li>
+                  ))}
               </ul>
               <Link
                 className={
@@ -114,17 +137,19 @@ export default async function PricingPage() {
           <p className="section-kicker">Flexibel ergänzen</p>
           <h2 className="mt-3 text-3xl font-semibold">Optionale Module</h2>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {sellableAddons.map((addon) => (
-              <div className="rounded-2xl bg-slate-50 p-4" key={addon.key}>
-                <p className="font-semibold">{addon.title}</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  {addon.description}
-                </p>
-                <p className="mt-3 text-sm font-semibold text-cyan-800">
-                  + {formatEuro(addon.addonPriceCents)} / Monat
-                </p>
-              </div>
-            ))}
+            {[...sellableAddons]
+              .sort((left, right) => bySalesRelevance(left.key, right.key))
+              .map((addon) => (
+                <div className="rounded-2xl bg-slate-50 p-4" key={addon.key}>
+                  <p className="font-semibold">{addon.title}</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {addon.description}
+                  </p>
+                  <p className="mt-3 text-sm font-semibold text-cyan-800">
+                    + {formatEuro(addon.addonPriceCents)} / Monat
+                  </p>
+                </div>
+              ))}
           </div>
         </section>
       ) : null}
