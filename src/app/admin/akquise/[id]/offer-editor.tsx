@@ -120,7 +120,7 @@ export function OfferEditor({
         )}
       </div>
       <div className="overflow-x-auto rounded-2xl border border-slate-200">
-        <table className="w-full min-w-[700px] text-left text-sm">
+        <table className="mobile-stack-table w-full min-w-[700px] text-left text-sm">
           <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
             <tr>
               <th className="p-3">Position</th>
@@ -134,7 +134,7 @@ export function OfferEditor({
           <tbody className="divide-y divide-slate-100">
             {rows.map((row) => (
               <tr key={row.id}>
-                <td className="p-3">
+                <td className="p-3" data-label="Position">
                   <input
                     className="min-h-10 w-full rounded-lg border border-slate-300 px-3"
                     name="description"
@@ -144,7 +144,7 @@ export function OfferEditor({
                     value={row.description}
                   />
                 </td>
-                <td className="p-3">
+                <td className="p-3" data-label="Menge">
                   <input
                     className="min-h-10 w-20 rounded-lg border border-slate-300 px-3"
                     defaultValue="1"
@@ -153,7 +153,7 @@ export function OfferEditor({
                     type="number"
                   />
                 </td>
-                <td className="p-3">
+                <td className="p-3" data-label="Einzelpreis">
                   <input
                     className="min-h-10 w-36 rounded-lg border border-slate-300 px-3"
                     name="unitPrice"
@@ -164,7 +164,7 @@ export function OfferEditor({
                     value={row.price}
                   />
                 </td>
-                <td className="p-3 text-right">
+                <td className="p-3 text-right" data-label="Aktion">
                   <button
                     className="rounded-lg px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
                     onClick={() =>

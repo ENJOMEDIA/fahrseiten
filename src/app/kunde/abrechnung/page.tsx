@@ -195,7 +195,7 @@ export default async function CustomerBillingPage() {
         </div>
         {billing.invoices.length ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[42rem] text-left text-sm">
+            <table className="mobile-stack-table w-full min-w-[42rem] text-left text-sm">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
                   <th className="p-4">Rechnung</th>
@@ -209,15 +209,19 @@ export default async function CustomerBillingPage() {
               <tbody>
                 {billing.invoices.map((invoice) => (
                   <tr className="border-t border-slate-100" key={invoice.id}>
-                    <td className="p-4 font-semibold">
+                    <td className="p-4 font-semibold" data-label="Rechnung">
                       {invoice.invoiceNumber}
                     </td>
-                    <td className="p-4">{date.format(invoice.issuedAt)}</td>
-                    <td className="p-4">{date.format(invoice.dueAt)}</td>
-                    <td className="p-4">
+                    <td className="p-4" data-label="Datum">
+                      {date.format(invoice.issuedAt)}
+                    </td>
+                    <td className="p-4" data-label="Fällig">
+                      {date.format(invoice.dueAt)}
+                    </td>
+                    <td className="p-4" data-label="Betrag">
                       {money.format(invoice.grossAmountCents / 100)}
                     </td>
-                    <td className="p-4">
+                    <td className="p-4" data-label="Status">
                       <StatusBadge
                         tone={
                           invoice.status === "paid"
@@ -230,7 +234,7 @@ export default async function CustomerBillingPage() {
                         {statusLabels[invoice.status]}
                       </StatusBadge>
                     </td>
-                    <td className="p-4">
+                    <td className="p-4" data-label="Dokument">
                       <a
                         className="font-semibold text-cyan-800"
                         href={`/api/rechnungen/${invoice.id}`}

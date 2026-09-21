@@ -5,6 +5,7 @@ export type CustomerNavigationItem = {
   label: string;
   icon: string;
   description: string;
+  group: string;
   feature?: FeatureKey;
   planned?: boolean;
 };
@@ -15,12 +16,14 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     label: "Dashboard",
     icon: "⌂",
     description: "Dein aktueller Überblick",
+    group: "Start",
   },
   {
     href: "/kunde/website",
     label: "Website",
     icon: "W",
     description: "Seiten gestalten und veröffentlichen",
+    group: "Website",
     feature: "managed_website",
   },
   {
@@ -28,6 +31,7 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     label: "Inhalte",
     icon: "I",
     description: "Angebote, Team und Standorte",
+    group: "Website",
     feature: "content_modules",
   },
   {
@@ -35,32 +39,37 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     label: "Medien",
     icon: "▧",
     description: "Bilder und Dateien",
-  },
-  {
-    href: "/kunde/anfragen",
-    label: "Anfragen",
-    icon: "@",
-    description: "Anfragen beantworten",
-    planned: true,
+    group: "Website",
   },
   {
     href: "/kunde/domain",
     label: "Domain",
     icon: "◎",
     description: "Adresse und SSL-Status",
+    group: "Website",
     feature: "custom_domain",
+  },
+  {
+    href: "/kunde/anfragen",
+    label: "Anfragen",
+    icon: "@",
+    description: "Anfragen beantworten",
+    group: "Kommunikation",
+    planned: true,
   },
   {
     href: "/kunde/abrechnung",
     label: "Vertrag & Rechnungen",
     icon: "€",
     description: "Laufzeit, Fälligkeit und Belege",
+    group: "Verwaltung",
   },
   {
     href: "/kunde/rechtliches",
     label: "Rechtliches",
     icon: "§",
     description: "Geführte Pflichtangaben",
+    group: "Verwaltung",
     feature: "legal_consent",
   },
   {
@@ -68,6 +77,7 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     label: "Teamzugänge",
     icon: "B",
     description: "Benutzer und Rollen",
+    group: "Verwaltung",
     planned: true,
   },
   {
@@ -75,12 +85,14 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     label: "Funktionen",
     icon: "+",
     description: "Aktive und geplante Module",
+    group: "Verwaltung",
   },
   {
     href: "/kunde/einstellungen",
     label: "Einstellungen",
     icon: "⚙",
     description: "Website und Wartungsmodus",
+    group: "Verwaltung",
     feature: "maintenance_preview",
   },
   {
@@ -88,6 +100,7 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     label: "Fehler melden",
     icon: "!",
     description: "Hilfe mit Referenznummer",
+    group: "Hilfe",
   },
 ] as const;
 

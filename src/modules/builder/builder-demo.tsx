@@ -366,8 +366,8 @@ export function BuilderDemo({
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
-      <div className="mx-auto max-w-[1500px]">
+    <div className="min-h-screen min-w-0 bg-slate-100 p-4 sm:p-6">
+      <div className="mx-auto w-full max-w-[1500px] min-w-0">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-cyan-700">
@@ -386,10 +386,10 @@ export function BuilderDemo({
                 : "Speichern fehlgeschlagen"}
           </div>
         </div>
-        <div className="grid gap-5 xl:grid-cols-[420px_1fr]">
+        <div className="grid min-w-0 gap-5 xl:grid-cols-[420px_1fr]">
           <section
             aria-label="Bearbeitung"
-            className="space-y-4 rounded-3xl bg-white p-5 shadow-sm"
+            className="min-w-0 space-y-4 rounded-3xl bg-white p-5 shadow-sm"
           >
             <DesignSetup
               canUseThemes={canUseThemes}
@@ -459,7 +459,7 @@ export function BuilderDemo({
                       ? "Texte und Seitenelemente"
                       : "Bereits gepflegte Inhalte"}
                   </p>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {(
                       Object.entries(builderBlockCatalog) as [
                         BuilderBlockType,
@@ -609,7 +609,7 @@ export function BuilderDemo({
                     Eine Überschrift ist erforderlich.
                   </p>
                 ) : null}
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <button
                     aria-label={`${block.properties.heading} nach oben`}
                     className="rounded-lg border px-3 py-2"
@@ -756,10 +756,10 @@ export function BuilderDemo({
           </section>
           <section
             aria-label="Vorschau"
-            className="self-start xl:sticky xl:top-5"
+            className="min-w-0 self-start xl:sticky xl:top-5"
           >
             <div
-              className="mb-3 flex gap-2"
+              className="mb-3 flex flex-wrap gap-2"
               role="group"
               aria-label="Vorschaugröße"
             >

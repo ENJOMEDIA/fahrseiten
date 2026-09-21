@@ -13,7 +13,7 @@ export default async function UsersPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
           <h2 className="font-semibold">Dein aktiver Zugang</h2>
-          <dl className="mt-4 grid grid-cols-[8rem_1fr] gap-2 text-sm">
+          <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-[8rem_1fr]">
             <dt className="text-slate-500">Name</dt>
             <dd>{identity?.displayName ?? "Nicht verfügbar"}</dd>
             <dt className="text-slate-500">Rolle</dt>

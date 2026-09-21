@@ -157,7 +157,7 @@ export function OutreachForm({
   return (
     <form action={action}>
       <div className="sticky top-4 z-10 mb-4 grid gap-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur lg:grid-cols-[minmax(16rem,1fr)_minmax(20rem,1.4fr)_auto] lg:items-end">
-        <label className="min-w-64 flex-1 text-sm font-semibold">
+        <label className="min-w-0 flex-1 text-sm font-semibold">
           E-Mail-Vorlage
           <select
             className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
@@ -194,7 +194,7 @@ export function OutreachForm({
         </div>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full min-w-[850px] text-left text-sm">
+        <table className="mobile-stack-table w-full min-w-[850px] text-left text-sm">
           <thead className="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
             <tr>
               <th className="p-4">Auswahl</th>
@@ -208,7 +208,7 @@ export function OutreachForm({
           <tbody className="divide-y divide-slate-100">
             {leads.map((lead) => (
               <tr key={lead.id}>
-                <td className="p-4">
+                <td className="p-4" data-label="Auswahl">
                   <input
                     aria-label={`${lead.companyName} auswählen`}
                     disabled={
@@ -223,14 +223,16 @@ export function OutreachForm({
                     value={lead.id}
                   />
                 </td>
-                <td className="p-4 font-semibold">{lead.companyName}</td>
-                <td className="p-4">
+                <td className="p-4 font-semibold" data-label="Fahrschule">
+                  {lead.companyName}
+                </td>
+                <td className="p-4" data-label="Kontakt">
                   <div>{lead.contactName || "–"}</div>
                   <div className="text-slate-500">
                     {lead.email || lead.phone || "Keine Kontaktdaten"}
                   </div>
                 </td>
-                <td className="p-4">
+                <td className="p-4" data-label="Webseite">
                   {lead.website ? (
                     <a
                       className="text-cyan-800 underline"
@@ -244,8 +246,10 @@ export function OutreachForm({
                     "–"
                   )}
                 </td>
-                <td className="p-4">{lead.status}</td>
-                <td className="p-4 text-xs font-semibold">
+                <td className="p-4" data-label="Status">
+                  {lead.status}
+                </td>
+                <td className="p-4 text-xs font-semibold" data-label="E-Mail">
                   <div
                     className={`mb-2 ${lead.emailOptOutAt ? "text-red-700" : ["consent", "existing_customer"].includes(lead.emailPermission) ? "text-emerald-700" : "text-amber-700"}`}
                   >

@@ -44,7 +44,7 @@ export default async function StatisticsPage() {
       </Card>
       <Card className="mt-6 overflow-x-auto">
         <h2 className="text-xl font-semibold">Websites und Mandanten</h2>
-        <table className="mt-5 w-full min-w-[620px] text-left text-sm">
+        <table className="mobile-stack-table mt-5 w-full min-w-[620px] text-left text-sm">
           <thead>
             <tr className="border-b text-slate-500">
               <th className="py-3">Mandant</th>
@@ -58,12 +58,12 @@ export default async function StatisticsPage() {
                 className="border-b border-slate-100"
                 key={`${item.tenantId}-${item.hostname}`}
               >
-                <td className="py-3 font-semibold">
+                <td className="py-3 font-semibold" data-label="Mandant">
                   {item.tenantName ??
                     (item.tenantId ? "Mandant" : "FahrSeiten")}
                 </td>
-                <td>{item.hostname}</td>
-                <td className="text-right font-semibold">
+                <td data-label="Domain">{item.hostname}</td>
+                <td className="text-right font-semibold" data-label="Aufrufe">
                   {Number(item.views)}
                 </td>
               </tr>

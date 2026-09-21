@@ -35,7 +35,7 @@ export default function FeaturesPage() {
         ))}
       </div>
       <div className="mt-16 grid gap-10 md:grid-cols-2">
-        <section className="rounded-[2rem] border border-cyan-100 bg-cyan-50 p-7 sm:p-9">
+        <section className="min-w-0 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-7 sm:p-9">
           <p className="section-kicker">Direkt nutzbar</p>
           <h2 className="mt-3 text-3xl font-semibold">Im MVP verfügbar</h2>
           <ul className="mt-7 space-y-3">
@@ -44,12 +44,12 @@ export default function FeaturesPage() {
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-cyan-100 text-sm text-cyan-800">
                   ✓
                 </span>
-                <span className="font-medium">{item}</span>
+                <span className="min-w-0 font-medium break-words">{item}</span>
               </li>
             ))}
           </ul>
         </section>
-        <section className="rounded-[2rem] border border-slate-200 bg-slate-50 p-7 sm:p-9">
+        <section className="min-w-0 rounded-[2rem] border border-slate-200 bg-slate-50 p-7 sm:p-9">
           <p className="section-kicker text-slate-500">Nächste Ausbaustufen</p>
           <h2 className="mt-3 text-3xl font-semibold">
             Klar als Planung markiert
@@ -57,11 +57,11 @@ export default function FeaturesPage() {
           <ul className="mt-7 space-y-3">
             {plannedMarketingFeatures.map((item) => (
               <li
-                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-slate-600"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-slate-600"
                 key={item}
               >
-                <span>{item}</span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
+                <span className="min-w-0 break-words">{item}</span>
+                <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
                   geplant
                 </span>
               </li>

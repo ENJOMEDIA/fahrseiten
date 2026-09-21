@@ -40,7 +40,7 @@ export default async function DomainPage() {
               {domain.status === "active" ? "Aktiv" : "Einrichtung offen"}
             </Badge>
           </div>
-          <dl className="mt-5 grid grid-cols-[10rem_1fr] gap-2 text-sm">
+          <dl className="mt-5 grid gap-2 text-sm sm:grid-cols-[10rem_1fr]">
             <dt>Verifikation</dt>
             <dd>{domain.verifiedAt ? "Bestätigt" : "Noch nicht bestätigt"}</dd>
             <dt>SSL</dt>

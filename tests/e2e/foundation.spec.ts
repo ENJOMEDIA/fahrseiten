@@ -88,7 +88,9 @@ test("edits, previews, publishes and restores in the controlled builder", async 
   ).toBeVisible();
   const heading = page.getByLabel("Überschrift", { exact: true }).first();
   await heading.fill("Sicher und entspannt zum Führerschein");
-  await expect(page.getByText("Entwurf gespeichert")).toBeVisible();
+  await expect(
+    page.getByText("Entwurf gespeichert", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Mobil", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Mobil", exact: true }),
@@ -145,4 +147,35 @@ test("serves security headers and keyboard-accessible mobile navigation", async 
   await page.getByText("Menü", { exact: true }).click();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Funktionen" })).toBeFocused();
+});
+
+test("keeps important public flows inside small mobile viewports", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+
+  for (const path of [
+    "/",
+    "/funktionen",
+    "/preise",
+    "/demo",
+    "/login",
+    "/impressum",
+    "/datenschutz",
+    "/cookie-einstellungen",
+    "/builder-demo",
+  ]) {
+    await page.goto(path);
+    await keepNecessaryConsent(page);
+
+    const viewport = await page.evaluate(() => ({
+      innerWidth: window.innerWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+
+    expect(
+      viewport.scrollWidth,
+      `${path} has horizontal overflow`,
+    ).toBeLessThanOrEqual(viewport.innerWidth);
+  }
 });

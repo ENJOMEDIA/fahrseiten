@@ -234,7 +234,7 @@ export function ContentEntryForm({
                 required
               />
             </label>
-            <div className="grid grid-cols-[7rem_1fr] gap-2">
+            <div className="grid gap-2 sm:grid-cols-[7rem_1fr]">
               <label className="block text-sm font-semibold">
                 PLZ
                 <input

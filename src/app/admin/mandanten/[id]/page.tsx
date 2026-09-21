@@ -698,7 +698,7 @@ export default async function TenantDetailPage({
             <div className="mt-7 space-y-3">
               <h3 className="font-semibold">Einträge beim Domainanbieter</h3>
               <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                <table className="w-full min-w-[34rem] text-left text-sm">
+                <table className="mobile-stack-table w-full min-w-[34rem] text-left text-sm">
                   <thead className="bg-slate-50 text-slate-500">
                     <tr>
                       <th className="p-3">Host</th>
@@ -709,9 +709,15 @@ export default async function TenantDetailPage({
                   <tbody>
                     {domainIsSubdomain ? (
                       <tr className="border-t border-slate-100">
-                        <td className="p-3 font-mono">{dnsHost}</td>
-                        <td className="p-3">CNAME</td>
-                        <td className="p-3 font-mono">{dnsTarget.hostname}</td>
+                        <td className="p-3 font-mono" data-label="Host">
+                          {dnsHost}
+                        </td>
+                        <td className="p-3" data-label="Typ">
+                          CNAME
+                        </td>
+                        <td className="p-3 font-mono" data-label="Ziel">
+                          {dnsTarget.hostname}
+                        </td>
                       </tr>
                     ) : null}
                     {!domainIsSubdomain
@@ -720,9 +726,15 @@ export default async function TenantDetailPage({
                             className="border-t border-slate-100"
                             key={address}
                           >
-                            <td className="p-3 font-mono">@</td>
-                            <td className="p-3">A</td>
-                            <td className="p-3 font-mono">{address}</td>
+                            <td className="p-3 font-mono" data-label="Host">
+                              @
+                            </td>
+                            <td className="p-3" data-label="Typ">
+                              A
+                            </td>
+                            <td className="p-3 font-mono" data-label="Ziel">
+                              {address}
+                            </td>
                           </tr>
                         ))
                       : null}
@@ -732,9 +744,16 @@ export default async function TenantDetailPage({
                             className="border-t border-slate-100"
                             key={address}
                           >
-                            <td className="p-3 font-mono">@</td>
-                            <td className="p-3">AAAA</td>
-                            <td className="p-3 font-mono break-all">
+                            <td className="p-3 font-mono" data-label="Host">
+                              @
+                            </td>
+                            <td className="p-3" data-label="Typ">
+                              AAAA
+                            </td>
+                            <td
+                              className="p-3 font-mono break-all"
+                              data-label="Ziel"
+                            >
                               {address}
                             </td>
                           </tr>

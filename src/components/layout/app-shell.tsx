@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 import { logoutAction } from "@/modules/auth/actions";
@@ -20,9 +21,11 @@ type NavItem = {
 function Navigation({
   items,
   mobile = false,
+  onNavigate,
 }: {
   items: readonly NavItem[];
   mobile?: boolean;
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
   const root = items[0]?.href;
@@ -58,6 +61,7 @@ function Navigation({
                 : "text-slate-400 hover:bg-white/8 hover:text-white",
           )}
           href={item.href}
+          onClick={onNavigate}
         >
           <span
             aria-hidden="true"
@@ -81,10 +85,11 @@ function Navigation({
                 </span>
               ) : null}
             </span>
-            {item.description && !mobile ? (
+            {item.description ? (
               <span
                 className={cn(
-                  "mt-0.5 block truncate text-[11px]",
+                  "mt-0.5 block text-[11px] leading-4",
+                  mobile ? "text-slate-500" : "truncate",
                   active ? "text-slate-500" : "text-slate-600",
                 )}
               >
@@ -111,10 +116,45 @@ export function AppShell({
   logoUrl?: string;
   children: React.ReactNode;
 }) {
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const mobileNavigationRef = useRef<HTMLElement>(null);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileNavigationOpen) return;
+    const trigger = mobileTriggerRef.current;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileNavigationOpen(false);
+      if (event.key !== "Tab") return;
+      const focusable =
+        mobileNavigationRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", closeOnEscape);
+      trigger?.focus();
+    };
+  }, [mobileNavigationOpen]);
+
   return (
     <div className="min-h-screen bg-[#f3f6f8] lg:grid lg:grid-cols-[19rem_1fr]">
       <AutoSaveIndicator />
-      <aside className="app-sidebar sticky top-0 hidden h-screen overflow-y-auto border-r border-white/5 bg-[#080d16] px-5 py-6 text-white lg:flex lg:flex-col">
+      <aside className="app-sidebar sticky top-0 hidden h-screen overflow-hidden border-r border-white/5 bg-[#080d16] px-5 py-6 text-white lg:flex lg:flex-col">
         <Link className="flex items-center gap-3" href="/">
           {logoUrl ? (
             <span className="grid h-11 min-w-14 place-items-center rounded-2xl bg-white px-2 shadow-lg">
@@ -147,10 +187,13 @@ export function AppShell({
           </p>
           <p className="mt-1 font-semibold">{eyebrow}</p>
         </div>
-        <nav aria-label="Hauptnavigation" className="mt-6 space-y-1.5">
+        <nav
+          aria-label="Hauptnavigation"
+          className="mt-5 min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain pr-1 pb-4"
+        >
           <Navigation items={navigation} />
         </nav>
-        <div className="mt-auto rounded-2xl border border-white/8 bg-white/[0.04] p-4">
+        <div className="mt-3 shrink-0 rounded-2xl border border-white/8 bg-white/[0.04] p-4">
           <p className="text-xs font-semibold text-white">Hilfe benötigt?</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
             Über „Fehler melden“ oder den Supportbereich erreichst du die
@@ -167,50 +210,135 @@ export function AppShell({
         </div>
       </aside>
       <div className="min-w-0">
-        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 px-5 py-4 backdrop-blur-xl lg:px-8">
-          <details className="group lg:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between font-semibold">
-              <span className="flex items-center gap-3">
-                {logoUrl ? (
-                  <span className="grid h-9 min-w-12 place-items-center rounded-xl bg-white px-2 shadow">
-                    <Image
-                      alt="Logo"
-                      className="h-6 w-auto object-contain"
-                      height={24}
-                      src={logoUrl}
-                      unoptimized
-                      width={100}
-                    />
-                  </span>
-                ) : (
-                  <span className="grid size-9 place-items-center rounded-xl bg-slate-950 text-white">
-                    F
-                  </span>
-                )}
-                Menü
-              </span>
-              <span aria-hidden="true" className="text-xl group-open:rotate-45">
-                +
-              </span>
-            </summary>
-            <nav
+        {mobileNavigationOpen ? (
+          <div className="fixed inset-0 z-[70] lg:hidden">
+            <button
+              aria-label="Menü schließen"
+              className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"
+              onClick={() => setMobileNavigationOpen(false)}
+              type="button"
+            />
+            <aside
               aria-label="Mobile Hauptnavigation"
-              className="mt-4 grid gap-1 border-t border-slate-100 pt-4"
+              aria-modal="true"
+              className="mobile-navigation-enter absolute inset-y-0 left-0 flex w-[min(25rem,calc(100vw-1.25rem))] flex-col bg-white shadow-2xl"
+              id="mobile-dashboard-navigation"
+              ref={mobileNavigationRef}
+              role="dialog"
             >
-              <Navigation items={navigation} mobile />
-              <form
-                action={logoutAction}
-                className="mt-3 border-t border-slate-100 pt-3"
-              >
-                <button
-                  className="w-full rounded-xl bg-slate-100 px-4 py-3 text-left text-sm font-semibold"
-                  type="submit"
+              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                <Link
+                  className="flex min-w-0 items-center gap-3"
+                  href="/"
+                  onClick={() => setMobileNavigationOpen(false)}
                 >
-                  Abmelden
+                  {logoUrl ? (
+                    <span className="grid h-10 min-w-12 place-items-center rounded-xl border border-slate-100 bg-white px-2 shadow-sm">
+                      <Image
+                        alt="Logo"
+                        className="h-6 w-auto object-contain"
+                        height={24}
+                        src={logoUrl}
+                        unoptimized
+                        width={100}
+                      />
+                    </span>
+                  ) : (
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-950 font-bold text-white">
+                      F
+                    </span>
+                  )}
+                  <span className="min-w-0">
+                    <span className="block truncate font-semibold">
+                      {eyebrow}
+                    </span>
+                    <span className="block truncate text-xs text-slate-500">
+                      {title}
+                    </span>
+                  </span>
+                </Link>
+                <button
+                  aria-label="Menü schließen"
+                  autoFocus
+                  className="grid size-11 shrink-0 place-items-center rounded-full bg-slate-100 text-2xl text-slate-700"
+                  onClick={() => setMobileNavigationOpen(false)}
+                  type="button"
+                >
+                  ×
                 </button>
-              </form>
-            </nav>
-          </details>
+              </div>
+              <div className="mx-5 mt-4 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
+                <span className="size-2.5 shrink-0 rounded-full bg-emerald-500" />
+                Sicher als {title} angemeldet
+              </div>
+              <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-4 py-4">
+                <Navigation
+                  items={navigation}
+                  mobile
+                  onNavigate={() => setMobileNavigationOpen(false)}
+                />
+              </nav>
+              <div className="border-t border-slate-200 bg-white p-4">
+                <p className="mb-3 text-xs leading-5 text-slate-500">
+                  Hilfe findest du jederzeit unter „Fehler melden“ oder im
+                  Supportbereich.
+                </p>
+                <form action={logoutAction}>
+                  <button
+                    className="min-h-12 w-full rounded-xl bg-slate-950 px-4 py-3 text-left text-sm font-semibold text-white"
+                    type="submit"
+                  >
+                    Sicher abmelden →
+                  </button>
+                </form>
+              </div>
+            </aside>
+          </div>
+        ) : null}
+        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 px-4 py-3 backdrop-blur-xl sm:px-5 sm:py-4 lg:px-8">
+          <div className="flex items-center justify-between gap-3 lg:hidden">
+            <div className="flex min-w-0 items-center gap-3">
+              {logoUrl ? (
+                <span className="grid h-9 min-w-11 place-items-center rounded-xl bg-white px-2 shadow-sm">
+                  <Image
+                    alt="Logo"
+                    className="h-6 w-auto object-contain"
+                    height={24}
+                    src={logoUrl}
+                    unoptimized
+                    width={100}
+                  />
+                </span>
+              ) : (
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-slate-950 text-sm font-bold text-white">
+                  F
+                </span>
+              )}
+              <span className="min-w-0">
+                <span className="block truncate text-[10px] font-bold tracking-[.12em] text-cyan-700 uppercase">
+                  {eyebrow}
+                </span>
+                <span className="block truncate text-sm font-semibold text-slate-950">
+                  {title}
+                </span>
+              </span>
+            </div>
+            <button
+              aria-controls="mobile-dashboard-navigation"
+              aria-expanded={mobileNavigationOpen}
+              aria-label="Menü öffnen"
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-sm"
+              onClick={() => setMobileNavigationOpen(true)}
+              ref={mobileTriggerRef}
+              type="button"
+            >
+              <span aria-hidden="true" className="grid gap-1">
+                <span className="block h-0.5 w-5 rounded bg-current" />
+                <span className="block h-0.5 w-5 rounded bg-current" />
+                <span className="block h-0.5 w-5 rounded bg-current" />
+              </span>
+            </button>
+          </div>
           <div className="hidden items-center justify-between lg:flex">
             <div>
               <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
@@ -293,7 +421,7 @@ export function AppShell({
             </div>
           </div>
         </header>
-        <main className="page-enter mx-auto w-full max-w-[94rem] px-5 py-8 lg:px-10 lg:py-10">
+        <main className="app-main page-enter mx-auto w-full max-w-[94rem] px-4 py-6 sm:px-5 sm:py-8 lg:px-10 lg:py-10">
           {children}
         </main>
       </div>
