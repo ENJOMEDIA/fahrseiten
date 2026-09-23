@@ -22,11 +22,16 @@ export function OnboardingLinkForm({
     name: string;
     monthlyPriceCents: number;
     setupPriceCents: number;
+    annualBillingEnabled: boolean;
+    annualDiscountBasisPoints: number;
+    minimumTermMonths: number;
   }[];
 }) {
   const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState("");
+  const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
 
   async function createInstance(formData: FormData, sendInvitation: boolean) {
     setPending(true);
@@ -42,6 +47,7 @@ export function OnboardingLinkForm({
         domain: formData.get("domain"),
         leadId: formData.get("leadId"),
         planId: formData.get("planId"),
+        billingIntervalMonths: Number(formData.get("billingIntervalMonths")),
         sendInvitation,
       }),
     });
@@ -96,6 +102,7 @@ export function OnboardingLinkForm({
           <select
             className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
             name="planId"
+            onChange={(event) => setSelectedPlanId(event.target.value)}
             required
           >
             <option value="">Paket auswählen</option>
@@ -118,6 +125,29 @@ export function OnboardingLinkForm({
           <span className="mt-1 block text-xs font-normal text-slate-500">
             Die enthaltenen Funktionen werden bei Abschluss der Einrichtung
             serverseitig freigeschaltet.
+          </span>
+        </label>
+        <label className="block text-sm font-semibold sm:col-span-2">
+          Zahlungsweise
+          <select
+            className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+            name="billingIntervalMonths"
+            required
+          >
+            <option value="1">Monatliche Abrechnung zum regulären Preis</option>
+            {selectedPlan?.annualBillingEnabled ? (
+              <option value="12">
+                Jahreszahlung mit {selectedPlan.annualDiscountBasisPoints / 100}{" "}
+                % Preisvorteil
+              </option>
+            ) : null}
+          </select>
+          <span className="mt-1 block text-xs leading-5 font-normal text-slate-500">
+            Zahlungsweise und Preisvorteil werden im Vertrag als fester
+            Preisstand gespeichert. Die Mindestlaufzeit des gewählten Pakets
+            beträgt {selectedPlan?.minimumTermMonths ?? "–"} Monat(e). Danach
+            läuft der Vertrag unbefristet weiter und ist mit einem Monat Frist
+            zum Monatsende kündbar.
           </span>
         </label>
         <Field

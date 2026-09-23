@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export function ConsultationForm() {
+export function ConsultationForm({ referralCode }: { referralCode?: string }) {
   const [startedAt] = useState(() => Date.now());
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
@@ -29,6 +29,12 @@ export function ConsultationForm() {
             privacyTextVersion: "marketing-local-v1",
             website: data.get("website"),
             startedAt,
+            referralCode,
+            referralDisclosureAccepted:
+              data.get("referralDisclosureAccepted") === "on",
+            referralTermsVersion: referralCode
+              ? "recommendation-v1"
+              : undefined,
           }),
         });
         setSending(false);
@@ -109,6 +115,30 @@ export function ConsultationForm() {
           zur Kenntnis genommen.
         </span>
       </label>
+      {referralCode ? (
+        <label className="mt-4 flex gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950">
+          <input
+            className="mt-1"
+            name="referralDisclosureAccepted"
+            required
+            type="checkbox"
+          />
+          <span>
+            Mir ist bekannt, dass der empfehlende FahrSeiten-Kunde nach einem
+            wirksamen Vertragsschluss, mindestens 30 aktiven Tagen und
+            dokumentierter erster Zahlung eine Gutschrift in Höhe seines
+            monatlichen Basispaketpreises erhalten kann. Dies verändert mein
+            Angebot nicht. Die{" "}
+            <Link
+              className="font-semibold underline"
+              href="/empfehlungsbedingungen"
+            >
+              Empfehlungsbedingungen
+            </Link>{" "}
+            habe ich zur Kenntnis genommen.
+          </span>
+        </label>
+      ) : null}
       <button
         className="mt-6 rounded-full bg-cyan-600 px-6 py-3 font-semibold text-white disabled:opacity-50"
         disabled={sending}

@@ -38,11 +38,12 @@ export function MarketingShell({
           </div>
           <nav
             aria-label="Footer-Navigation"
-            className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm text-slate-400"
+            className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm text-slate-400 sm:grid-cols-2"
           >
             <Link href="/impressum">Impressum</Link>
             <Link href="/datenschutz">Datenschutz</Link>
             <Link href="/agb">AGB</Link>
+            <Link href="/empfehlungsbedingungen">Empfehlungsbedingungen</Link>
             <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
             <Link href="/fehler-melden">Fehler melden</Link>
           </nav>

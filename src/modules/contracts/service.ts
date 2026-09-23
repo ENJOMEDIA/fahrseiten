@@ -86,7 +86,12 @@ export async function buildCurrentContractPdf(tenantId: string) {
     setupPriceCents: billing.subscription.setupPriceCentsSnapshot,
     startsAt: billing.subscription.startsAt,
     minimumTermMonths: billing.subscription.minimumTermMonths,
+    cancellationNoticeMonths:
+      billing.subscription.cancellationNoticeMonthsSnapshot,
+    renewsIndefinitely: billing.subscription.renewsIndefinitelySnapshot,
     billingIntervalMonths: billing.subscription.billingIntervalMonths,
+    billingAmountCents: billing.subscription.billingAmountCentsSnapshot,
+    discountBasisPoints: billing.subscription.discountBasisPointsSnapshot,
     nextInvoiceAt: billing.subscription.nextInvoiceAt,
   });
   return {

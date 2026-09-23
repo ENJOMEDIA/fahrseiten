@@ -218,6 +218,14 @@ export function TenantOnboardingForm({
     ownerEmail?: string;
     phone?: string;
     domain?: string;
+    planSummary?: {
+      name: string;
+      setupPriceCents: number | null;
+      billingAmountCents: number;
+      billingIntervalMonths: number;
+      discountBasisPoints: number;
+      minimumTermMonths: number;
+    };
   };
 }) {
   const [message, setMessage] = useState("");
@@ -246,6 +254,39 @@ export function TenantOnboardingForm({
 
   return (
     <form action={submit} className="mt-8 grid gap-5 sm:grid-cols-2">
+      {prefill?.planSummary ? (
+        <section className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 sm:col-span-2">
+          <p className="text-xs font-semibold tracking-[.14em] text-cyan-800 uppercase">
+            Vorbereitete kaufmännische Auswahl
+          </p>
+          <h2 className="mt-2 text-xl font-semibold">
+            {prefill.planSummary.name}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            {(prefill.planSummary.billingAmountCents / 100).toLocaleString(
+              "de-DE",
+              { style: "currency", currency: "EUR" },
+            )}{" "}
+            je{" "}
+            {prefill.planSummary.billingIntervalMonths === 12
+              ? "12 Monate"
+              : "Monat"}
+            {prefill.planSummary.discountBasisPoints
+              ? ` inklusive ${(prefill.planSummary.discountBasisPoints / 100).toLocaleString("de-DE")} % Jahresrabatt`
+              : ""}
+            .
+            {prefill.planSummary.setupPriceCents !== null
+              ? ` Einmalige Einrichtung: ${(prefill.planSummary.setupPriceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })}.`
+              : ""}
+            {` Mindestlaufzeit: ${prefill.planSummary.minimumTermMonths} Monat(e). Danach läuft der Vertrag unbefristet weiter und ist mit einem Monat Frist zum Monatsende kündbar.`}
+          </p>
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            Dieses technische Onboarding ersetzt weder Angebot noch Vertrag oder
+            Rechnung. Maßgeblich sind die separat übermittelten
+            Vertragsunterlagen.
+          </p>
+        </section>
+      ) : null}
       <Input
         defaultValue={prefill?.companyName}
         label="Name der Fahrschule"
@@ -377,6 +418,19 @@ export function TenantOnboardingForm({
         />
       </div>
       <LegalSetupFields />
+      <label className="flex items-start gap-3 rounded-2xl border border-slate-200 p-4 text-sm leading-6 sm:col-span-2">
+        <input
+          className="mt-1 size-5"
+          name="commercialSummaryAcknowledged"
+          required
+          type="checkbox"
+        />
+        <span>
+          Ich habe die vorbereitete Paket- und Abrechnungsauswahl geprüft. Mir
+          ist bekannt, dass Vertrag und steuerlich maßgebliche Rechnung separat
+          übermittelt werden.
+        </span>
+      </label>
       <div className="sm:col-span-2">
         <button
           className="rounded-xl bg-cyan-600 px-5 py-3 font-semibold text-white disabled:opacity-60"

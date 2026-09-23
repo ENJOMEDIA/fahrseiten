@@ -14,6 +14,7 @@ import {
 import { createId } from "@/lib/ids";
 import { featureCatalog, type FeatureKey } from "@/modules/features/catalog";
 import { priceToCents } from "./pricing";
+import { calculateBillingSnapshot } from "@/modules/billing/intervals";
 
 const planInputSchema = z.object({
   id: z.string().uuid().optional(),
@@ -21,6 +22,9 @@ const planInputSchema = z.object({
   description: z.string().trim().min(10).max(1_000),
   monthlyPrice: z.string().trim().max(20),
   setupPrice: z.string().trim().max(20),
+  annualBillingEnabled: z.boolean(),
+  annualDiscountPercent: z.coerce.number().min(0).max(50),
+  minimumTermMonths: z.coerce.number().int().min(1).max(24),
   position: z.coerce.number().int().min(0).max(2),
   highlighted: z.boolean(),
   active: z.boolean(),
@@ -92,6 +96,9 @@ export async function savePlatformPlan(raw: PlanInput) {
     );
   const monthlyPriceCents = priceToCents(input.monthlyPrice);
   const setupPriceCents = priceToCents(input.setupPrice);
+  const annualDiscountBasisPoints = Math.round(
+    input.annualDiscountPercent * 100,
+  );
 
   return db.transaction(async (tx) => {
     const currentPlans = await tx.select({ id: plans.id }).from(plans);
@@ -107,6 +114,9 @@ export async function savePlatformPlan(raw: PlanInput) {
       description: input.description,
       monthlyPriceCents,
       setupPriceCents,
+      annualBillingEnabled: input.annualBillingEnabled,
+      annualDiscountBasisPoints,
+      minimumTermMonths: input.minimumTermMonths,
       position: input.position,
       highlighted: input.highlighted,
       active: input.active,
@@ -172,6 +182,7 @@ export async function listSellableAddons() {
 export async function assignTenantPlan(input: {
   tenantId: string;
   planId: string;
+  billingIntervalMonths: number;
   actorUserId: string;
 }) {
   await db.transaction(async (tx) => {
@@ -181,11 +192,15 @@ export async function assignTenantPlan(input: {
         publicName: plans.publicName,
         monthlyPriceCents: plans.monthlyPriceCents,
         setupPriceCents: plans.setupPriceCents,
+        annualBillingEnabled: plans.annualBillingEnabled,
+        annualDiscountBasisPoints: plans.annualDiscountBasisPoints,
+        minimumTermMonths: plans.minimumTermMonths,
       })
       .from(plans)
       .where(eq(plans.id, input.planId))
       .limit(1);
     if (!plan) throw new Error("Paket wurde nicht gefunden.");
+    const billing = calculateBillingSnapshot(plan, input.billingIntervalMonths);
     await tx
       .update(subscriptions)
       .set({ status: "replaced", endsAt: new Date() })
@@ -197,6 +212,12 @@ export async function assignTenantPlan(input: {
       planNameSnapshot: plan.publicName,
       monthlyPriceCentsSnapshot: plan.monthlyPriceCents,
       setupPriceCentsSnapshot: plan.setupPriceCents,
+      billingAmountCentsSnapshot: billing.billingAmountCentsSnapshot,
+      billingIntervalMonths: billing.billingIntervalMonths,
+      discountBasisPointsSnapshot: billing.discountBasisPointsSnapshot,
+      minimumTermMonths: plan.minimumTermMonths,
+      cancellationNoticeMonthsSnapshot: 1,
+      renewsIndefinitelySnapshot: true,
       status: "active",
     });
     await tx.insert(auditLogs).values({
@@ -210,6 +231,12 @@ export async function assignTenantPlan(input: {
         planName: plan.publicName,
         monthlyPriceCents: plan.monthlyPriceCents,
         setupPriceCents: plan.setupPriceCents,
+        billingIntervalMonths: billing.billingIntervalMonths,
+        billingAmountCents: billing.billingAmountCentsSnapshot,
+        discountBasisPoints: billing.discountBasisPointsSnapshot,
+        minimumTermMonths: plan.minimumTermMonths,
+        cancellationNoticeMonths: 1,
+        renewsIndefinitely: true,
       },
     });
   });

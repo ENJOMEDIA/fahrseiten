@@ -1,6 +1,6 @@
 # Verträge und Abrechnungsverlauf
 
-Stand: 19. September 2026. Accountable bleibt das führende System für die
+Stand: 23. September 2026. Accountable bleibt das führende System für die
 Erstellung, Zustellung und steuerliche Archivierung wiederkehrender Rechnungen.
 FahrSeiten bildet die operative Kundenakte ab und erzeugt selbst keine
 steuerliche Rechnung.
@@ -32,6 +32,48 @@ offen, bezahlt, überfällig oder storniert setzen. Der Kunde sieht diese Angabe
 unter **Vertrag & Rechnungen**; die Oberfläche weist ausdrücklich darauf hin,
 dass die Rechnung separat zugestellt wird.
 
+Monats- und Jahreszahlung werden getrennt von der Mindestvertragslaufzeit
+gespeichert. Die Paketverwaltung kann die Jahreszahlung je Paket aktivieren und
+einen Rabatt in Basispunkten festlegen. Bei der Zuweisung werden Monatswert,
+tatsächlicher Rechnungsbetrag, Intervall und Rabatt als unveränderlicher
+Vertrags-Snapshot gespeichert. So verändert eine spätere Preisanpassung keine
+bereits vereinbarte Abrechnung. Der Kunde sieht Paketpreis pro Monat,
+Rechnungsbetrag und Intervall getrennt. Das Onboarding zeigt die vorbereitete
+Auswahl, verlangt eine Bestätigung und weist darauf hin, dass Angebot, Vertrag
+und Accountable-Rechnung maßgeblich bleiben.
+
+Die aktuelle B2B-Vertragslogik verwendet eine paketabhängige Mindestlaufzeit
+von höchstens 24 Monaten. Eine ordentliche Kündigung ist in Textform mit einem
+Monat Frist möglich, frühestens zum Ende der Mindestlaufzeit. Ohne Kündigung
+läuft der Vertrag anschließend auf unbestimmte Zeit weiter und bleibt mit einem
+Monat Frist zum Monatsende kündbar. Die Jahreszahlung ist ausdrücklich nur eine
+Zahlungsweise. Endet der Vertrag während eines vorausbezahlten Zeitraums,
+müssen volle Leistungsmonate nach dem Beendigungsdatum im führenden
+Rechnungssystem gutgeschrieben werden. Der öffentlich gespeicherte AGB-Text
+wird nicht automatisch überschrieben: Im Rechtsbereich erscheint bei einer
+alten Fassung ein Hinweis zur bewussten Aktualisierung und Veröffentlichung.
+
+## Empfehlungsbonus
+
+Das **FahrSeiten Empfehlungsprogramm** arbeitet mit einem zufälligen Link je
+aktivem Kunden. Der Kunde teilt ihn selbst und muss den möglichen Monatsbonus
+offenlegen. FahrSeiten übernimmt keine Kontakte aus seinem Adressbuch und
+versendet über diese Funktion keine Werbung an Dritte.
+
+Eine Empfehlung wird erst freigegeben, wenn die empfohlene Instanz mindestens
+30 Tage aktiv ist und ihre erste Rechnung als bezahlt dokumentiert wurde. Die
+Bonushöhe wird zu diesem Zeitpunkt einmalig aus dem aktuellen monatlichen
+Grundpreis des Werbers festgeschrieben. Es gibt keine Barauszahlung und keine
+dauerhafte Preisänderung. Einrichtung, Zusatzmodule, Fotografie, Medien und
+Porto werden nicht erfasst.
+
+Die Plattform erstellt keine Gutschrift. Ein Plattform-Owner muss den Rabatt
+zuerst auf einer konkreten Rechnung in Accountable berücksichtigen, die
+Rechnungskopie in der Kundenakte hinterlegen und anschließend exakt diese
+Rechnung auswählen. Eine Pflichtbestätigung und das Audit-Log dokumentieren
+den manuellen Abgleich; stornierte Rechnungen sind gesperrt. Die öffentliche
+Fassung `recommendation-v1` steht unter `/empfehlungsbedingungen`.
+
 Neue Angebote verwenden standardmäßig die explizite Auswahl
 **Kleinunternehmerregelung nach § 19 UStG**. In diesem Fall wird keine
 Umsatzsteuerposition berechnet oder ausgewiesen; das PDF enthält stattdessen
@@ -61,6 +103,11 @@ Löschregelung gemeinsam anwaltlich geprüft und auf das tatsächliche
 Geschäftsmodell abgestimmt werden. Die öffentliche AGB-Seite verwendet die
 allgemeine Fassung, solange keine individuell geprüfte und versionierte Fassung
 im Rechtsbereich veröffentlicht wurde.
+
+Auch Empfehlungsbedingungen, Rabattdarstellung und steuerliche Behandlung des
+Bonus müssen vor dem ersten produktiven Einsatz anwaltlich beziehungsweise mit
+der Steuerberatung geprüft werden. Technische Sperren verhindern typische
+Doppel- und Zuordnungsfehler, sind aber keine Rechts- oder Steuerberatung.
 
 Das Vertrags-PDF verwendet das im Plattform-Medienbereich hinterlegte Logo. Das
 Logo wird serverseitig in ein PDF-kompatibles PNG umgewandelt; fehlt es oder ist

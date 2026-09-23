@@ -1,6 +1,6 @@
 # Tarife und Feature-Flags
 
-Stand: 19. September 2026.
+Stand: 23. September 2026.
 
 ## Auflösung
 
@@ -24,6 +24,12 @@ Der Kundenbereich zeigt „In deinem Paket“ für aktive, „Nicht im Paket“ 
 Ein Hauptstandort ist immer enthalten. Ohne das Modul `multi_location` wird das Anlegen eines zweiten Standorts auch serverseitig abgewiesen. Direkte Requests an Builder, Inhalte, Recht, Domain und Wartung prüfen die jeweilige Freischaltung zusätzlich zur Navigation.
 
 Bei jeder neuen Instanzeinladung ist ein aktives Paket Pflicht. Ältere, bereits ausgestellte Einrichtungslinks ohne Paketauswahl erhalten beim Abschluss aus Kompatibilitätsgründen das erste aktive Paket nach der konfigurierten Reihenfolge.
+
+Die Paketverwaltung bietet Monatszahlung und optional Jahreszahlung. Der
+Jahresrabatt ist je Paket konfigurierbar; die Oberfläche zeigt den tatsächlichen
+Jahresbetrag und die Ersparnis. Zahlungsintervall und Mindestvertragslaufzeit
+sind getrennte Angaben. Der aktuell vorbelegte Rabatt von zehn Prozent ist eine
+änderbare Produkteinstellung und keine rechtliche oder steuerliche Vorgabe.
 
 ## Vorbereitete Schlüssel
 

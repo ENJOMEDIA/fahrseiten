@@ -7,6 +7,7 @@ import {
   listSellableAddons,
 } from "@/modules/platform/plans";
 import { formatEuro } from "@/modules/platform/pricing";
+import { calculateBillingSnapshot } from "@/modules/billing/intervals";
 
 const salesFeatureOrder: FeatureKey[] = [
   "managed_website",
@@ -88,11 +89,26 @@ export default async function PricingPage() {
                   / Monat
                 </span>
               </p>
+              {plan.annualBillingEnabled && plan.monthlyPriceCents !== null ? (
+                <p className="mt-3 rounded-xl bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-900">
+                  Jahreszahlung:{" "}
+                  {formatEuro(
+                    calculateBillingSnapshot(plan, 12)
+                      .billingAmountCentsSnapshot,
+                  )}{" "}
+                  pro Jahr · {plan.annualDiscountBasisPoints / 100} % Vorteil
+                </p>
+              ) : null}
               {plan.setupPriceCents !== null ? (
                 <p className="mt-1 text-sm opacity-60">
                   zzgl. {formatEuro(plan.setupPriceCents)} Einrichtung
                 </p>
               ) : null}
+              <p className="mt-3 text-xs leading-5 opacity-70">
+                Mindestlaufzeit {plan.minimumTermMonths} Monat(e). Danach
+                unbefristet und mit einem Monat Frist zum Monatsende kündbar.
+                Zahlungsweise und Vertragslaufzeit sind getrennt.
+              </p>
               {index === marketingPlans.length - 1 &&
               marketingPlans.length === 3 ? (
                 <div

@@ -45,6 +45,9 @@ export default async function NewTenantPage({
             name: plan.publicName,
             monthlyPriceCents: plan.monthlyPriceCents ?? 0,
             setupPriceCents: plan.setupPriceCents ?? 0,
+            annualBillingEnabled: plan.annualBillingEnabled,
+            annualDiscountBasisPoints: plan.annualDiscountBasisPoints,
+            minimumTermMonths: plan.minimumTermMonths,
           }))}
           initialValues={
             lead

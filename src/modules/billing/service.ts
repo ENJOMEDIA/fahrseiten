@@ -10,11 +10,13 @@ import {
   invoiceRecords,
   subscriptions,
   tenants,
+  plans,
   type invoiceStatusValues,
 } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { priceToCents } from "@/modules/platform/pricing";
+import { calculateBillingSnapshot } from "./intervals";
 
 const MAX_INVOICE_BYTES = 10 * 1024 * 1024;
 type InvoiceStatus = (typeof invoiceStatusValues)[number];
@@ -108,18 +110,43 @@ export async function updateSubscriptionSchedule(input: {
     .object({
       tenantId: z.string().uuid(),
       subscriptionId: z.string().uuid(),
-      minimumTermMonths: z.number().int().min(1).max(120),
-      billingIntervalMonths: z.number().int().min(1).max(24),
+      minimumTermMonths: z.number().int().min(1).max(24),
+      billingIntervalMonths: z.union([z.literal(1), z.literal(12)]),
       nextInvoiceAt: z.date().nullable(),
       actorUserId: z.string().uuid(),
     })
     .parse(input);
   await db.transaction(async (tx) => {
+    const [subscription] = await tx
+      .select({
+        id: subscriptions.id,
+        monthlyPriceCents: plans.monthlyPriceCents,
+        annualBillingEnabled: plans.annualBillingEnabled,
+        annualDiscountBasisPoints: plans.annualDiscountBasisPoints,
+      })
+      .from(subscriptions)
+      .innerJoin(plans, eq(plans.id, subscriptions.planId))
+      .where(
+        and(
+          eq(subscriptions.id, parsed.subscriptionId),
+          eq(subscriptions.tenantId, parsed.tenantId),
+          eq(subscriptions.status, "active"),
+        ),
+      )
+      .limit(1);
+    if (!subscription)
+      throw new Error("Aktive Vertragszuordnung wurde nicht gefunden.");
+    const billing = calculateBillingSnapshot(
+      subscription,
+      parsed.billingIntervalMonths,
+    );
     const result = await tx
       .update(subscriptions)
       .set({
         minimumTermMonths: parsed.minimumTermMonths,
         billingIntervalMonths: parsed.billingIntervalMonths,
+        billingAmountCentsSnapshot: billing.billingAmountCentsSnapshot,
+        discountBasisPointsSnapshot: billing.discountBasisPointsSnapshot,
         nextInvoiceAt: parsed.nextInvoiceAt,
       })
       .where(
@@ -141,6 +168,8 @@ export async function updateSubscriptionSchedule(input: {
       metadata: {
         minimumTermMonths: parsed.minimumTermMonths,
         billingIntervalMonths: parsed.billingIntervalMonths,
+        billingAmountCents: billing.billingAmountCentsSnapshot,
+        discountBasisPoints: billing.discountBasisPointsSnapshot,
         nextInvoiceAt: parsed.nextInvoiceAt?.toISOString() ?? null,
       },
     });

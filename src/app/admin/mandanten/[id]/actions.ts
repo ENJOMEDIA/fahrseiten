@@ -265,6 +265,7 @@ export async function assignPlanAction(
     await assignTenantPlan({
       tenantId,
       planId: String(formData.get("planId")),
+      billingIntervalMonths: Number(formData.get("billingIntervalMonths")),
       actorUserId: identity.id,
     });
     revalidatePath(`/admin/mandanten/${tenantId}`);

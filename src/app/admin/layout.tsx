@@ -47,6 +47,13 @@ export default async function PlatformLayout({
             description: "Leads und nächste Schritte",
             group: "Kunden & Vertrieb",
           },
+          {
+            href: "/admin/empfehlungen",
+            label: "Empfehlungen",
+            icon: "✦",
+            description: "Prüfen und Rechnungsgutschriften zuordnen",
+            group: "Kunden & Vertrieb",
+          },
         ]
       : []),
     ...(hasPlatformPermission(identity.platformRole, "platform.security.manage")

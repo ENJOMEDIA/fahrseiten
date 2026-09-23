@@ -65,6 +65,13 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     group: "Verwaltung",
   },
   {
+    href: "/kunde/empfehlungen",
+    label: "Weiterempfehlen",
+    icon: "✦",
+    description: "Link teilen und Monatsbonus verfolgen",
+    group: "Verwaltung",
+  },
+  {
     href: "/kunde/rechtliches",
     label: "Rechtliches",
     icon: "§",

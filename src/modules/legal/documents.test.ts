@@ -165,6 +165,11 @@ describe("legal document publication", () => {
     expect(createPlatformTermsDraft(data)).toContain("[Festlegen:");
     const liveTerms = createPlatformTerms(data);
     expect(liveTerms).not.toContain("[Festlegen:");
+    expect(liveTerms).toContain(
+      "Zahlungsintervall und Laufzeit sind voneinander unabhängig",
+    );
+    expect(liveTerms).toContain("auf unbestimmte Zeit weiter");
+    expect(liveTerms).toContain("einer Frist von einem Monat");
     expect(publicationWarnings("terms", liveTerms)).toHaveLength(0);
     expect(liveTerms).toContain("Ein Vertrag kommt durch Annahme");
     expect(createPlatformTermsDraft(data)).toContain(

@@ -29,7 +29,11 @@ describe("contract template", () => {
       setupPriceCents: 10000,
       startsAt: new Date("2026-09-18T00:00:00Z"),
       minimumTermMonths: 12,
+      cancellationNoticeMonths: 1,
+      renewsIndefinitely: true,
       billingIntervalMonths: 1,
+      billingAmountCents: 9999,
+      discountBasisPoints: 0,
     })
       .flatMap((section) => section.paragraphs)
       .join("\n");
@@ -42,5 +46,7 @@ describe("contract template", () => {
       "separat über das von FahrSeiten eingesetzte Rechnungssystem",
     );
     expect(text).toContain("Vorsatz, grober Fahrlässigkeit");
+    expect(text).toContain("auf unbestimmte Zeit weiter");
+    expect(text).toContain("Zahlungsintervall und Laufzeit");
   });
 });

@@ -28,7 +28,12 @@ export function TenantPlanForm({
   currentPlanName,
 }: {
   tenantId: string;
-  plans: Array<{ id: string; publicName: string }>;
+  plans: Array<{
+    id: string;
+    publicName: string;
+    annualBillingEnabled: boolean;
+    annualDiscountBasisPoints: number;
+  }>;
   currentPlanName: string | null;
 }) {
   const [state, action, pending] = useActionState(
@@ -51,6 +56,17 @@ export function TenantPlanForm({
               {plan.publicName}
             </option>
           ))}
+        </select>
+      </label>
+      <label className="mt-3 block text-sm font-semibold">
+        Zahlungsweise
+        <select
+          className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+          name="billingIntervalMonths"
+          required
+        >
+          <option value="1">Monatliche Abrechnung</option>
+          <option value="12">Jahreszahlung, sofern im Paket freigegeben</option>
         </select>
       </label>
       <button

@@ -5,6 +5,8 @@ import { getOptionalServiceConfig } from "@/modules/consent/config";
 import { PrivacyServiceNotice } from "@/modules/legal/public-document";
 import { createOnlinebriefPrivacyNotice } from "@/modules/legal/documents";
 
+const referralPrivacyNotice = `Empfehlungsprogramm\nWenn ein Interessent einen persönlichen Empfehlungslink verwendet, verarbeiten wir die zufällige Empfehlungskennung, die Zuordnung zum werbenden Kunden, den Zeitpunkt der Bestätigung, den Bearbeitungsstatus sowie – nach einem Vertragsschluss – die Kunden-, Vertrags-, Zahlungs- und Rechnungszuordnung. Der werbende Kunde erhält keine Kontaktdaten der empfohlenen Person. Die Verarbeitung dient der Bearbeitung der Anfrage, der Durchführung des Empfehlungsprogramms, der Missbrauchsvermeidung und der nachvollziehbaren Abrechnung. Rechtsgrundlagen sind Art. 6 Abs. 1 lit. b und lit. f DSGVO. Abrechnungsrelevante Nachweise werden entsprechend den gesetzlichen Aufbewahrungspflichten gespeichert; nicht zustande gekommene Empfehlungen werden gelöscht, sobald keine Nachweis- oder Abwehrinteressen mehr bestehen.`;
+
 export default async function PrivacyPage() {
   await connection();
   const [document, services] = await Promise.all([
@@ -13,8 +15,8 @@ export default async function PrivacyPage() {
   ]);
   const privacyContent = document
     ? document.content.includes("Onlinebrief24")
-      ? document.content
-      : `${document.content}\n\n${createOnlinebriefPrivacyNotice()}`
+      ? `${document.content}\n\n${referralPrivacyNotice}`
+      : `${document.content}\n\n${createOnlinebriefPrivacyNotice()}\n\n${referralPrivacyNotice}`
     : null;
   return (
     <SimpleMarketingPage

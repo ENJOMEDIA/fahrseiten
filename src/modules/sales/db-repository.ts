@@ -3,6 +3,7 @@ import { db } from "@/db/client";
 import { salesActivities, salesLeads } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import type { SalesLeadRepository } from "./lead-service";
+import { recordLeadReferral } from "@/modules/referrals/service";
 export const dbSalesLeadRepository: SalesLeadRepository = {
   async create(record) {
     await db.transaction(async (tx) => {
@@ -23,6 +24,14 @@ export const dbSalesLeadRepository: SalesLeadRepository = {
         activityType: "marketing_inquiry",
         note: record.message,
       });
+      if (record.referralCode)
+        await recordLeadReferral(tx, {
+          leadId: record.id,
+          code: record.referralCode,
+          disclosureAccepted: record.referralDisclosureAccepted === true,
+          disclosureVersion: record.referralTermsVersion ?? "",
+          confirmedAt: record.createdAt,
+        });
     });
   },
 };

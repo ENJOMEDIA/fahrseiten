@@ -161,6 +161,7 @@ export function BillingScheduleForm({
         <input
           className={inputClass}
           defaultValue={subscription.minimumTermMonths}
+          max="24"
           min="1"
           name="minimumTermMonths"
           required
@@ -168,15 +169,16 @@ export function BillingScheduleForm({
         />
       </label>
       <label className="text-sm font-semibold">
-        Abrechnung alle (Monate)
-        <input
+        Zahlungsweise
+        <select
           className={inputClass}
           defaultValue={subscription.billingIntervalMonths}
-          min="1"
           name="billingIntervalMonths"
           required
-          type="number"
-        />
+        >
+          <option value="1">Monatliche Abrechnung</option>
+          <option value="12">Jahreszahlung</option>
+        </select>
       </label>
       <label className="text-sm font-semibold">
         Nächste Rechnung

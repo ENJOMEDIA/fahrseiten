@@ -20,6 +20,11 @@ export async function savePlanAction(
       description: String(formData.get("description") ?? ""),
       monthlyPrice: String(formData.get("monthlyPrice") ?? ""),
       setupPrice: String(formData.get("setupPrice") ?? ""),
+      annualBillingEnabled: formData.get("annualBillingEnabled") === "on",
+      annualDiscountPercent: Number(
+        String(formData.get("annualDiscountPercent") ?? "0").replace(",", "."),
+      ),
+      minimumTermMonths: Number(formData.get("minimumTermMonths") ?? 1),
       position: Number(formData.get("position") ?? 0),
       highlighted: formData.get("highlighted") === "on",
       active: formData.get("active") === "on",

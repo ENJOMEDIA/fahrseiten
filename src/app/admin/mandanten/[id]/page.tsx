@@ -804,7 +804,19 @@ export default async function TenantDetailPage({
               currentPlanName={tenant.planName}
               plans={availablePlans
                 .filter((plan) => plan.active)
-                .map(({ id, publicName }) => ({ id, publicName }))}
+                .map(
+                  ({
+                    id,
+                    publicName,
+                    annualBillingEnabled,
+                    annualDiscountBasisPoints,
+                  }) => ({
+                    id,
+                    publicName,
+                    annualBillingEnabled,
+                    annualDiscountBasisPoints,
+                  }),
+                )}
               tenantId={tenant.id}
             />
           </Card>

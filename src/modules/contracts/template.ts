@@ -25,7 +25,11 @@ export type ContractTemplateInput = {
   setupPriceCents: number | null;
   startsAt: Date;
   minimumTermMonths: number;
+  cancellationNoticeMonths: number;
+  renewsIndefinitely: boolean;
   billingIntervalMonths: number;
+  billingAmountCents: number | null;
+  discountBasisPoints: number;
   nextInvoiceAt?: Date | null;
 };
 
@@ -48,6 +52,14 @@ export function createContractSections(
     input.setupPriceCents === null
       ? "gemäß individuellem Angebot"
       : `${euro.format(input.setupPriceCents / 100)} brutto einmalig`;
+  const billingAmount =
+    input.billingAmountCents === null
+      ? "gemäß individuellem Angebot"
+      : `${euro.format(input.billingAmountCents / 100)} je Abrechnungszeitraum`;
+  const intervalDescription =
+    input.billingIntervalMonths === 12
+      ? `jährlich im Voraus${input.discountBasisPoints > 0 ? ` mit ${(input.discountBasisPoints / 100).toLocaleString("de-DE")} % Preisvorteil` : ""}`
+      : "monatlich";
 
   return [
     {
@@ -82,7 +94,9 @@ export function createContractSections(
     {
       heading: "5. Vergütung und Abrechnung",
       paragraphs: [
-        `Die vereinbarte Vergütung beträgt ${monthly}; die Einrichtung kostet ${setup}. Der Abrechnungszeitraum umfasst ${input.billingIntervalMonths} Monat(e). Alle Rechnungen werden separat über das von FahrSeiten eingesetzte Rechnungssystem übermittelt. Die Anzeige im Kundenbereich dient der Übersicht und ersetzt nicht die Rechnung.`,
+        `Die vereinbarte Basisvergütung beträgt ${monthly}; die Einrichtung kostet ${setup}. Abgerechnet wird ${intervalDescription}. Der fest vereinbarte Betrag beträgt ${billingAmount}. Mindestlaufzeit und Zahlungsintervall sind voneinander unabhängige Vertragsangaben. Alle Rechnungen werden separat über das von FahrSeiten eingesetzte Rechnungssystem übermittelt. Die Anzeige im Kundenbereich dient der Übersicht und ersetzt nicht die Rechnung.`,
+        "Empfehlungsgutschriften werden nur nach den gesonderten Empfehlungsbedingungen und erst nach ausdrücklicher Bestätigung auf einer konkreten Rechnung berücksichtigt. Sie verändern den vereinbarten Paketpreis nicht dauerhaft und werden nicht in bar ausgezahlt.",
+        "Eine Jahreszahlung ist eine vorausbezahlte Zahlungsweise und verlängert die Vertragsbindung nicht eigenständig. Endet der Vertrag wirksam vor dem Ende eines bereits bezahlten Jahreszeitraums, wird das Entgelt für die danach liegenden vollen Leistungsmonate über das führende Rechnungssystem gutgeschrieben, soweit keine offenen Gegenansprüche bestehen.",
         input.nextInvoiceAt
           ? `Der nächste planmäßige Rechnungstermin ist der ${date.format(input.nextInvoiceAt)}. Das konkrete Zahlungsziel ergibt sich aus der jeweiligen Rechnung.`
           : "Der nächste Rechnungstermin und das konkrete Zahlungsziel ergeben sich aus der jeweiligen Rechnung.",
@@ -91,7 +105,7 @@ export function createContractSections(
     {
       heading: "6. Beginn, Laufzeit und Kündigung",
       paragraphs: [
-        `Der Vertrag beginnt am ${date.format(input.startsAt)}. Die Mindestlaufzeit beträgt ${input.minimumTermMonths} Monat(e). Verlängerung und Kündigungsfrist richten sich nach dem angenommenen Angebot beziehungsweise den wirksam einbezogenen AGB. Außerordentliche Kündigungsrechte bleiben unberührt.`,
+        `Der Vertrag beginnt am ${date.format(input.startsAt)}. Die Mindestlaufzeit beträgt ${input.minimumTermMonths} Monat(e). Er kann mit einer Frist von ${input.cancellationNoticeMonths} Monat zum Ende der Mindestlaufzeit in Textform gekündigt werden. Ohne Kündigung läuft er anschließend ${input.renewsIndefinitely ? "auf unbestimmte Zeit weiter und kann mit derselben Frist zum Monatsende gekündigt werden" : "nach Maßgabe des angenommenen Angebots weiter"}. Zahlungsintervall und Laufzeit sind voneinander unabhängig. Außerordentliche Kündigungsrechte bleiben unberührt.`,
       ],
     },
     {

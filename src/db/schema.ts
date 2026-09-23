@@ -129,6 +129,7 @@ export const tenantOnboardingTokens = mysqlTable(
       phone?: string;
       domain?: string;
       planId?: string;
+      billingIntervalMonths?: 1 | 12;
     }>(),
     expiresAt: timestamp("expires_at", { mode: "date", fsp: 3 }).notNull(),
     usedAt: timestamp("used_at", { mode: "date", fsp: 3 }),
@@ -1210,6 +1211,13 @@ export const plans = mysqlTable(
     description: text("description"),
     monthlyPriceCents: int("monthly_price_cents"),
     setupPriceCents: int("setup_price_cents"),
+    annualBillingEnabled: boolean("annual_billing_enabled")
+      .default(true)
+      .notNull(),
+    annualDiscountBasisPoints: int("annual_discount_basis_points")
+      .default(1000)
+      .notNull(),
+    minimumTermMonths: int("minimum_term_months").default(1).notNull(),
     position: int("position").default(0).notNull(),
     highlighted: boolean("highlighted").default(false).notNull(),
     active: boolean("active").default(true).notNull(),
@@ -1231,8 +1239,18 @@ export const subscriptions = mysqlTable(
     planNameSnapshot: varchar("plan_name_snapshot", { length: 120 }).notNull(),
     monthlyPriceCentsSnapshot: int("monthly_price_cents_snapshot"),
     setupPriceCentsSnapshot: int("setup_price_cents_snapshot"),
+    billingAmountCentsSnapshot: int("billing_amount_cents_snapshot"),
+    discountBasisPointsSnapshot: int("discount_basis_points_snapshot")
+      .default(0)
+      .notNull(),
     billingIntervalMonths: int("billing_interval_months").default(1).notNull(),
     minimumTermMonths: int("minimum_term_months").default(1).notNull(),
+    cancellationNoticeMonthsSnapshot: int("cancellation_notice_months_snapshot")
+      .default(1)
+      .notNull(),
+    renewsIndefinitelySnapshot: boolean("renews_indefinitely_snapshot")
+      .default(true)
+      .notNull(),
     nextInvoiceAt: timestamp("next_invoice_at", { mode: "date", fsp: 3 }),
     status: varchar("status", { length: 40 }).default("active").notNull(),
     startsAt: timestamp("starts_at", { mode: "date", fsp: 3 })
@@ -1419,6 +1437,83 @@ export const invoiceRecords = mysqlTable(
   (table) => [
     uniqueIndex("invoice_records_number_unique").on(table.invoiceNumber),
     index("invoice_records_tenant_due_idx").on(table.tenantId, table.dueAt),
+  ],
+);
+
+export const referralStatusValues = [
+  "pending",
+  "awaiting_eligibility",
+  "qualified",
+  "credited",
+  "rejected",
+  "cancelled",
+] as const;
+export const referralCodes = mysqlTable(
+  "referral_codes",
+  {
+    id: id("id").primaryKey(),
+    tenantId: id("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    code: varchar("code", { length: 48 }).notNull(),
+    active: boolean("active").default(true).notNull(),
+    termsVersion: varchar("terms_version", { length: 40 })
+      .default("recommendation-v1")
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("referral_codes_tenant_unique").on(table.tenantId),
+    uniqueIndex("referral_codes_code_unique").on(table.code),
+  ],
+);
+export const referrals = mysqlTable(
+  "referrals",
+  {
+    id: id("id").primaryKey(),
+    referralCodeId: id("referral_code_id")
+      .notNull()
+      .references(() => referralCodes.id, { onDelete: "restrict" }),
+    referrerTenantId: id("referrer_tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    referredLeadId: id("referred_lead_id")
+      .notNull()
+      .references(() => salesLeads.id, { onDelete: "restrict" }),
+    referredTenantId: id("referred_tenant_id").references(() => tenants.id, {
+      onDelete: "set null",
+    }),
+    status: mysqlEnum("status", referralStatusValues)
+      .default("pending")
+      .notNull(),
+    termsVersion: varchar("terms_version", { length: 40 }).notNull(),
+    disclosureConfirmedAt: timestamp("disclosure_confirmed_at", {
+      mode: "date",
+      fsp: 3,
+    }).notNull(),
+    eligibleAt: timestamp("eligible_at", { mode: "date", fsp: 3 }),
+    qualifiedAt: timestamp("qualified_at", { mode: "date", fsp: 3 }),
+    rewardCentsSnapshot: int("reward_cents_snapshot"),
+    creditedAt: timestamp("credited_at", { mode: "date", fsp: 3 }),
+    creditedInvoiceId: id("credited_invoice_id").references(
+      () => invoiceRecords.id,
+      { onDelete: "set null" },
+    ),
+    rejectedAt: timestamp("rejected_at", { mode: "date", fsp: 3 }),
+    rejectionReason: varchar("rejection_reason", { length: 500 }),
+    reviewedByUserId: id("reviewed_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("referrals_lead_unique").on(table.referredLeadId),
+    uniqueIndex("referrals_tenant_unique").on(table.referredTenantId),
+    index("referrals_referrer_status_idx").on(
+      table.referrerTenantId,
+      table.status,
+    ),
+    index("referrals_eligible_idx").on(table.status, table.eligibleAt),
   ],
 );
 

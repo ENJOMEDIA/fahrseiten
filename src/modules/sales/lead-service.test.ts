@@ -45,4 +45,26 @@ describe("marketing leads", () => {
       ),
     ).rejects.toThrow();
   });
+
+  it("requires transparent referral disclosure", async () => {
+    await expect(
+      submitSalesLead(
+        {
+          companyName: "Fahrschule Empfehlung",
+          contactName: "Alex Beispiel",
+          email: "alex@example.invalid",
+          message: "Ich möchte FahrSeiten kennenlernen.",
+          privacyAccepted: true,
+          privacyTextVersion: "marketing-local-v1",
+          website: "",
+          startedAt: 1_000,
+          referralCode: "a".repeat(24),
+          referralDisclosureAccepted: false,
+          referralTermsVersion: "recommendation-v1",
+        },
+        { async create() {} },
+        4_000,
+      ),
+    ).rejects.toThrow("Empfehlungsbedingungen");
+  });
 });

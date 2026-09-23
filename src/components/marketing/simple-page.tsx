@@ -33,6 +33,7 @@ function MaintenanceLegalShell({
           <Link href="/impressum">Impressum</Link>
           <Link href="/datenschutz">Datenschutz</Link>
           <Link href="/agb">AGB</Link>
+          <Link href="/empfehlungsbedingungen">Empfehlungsbedingungen</Link>
           <Link href="/cookie-einstellungen">Cookie-Einstellungen</Link>
           <Link className="font-semibold text-slate-950" href={dashboardUrl()}>
             Kundenlogin

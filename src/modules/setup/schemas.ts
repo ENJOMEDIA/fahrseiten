@@ -68,6 +68,10 @@ export const tenantOnboardingSchema = z
     primaryColor: hexColor,
     accentColor: hexColor,
     maintenanceMessage: z.string().trim().min(10).max(500),
+    commercialSummaryAcknowledged: z.preprocess(
+      (value) => value === true || value === "on",
+      z.literal(true, "Bitte Paket- und Abrechnungshinweis bestätigen."),
+    ),
     billingUseLocationAddress: z.preprocess(
       (value) =>
         value === undefined ? true : value === true || value === "on",

@@ -73,8 +73,10 @@ Automatisch erzeugte oder technisch unterstützte Impressums-, Datenschutz-, Coo
 [Festlegen: Einrichtungspreis, monatliche Abrechnung, Zahlungsziel, Umsatzsteuer, Verzug und Preise für Zusatzleistungen.]
 Rechnungen werden über das eingesetzte externe Rechnungssystem separat übermittelt. Eine zusätzliche Anzeige oder PDF-Kopie im FahrSeiten-Kundenbereich dient nur der Übersicht und ersetzt nicht die Rechnung. Der Kunde hält seine Rechnungsanschrift und Rechnungskontaktadresse aktuell.
 
+Ein Empfehlungsbonus entsteht ausschließlich nach Maßgabe der jeweils einbezogenen Empfehlungsbedingungen. Er wird nicht ausgezahlt und erst mit einer konkreten Rechnung verrechnet. Das Empfehlungsprogramm ändert weder den vereinbarten Paketpreis noch die Laufzeit oder die Kündigungsregeln.
+
 8. Laufzeit und Kündigung
-[Festlegen: Mindestlaufzeit, Verlängerung, ordentliche Kündigungsfrist und Folgen einer Vertragsbeendigung.]
+Die Mindestlaufzeit ergibt sich aus Angebot oder Vertrag. Der Vertrag kann mit einer Frist von einem Monat zum Ende der Mindestlaufzeit in Textform gekündigt werden. Ohne Kündigung läuft er danach auf unbestimmte Zeit weiter und kann mit einer Frist von einem Monat zum Monatsende gekündigt werden. Zahlungsintervall und Laufzeit sind voneinander unabhängig. Außerordentliche Kündigungsrechte bleiben unberührt.
 
 9. Verfügbarkeit, Wartung und Störungen
 [Festlegen: zugesagte Verfügbarkeit, angekündigte Wartungsfenster, Sicherheitsupdates und zulässige Weiterentwicklung der Plattform.]
@@ -135,8 +137,12 @@ Eine Kundendomain kann beim bisherigen Domainanbieter verbleiben und technisch m
 7. Vergütung und Rechnungen
 Einrichtungsentgelt, laufende Vergütung, Abrechnungszeitraum und Zusatzleistungen ergeben sich aus dem angenommenen Angebot oder der Auftragsbestätigung. Rechnungen werden elektronisch über das vom Anbieter eingesetzte Rechnungssystem übermittelt und sind innerhalb des auf der Rechnung angegebenen Zahlungsziels ohne Abzug fällig. Die Anzeige einer Rechnungskopie oder eines Zahlungsstatus im FahrSeiten-Kundenbereich dient der Übersicht und ersetzt nicht die übermittelte Rechnung. Alle Preise verstehen sich zuzüglich gesetzlicher Umsatzsteuer, soweit diese anfällt und nicht ausdrücklich ein Bruttopreis ausgewiesen ist.
 
+Monats- oder Jahreszahlung bezeichnet ausschließlich den Zahlungsrhythmus und verändert weder die vereinbarte Mindestlaufzeit noch die Kündigungsfrist. Zahlungsintervall und Laufzeit sind voneinander unabhängig. Bei wirksamer Vertragsbeendigung vor Ablauf eines vorausbezahlten Jahreszeitraums wird das Entgelt für die nach Vertragsende liegenden vollen Leistungsmonate gutgeschrieben, soweit keine offenen Gegenansprüche bestehen. Preisänderungen für laufende Verträge bedürfen einer ausdrücklichen Vereinbarung; die bloße Veröffentlichung neuer Paketpreise ändert bestehende Preisvereinbarungen nicht.
+
+Ein Empfehlungsbonus entsteht ausschließlich nach Maßgabe der bei Teilnahme einbezogenen Empfehlungsbedingungen. Er wird nicht bar ausgezahlt, verändert den Paketpreis nicht dauerhaft und wird erst auf einer konkreten Rechnung berücksichtigt.
+
 8. Laufzeit und Kündigung
-Vertragsbeginn, Mindestlaufzeit und ordentliche Kündigungsfrist ergeben sich aus dem angenommenen Angebot oder der Auftragsbestätigung. Fehlt dort eine Mindestlaufzeit, läuft der Vertrag auf unbestimmte Zeit und kann mit einer Frist von einem Monat zum Monatsende in Textform gekündigt werden. Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt unberührt.
+Vertragsbeginn und Mindestlaufzeit ergeben sich aus dem angenommenen Angebot oder dem Vertragsdokument. Der Vertrag kann mit einer Frist von einem Monat zum Ende der Mindestlaufzeit in Textform gekündigt werden. Fehlt eine Mindestlaufzeit, läuft er von Beginn an auf unbestimmte Zeit. Ohne fristgerechte Kündigung läuft der Vertrag nach der Mindestlaufzeit auf unbestimmte Zeit weiter und kann mit einer Frist von einem Monat zum Monatsende gekündigt werden. Eine Kündigung kann insbesondere per E-Mail an die im Impressum genannte Kontaktadresse erklärt werden. Der Anbieter bestätigt den Zugang und den ermittelten Beendigungszeitpunkt in Textform. Das Recht beider Parteien zur außerordentlichen Kündigung aus wichtigem Grund bleibt unberührt.
 
 9. Betrieb, Wartung und Störungen
 Der Anbieter stellt die Plattform mit der im Angebot vereinbarten Verfügbarkeit bereit. Ohne ausdrückliche Service-Level-Vereinbarung besteht kein Anspruch auf eine bestimmte unterbrechungsfreie Verfügbarkeit. Notwendige Wartungs-, Sicherheits- und Aktualisierungsarbeiten sind zulässig; planbare Einschränkungen werden nach Möglichkeit angekündigt. Störungen sind mit einer nachvollziehbaren Beschreibung zu melden. Der Anbieter bearbeitet Wiederherstellung und Schadensbegrenzung nach Dringlichkeit.

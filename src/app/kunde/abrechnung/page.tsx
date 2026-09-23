@@ -54,7 +54,7 @@ export default async function CustomerBillingPage() {
           {billing.subscription ? (
             <dl className="mt-7 grid gap-5 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-slate-400">Monatlicher Preis</dt>
+                <dt className="text-slate-400">Paketpreis pro Monat</dt>
                 <dd className="mt-1 text-lg font-semibold">
                   {billing.subscription.monthlyPriceCentsSnapshot === null
                     ? "Laut Angebot"
@@ -70,10 +70,38 @@ export default async function CustomerBillingPage() {
                 </dd>
               </div>
               <div>
+                <dt className="text-slate-400">Kündigung</dt>
+                <dd className="mt-1 font-semibold">
+                  {billing.subscription.cancellationNoticeMonthsSnapshot} Monat
+                  zum Laufzeitende
+                </dd>
+                <p className="mt-1 text-xs text-slate-400">
+                  Danach unbefristet mit einem Monat Frist zum Monatsende.
+                </p>
+              </div>
+              <div>
                 <dt className="text-slate-400">Abrechnungsrhythmus</dt>
                 <dd className="mt-1 font-semibold">
-                  Alle {billing.subscription.billingIntervalMonths} Monat(e)
+                  {billing.subscription.billingIntervalMonths === 12
+                    ? "Jährlich im Voraus"
+                    : "Monatlich"}
                 </dd>
+              </div>
+              <div>
+                <dt className="text-slate-400">Betrag je Rechnung</dt>
+                <dd className="mt-1 font-semibold">
+                  {billing.subscription.billingAmountCentsSnapshot === null
+                    ? "Laut Angebot"
+                    : money.format(
+                        billing.subscription.billingAmountCentsSnapshot / 100,
+                      )}
+                </dd>
+                {billing.subscription.discountBasisPointsSnapshot ? (
+                  <p className="mt-1 text-xs text-emerald-300">
+                    {billing.subscription.discountBasisPointsSnapshot / 100} %
+                    Jahresrabatt berücksichtigt
+                  </p>
+                ) : null}
               </div>
               <div>
                 <dt className="text-slate-400">Nächste Rechnung</dt>
@@ -90,6 +118,14 @@ export default async function CustomerBillingPage() {
             ENJO MEDIA versendet. Diese Seite zeigt deine Vertrags- und
             Zahlungshistorie.
           </p>
+          {billing.subscription?.billingIntervalMonths === 12 ? (
+            <p className="mt-3 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-xs leading-5 text-cyan-100">
+              Die Jahreszahlung ist eine Zahlungsweise und verlängert deine
+              Vertragsbindung nicht. Bei einem früheren wirksamen Vertragsende
+              werden volle, danach liegende Leistungsmonate über das führende
+              Rechnungssystem korrigiert.
+            </p>
+          ) : null}
         </Card>
         <Card>
           <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">

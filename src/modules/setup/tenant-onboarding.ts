@@ -40,6 +40,8 @@ import {
 
 import { SetupInputError } from "./error";
 import { tenantOnboardingSchema } from "./schemas";
+import { calculateBillingSnapshot } from "@/modules/billing/intervals";
+import { linkReferralToTenant } from "@/modules/referrals/service";
 
 function slugify(value: string) {
   return value
@@ -57,6 +59,7 @@ export type TenantSetupPrefill = {
   phone?: string;
   domain?: string;
   planId?: string;
+  billingIntervalMonths?: 1 | 12;
 };
 
 export async function createTenantOnboardingLink(input: {
@@ -195,7 +198,37 @@ export async function findTenantOnboardingPrefill(token: string) {
       ),
     )
     .limit(1);
-  return row?.prefill ?? null;
+  if (!row?.prefill) return null;
+  const planId = row.prefill.planId;
+  if (!planId) return row.prefill;
+  const [plan] = await db
+    .select({
+      publicName: plans.publicName,
+      monthlyPriceCents: plans.monthlyPriceCents,
+      setupPriceCents: plans.setupPriceCents,
+      annualBillingEnabled: plans.annualBillingEnabled,
+      annualDiscountBasisPoints: plans.annualDiscountBasisPoints,
+      minimumTermMonths: plans.minimumTermMonths,
+    })
+    .from(plans)
+    .where(eq(plans.id, planId))
+    .limit(1);
+  if (!plan) return row.prefill;
+  const billing = calculateBillingSnapshot(
+    plan,
+    row.prefill.billingIntervalMonths ?? 1,
+  );
+  return {
+    ...row.prefill,
+    planSummary: {
+      name: plan.publicName,
+      setupPriceCents: plan.setupPriceCents,
+      billingAmountCents: billing.billingAmountCentsSnapshot,
+      billingIntervalMonths: billing.billingIntervalMonths,
+      discountBasisPoints: billing.discountBasisPointsSnapshot,
+      minimumTermMonths: plan.minimumTermMonths,
+    },
+  };
 }
 
 export async function completeTenantOnboarding(input: unknown) {
@@ -262,6 +295,7 @@ export async function completeTenantOnboarding(input: unknown) {
     const siteId = randomUUID();
     const pageId = randomUUID();
     const versionId = randomUUID();
+    const subscriptionStartsAt = new Date();
     const passwordHash = await hashPassword(parsed.ownerPassword);
     const legalDrafts = createLegalDrafts({
       ...parsed,
@@ -287,6 +321,10 @@ export async function completeTenantOnboarding(input: unknown) {
       throw new SetupInputError(
         "Das ausgewählte Paket ist nicht mehr verfügbar.",
       );
+    const billing = calculateBillingSnapshot(
+      selectedPlan,
+      onboarding.prefill?.billingIntervalMonths ?? 1,
+    );
 
     await tx.insert(tenants).values({
       id: tenantId,
@@ -301,7 +339,14 @@ export async function completeTenantOnboarding(input: unknown) {
       planNameSnapshot: selectedPlan.publicName,
       monthlyPriceCentsSnapshot: selectedPlan.monthlyPriceCents,
       setupPriceCentsSnapshot: selectedPlan.setupPriceCents,
+      billingAmountCentsSnapshot: billing.billingAmountCentsSnapshot,
+      billingIntervalMonths: billing.billingIntervalMonths,
+      discountBasisPointsSnapshot: billing.discountBasisPointsSnapshot,
+      minimumTermMonths: selectedPlan.minimumTermMonths,
+      cancellationNoticeMonthsSnapshot: 1,
+      renewsIndefinitelySnapshot: true,
       status: "active",
+      startsAt: subscriptionStartsAt,
     });
     await tx.insert(users).values({
       id: ownerId,
@@ -475,6 +520,11 @@ export async function completeTenantOnboarding(input: unknown) {
       .update(salesLeads)
       .set({ status: "won", convertedTenantId: tenantId })
       .where(eq(salesLeads.id, onboarding.leadId));
+    await linkReferralToTenant(tx, {
+      leadId: onboarding.leadId,
+      tenantId,
+      startsAt: subscriptionStartsAt,
+    });
     await tx.insert(salesActivities).values({
       id: randomUUID(),
       leadId: onboarding.leadId,

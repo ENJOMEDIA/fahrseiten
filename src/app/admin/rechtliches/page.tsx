@@ -22,6 +22,9 @@ export default async function PlatformLegalPage() {
   ]);
   const latest = (type: "imprint" | "privacy" | "terms") =>
     documents.find((document) => document.documentType === type);
+  const termsNeedRefresh = !latest("terms")?.content.includes(
+    "Zahlungsintervall und Laufzeit sind voneinander unabhängig",
+  );
   return (
     <CustomerPage
       title="Rechtliches"
@@ -52,6 +55,14 @@ export default async function PlatformLegalPage() {
               abgestufter Haftung. Eigene Änderungen im aktuellen Entwurf werden
               dabei überschrieben; eine Veröffentlichung erfolgt nicht.
             </p>
+            {termsNeedRefresh ? (
+              <p className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-semibold text-amber-950">
+                Die gespeicherte Fassung enthält die aktuelle Regel zu
+                Mindestlaufzeit, Jahreszahlung, unbefristeter Verlängerung und
+                einmonatiger Kündigungsfrist noch nicht. Vorlage einsetzen,
+                fachlich prüfen und anschließend bewusst veröffentlichen.
+              </p>
+            ) : null}
             <form action={replacePlatformTermsTemplateAction} className="mt-4">
               <button className="rounded-xl bg-cyan-900 px-4 py-3 text-sm font-semibold text-white">
                 Aktuelle Vorlage als Entwurf einsetzen

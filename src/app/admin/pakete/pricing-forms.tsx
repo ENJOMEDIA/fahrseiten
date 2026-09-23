@@ -26,6 +26,9 @@ type EditablePlan = {
   description: string | null;
   monthlyPriceCents: number | null;
   setupPriceCents: number | null;
+  annualBillingEnabled: boolean;
+  annualDiscountBasisPoints: number;
+  minimumTermMonths: number;
   position: number;
   highlighted: boolean;
   active: boolean;
@@ -120,6 +123,47 @@ export function PlanForm({
             name="setupPrice"
             placeholder="z. B. 299,00"
           />
+        </label>
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold">
+          <input
+            defaultChecked={plan?.annualBillingEnabled ?? true}
+            name="annualBillingEnabled"
+            type="checkbox"
+          />
+          Jahreszahlung anbieten
+        </label>
+        <label className="text-sm font-semibold">
+          Vorteil bei Jahreszahlung in Prozent
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+            defaultValue={(plan?.annualDiscountBasisPoints ?? 1000) / 100}
+            inputMode="decimal"
+            max="50"
+            min="0"
+            name="annualDiscountPercent"
+            step="0.01"
+            type="number"
+          />
+          <span className="mt-1 block text-xs leading-5 font-normal text-slate-500">
+            Der exakte Jahresbetrag wird bei Vertragszuordnung berechnet und
+            unveränderlich gespeichert. Empfehlung: 10 %.
+          </span>
+        </label>
+        <label className="text-sm font-semibold">
+          Mindestlaufzeit in Monaten
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+            defaultValue={plan?.minimumTermMonths ?? 1}
+            max="24"
+            min="1"
+            name="minimumTermMonths"
+            required
+            type="number"
+          />
+          <span className="mt-1 block text-xs leading-5 font-normal text-slate-500">
+            Danach läuft der Vertrag unbefristet weiter und ist mit einem Monat
+            Frist zum Monatsende kündbar.
+          </span>
         </label>
         <label className="text-sm font-semibold">
           Reihenfolge
