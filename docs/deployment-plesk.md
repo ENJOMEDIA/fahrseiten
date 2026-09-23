@@ -28,7 +28,7 @@ Vor dem ersten Deployment sind im Plesk-Panel oder beim Hostinganbieter diese Pu
 4. Eine unterstützte MySQL-/MariaDB-Datenbank samt eigenem Benutzer ist vorhanden.
 5. Shell-Zugriff oder eine gleichwertige Möglichkeit zum einmaligen Ausführen von `node migrate.mjs` ist vorhanden.
 6. Persistenter Speicher und Schreibrechte sind für spätere Uploads geklärt. Der lokale `.local-storage`-Adapter ist nicht als produktiver Speicher freigegeben.
-7. Plesk kann alle vorgesehenen Hosts auf dieselbe Node.js-Anwendung leiten und den ursprünglichen `Host`-Header erhalten.
+7. Plesk kann alle vorgesehenen Hosts auf dieselbe Node.js-Anwendung leiten und den ursprünglichen `Host`-Header erhalten. Dies wurde durch den netcup-Support am 23. September 2026 für mehrere Domains mit gemeinsamem Dokumentenstamm bestätigt.
 
 Fehlt Node.js 22, eine Startmöglichkeit oder der Host-Header bleibt nicht erhalten, darf das Deployment nicht fortgesetzt werden.
 
@@ -270,6 +270,12 @@ Neue Fahrschulen erhalten keine eigene FahrSeiten-Installation und keine eigene 
 6. Nach Aktivierung der Domain erscheint zunächst die farblich angepasste Wartungsseite. Der `tenant_owner` kann Text und Freigabe unter `/kunde/einstellungen` steuern.
 
 Tarifzuordnung, freigegebene Rechtstexte und weitere Designoptionen werden nicht stillschweigend vorbelegt. Diese Punkte bleiben bis zur fachlichen Entscheidung offen. Der Assistent ist ein kontrolliertes Onboarding durch die Plattformverwaltung und kein öffentliches Self-Service-Bestellsystem.
+
+Der [netcup-Domainnachweis](netcup-domainnachweis.md) bestätigt, dass jede
+Kundendomain einzeln in Plesk eingerichtet, aber auf denselben Dokumentenstamm
+und dieselbe Node.js-Anwendung gelegt werden kann. Der Host-Header bleibt dabei
+erhalten und jede Domain kann ein eigenes SSL-Zertifikat erhalten. Es wird kein
+zweiter Installer, keine zweite Datenbank und keine neue Codekopie benötigt.
 
 ## Start und Healthcheck
 

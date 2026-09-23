@@ -88,6 +88,7 @@ pnpm build
 - [Offene Entscheidungen](docs/open-decisions.md): ungeklärte Punkte und Dokumentationsabweichungen.
 - [Architecture Decision Records](docs/decisions/README.md): Verfahren für technische Entscheidungen.
 - [netcup/Plesk-Livegang](docs/go-live-plesk.md): ausführbare Reihenfolge für Domain, SSL, Datenbank, Installer, SMTP und Updates.
+- [netcup-Domainnachweis](docs/netcup-domainnachweis.md): bestätigter gemeinsamer Dokumentenstamm, Host-Header, Einzelzertifikate und Domainlimits.
 
 ## Arbeitsweise und Prüfung
 

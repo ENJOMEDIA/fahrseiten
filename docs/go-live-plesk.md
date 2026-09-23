@@ -91,6 +91,25 @@ Einen Wert als `CRON_SECRET`, den anderen als vorübergehenden `INSTALL_TOKEN` h
 4. `app.fahrseiten.de` erst später als optionalen Alias derselben Anwendung ergänzen; keine zweite Node.js-Installation anlegen.
 5. Bei den aktiven Hosts prüfen, dass Plesk den `Host`-Header erhält. `TRUST_PROXY_HEADERS` bleibt zunächst `false`.
 
+Für jede spätere Kundendomain gilt zusätzlich:
+
+1. Domain in Plesk einzeln anlegen beziehungsweise dem Webhosting zuweisen.
+2. Als Dokumentenstamm denselben FahrSeiten-Root wie bei `fahrseiten.de`
+   auswählen; keine zweite Repository-Kopie und keine zweite Node-Anwendung
+   installieren.
+3. DNS auf das Webhosting richten, vorhandene Mail-Einträge beibehalten und den
+   Domainnachweis im Mandantenbereich abschließen.
+4. Ein eigenes Zertifikat für genau diese Domain ausstellen.
+5. Prüfen, dass der unveränderte Hostname die FahrSeiten-Anwendung erreicht.
+6. Die Domain erst danach in der Mandantenverwaltung aktivieren.
+
+Der netcup-Support hat gemeinsamen Dokumentenstamm, unveränderten Host-Header,
+separate Zertifikate und den grundsätzlichen Mehrkundenbetrieb bestätigt.
+Domains, die bei netcup registriert und dem Webhosting zugewiesen sind, fallen
+laut dieser Auskunft nicht unter die Begrenzung externer Domains. Details und
+verbleibende Betriebsrisiken stehen im
+[netcup-Domainnachweis](netcup-domainnachweis.md).
+
 ## 7. DNS durch netcup setzen lassen
 
 Die Zielwerte stehen im CCP in der Webhostingübersicht. An netcup kann folgende Liste mit den echten Zielwerten übergeben werden:

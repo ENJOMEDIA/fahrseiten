@@ -19,4 +19,12 @@ Lokale Standardhosts sind `localhost` und `127.0.0.1` für Marketing, `app.local
 7. Primärdomain und optionale Weiterleitung eindeutig festlegen, anschließend kontrolliert auf `active` setzen.
 8. Fehler als `error`, stillgelegte Domains als `disabled` behandeln. Niemals auf einen Standardmandanten zurückfallen.
 
-Die konkreten DNS-Ziele, Zertifikatsautomatisierung, Proxy-Header und Domainlimits des Plesk-Zielsystems bleiben bis zur kontrollierten Stagingprüfung unbestätigt. Automatische Domainregistrierung und automatisches Provisioning gehören nicht zum MVP.
+Der netcup-Support hat am 23. September 2026 bestätigt, dass mehrere Domains
+denselben Dokumentenstamm und dieselbe Node.js-Anwendung verwenden können, der
+ursprüngliche Host-Header erhalten bleibt und je Domain ein eigenes
+SSL-Zertifikat möglich ist. Bei netcup registrierte Domains sind laut Auskunft
+nicht durch die Grenze externer Domains beschränkt. Die konkreten DNS-Ziele,
+Ressourcen, Zertifikatsabläufe und jede reale Kundendomain bleiben trotzdem im
+Staging einzeln zu prüfen. Automatische Domainregistrierung und automatisches
+Provisioning gehören nicht zum MVP. Siehe
+[netcup-Domainnachweis](netcup-domainnachweis.md).
