@@ -2,6 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { env } from "@/config/env";
 import { db } from "@/db/client";
 import {
   auditLogs,
@@ -21,6 +22,7 @@ import {
   tenants,
   users,
 } from "@/db/schema";
+import { createOpaqueToken, hashToken } from "@/modules/auth/tokens";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 
 export async function listPlatformTenants() {
@@ -153,6 +155,92 @@ export async function cancelPendingInstanceSetup(input: {
       metadata: { companyName: displayName },
     });
     return { displayName };
+  });
+}
+
+export async function resendPendingInstanceInvitation(input: {
+  setupId: string;
+  actorUserId: string;
+}) {
+  const token = createOpaqueToken();
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60_000);
+
+  return db.transaction(async (tx) => {
+    const [setup] = await tx
+      .select({
+        id: tenantOnboardingTokens.id,
+        leadId: tenantOnboardingTokens.leadId,
+        prefill: tenantOnboardingTokens.prefill,
+        usedAt: tenantOnboardingTokens.usedAt,
+      })
+      .from(tenantOnboardingTokens)
+      .where(eq(tenantOnboardingTokens.id, input.setupId))
+      .limit(1)
+      .for("update");
+    if (!setup)
+      throw new Error("Die vorbereitete Instanz wurde nicht gefunden.");
+    if (setup.usedAt)
+      throw new Error("Die Einrichtung wurde bereits abgeschlossen.");
+    if (!setup.prefill?.ownerEmail)
+      throw new Error(
+        "Für diese Einrichtung ist keine Empfänger-E-Mail-Adresse hinterlegt.",
+      );
+
+    const companyName = setup.prefill.companyName || "Ihre Fahrschule";
+    const actionUrl = new URL(
+      `/onboarding/${token}`,
+      env.APP_BASE_URL,
+    ).toString();
+
+    await tx
+      .delete(backgroundJobs)
+      .where(
+        eq(backgroundJobs.idempotencyKey, `instance-invitation:${setup.id}`),
+      );
+    await tx
+      .update(tenantOnboardingTokens)
+      .set({ tokenHash: hashToken(token), expiresAt })
+      .where(
+        and(
+          eq(tenantOnboardingTokens.id, setup.id),
+          isNull(tenantOnboardingTokens.usedAt),
+        ),
+      );
+    await tx.insert(backgroundJobs).values({
+      id: randomUUID(),
+      type: "notification",
+      idempotencyKey: `instance-invitation:${setup.id}`,
+      payload: {
+        to: setup.prefill.ownerEmail,
+        from: env.SMTP_FROM,
+        template: "instance_invitation",
+        values: {
+          companyName,
+          contactName: setup.prefill.ownerName || "Fahrschul-Team",
+          actionUrl,
+          expiresInDays: 7,
+        },
+      },
+      runAt: new Date(),
+    });
+    if (setup.leadId)
+      await tx.insert(salesActivities).values({
+        id: randomUUID(),
+        leadId: setup.leadId,
+        actorUserId: input.actorUserId,
+        activityType: "instance_setup_resent",
+        note: "Neuen Einrichtungslink für den Versand eingeplant; der vorherige Link wurde ungültig.",
+      });
+    await tx.insert(auditLogs).values({
+      id: randomUUID(),
+      actorUserId: input.actorUserId,
+      action: "tenant.onboarding.invitation_resent",
+      entityType: "tenant_onboarding",
+      entityId: setup.id,
+      metadata: { expiresAt: expiresAt.toISOString() },
+    });
+
+    return { displayName: companyName, expiresAt };
   });
 }
 

@@ -26,5 +26,14 @@ describe("MaintenancePage", () => {
       "content",
       "noindex, nofollow",
     );
+    expect(screen.getByRole("link", { name: "Impressum" })).toHaveAttribute(
+      "href",
+      "/impressum",
+    );
+    expect(screen.getByRole("link", { name: "Datenschutz" })).toHaveAttribute(
+      "href",
+      "/datenschutz",
+    );
+    expect(screen.queryByRole("link", { name: "AGB" })).not.toBeInTheDocument();
   });
 });

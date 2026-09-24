@@ -13,6 +13,7 @@ import { findPublishedTenantLegalDocument } from "@/modules/legal/repository";
 import {
   PublicCookieSettings,
   PublicLegalDocument,
+  PublicLegalDocumentUnavailable,
 } from "@/modules/legal/public-document";
 
 export default async function TenantSitePlaceholder({
@@ -61,6 +62,12 @@ export default async function TenantSitePlaceholder({
           }
         />
       );
+    return (
+      <PublicLegalDocumentUnavailable
+        brandName={website.name}
+        title={legalType === "imprint" ? "Impressum" : "Datenschutz"}
+      />
+    );
   }
   if (path === "cookie-einstellungen")
     return (

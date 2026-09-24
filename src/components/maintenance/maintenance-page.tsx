@@ -226,9 +226,11 @@ export function MaintenancePage({
             <Link className="hover:text-white" href="/datenschutz">
               Datenschutz
             </Link>
-            <Link className="hover:text-white" href="/agb">
-              AGB
-            </Link>
+            {platform ? (
+              <Link className="hover:text-white" href="/agb">
+                AGB
+              </Link>
+            ) : null}
             <Link className="hover:text-white" href="/cookie-einstellungen">
               Cookie-Einstellungen
             </Link>

@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import {
   cancelPendingInstanceAction,
   processPendingInvitations,
+  resendPendingInstanceAction,
   type InvitationProcessingState,
 } from "./actions";
 
@@ -35,6 +36,43 @@ export function PendingInvitationsForm() {
               ? "bg-red-100 text-red-900"
               : "bg-white text-emerald-800 shadow-sm"
           }`}
+        >
+          {state.message}
+        </p>
+      ) : null}
+    </form>
+  );
+}
+
+export function ResendPendingInstanceForm({ setupId }: { setupId: string }) {
+  const [state, action, pending] = useActionState(
+    resendPendingInstanceAction,
+    initialState,
+  );
+  return (
+    <form
+      action={action}
+      className="mt-4 rounded-xl border border-cyan-100 bg-cyan-50 p-3"
+    >
+      <input name="setupId" type="hidden" value={setupId} />
+      <p className="text-xs leading-5 text-slate-700">
+        Erstellt einen neuen, sieben Tage gültigen Einrichtungslink und sendet
+        ihn an die hinterlegte E-Mail-Adresse. Der bisherige Link wird sofort
+        ungültig.
+      </p>
+      <button
+        className="mt-3 rounded-xl bg-cyan-800 px-4 py-2 text-xs font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-wait disabled:opacity-60"
+        disabled={pending}
+        type="submit"
+      >
+        {pending
+          ? "Neuer Link wird versendet …"
+          : "Einrichtungslink erneut senden"}
+      </button>
+      {state.message ? (
+        <p
+          aria-live="polite"
+          className={`mt-3 text-xs font-semibold ${state.error ? "text-red-800" : "text-emerald-800"}`}
         >
           {state.message}
         </p>

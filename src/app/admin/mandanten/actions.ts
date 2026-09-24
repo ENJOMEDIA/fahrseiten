@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 
 import { runNotificationScheduler } from "@/modules/notifications/runtime";
 import { requirePlatformPermission } from "@/modules/platform/access";
-import { cancelPendingInstanceSetup } from "@/modules/platform/tenant-directory";
+import {
+  cancelPendingInstanceSetup,
+  resendPendingInstanceInvitation,
+} from "@/modules/platform/tenant-directory";
+import { findInstanceInvitationStatus } from "@/modules/setup/tenant-onboarding";
 
 export type InvitationProcessingState = { message: string; error: boolean };
 
@@ -64,4 +68,46 @@ export async function cancelPendingInstanceAction(
   redirect(
     `/admin/mandanten?setupCancelled=${encodeURIComponent(result.displayName)}`,
   );
+}
+
+export async function resendPendingInstanceAction(
+  _state: InvitationProcessingState,
+  formData: FormData,
+): Promise<InvitationProcessingState> {
+  const identity = await requirePlatformPermission("platform.tenants.manage");
+  const setupId = String(formData.get("setupId") ?? "");
+  let result: Awaited<ReturnType<typeof resendPendingInstanceInvitation>>;
+  try {
+    result = await resendPendingInstanceInvitation({
+      setupId,
+      actorUserId: identity.id,
+    });
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Der Einrichtungslink konnte nicht neu erstellt werden.",
+      error: true,
+    };
+  }
+
+  try {
+    await runNotificationScheduler();
+  } catch {
+    // Der Job bleibt gespeichert und wird vom Cron erneut verarbeitet.
+  }
+  const status = await findInstanceInvitationStatus(setupId);
+  revalidatePath("/admin/mandanten");
+  revalidatePath("/admin/akquise");
+
+  if (status?.status === "completed")
+    return {
+      message: `Neuer Link für „${result.displayName}“ wurde versendet. Der vorherige Link ist ungültig.`,
+      error: false,
+    };
+  return {
+    message: `Neuer Link für „${result.displayName}“ wurde erstellt und für den Versand eingeplant. Der vorherige Link ist ungültig.`,
+    error: false,
+  };
 }

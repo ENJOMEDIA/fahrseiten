@@ -10,6 +10,7 @@ import {
 import {
   CancelPendingInstanceForm,
   PendingInvitationsForm,
+  ResendPendingInstanceForm,
 } from "./pending-invitations-form";
 
 const formatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" });
@@ -186,6 +187,14 @@ export default async function TenantsPage({
                   ) : (
                     <p className="mt-3 font-mono text-[11px] text-slate-400">
                       Lead: {setup.leadId}
+                    </p>
+                  )}
+                  {setup.prefill.ownerEmail ? (
+                    <ResendPendingInstanceForm setupId={setup.id} />
+                  ) : (
+                    <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+                      Ein Neuversand ist erst möglich, wenn eine
+                      Empfänger-E-Mail-Adresse hinterlegt ist.
                     </p>
                   )}
                   <CancelPendingInstanceForm

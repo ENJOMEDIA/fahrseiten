@@ -32,6 +32,34 @@ export function PublicLegalDocument({
   );
 }
 
+export function PublicLegalDocumentUnavailable({
+  brandName,
+  title,
+}: {
+  brandName: string;
+  title: string;
+}) {
+  return (
+    <main className="grid min-h-screen place-items-center bg-slate-950 px-6 py-12 text-white">
+      <meta content="noindex, nofollow" name="robots" />
+      <article className="w-full max-w-2xl rounded-[2rem] border border-white/10 bg-white/[0.07] p-7 shadow-2xl backdrop-blur sm:p-10">
+        <Link className="font-semibold text-cyan-300" href="/">
+          ← {brandName}
+        </Link>
+        <p className="mt-10 text-xs font-bold tracking-[.16em] text-cyan-300 uppercase">
+          Veröffentlichung wird vorbereitet
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{title}</h1>
+        <p className="mt-5 max-w-xl leading-7 text-slate-300">
+          Dieses Dokument wurde noch nicht freigegeben. Die Website bleibt bis
+          zur Prüfung und Veröffentlichung der rechtlichen Angaben im
+          Wartungsmodus.
+        </p>
+      </article>
+    </main>
+  );
+}
+
 export function LegalContent({
   content,
   title,
