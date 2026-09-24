@@ -19,6 +19,13 @@ export const customerNavigation: readonly CustomerNavigationItem[] = [
     group: "Start",
   },
   {
+    href: "/kunde/einrichtung",
+    label: "Einrichtungsassistent",
+    icon: "✓",
+    description: "Geführt zu deiner fertigen Website",
+    group: "Start",
+  },
+  {
     href: "/kunde/website",
     label: "Website",
     icon: "W",

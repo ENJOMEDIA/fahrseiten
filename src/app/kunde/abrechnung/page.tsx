@@ -43,11 +43,11 @@ export default async function CustomerBillingPage() {
         ]}
       />
       <div className="mt-6 grid gap-5 lg:grid-cols-[.8fr_1.2fr]">
-        <Card className="bg-slate-950 text-white">
+        <Card className="border-slate-800 bg-slate-950 text-slate-50">
           <p className="text-xs font-semibold tracking-[.16em] text-cyan-300 uppercase">
             Vertragsübersicht
           </p>
-          <h1 className="mt-3 text-3xl font-semibold">
+          <h1 className="mt-3 text-3xl font-semibold break-words text-white">
             {billing.subscription?.planNameSnapshot ??
               "Noch kein Paket zugeordnet"}
           </h1>
@@ -55,7 +55,7 @@ export default async function CustomerBillingPage() {
             <dl className="mt-7 grid gap-5 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-slate-400">Paketpreis pro Monat</dt>
-                <dd className="mt-1 text-lg font-semibold">
+                <dd className="mt-1 text-lg font-semibold text-white">
                   {billing.subscription.monthlyPriceCentsSnapshot === null
                     ? "Laut Angebot"
                     : money.format(
@@ -65,13 +65,13 @@ export default async function CustomerBillingPage() {
               </div>
               <div>
                 <dt className="text-slate-400">Mindestlaufzeit</dt>
-                <dd className="mt-1 text-lg font-semibold">
+                <dd className="mt-1 text-lg font-semibold text-white">
                   {billing.subscription.minimumTermMonths} Monat(e)
                 </dd>
               </div>
               <div>
                 <dt className="text-slate-400">Kündigung</dt>
-                <dd className="mt-1 font-semibold">
+                <dd className="mt-1 font-semibold text-white">
                   {billing.subscription.cancellationNoticeMonthsSnapshot} Monat
                   zum Laufzeitende
                 </dd>
@@ -81,7 +81,7 @@ export default async function CustomerBillingPage() {
               </div>
               <div>
                 <dt className="text-slate-400">Abrechnungsrhythmus</dt>
-                <dd className="mt-1 font-semibold">
+                <dd className="mt-1 font-semibold text-white">
                   {billing.subscription.billingIntervalMonths === 12
                     ? "Jährlich im Voraus"
                     : "Monatlich"}
@@ -89,7 +89,7 @@ export default async function CustomerBillingPage() {
               </div>
               <div>
                 <dt className="text-slate-400">Betrag je Rechnung</dt>
-                <dd className="mt-1 font-semibold">
+                <dd className="mt-1 font-semibold text-white">
                   {billing.subscription.billingAmountCentsSnapshot === null
                     ? "Laut Angebot"
                     : money.format(
@@ -105,7 +105,7 @@ export default async function CustomerBillingPage() {
               </div>
               <div>
                 <dt className="text-slate-400">Nächste Rechnung</dt>
-                <dd className="mt-1 font-semibold">
+                <dd className="mt-1 font-semibold text-white">
                   {billing.subscription.nextInvoiceAt
                     ? date.format(billing.subscription.nextInvoiceAt)
                     : "Noch nicht eingetragen"}
@@ -127,7 +127,7 @@ export default async function CustomerBillingPage() {
             </p>
           ) : null}
         </Card>
-        <Card>
+        <Card className="text-slate-950">
           <p className="text-xs font-semibold tracking-[.16em] text-cyan-700 uppercase">
             Rechnungsanschrift
           </p>
@@ -156,7 +156,7 @@ export default async function CustomerBillingPage() {
           )}
         </Card>
       </div>
-      <Card className="mt-6 overflow-hidden p-0">
+      <Card className="mt-6 overflow-hidden p-0 text-slate-950">
         <div className="border-b border-slate-100 p-6">
           <h2 className="text-2xl font-semibold">Verträge</h2>
           <p className="mt-2 text-sm text-slate-500">
@@ -168,7 +168,7 @@ export default async function CustomerBillingPage() {
           {contracts.length ? (
             contracts.map((contract) => (
               <div
-                className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4"
+                className="flex flex-col gap-4 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
                 key={contract.id}
               >
                 <div>
@@ -178,7 +178,7 @@ export default async function CustomerBillingPage() {
                     {contractStatusLabels[contract.status]}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap">
                   {contract.signatureRequest?.signingUrl &&
                   ["pending", "opened"].includes(
                     contract.signatureRequest.status,
@@ -222,7 +222,7 @@ export default async function CustomerBillingPage() {
           )}
         </div>
       </Card>
-      <Card className="mt-6 overflow-hidden p-0">
+      <Card className="mt-6 overflow-hidden p-0 text-slate-950">
         <div className="border-b border-slate-100 p-6">
           <h2 className="text-2xl font-semibold">Rechnungshistorie</h2>
           <p className="mt-2 text-sm text-slate-500">

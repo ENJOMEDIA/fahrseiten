@@ -5,6 +5,10 @@ import { getSessionIdentity } from "@/modules/auth/session";
 import { tenantHasPublishedLegalDocuments } from "@/modules/legal/repository";
 import { findTenantMaintenance } from "@/modules/setup/maintenance";
 import { createMembershipTenantContext } from "@/modules/tenancy/tenant-context";
+import {
+  findWebsiteSetupState,
+  websiteSetupSteps,
+} from "@/modules/onboarding/website-setup";
 
 export default async function CustomerDashboardPage() {
   const identity = await getSessionIdentity();
@@ -17,20 +21,21 @@ export default async function CustomerDashboardPage() {
           activeTenantIds: identity.memberships.map((item) => item.tenantId),
         })
       : null;
-  const [site, legalReady] = context
+  const [site, legalReady, setupState] = context
     ? await Promise.all([
         findTenantMaintenance(context),
         tenantHasPublishedLegalDocuments(context.tenantId),
+        findWebsiteSetupState(context.tenantId),
       ])
-    : [null, false];
+    : [null, false, null];
   const online = site ? !site.maintenanceMode : false;
 
   const steps = [
     {
-      title: "Grundinhalte pflegen",
-      text: "Klassen, Preise, Team, Fahrzeuge und Standorte ergänzen.",
-      href: "/kunde/inhalte",
-      done: false,
+      title: "Geführte Einrichtung abschließen",
+      text: "Klassen, Standort, Fahrzeuge und Builder Schritt für Schritt vorbereiten.",
+      href: "/kunde/einrichtung",
+      done: setupState?.complete ?? false,
     },
     {
       title: "Rechtliches freigeben",
@@ -67,9 +72,15 @@ export default async function CustomerDashboardPage() {
           </div>
           <Link
             className="inline-flex min-h-12 items-center justify-center rounded-full bg-cyan-300 px-6 font-semibold text-slate-950"
-            href="/kunde/website/builder"
+            href={
+              setupState?.complete
+                ? "/kunde/website/builder"
+                : "/kunde/einrichtung"
+            }
           >
-            Website bearbeiten →
+            {setupState?.complete
+              ? "Website bearbeiten →"
+              : "Einrichtung fortsetzen →"}
           </Link>
         </div>
       </section>
@@ -82,7 +93,9 @@ export default async function CustomerDashboardPage() {
                 Deine nächsten Schritte
               </p>
               <h2 className="mt-2 text-2xl font-semibold">
-                Bereit für die Veröffentlichung
+                {setupState?.complete
+                  ? "Bereit für die Veröffentlichung"
+                  : "Dein Weg zur fertigen Website"}
               </h2>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
@@ -91,6 +104,31 @@ export default async function CustomerDashboardPage() {
             </span>
           </div>
           <div className="mt-7 space-y-3">
+            {setupState && !setupState.complete ? (
+              <Link
+                className="block rounded-2xl bg-slate-950 p-5 text-white shadow-lg shadow-slate-900/10"
+                href="/kunde/einrichtung"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold tracking-[.14em] text-cyan-300 uppercase">
+                      Einrichtungsassistent
+                    </p>
+                    <p className="mt-2 font-semibold">
+                      {setupState.completedCount} von {websiteSetupSteps.length}{" "}
+                      Grundlagen erledigt
+                    </p>
+                  </div>
+                  <span className="text-2xl text-cyan-300">→</span>
+                </div>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-cyan-300"
+                    style={{ width: `${setupState.percent}%` }}
+                  />
+                </div>
+              </Link>
+            ) : null}
             {steps.map((step, index) => (
               <Link
                 className="group flex items-center gap-4 rounded-2xl border border-slate-200 p-4 hover:border-cyan-300 hover:shadow-md"

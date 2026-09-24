@@ -6,6 +6,9 @@ import { findTenantLogoId } from "@/modules/media/repository";
 import { mediaPublicUrl } from "@/modules/media/public-url";
 import { getTenantFeatureStatusMap } from "@/modules/features/access";
 import { isFeatureUsable } from "@/modules/features/service";
+import { SetupGuideReminder } from "@/components/onboarding/setup-guide-reminder";
+import { findWebsiteSetupState } from "@/modules/onboarding/website-setup";
+import { hasTenantPermission } from "@/modules/auth/permissions";
 
 export default async function CustomerLayout({
   children,
@@ -15,9 +18,10 @@ export default async function CustomerLayout({
   const identity = await getSessionIdentity();
   if (!identity || identity.memberships.length === 0) redirect("/login");
   const tenantId = identity.memberships[0].tenantId;
-  const [logoId, featureStatuses] = await Promise.all([
+  const [logoId, featureStatuses, setupState] = await Promise.all([
     findTenantLogoId(tenantId),
     getTenantFeatureStatusMap(tenantId),
+    findWebsiteSetupState(tenantId),
   ]);
   const navigation = customerNavigation.map((item) => {
     if (item.planned) return { ...item, badge: "Demnächst" };
@@ -37,6 +41,13 @@ export default async function CustomerLayout({
       title={identity.displayName}
     >
       {children}
+      {setupState.showReminder &&
+      hasTenantPermission(
+        identity.memberships[0].role,
+        "tenant.content.write",
+      ) ? (
+        <SetupGuideReminder percent={setupState.percent} />
+      ) : null}
     </AppShell>
   );
 }

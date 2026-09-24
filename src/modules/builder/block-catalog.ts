@@ -49,8 +49,8 @@ export function createBuilderBlockProperties(
     },
     contact_teaser: {
       type: "contact_teaser",
-      heading: "Kontakt",
-      text: "Wir helfen gern.",
+      heading: "Lass uns über deinen Führerschein sprechen",
+      text: "Du hast Fragen zu Klassen, Ablauf oder Anmeldung? Ruf uns an oder schreib uns – wir beraten dich persönlich und ohne Umwege.",
     },
     license_classes: {
       type: "license_classes",

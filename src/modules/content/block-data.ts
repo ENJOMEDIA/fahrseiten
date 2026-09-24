@@ -84,7 +84,7 @@ export async function hydrateTenantContentBlocks(
           .where(eq(vehicles.tenantId, tenantId))
           .orderBy(asc(vehicles.position))
       : [],
-    types.has("locations")
+    types.has("locations") || types.has("contact_teaser")
       ? db
           .select()
           .from(locations)
@@ -240,6 +240,25 @@ export async function hydrateTenantContentBlocks(
             })),
           },
         };
+      case "contact_teaser": {
+        const place = places[0];
+        if (!place) return block;
+        const generic =
+          properties.text === "Wir helfen gern." ||
+          properties.text === "Neuer Text" ||
+          properties.text.startsWith("Du hast Fragen zu Klassen");
+        return {
+          ...block,
+          properties: {
+            ...properties,
+            text: generic
+              ? `Du hast Fragen zu Klassen, Ablauf oder Anmeldung? Melde dich bei uns in ${place.city} – wir beraten dich persönlich und ohne Umwege.`
+              : properties.text,
+            phone: properties.phone || place.phone || undefined,
+            email: properties.email || place.email || undefined,
+          },
+        };
+      }
       case "testimonials":
         return {
           ...block,
