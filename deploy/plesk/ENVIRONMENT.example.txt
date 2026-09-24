@@ -4,6 +4,8 @@
 
 NODE_ENV=production
 APP_BASE_URL=https://fahrseiten.de
+# Öffentliches, niemals lokales DNS-Ziel für alle Kundendomains.
+PUBLIC_DNS_TARGET_HOST=fahrseiten.de
 # Leer lassen: Login bleibt unter fahrseiten.de/login. Später optional https://app.fahrseiten.de
 DASHBOARD_BASE_URL=
 FAHRSEITEN_CONFIG_FILE=<ABSOLUTER-PERSISTENTER-PFAD>/fahrseiten-runtime.json

@@ -96,12 +96,14 @@ export function DomainManagement({
   hostname,
   status,
   sslStatus,
+  dnsTargetHostname,
 }: {
   tenantId: string;
   domainId: string;
   hostname: string;
   status: string;
   sslStatus: string;
+  dnsTargetHostname: string;
 }) {
   const [updateState, updateAction, updatePending] = useActionState(
     updateDomainAction,
@@ -122,6 +124,18 @@ export function DomainManagement({
           <span className="block text-xs text-slate-500">SSL-Status</span>
           <span className="font-semibold">{sslStatus}</span>
         </p>
+      </div>
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
+        <span className="block text-xs font-semibold tracking-wide uppercase">
+          Öffentliches FahrSeiten-Ziel
+        </span>
+        <span className="mt-1 block font-mono font-semibold">
+          {dnsTargetHostname}
+        </span>
+        <span className="mt-2 block leading-5">
+          Die Prüfung verwendet ausschließlich dieses öffentliche Ziel und
+          niemals eine lokale Entwicklungsadresse.
+        </span>
       </div>
       <form
         action={updateAction}

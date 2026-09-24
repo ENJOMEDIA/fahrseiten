@@ -683,6 +683,7 @@ export default async function TenantDetailPage({
           <div className="p-6">
             {tenant.domain && tenant.domainId ? (
               <DomainManagement
+                dnsTargetHostname={dnsTarget.hostname}
                 domainId={tenant.domainId}
                 hostname={tenant.domain}
                 sslStatus={tenant.sslStatus ?? "unknown"}

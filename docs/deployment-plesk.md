@@ -71,6 +71,7 @@ Mindestens diese Variablen werden in Plesk hinterlegt:
 | ----------------------------- | ------------------------------------------------------------------------------- |
 | `NODE_ENV`                    | `production`                                                                    |
 | `APP_BASE_URL`                | `https://fahrseiten.de`                                                         |
+| `PUBLIC_DNS_TARGET_HOST`      | `fahrseiten.de` – öffentliches Ziel für Kundendomain-Anweisungen und Prüfung    |
 | `DASHBOARD_BASE_URL`          | Leer: Login unter `fahrseiten.de/login`; später optional eigene App-Domain      |
 | `FAHRSEITEN_CONFIG_FILE`      | Absoluter persistenter Pfad außerhalb des Release- und Document-Root            |
 | `DEMO_DATA_MODE`              | `database`                                                                      |

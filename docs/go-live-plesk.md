@@ -79,7 +79,7 @@ Die Werte aus `ENVIRONMENT.example.txt` einzeln als geschützte Plesk-Umgebungsv
 openssl rand -hex 32
 ```
 
-Einen Wert als `CRON_SECRET`, den anderen als vorübergehenden `INSTALL_TOKEN` hinterlegen. `APP_BASE_URL` bleibt bereits `https://fahrseiten.de`, auch wenn das Zertifikat erst nach dem DNS-Wechsel ausgestellt wird. Die App darf gestartet werden. Auf ausdrücklichen Wunsch kann `/setup` schon über HTTP verwendet werden; Installationscode, Admin-Passwort und Stammdaten werden dabei unverschlüsselt übertragen.
+Einen Wert als `CRON_SECRET`, den anderen als vorübergehenden `INSTALL_TOKEN` hinterlegen. `APP_BASE_URL` bleibt bereits `https://fahrseiten.de`, auch wenn das Zertifikat erst nach dem DNS-Wechsel ausgestellt wird. `PUBLIC_DNS_TARGET_HOST` bleibt immer `fahrseiten.de`; dieser Wert wird unabhängig von einer lokalen Build- oder Vorschau-URL für alle Kundendomain-Anweisungen und Prüfungen verwendet. Die App darf gestartet werden. Auf ausdrücklichen Wunsch kann `/setup` schon über HTTP verwendet werden; Installationscode, Admin-Passwort und Stammdaten werden dabei unverschlüsselt übertragen.
 
 `CONSENT_FUNCTIONAL_SERVICES`, `CONSENT_STATISTICS_SERVICES` und `CONSENT_MARKETING_SERVICES` bleiben leer, solange kein entsprechender optionaler Dienst technisch eingebunden ist. Dadurch erscheint kein unnötiges Consent-Banner.
 

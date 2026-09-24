@@ -53,6 +53,7 @@ const effectiveEnvironment = {
 
 const applicationEnvironmentVisible = [
   "APP_BASE_URL",
+  "PUBLIC_DNS_TARGET_HOST",
   "DEMO_DATA_MODE",
   "MARKETING_HOSTS",
   "APP_HOSTS",

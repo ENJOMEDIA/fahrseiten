@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  DEFAULT_PUBLIC_DNS_TARGET_HOST,
+  isPublicDnsTargetHostname,
+} from "@/modules/domains/public-dns-target";
+
 const booleanFromString = z
   .enum(["true", "false"])
   .transform((value) => value === "true");
@@ -9,6 +14,14 @@ const serverEnvSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   APP_BASE_URL: z.url().default("http://localhost:3000"),
+  PUBLIC_DNS_TARGET_HOST: z
+    .string()
+    .trim()
+    .refine(
+      isPublicDnsTargetHostname,
+      "PUBLIC_DNS_TARGET_HOST muss ein öffentlicher Hostname sein.",
+    )
+    .default(DEFAULT_PUBLIC_DNS_TARGET_HOST),
   DASHBOARD_BASE_URL: z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.url().optional(),

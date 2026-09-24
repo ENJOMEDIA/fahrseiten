@@ -19,6 +19,7 @@ import { verifyPassword } from "../src/modules/auth/password.ts";
 const validEnvironment = {
   NODE_ENV: "production",
   APP_BASE_URL: "https://fahrseiten.de",
+  PUBLIC_DNS_TARGET_HOST: "fahrseiten.de",
   DATABASE_URL: "mysql://fahrseiten:secret@db.internal:3306/fahrseiten",
   DEMO_DATA_MODE: "database",
   MARKETING_HOSTS: "fahrseiten.de,www.fahrseiten.de",
@@ -131,6 +132,18 @@ test("rejects local defaults and missing production settings", () => {
     "SMTP_USER und SMTP_PASSWORD müssen gesetzt sein.",
     "SMTP_FROM muss eine reale, freigegebene Absenderadresse sein.",
   ]);
+});
+
+test("rejects a local DNS target for customer domains", () => {
+  const errors = validateProductionEnvironment({
+    ...validEnvironment,
+    PUBLIC_DNS_TARGET_HOST: "app.localhost",
+  });
+  assert.ok(
+    errors.includes(
+      "PUBLIC_DNS_TARGET_HOST muss ein öffentlicher Hostname sein.",
+    ),
+  );
 });
 
 test("creates password hashes compatible with application login", async () => {

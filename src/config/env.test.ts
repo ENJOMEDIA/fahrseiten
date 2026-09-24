@@ -7,6 +7,7 @@ describe("parseServerEnv", () => {
     expect(parseServerEnv({})).toEqual({
       NODE_ENV: "development",
       APP_BASE_URL: "http://localhost:3000",
+      PUBLIC_DNS_TARGET_HOST: "fahrseiten.de",
       DATABASE_URL:
         "mysql://fahrseiten_local:local_only@127.0.0.1:3306/fahrseiten_local",
       TRUST_PROXY_HEADERS: false,
@@ -29,6 +30,12 @@ describe("parseServerEnv", () => {
   it("rejects invalid URLs", () => {
     expect(() => parseServerEnv({ APP_BASE_URL: "not-a-url" })).toThrow();
     expect(() => parseServerEnv({ DASHBOARD_BASE_URL: "not-a-url" })).toThrow();
+  });
+
+  it("rejects local DNS targets even during local development", () => {
+    expect(() =>
+      parseServerEnv({ PUBLIC_DNS_TARGET_HOST: "localhost" }),
+    ).toThrow("PUBLIC_DNS_TARGET_HOST muss ein öffentlicher Hostname sein.");
   });
 
   it("accepts an optional dashboard host or an empty Plesk value", () => {

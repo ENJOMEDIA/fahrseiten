@@ -9,6 +9,7 @@ import { env } from "@/config/env";
 import { db } from "@/db/client";
 import { domains } from "@/db/schema";
 import { normalizeHostname } from "@/modules/domains/hostname";
+import { isPublicDnsAddress } from "@/modules/domains/public-dns-target";
 
 async function addresses(hostname: string) {
   const [ipv4, ipv6] = await Promise.all([
@@ -60,8 +61,18 @@ async function checkApplicationRoute(hostname: string, sslActive: boolean) {
 }
 
 export async function getDnsTarget() {
-  const hostname = normalizeHostname(new URL(env.APP_BASE_URL).hostname);
-  return { hostname, ...(await addresses(hostname)) };
+  const hostname = normalizeHostname(env.PUBLIC_DNS_TARGET_HOST);
+  const resolved = await addresses(hostname);
+  const target = {
+    hostname,
+    ipv4: resolved.ipv4.filter(isPublicDnsAddress),
+    ipv6: resolved.ipv6.filter(isPublicDnsAddress),
+  };
+  if (target.ipv4.length === 0 && target.ipv6.length === 0)
+    throw new Error(
+      `Das öffentliche DNS-Ziel ${hostname} liefert aktuell keine öffentliche IP-Adresse.`,
+    );
+  return target;
 }
 
 export async function inspectTenantDomain(hostname: string) {

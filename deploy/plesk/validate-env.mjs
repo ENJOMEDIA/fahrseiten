@@ -1,4 +1,5 @@
 import path from "node:path";
+import { isIP } from "node:net";
 
 const PLACEHOLDER_MARKERS = [
   "replace-with",
@@ -53,6 +54,22 @@ export function validateProductionEnvironment(
     }
   } catch {
     errors.push("APP_BASE_URL muss eine gültige HTTPS-URL sein.");
+  }
+
+  const publicDnsTarget = (source.PUBLIC_DNS_TARGET_HOST || "fahrseiten.de")
+    .trim()
+    .toLowerCase()
+    .replace(/\.$/, "");
+  if (
+    !publicDnsTarget.includes(".") ||
+    isIP(publicDnsTarget) !== 0 ||
+    publicDnsTarget === "localhost" ||
+    publicDnsTarget.endsWith(".localhost") ||
+    publicDnsTarget.endsWith(".local") ||
+    publicDnsTarget.endsWith(".test") ||
+    publicDnsTarget.endsWith(".invalid")
+  ) {
+    errors.push("PUBLIC_DNS_TARGET_HOST muss ein öffentlicher Hostname sein.");
   }
 
   if (!options.allowDatabaseBootstrap) {
