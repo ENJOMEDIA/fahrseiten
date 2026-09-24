@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { type FormEvent, useState } from "react";
 
 import { Input } from "@/components/ui/field";
 
@@ -10,6 +11,9 @@ function LegalSetupFields() {
       <legend className="px-2 font-semibold">Rechtliche Grundangaben</legend>
       <p className="text-sm leading-6 text-slate-600 sm:col-span-2">
         Daraus entstehen bearbeitbare Entwürfe für Impressum und Datenschutz.
+        Unternehmensname, Inhaber und Anschrift aus den Feldern darüber werden
+        automatisch übernommen. Nach der Einrichtung müssen die Entwürfe im
+        Kundenbereich unter „Rechtliches“ geprüft und veröffentlicht werden.
         Optionale Angaben müssen ergänzt werden, wenn sie zutreffen.
       </p>
       <Input label="Rechtsform (optional)" name="legalForm" />
@@ -42,28 +46,46 @@ function LegalSetupFields() {
 export function PlatformSetupForm() {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const [feedback, setFeedback] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
 
-  async function submit(formData: FormData) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     setPending(true);
-    setMessage("");
-    const response = await fetch("/api/setup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.fromEntries(formData)),
-    });
-    const result = await response.json();
-    setPending(false);
-    setMessage(
-      response.ok
-        ? result.status === "already_installed"
-          ? "FahrSeiten ist bereits eingerichtet. Du kannst dich anmelden."
-          : "Installation abgeschlossen und Installationscode verworfen. Starte die Anwendung jetzt einmal in Plesk neu und melde dich danach an."
-        : (result.message ?? "Installation fehlgeschlagen."),
-    );
+    setFeedback("idle");
+    setMessage("Installation und Datenbankeinrichtung werden geprüft …");
+    try {
+      const response = await fetch("/api/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        status?: string;
+        message?: string;
+      };
+      setFeedback(response.ok ? "success" : "error");
+      setMessage(
+        response.ok
+          ? result.status === "already_installed"
+            ? "FahrSeiten ist bereits eingerichtet. Du kannst dich anmelden."
+            : "Installation abgeschlossen und Installationscode verworfen. Starte die Anwendung jetzt einmal in Plesk neu und melde dich danach an."
+          : (result.message ?? "Installation fehlgeschlagen."),
+      );
+    } catch {
+      setFeedback("error");
+      setMessage(
+        "Die Installation konnte nicht abgeschlossen werden. Deine Eingaben bleiben erhalten; bitte prüfe die Verbindung und versuche es erneut.",
+      );
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
-    <form action={submit} className="mt-8 grid gap-5 sm:grid-cols-2">
+    <form onSubmit={submit} className="mt-8 grid gap-5 sm:grid-cols-2">
       <div className="sm:col-span-2">
         <Input
           autoComplete="off"
@@ -198,7 +220,17 @@ export function PlatformSetupForm() {
           {pending ? "Installation läuft …" : "FahrSeiten einrichten"}
         </button>
         {message ? (
-          <p aria-live="polite" className="mt-4 text-sm text-slate-700">
+          <p
+            aria-live="polite"
+            className={`mt-4 rounded-2xl border p-4 text-sm font-semibold ${
+              feedback === "error"
+                ? "border-red-200 bg-red-50 text-red-900"
+                : feedback === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                  : "border-cyan-200 bg-cyan-50 text-cyan-950"
+            }`}
+            role={feedback === "error" ? "alert" : "status"}
+          >
             {message}
           </p>
         ) : null}
@@ -231,29 +263,56 @@ export function TenantOnboardingForm({
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [useLocationForBilling, setUseLocationForBilling] = useState(true);
+  const [feedback, setFeedback] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
+  const [completed, setCompleted] = useState(false);
 
-  async function submit(formData: FormData) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     setPending(true);
-    setMessage("");
-    const response = await fetch(
-      `/api/onboarding/${encodeURIComponent(token)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(formData)),
-      },
-    );
-    const result = await response.json();
-    setPending(false);
+    setFeedback("idle");
     setMessage(
-      response.ok
-        ? "Deine Fahrschulseite wurde angelegt. Die Domain wird vor der Freischaltung noch geprüft. Du kannst dich jetzt im Kundenbereich anmelden."
-        : (result.message ?? "Onboarding fehlgeschlagen."),
+      "Deine Angaben werden geprüft und die Fahrschulinstanz wird eingerichtet …",
     );
+    try {
+      const response = await fetch(
+        `/api/onboarding/${encodeURIComponent(token)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(Object.fromEntries(formData)),
+        },
+      );
+      const result = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      if (!response.ok) {
+        setFeedback("error");
+        setMessage(
+          result.message ??
+            "Onboarding fehlgeschlagen. Deine Eingaben bleiben erhalten; bitte prüfe die Pflichtangaben und versuche es erneut.",
+        );
+        return;
+      }
+      setCompleted(true);
+      setFeedback("success");
+      setMessage(
+        "Deine Fahrschulseite wurde angelegt. Melde dich jetzt im Kundenbereich an und prüfe unter „Rechtliches“ die aus deinen Angaben erstellten Entwürfe für Impressum und Datenschutz.",
+      );
+    } catch {
+      setFeedback("error");
+      setMessage(
+        "Die Anfrage konnte nicht abgeschlossen werden. Deine Eingaben bleiben erhalten; bitte prüfe die Verbindung und versuche es erneut.",
+      );
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
-    <form action={submit} className="mt-8 grid gap-5 sm:grid-cols-2">
+    <form onSubmit={submit} className="mt-8 grid gap-5 sm:grid-cols-2">
       {prefill?.planSummary ? (
         <section className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 sm:col-span-2">
           <p className="text-xs font-semibold tracking-[.14em] text-cyan-800 uppercase">
@@ -434,17 +493,37 @@ export function TenantOnboardingForm({
       <div className="sm:col-span-2">
         <button
           className="rounded-xl bg-cyan-600 px-5 py-3 font-semibold text-white disabled:opacity-60"
-          disabled={pending}
+          disabled={pending || completed}
           type="submit"
         >
-          {pending
-            ? "Website wird eingerichtet …"
-            : "Fahrschulseite einrichten"}
+          {completed
+            ? "Fahrschulseite ist eingerichtet"
+            : pending
+              ? "Website wird eingerichtet …"
+              : "Fahrschulseite einrichten"}
         </button>
         {message ? (
-          <p aria-live="polite" className="mt-4 text-sm text-slate-700">
-            {message}
-          </p>
+          <div
+            aria-live="polite"
+            className={`mt-4 rounded-2xl border p-4 text-sm leading-6 font-semibold ${
+              feedback === "error"
+                ? "border-red-200 bg-red-50 text-red-900"
+                : feedback === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                  : "border-cyan-200 bg-cyan-50 text-cyan-950"
+            }`}
+            role={feedback === "error" ? "alert" : "status"}
+          >
+            <p>{message}</p>
+            {completed ? (
+              <Link
+                className="mt-3 inline-flex rounded-full bg-emerald-700 px-4 py-2 text-white"
+                href="/login"
+              >
+                Zum Kundenlogin →
+              </Link>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </form>

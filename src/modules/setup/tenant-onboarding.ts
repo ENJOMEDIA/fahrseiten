@@ -39,6 +39,10 @@ import {
 } from "@/modules/legal/documents";
 
 import { SetupInputError } from "./error";
+import {
+  TENANT_ONBOARDING_VALIDITY_DAYS,
+  tenantOnboardingExpiry,
+} from "./onboarding-policy";
 import { tenantOnboardingSchema } from "./schemas";
 import { calculateBillingSnapshot } from "@/modules/billing/intervals";
 import { linkReferralToTenant } from "@/modules/referrals/service";
@@ -90,14 +94,18 @@ export async function createTenantOnboardingLink(input: {
             .limit(2)
         : [];
     if (!input.leadId && matchingLeads.length > 1)
-      throw new Error(
+      throw new SetupInputError(
         "Zur E-Mail-Adresse existieren mehrere Leads. Starte die Instanzerstellung beim gewünschten Lead im Akquise-Bereich.",
       );
     const selectedLead = matchingLeads[0];
     if (input.leadId && !selectedLead)
-      throw new Error("Der ausgewählte Akquise-Lead wurde nicht gefunden.");
+      throw new SetupInputError(
+        "Der ausgewählte Akquise-Lead wurde nicht gefunden.",
+      );
     if (selectedLead?.convertedTenantId)
-      throw new Error("Dieser Lead ist bereits mit einer Instanz verbunden.");
+      throw new SetupInputError(
+        "Dieser Lead ist bereits mit einer Instanz verbunden.",
+      );
     const leadId = selectedLead?.id ?? randomUUID();
     const [pendingSetup] = selectedLead
       ? await tx
@@ -113,7 +121,7 @@ export async function createTenantOnboardingLink(input: {
           .limit(1)
       : [];
     if (pendingSetup)
-      throw new Error(
+      throw new SetupInputError(
         "Für diesen Lead existiert bereits ein gültiger Einrichtungslink.",
       );
     if (!selectedLead)
@@ -138,7 +146,7 @@ export async function createTenantOnboardingLink(input: {
       tokenHash: hashToken(token),
       createdByUserId: input.createdByUserId,
       prefill: input.prefill,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60_000),
+      expiresAt: tenantOnboardingExpiry(),
     });
     if (input.sendInvitation && input.prefill.ownerEmail) {
       await tx.insert(backgroundJobs).values({
@@ -153,7 +161,7 @@ export async function createTenantOnboardingLink(input: {
             companyName: input.prefill.companyName || "Ihre Fahrschule",
             contactName: input.prefill.ownerName || "Fahrschul-Team",
             actionUrl,
-            expiresInDays: 7,
+            expiresInDays: TENANT_ONBOARDING_VALIDITY_DAYS,
           },
         },
         runAt: new Date(),

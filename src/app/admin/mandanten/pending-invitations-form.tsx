@@ -8,6 +8,7 @@ import {
   resendPendingInstanceAction,
   type InvitationProcessingState,
 } from "./actions";
+import { TENANT_ONBOARDING_VALIDITY_DAYS } from "@/modules/setup/onboarding-policy";
 
 const initialState: InvitationProcessingState = {
   message: "",
@@ -56,9 +57,9 @@ export function ResendPendingInstanceForm({ setupId }: { setupId: string }) {
     >
       <input name="setupId" type="hidden" value={setupId} />
       <p className="text-xs leading-5 text-slate-700">
-        Erstellt einen neuen, sieben Tage gültigen Einrichtungslink und sendet
-        ihn an die hinterlegte E-Mail-Adresse. Der bisherige Link wird sofort
-        ungültig.
+        Erstellt einen neuen, {TENANT_ONBOARDING_VALIDITY_DAYS} Tage gültigen
+        Einrichtungslink und sendet ihn an die hinterlegte E-Mail-Adresse. Der
+        bisherige Link wird sofort ungültig.
       </p>
       <button
         className="mt-3 rounded-xl bg-cyan-800 px-4 py-2 text-xs font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-wait disabled:opacity-60"

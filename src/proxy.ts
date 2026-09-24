@@ -9,6 +9,20 @@ function hosts(value: string | undefined, fallback: string): string[] {
     .filter(Boolean);
 }
 
+const applicationPaths = [
+  "/login",
+  "/passwort-vergessen",
+  "/passwort-zuruecksetzen",
+  "/admin",
+  "/kunde",
+] as const;
+
+export function isApplicationPath(pathname: string) {
+  return applicationPaths.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
 export function proxy(request: NextRequest) {
   let hostname: string;
   try {
@@ -31,6 +45,8 @@ export function proxy(request: NextRequest) {
   );
   if (marketingHosts.includes(hostname) || appHosts.includes(hostname))
     return NextResponse.next();
+
+  if (isApplicationPath(request.nextUrl.pathname)) return NextResponse.next();
 
   const target = request.nextUrl.clone();
   if (demoHosts.includes(hostname)) {

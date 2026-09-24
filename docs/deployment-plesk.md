@@ -263,7 +263,7 @@ Subdomain nicht eingerichtet ist, bleibt `MEDIA_PUBLIC_BASE_URL` leer.
 Neue Fahrschulen erhalten keine eigene FahrSeiten-Installation und keine eigene Datenbank. Nach der einmaligen Plattforminstallation werden sie innerhalb derselben Anwendung als getrennte Mandanten provisioniert:
 
 1. Ein angemeldeter Plattform-Owner öffnet `/admin/mandanten/neu` und erzeugt einen Einmal-Link.
-2. Der Link ist sieben Tage gültig und wird nur bei seiner Erzeugung vollständig angezeigt. In der Datenbank liegt ausschließlich sein SHA-256-Hash.
+2. Der Link ist 14 Tage gültig und wird nur bei seiner Erzeugung vollständig angezeigt. In der Datenbank liegt ausschließlich sein SHA-256-Hash.
 3. Die Fahrschule trägt Name, Inhaber beziehungsweise Ansprechpartner, Zugangsdaten, Adresse, Telefon, Wunschdomain, Primär- und Akzentfarbe sowie einen Vorschautext ein.
 4. Der Assistent legt in einer Transaktion Tenant, `tenant_owner`, Mitgliedschaft, Website, Theme, Hauptstandort, Kontaktformular, Startseite, Navigation und Audit-Eintrag an.
 5. Die Wunschdomain bleibt `pending`. DNS-Ziel, Inhabernachweis, Plesk-Alias und SSL müssen vor ihrer Aktivierung separat geprüft werden.

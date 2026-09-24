@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
+
+import { TENANT_ONBOARDING_VALIDITY_DAYS } from "@/modules/setup/onboarding-policy";
 
 type OnboardingPrefill = {
   companyName?: string;
@@ -29,54 +31,84 @@ export function OnboardingLinkForm({
 }) {
   const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
-  const [pending, setPending] = useState(false);
+  const [pendingIntent, setPendingIntent] = useState<"link" | "email" | null>(
+    null,
+  );
+  const [feedback, setFeedback] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
 
-  async function createInstance(formData: FormData, sendInvitation: boolean) {
-    setPending(true);
-    setMessage("");
-    const response = await fetch("/api/admin/onboarding", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        companyName: formData.get("companyName"),
-        ownerName: formData.get("ownerName"),
-        ownerEmail: formData.get("ownerEmail"),
-        phone: formData.get("phone"),
-        domain: formData.get("domain"),
-        leadId: formData.get("leadId"),
-        planId: formData.get("planId"),
-        billingIntervalMonths: Number(formData.get("billingIntervalMonths")),
-        sendInvitation,
-      }),
-    });
-    const result = (await response.json()) as {
-      url?: string;
-      invitationQueued?: boolean;
-      invitationProcessed?: boolean;
-      message?: string;
-    };
-    setPending(false);
-    if (!response.ok || !result.url) {
-      setMessage(
-        result.message ?? "Die Instanz konnte nicht vorbereitet werden.",
-      );
-      return;
-    }
-    setUrl(result.url);
+  async function createInstance(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    const intent =
+      submitter instanceof HTMLButtonElement &&
+      submitter.dataset.intent === "email"
+        ? "email"
+        : "link";
+    const sendInvitation = intent === "email";
+    const formData = new FormData(event.currentTarget);
+    setPendingIntent(intent);
+    setFeedback("idle");
+    setUrl("");
     setMessage(
-      result.invitationProcessed
-        ? "Die Instanz ist vorbereitet und die Einladungs-E-Mail wurde über den eingerichteten SMTP-Server versendet."
-        : result.invitationQueued
-          ? "Die Instanz ist vorbereitet. Der Versand wartet oder wird nach einem SMTP-Fehler automatisch wiederholt. Den genauen Status siehst du in der Mandantenübersicht."
-          : "Die Instanz ist vorbereitet. Der persönliche Link ist sieben Tage gültig und wird nur jetzt vollständig angezeigt.",
+      sendInvitation
+        ? "Instanz und Einrichtungslink werden erstellt. Anschließend wird die E-Mail versendet …"
+        : "Der persönliche Einrichtungslink wird erstellt …",
     );
+    try {
+      const response = await fetch("/api/admin/onboarding", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          companyName: formData.get("companyName"),
+          ownerName: formData.get("ownerName"),
+          ownerEmail: formData.get("ownerEmail"),
+          phone: formData.get("phone"),
+          domain: formData.get("domain"),
+          leadId: formData.get("leadId"),
+          planId: formData.get("planId"),
+          billingIntervalMonths: Number(formData.get("billingIntervalMonths")),
+          sendInvitation,
+        }),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        url?: string;
+        invitationQueued?: boolean;
+        invitationProcessed?: boolean;
+        message?: string;
+      };
+      if (!response.ok || !result.url) {
+        setFeedback("error");
+        setMessage(
+          result.message ?? "Die Instanz konnte nicht vorbereitet werden.",
+        );
+        return;
+      }
+      setUrl(result.url);
+      setFeedback("success");
+      setMessage(
+        result.invitationProcessed
+          ? "Die Instanz ist vorbereitet und die Einladungs-E-Mail wurde über den eingerichteten SMTP-Server versendet."
+          : result.invitationQueued
+            ? "Die Instanz ist vorbereitet. Der Versand wartet oder wird nach einem SMTP-Fehler automatisch wiederholt. Den genauen Status siehst du in der Mandantenübersicht."
+            : `Die Instanz ist vorbereitet. Der persönliche Link ist ${TENANT_ONBOARDING_VALIDITY_DAYS} Tage gültig und wird nur jetzt vollständig angezeigt.`,
+      );
+    } catch {
+      setFeedback("error");
+      setMessage(
+        "Die Anfrage konnte nicht abgeschlossen werden. Die Eingaben bleiben erhalten; bitte prüfe die Verbindung und versuche es erneut.",
+      );
+    } finally {
+      setPendingIntent(null);
+    }
   }
 
   return (
     <form
-      action={(formData) => createInstance(formData, false)}
+      onSubmit={createInstance}
       className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
     >
       <input name="leadId" type="hidden" value={leadId ?? ""} />
@@ -93,7 +125,7 @@ export function OnboardingLinkForm({
           </p>
         </div>
         <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
-          Einmal-Link · 7 Tage
+          Einmal-Link · {TENANT_ONBOARDING_VALIDITY_DAYS} Tage
         </span>
       </div>
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -200,18 +232,21 @@ export function OnboardingLinkForm({
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           className="rounded-full bg-slate-950 px-5 py-3 font-semibold text-white disabled:opacity-50"
-          disabled={pending}
+          data-intent="link"
+          disabled={pendingIntent !== null}
           type="submit"
         >
-          {pending ? "Wird vorbereitet …" : "Link erstellen"}
+          {pendingIntent === "link" ? "Link wird erstellt …" : "Link erstellen"}
         </button>
         <button
           className="rounded-full bg-cyan-600 px-5 py-3 font-semibold text-white disabled:opacity-50"
-          disabled={pending}
-          formAction={(formData) => createInstance(formData, true)}
+          data-intent="email"
+          disabled={pendingIntent !== null}
           type="submit"
         >
-          Erstellen & per E-Mail senden
+          {pendingIntent === "email"
+            ? "Instanz wird erstellt & E-Mail versendet …"
+            : "Erstellen & per E-Mail senden"}
         </button>
       </div>
       {url ? (
@@ -228,12 +263,19 @@ export function OnboardingLinkForm({
         </div>
       ) : null}
       {message ? (
-        <p
+        <div
           aria-live="polite"
-          className="mt-4 text-sm font-semibold text-slate-700"
+          className={`mt-4 rounded-2xl border p-4 text-sm font-semibold ${
+            feedback === "error"
+              ? "border-red-200 bg-red-50 text-red-900"
+              : feedback === "success"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                : "border-cyan-200 bg-cyan-50 text-cyan-950"
+          }`}
+          role={feedback === "error" ? "alert" : "status"}
         >
           {message}
-        </p>
+        </div>
       ) : null}
     </form>
   );

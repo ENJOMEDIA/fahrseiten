@@ -24,6 +24,10 @@ import {
 } from "@/db/schema";
 import { createOpaqueToken, hashToken } from "@/modules/auth/tokens";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
+import {
+  TENANT_ONBOARDING_VALIDITY_DAYS,
+  tenantOnboardingExpiry,
+} from "@/modules/setup/onboarding-policy";
 
 export async function listPlatformTenants() {
   return db
@@ -163,7 +167,7 @@ export async function resendPendingInstanceInvitation(input: {
   actorUserId: string;
 }) {
   const token = createOpaqueToken();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60_000);
+  const expiresAt = tenantOnboardingExpiry();
 
   return db.transaction(async (tx) => {
     const [setup] = await tx
@@ -218,7 +222,7 @@ export async function resendPendingInstanceInvitation(input: {
           companyName,
           contactName: setup.prefill.ownerName || "Fahrschul-Team",
           actionUrl,
-          expiresInDays: 7,
+          expiresInDays: TENANT_ONBOARDING_VALIDITY_DAYS,
         },
       },
       runAt: new Date(),

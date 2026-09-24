@@ -28,6 +28,13 @@ export default async function TenantOnboardingPage({
           Lege die wichtigsten Angaben für deine Website fest. Alle Inhalte
           können anschließend im Kundenbereich ergänzt und bearbeitet werden.
         </p>
+        <p className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950">
+          Anschrift und rechtliche Grundangaben gelten für diese
+          Fahrschulinstanz. Nach der Einrichtung meldest du dich mit dem hier
+          vergebenen Zugang an, prüfst unter „Rechtliches“ die Entwürfe für
+          Impressum und Datenschutz und veröffentlichst sie erst nach deiner
+          Freigabe.
+        </p>
         <TenantOnboardingForm prefill={prefill ?? undefined} token={token} />
       </div>
     </main>
