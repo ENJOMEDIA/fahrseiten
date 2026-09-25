@@ -443,11 +443,11 @@ export default async function TenantDetailPage({
                 className="mt-5 inline-flex rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold"
                 href={`/api/admin/mandanten/${tenant.id}/vertrag`}
               >
-                Vertrags-PDF erzeugen
+                Vertragsentwurf prüfen
               </a>
               <p className="mt-2 text-xs leading-5 text-slate-500">
-                Das Muster vor Unterschrift zusammen mit Angebot, AGB und AVV
-                rechtlich auf den konkreten Auftrag prüfen.
+                Diese Vorschau wird noch nicht in der Vertragsakte gespeichert.
+                Prüfe sie vor der Freigabe zusammen mit Angebot, AGB und AVV.
               </p>
               <PrepareContractForm tenantId={tenant.id} />
             </>

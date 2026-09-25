@@ -119,4 +119,5 @@ export async function chooseTenantFavicon(formData: FormData) {
   );
   revalidatePath("/kunde/medien");
   revalidatePath("/api/favicon");
+  revalidatePath("/", "layout");
 }

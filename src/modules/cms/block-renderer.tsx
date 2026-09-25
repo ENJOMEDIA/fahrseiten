@@ -613,7 +613,13 @@ function Block({
       return (
         <ContentSection
           alternate={alternate}
-          eyebrow="Fiktive Stimmen"
+          eyebrow={
+            value.items.some((item) =>
+              item.sourceLabel?.toLocaleLowerCase("de-DE").includes("fiktiv"),
+            )
+              ? "Fiktive Beispielstimmen"
+              : "Bewertungen"
+          }
           heading={value.heading}
         >
           {value.items
@@ -624,7 +630,7 @@ function Block({
                 key={item.id}
               >
                 <div
-                  className="text-lg tracking-[0.18em] text-[var(--tenant-primary)]"
+                  className="testimonial-rating text-lg tracking-[0.18em] text-[var(--tenant-primary)]"
                   aria-label={`${item.rating ?? 5} von 5 Sternen`}
                 >
                   {"★★★★★".slice(0, item.rating ?? 5)}
@@ -635,7 +641,7 @@ function Block({
                 <figcaption className="mt-7 border-t border-slate-100 pt-5 text-sm">
                   <span className="font-black">{item.displayName}</span>
                   {item.sourceLabel ? (
-                    <span className="block text-slate-400">
+                    <span className="testimonial-source block text-slate-400">
                       {item.sourceLabel}
                     </span>
                   ) : null}

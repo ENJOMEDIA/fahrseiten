@@ -542,9 +542,16 @@ textarea {
   box-shadow: none;
 }
 
-[data-theme="urban_night"] .tenant-content-card span,
 [data-theme="urban_night"] .tenant-content-card a {
   color: inherit;
+}
+
+[data-theme="urban_night"] .tenant-content-card .testimonial-rating {
+  color: #67e8f9;
+}
+
+[data-theme="urban_night"] .tenant-content-card .testimonial-source {
+  color: #94a3b8;
 }
 
 [data-theme="urban_night"] .tenant-hero h1,

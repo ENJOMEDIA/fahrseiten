@@ -1,9 +1,8 @@
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { OpenConsentSettingsButton } from "@/modules/consent/consent-manager";
-import { OptionalContent } from "@/modules/consent/optional-content";
-import { getOptionalServiceConfig } from "@/modules/consent/config";
+import { getRequestOptionalServiceConfig } from "@/modules/consent/config";
 export default async function CookieSettingsPage() {
-  const optionalServiceConfig = await getOptionalServiceConfig();
+  const optionalServiceConfig = await getRequestOptionalServiceConfig();
   return (
     <SimpleMarketingPage
       availableDuringMaintenance
@@ -36,17 +35,6 @@ export default async function CookieSettingsPage() {
             <OpenConsentSettingsButton />
           </div>
         ) : null}
-        <div className="mt-8">
-          <OptionalContent
-            category="functional"
-            title="Beispiel für externe Karte"
-          >
-            <div className="rounded-2xl bg-cyan-50 p-5">
-              Funktionaler Inhalt freigegeben. In der lokalen Entwicklung ist
-              kein externer Kartenanbieter verbunden.
-            </div>
-          </OptionalContent>
-        </div>
       </div>
     </SimpleMarketingPage>
   );

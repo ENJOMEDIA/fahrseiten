@@ -43,7 +43,7 @@ export default async function CustomerBillingPage() {
         ]}
       />
       <div className="mt-6 grid gap-5 lg:grid-cols-[.8fr_1.2fr]">
-        <Card className="border-slate-800 bg-slate-950 text-slate-50">
+        <Card className="!border-slate-800 !bg-slate-950 !text-slate-50">
           <p className="text-xs font-semibold tracking-[.16em] text-cyan-300 uppercase">
             Vertragsübersicht
           </p>

@@ -147,7 +147,7 @@ export async function createContractPdf(input: ContractTemplateInput) {
   ensure(145);
   drawLines("Bestätigung", { font: bold, size: 11.5, gap: 8 });
   drawLines(
-    "Der Vertrag ist ein wiederverwendbares Muster und muss vor Einsatz zusammen mit Angebot, Leistungsbeschreibung, AGB und Auftragsverarbeitungsvereinbarung fachlich sowie rechtlich auf den konkreten Abschluss geprüft werden.",
+    "Dieses Vertragsdokument bildet die für den Kunden gespeicherten Stammdaten und Konditionen ab. Vor dem Versand zur Unterschrift bestätigt der Anbieter, Angaben, Leistungsbeschreibung, Angebot, AGB und gegebenenfalls die Auftragsverarbeitungsvereinbarung auf den konkreten Abschluss geprüft zu haben.",
     { gap: 22 },
   );
   page.drawLine({

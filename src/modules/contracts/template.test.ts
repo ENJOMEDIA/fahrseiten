@@ -43,6 +43,12 @@ describe("contract template", () => {
       "FahrSeiten bleibt für eigene technische Leistungen",
     );
     expect(text).toContain(
+      "erforderlichen Nutzungs- und Persönlichkeitsrechte",
+    );
+    expect(text).toContain("Rechtebelege vorlegen");
+    expect(text).toContain("von berechtigten Ansprüchen Dritter");
+    expect(text).toContain("eigenständige Änderungen oder Inhalte");
+    expect(text).toContain(
       "separat über das von FahrSeiten eingesetzte Rechnungssystem",
     );
     expect(text).toContain("Vorsatz, grober Fahrlässigkeit");

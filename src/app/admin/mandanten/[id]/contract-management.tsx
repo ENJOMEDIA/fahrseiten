@@ -29,9 +29,7 @@ export function PrepareContractForm({ tenantId }: { tenantId: string }) {
     <form action={action} className="mt-5">
       <input name="tenantId" type="hidden" value={tenantId} />
       <button className="premium-button" disabled={pending}>
-        {pending
-          ? "Vertrag wird fixiert …"
-          : "Vertrag zur Signatur vorbereiten"}
+        {pending ? "Vertrag wird gespeichert …" : "Geprüften Vertrag speichern"}
       </button>
       <Feedback state={state} />
     </form>

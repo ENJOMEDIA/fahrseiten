@@ -117,8 +117,25 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const [desktopNavigationHidden, setDesktopNavigationHidden] = useState(false);
   const mobileNavigationRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setDesktopNavigationHidden(
+        window.localStorage.getItem("fahrseiten:sidebar-hidden") === "true",
+      );
+    });
+  }, []);
+
+  function toggleDesktopNavigation() {
+    setDesktopNavigationHidden((current) => {
+      const next = !current;
+      window.localStorage.setItem("fahrseiten:sidebar-hidden", String(next));
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (!mobileNavigationOpen) return;
@@ -152,9 +169,21 @@ export function AppShell({
   }, [mobileNavigationOpen]);
 
   return (
-    <div className="min-h-screen bg-[#f3f6f8] lg:grid lg:grid-cols-[19rem_1fr]">
+    <div
+      className={cn(
+        "min-h-screen bg-[#f3f6f8] lg:grid",
+        desktopNavigationHidden
+          ? "lg:grid-cols-[1fr]"
+          : "lg:grid-cols-[19rem_1fr]",
+      )}
+    >
       <AutoSaveIndicator />
-      <aside className="app-sidebar sticky top-0 hidden h-screen overflow-hidden border-r border-white/5 bg-[#080d16] px-5 py-6 text-white lg:flex lg:flex-col">
+      <aside
+        className={cn(
+          "app-sidebar sticky top-0 hidden h-screen overflow-hidden border-r border-white/5 bg-[#080d16] px-5 py-6 text-white",
+          !desktopNavigationHidden && "lg:flex lg:flex-col",
+        )}
+      >
         <Link className="flex items-center gap-3" href="/">
           {logoUrl ? (
             <span className="grid h-11 min-w-14 place-items-center rounded-2xl bg-white px-2 shadow-lg">
@@ -340,11 +369,33 @@ export function AppShell({
             </button>
           </div>
           <div className="hidden items-center justify-between lg:flex">
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
-                {eyebrow}
-              </p>
-              <p className="mt-0.5 font-semibold text-slate-950">{title}</p>
+            <div className="flex items-center gap-3">
+              <button
+                aria-expanded={!desktopNavigationHidden}
+                aria-label={
+                  desktopNavigationHidden
+                    ? "Seitenmenü einblenden"
+                    : "Seitenmenü ausblenden"
+                }
+                className="grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-cyan-300 hover:text-cyan-800"
+                onClick={toggleDesktopNavigation}
+                title={
+                  desktopNavigationHidden
+                    ? "Seitenmenü einblenden"
+                    : "Seitenmenü ausblenden"
+                }
+                type="button"
+              >
+                <span aria-hidden="true" className="text-lg">
+                  {desktopNavigationHidden ? "☰" : "←"}
+                </span>
+              </button>
+              <div>
+                <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
+                  {eyebrow}
+                </p>
+                <p className="mt-0.5 font-semibold text-slate-950">{title}</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <details className="group relative">

@@ -137,4 +137,8 @@ export const contentModules = {
     title: "Standorte & Öffnungszeiten",
     singular: "Standort",
   },
+  bewertungen: {
+    title: "Bewertungen",
+    singular: "Bewertung",
+  },
 } as const;

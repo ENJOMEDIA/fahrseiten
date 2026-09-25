@@ -67,7 +67,7 @@ export function ContentEntryForm({
       ) : null}
       <div className="mt-4 space-y-3">
         <label className="block text-sm font-semibold">
-          Bezeichnung
+          {module === "bewertungen" ? "Angezeigter Name" : "Bezeichnung"}
           <input
             className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
             defaultValue={entry?.title}
@@ -273,7 +273,58 @@ export function ContentEntryForm({
             </label>
           </>
         ) : null}
-        {module !== "standorte" ? (
+        {module === "bewertungen" ? (
+          <>
+            <label className="block text-sm font-semibold">
+              Bewertungstext
+              <textarea
+                className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 p-3 font-normal"
+                defaultValue={entry?.fields.description}
+                name="description"
+                required
+              />
+            </label>
+            <label className="block text-sm font-semibold">
+              Sterne
+              <select
+                className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.rating ?? 5}
+                name="rating"
+              >
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <option key={rating} value={rating}>
+                    {rating} von 5 Sternen
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm font-semibold">
+              Nachvollziehbare Herkunft
+              <input
+                className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+                defaultValue={entry?.fields.sourceLabel}
+                name="sourceLabel"
+                placeholder="z. B. Google-Bewertung vom 12.05.2026"
+                required
+              />
+            </label>
+            <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-950">
+              <input
+                className="mt-0.5 size-5 shrink-0 accent-cyan-700"
+                name="rightsConfirmed"
+                required
+                type="checkbox"
+                value="true"
+              />
+              <span>
+                Ich bestätige, dass diese Bewertung echt ist, nicht irreführend
+                verändert wurde und für ihre Veröffentlichung eine Berechtigung
+                besteht.
+              </span>
+            </label>
+          </>
+        ) : null}
+        {module !== "standorte" && module !== "bewertungen" ? (
           <label className="block text-sm font-semibold">
             Beschreibung
             <textarea

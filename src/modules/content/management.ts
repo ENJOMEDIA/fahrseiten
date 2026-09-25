@@ -10,6 +10,7 @@ import {
   mediaUsages,
   priceGroups,
   teamMembers,
+  testimonials,
   vehicles,
 } from "@/db/schema";
 import { createId } from "@/lib/ids";
@@ -21,7 +22,8 @@ export type ContentModuleKey =
   | "kurse"
   | "team"
   | "fahrzeuge"
-  | "standorte";
+  | "standorte"
+  | "bewertungen";
 
 export type ManagedContentEntry = {
   id: string;
@@ -43,6 +45,8 @@ export type ManagedContentEntry = {
     city?: string;
     phone?: string;
     email?: string;
+    rating?: number;
+    sourceLabel?: string;
   };
 };
 
@@ -181,6 +185,28 @@ export async function listTenantContentEntries(
           email: entry.email ?? "",
         },
       }));
+    case "bewertungen":
+      return (
+        await db
+          .select({
+            id: testimonials.id,
+            title: testimonials.displayName,
+            subtitle: testimonials.sourceLabel,
+            active: testimonials.active,
+            quote: testimonials.quote,
+            rating: testimonials.rating,
+          })
+          .from(testimonials)
+          .where(eq(testimonials.tenantId, tenantId))
+          .orderBy(asc(testimonials.position))
+      ).map((entry) => ({
+        ...entry,
+        fields: {
+          description: entry.quote,
+          rating: entry.rating ?? 5,
+          sourceLabel: entry.subtitle ?? "",
+        },
+      }));
   }
 }
 
@@ -196,6 +222,25 @@ function requiredText(formData: FormData, key: string, label: string) {
 
 function requiredKey(formData: FormData) {
   return licenseClassKeySchema.parse(text(formData, "key"));
+}
+
+function testimonialFields(formData: FormData) {
+  if (formData.get("rightsConfirmed") !== "true")
+    throw new Error(
+      "Bitte bestätige, dass die Bewertung echt ist und veröffentlicht werden darf.",
+    );
+  const rating = Number(text(formData, "rating"));
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5)
+    throw new Error("Die Bewertung muss zwischen 1 und 5 Sternen liegen.");
+  return {
+    quote: requiredText(formData, "description", "Der Bewertungstext"),
+    rating,
+    sourceLabel: requiredText(
+      formData,
+      "sourceLabel",
+      "Die nachvollziehbare Herkunft",
+    ),
+  };
 }
 
 export async function createTenantContentEntry(input: {
@@ -300,6 +345,14 @@ export async function createTenantContentEntry(input: {
         city: requiredText(input.formData, "city", "Der Ort"),
         phone: text(input.formData, "phone") || null,
         email: text(input.formData, "email") || null,
+      });
+      break;
+    case "bewertungen":
+      await db.insert(testimonials).values({
+        id,
+        tenantId: input.tenantId,
+        displayName: title,
+        ...testimonialFields(input.formData),
       });
       break;
   }
@@ -431,6 +484,20 @@ export async function updateTenantContentEntry(input: {
           ),
         );
       break;
+    case "bewertungen":
+      await db
+        .update(testimonials)
+        .set({
+          displayName: title,
+          ...testimonialFields(input.formData),
+        })
+        .where(
+          and(
+            eq(testimonials.id, input.id),
+            eq(testimonials.tenantId, input.tenantId),
+          ),
+        );
+      break;
   }
 }
 
@@ -536,6 +603,16 @@ export async function deleteTenantContentEntry(input: {
             ),
           );
         break;
+      case "bewertungen":
+        await tx
+          .delete(testimonials)
+          .where(
+            and(
+              eq(testimonials.id, input.id),
+              eq(testimonials.tenantId, input.tenantId),
+            ),
+          );
+        break;
     }
   });
 }
@@ -607,6 +684,17 @@ export async function setTenantContentEntryActive(input: {
           and(
             eq(locations.id, input.id),
             eq(locations.tenantId, input.tenantId),
+          ),
+        );
+      break;
+    case "bewertungen":
+      await db
+        .update(testimonials)
+        .set({ active: input.active })
+        .where(
+          and(
+            eq(testimonials.id, input.id),
+            eq(testimonials.tenantId, input.tenantId),
           ),
         );
       break;

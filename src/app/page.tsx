@@ -9,6 +9,7 @@ import {
 } from "@/config/marketing";
 import { findPlatformSettings } from "@/modules/setup/platform-settings";
 import { mediaPublicUrl } from "@/modules/media/public-url";
+import { InteractiveBuilderShowcase } from "@/components/marketing/interactive-builder-showcase";
 
 export const dynamic = "force-dynamic";
 
@@ -480,43 +481,7 @@ export default async function MarketingStartPage() {
                 ))}
               </ul>
             </div>
-            <div className="builder-visual rounded-[2.5rem] bg-slate-950 p-4 shadow-2xl shadow-slate-900/20 sm:p-6">
-              <div className="rounded-[1.75rem] bg-white p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-cyan-700">
-                      SEITENINHALT
-                    </p>
-                    <p className="mt-1 font-semibold">Startseite</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                    Gespeichert
-                  </span>
-                </div>
-                <div className="mt-6 space-y-3">
-                  {[
-                    ["Hero", "Willkommen bei deiner Fahrschule"],
-                    ["Führerscheinklassen", "Dein Weg zum Führerschein"],
-                    ["Vorteile", "Darum lernen Fahrschüler bei uns"],
-                    ["Kontakt", "Jetzt unverbindlich anfragen"],
-                  ].map(([title, text], index) => (
-                    <div
-                      className="group flex items-center gap-4 rounded-2xl border border-slate-200 p-4 hover:border-cyan-300 hover:shadow-lg"
-                      key={title}
-                    >
-                      <span className="cursor-grab text-slate-300">⠿</span>
-                      <span className="grid size-10 place-items-center rounded-xl bg-slate-100 text-sm font-semibold">
-                        0{index + 1}
-                      </span>
-                      <div>
-                        <p className="font-semibold">{title}</p>
-                        <p className="text-sm text-slate-500">{text}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <InteractiveBuilderShowcase />
           </div>
         </section>
 
