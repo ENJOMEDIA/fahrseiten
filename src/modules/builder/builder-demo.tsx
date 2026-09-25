@@ -239,6 +239,9 @@ export function BuilderDemo({
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">(
     "desktop",
   );
+  const [workspaceView, setWorkspaceView] = useState<"edit" | "preview">(
+    "edit",
+  );
   const [message, setMessage] = useState("");
   const [showPageCreator, setShowPageCreator] = useState(false);
   const [pageTemplate, setPageTemplate] =
@@ -319,6 +322,14 @@ export function BuilderDemo({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [saveState]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      if (window.innerWidth < 640) setDevice("mobile");
+      else if (window.innerWidth < 1024) setDevice("tablet");
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   function patchProperties(id: string, patch: Partial<BlockProperties>) {
     setMessage("");
@@ -456,18 +467,20 @@ export function BuilderDemo({
   }
 
   return (
-    <div className="min-h-screen min-w-0 bg-slate-100 p-4 sm:p-6">
+    <div className="min-h-screen min-w-0 overflow-x-clip bg-slate-100 p-2 sm:p-4 lg:p-6">
       <div className="mx-auto w-full max-w-[1500px] min-w-0">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-          <div>
+        <div className="mb-4 flex min-w-0 flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0">
             <p className="text-sm font-semibold text-cyan-700">
               {tenantMode ? "Website gestalten" : "Builder ausprobieren"}
             </p>
-            <h1 className="text-3xl font-semibold">Website-Builder</h1>
+            <h1 className="text-2xl font-semibold sm:text-3xl">
+              Website-Builder
+            </h1>
           </div>
           <div
             aria-live="polite"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold"
+            className="self-start rounded-full bg-white px-4 py-2 text-sm font-semibold whitespace-nowrap sm:self-auto"
           >
             {saveState === "saving"
               ? "Wird gespeichert …"
@@ -476,10 +489,40 @@ export function BuilderDemo({
                 : "Speichern fehlgeschlagen"}
           </div>
         </div>
-        <div className="grid min-w-0 gap-5 xl:grid-cols-[420px_1fr]">
+        <div
+          aria-label="Builder-Ansicht"
+          className="sticky top-[4.5rem] z-30 mb-4 grid grid-cols-2 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-lg shadow-slate-900/5 backdrop-blur-xl 2xl:hidden"
+          role="group"
+        >
+          <button
+            aria-pressed={workspaceView === "edit"}
+            className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+              workspaceView === "edit"
+                ? "bg-slate-950 text-white"
+                : "text-slate-600"
+            }`}
+            onClick={() => setWorkspaceView("edit")}
+            type="button"
+          >
+            Bearbeiten
+          </button>
+          <button
+            aria-pressed={workspaceView === "preview"}
+            className={`min-h-11 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+              workspaceView === "preview"
+                ? "bg-cyan-600 text-white"
+                : "text-slate-600"
+            }`}
+            onClick={() => setWorkspaceView("preview")}
+            type="button"
+          >
+            Vorschau
+          </button>
+        </div>
+        <div className="grid min-w-0 gap-5 2xl:grid-cols-[minmax(360px,420px)_minmax(0,1fr)]">
           <section
             aria-label="Bearbeitung"
-            className="min-w-0 space-y-4 rounded-3xl bg-white p-5 shadow-sm"
+            className={`${workspaceView === "edit" ? "block" : "hidden"} min-w-0 space-y-4 rounded-2xl bg-white p-3 shadow-sm sm:rounded-3xl sm:p-5 2xl:block`}
           >
             <DesignSetup
               canUseThemes={canUseThemes}
@@ -951,17 +994,21 @@ export function BuilderDemo({
           </section>
           <section
             aria-label="Vorschau"
-            className="min-w-0 self-start xl:sticky xl:top-5"
+            className={`${workspaceView === "preview" ? "block" : "hidden"} min-w-0 self-start 2xl:sticky 2xl:top-5 2xl:block`}
           >
             <div
-              className="mb-3 flex flex-wrap gap-2"
+              className="mb-3 hidden grid-cols-3 gap-2 sm:grid"
               role="group"
               aria-label="Vorschaugröße"
             >
               {(["desktop", "tablet", "mobile"] as const).map((value) => (
                 <button
                   aria-pressed={device === value}
-                  className="rounded-lg bg-white px-4 py-2 capitalize"
+                  className={`min-h-11 rounded-xl border px-2 py-2 text-sm font-semibold capitalize ${
+                    device === value
+                      ? "border-cyan-500 bg-cyan-50 text-cyan-950"
+                      : "border-transparent bg-white text-slate-600"
+                  }`}
                   key={value}
                   onClick={() => setDevice(value)}
                 >
@@ -973,8 +1020,11 @@ export function BuilderDemo({
                 </button>
               ))}
             </div>
+            <p className="mb-3 rounded-xl bg-white px-4 py-3 text-center text-sm font-semibold text-slate-600 sm:hidden">
+              Mobile Vorschau
+            </p>
             <div
-              className={`mx-auto overflow-hidden rounded-3xl bg-white shadow-lg transition-[max-width] ${device === "mobile" ? "max-w-[390px]" : device === "tablet" ? "max-w-[800px]" : "max-w-none"}`}
+              className={`mx-auto w-full max-w-full overflow-hidden rounded-2xl bg-white shadow-lg transition-[max-width] sm:rounded-3xl ${device === "mobile" ? "sm:max-w-[390px]" : device === "tablet" ? "sm:max-w-[800px]" : "max-w-none"}`}
               data-font={font}
               data-theme={theme}
               style={
