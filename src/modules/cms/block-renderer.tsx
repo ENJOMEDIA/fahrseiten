@@ -5,13 +5,28 @@ import type { StoredBlock } from "./block-schema";
 
 const weekdays = ["", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
-export function BlockRenderer({ blocks }: { blocks: readonly StoredBlock[] }) {
+export function BlockRenderer({
+  blocks,
+  contactHref,
+}: {
+  blocks: readonly StoredBlock[];
+  contactHref?: string;
+}) {
+  const contactBlockId = blocks.find(
+    (block) => block.visible && block.properties.type === "contact_teaser",
+  )?.id;
   return (
     <div className="@container">
       {blocks
         .filter((block) => block.visible)
         .map((block, index) => (
-          <Block alternate={index % 2 === 1} block={block} key={block.id} />
+          <Block
+            alternate={index % 2 === 1}
+            block={block}
+            contactAnchor={block.id === contactBlockId}
+            contactHref={contactHref}
+            key={block.id}
+          />
         ))}
     </div>
   );
@@ -20,9 +35,13 @@ export function BlockRenderer({ blocks }: { blocks: readonly StoredBlock[] }) {
 function Block({
   block,
   alternate,
+  contactAnchor,
+  contactHref,
 }: {
   block: StoredBlock;
   alternate: boolean;
+  contactAnchor: boolean;
+  contactHref?: string;
 }) {
   const value = block.properties;
   switch (value.type) {
@@ -60,7 +79,7 @@ function Block({
                 {value.actionLabel && value.actionHref ? (
                   <Link
                     className="surface-lift inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full px-6 font-black text-white shadow-2xl @[40rem]:min-h-14 @[40rem]:w-auto @[40rem]:px-7"
-                    href={value.actionHref}
+                    href={resolveActionHref(value.actionHref, contactHref)}
                     style={{ backgroundColor: "var(--tenant-primary)" }}
                   >
                     {value.actionLabel}
@@ -187,7 +206,7 @@ function Block({
               </div>
               <Link
                 className="surface-lift inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-white px-7 text-center font-black text-slate-950 @[40rem]:w-auto"
-                href={value.actionHref}
+                href={resolveActionHref(value.actionHref, contactHref)}
               >
                 {value.actionLabel}
                 <span aria-hidden="true">→</span>
@@ -230,7 +249,10 @@ function Block({
       );
     case "contact_teaser":
       return (
-        <section className="tenant-contact px-4 py-16 text-white @[40rem]:px-8 @[40rem]:py-24">
+        <section
+          className="tenant-contact scroll-mt-24 px-4 py-16 text-white @[40rem]:px-8 @[40rem]:py-24"
+          id={contactAnchor ? "kontakt" : undefined}
+        >
           <div className="mx-auto grid max-w-7xl items-end gap-10 @[64rem]:grid-cols-[1fr_auto]">
             <div>
               <p className="text-xs font-black tracking-[0.2em] text-white/45 uppercase">
@@ -623,6 +645,10 @@ function Block({
         </ContentSection>
       );
   }
+}
+
+function resolveActionHref(href: string | undefined, contactHref?: string) {
+  return href === "/kontakt" && contactHref ? contactHref : (href ?? "/");
 }
 
 function SectionIntro({

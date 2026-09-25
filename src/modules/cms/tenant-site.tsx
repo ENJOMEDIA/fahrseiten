@@ -18,6 +18,7 @@ export function TenantSite({
   const navigation = [...website.navigation].sort(
     (a, b) => a.position - b.position,
   );
+  const contactHref = resolveTenantContactHref(website);
   return (
     <div
       className="tenant-site min-h-screen bg-white text-slate-950"
@@ -86,7 +87,7 @@ export function TenantSite({
           <div className="flex items-center gap-2">
             <Link
               className="hidden rounded-full px-5 py-3 text-sm font-black text-white shadow-lg sm:inline-flex"
-              href={`${website.basePath || ""}/kontakt`}
+              href={contactHref}
               style={{ backgroundColor: "var(--tenant-primary)" }}
             >
               Jetzt anfragen
@@ -115,7 +116,7 @@ export function TenantSite({
         </div>
       </header>
       <main>
-        <BlockRenderer blocks={page.blocks} />
+        <BlockRenderer blocks={page.blocks} contactHref={contactHref} />
         {afterContent}
       </main>
       <footer className="tenant-footer px-6 py-16 text-white">
@@ -178,4 +179,21 @@ export function TenantSite({
       </footer>
     </div>
   );
+}
+
+export function resolveTenantContactHref(website: TenantWebsite) {
+  const contactItem = [...website.navigation]
+    .sort((a, b) => a.position - b.position)
+    .find((item) => {
+      const path = item.href.split(/[?#]/, 1)[0].replace(/\/+$/, "");
+      const label = item.label.toLocaleLowerCase("de-DE");
+      return (
+        path.endsWith("/kontakt") ||
+        label.includes("kontakt") ||
+        label.includes("anfrag")
+      );
+    });
+  if (contactItem) return contactItem.href;
+  const home = (website.basePath || "/").replace(/\/+$/, "") || "/";
+  return home === "/" ? "/#kontakt" : `${home}#kontakt`;
 }
