@@ -53,7 +53,7 @@ export function ContentEntryForm({
       action={action}
       className="rounded-2xl border border-slate-200 bg-white p-5"
       encType="multipart/form-data"
-      id={entry ? undefined : "new-entry"}
+      id={entry ? undefined : `new-${module}`}
     >
       <input name="module" type="hidden" value={module} />
       {entry ? <input name="id" type="hidden" value={entry.id} /> : null}

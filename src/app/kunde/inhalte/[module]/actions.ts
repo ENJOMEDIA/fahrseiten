@@ -118,6 +118,7 @@ export async function createContentEntryAction(
       formData,
     });
     revalidatePath(`/kunde/inhalte/${contentModule}`);
+    revalidatePath("/kunde/einrichtung");
     revalidatePath("/site", "layout");
     return { message: "Eintrag wurde gespeichert.", error: false };
   } catch (error) {
@@ -147,6 +148,7 @@ export async function updateContentEntryAction(
       formData,
     });
     revalidatePath(`/kunde/inhalte/${contentModule}`);
+    revalidatePath("/kunde/einrichtung");
     revalidatePath("/site", "layout");
     return { message: "Änderungen wurden gespeichert.", error: false };
   } catch (error) {
@@ -174,6 +176,7 @@ export async function deleteContentEntryAction(
       id: String(formData.get("id")),
     });
     revalidatePath(`/kunde/inhalte/${contentModule}`);
+    revalidatePath("/kunde/einrichtung");
     revalidatePath("/site", "layout");
     return { message: "Eintrag wurde gelöscht.", error: false };
   } catch (error) {
@@ -202,6 +205,7 @@ export async function toggleContentEntryAction(
       active: formData.get("active") === "true",
     });
     revalidatePath(`/kunde/inhalte/${contentModule}`);
+    revalidatePath("/kunde/einrichtung");
     revalidatePath("/site", "layout");
     return { message: "Sichtbarkeit wurde geändert.", error: false };
   } catch (error) {

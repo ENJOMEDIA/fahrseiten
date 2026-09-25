@@ -1,18 +1,27 @@
 import Link from "next/link";
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 import {
-  addVehicleSetupAction,
   saveLicenseSetupAction,
   saveLocationSetupAction,
   startBuilderFromGuideAction,
 } from "./actions";
+import {
+  ContentEntryForm,
+  DeleteContentEntryForm,
+} from "@/app/kunde/inhalte/[module]/content-entry-form";
 import { Breadcrumbs } from "@/components/layout/app-shell";
 import { GuidedSubmitButton } from "@/components/onboarding/guided-submit-button";
+import { VehicleSetupForm } from "@/components/onboarding/vehicle-setup-form";
 import { db } from "@/db/client";
-import { licenseClasses, vehicles } from "@/db/schema";
+import { licenseClasses } from "@/db/schema";
 import { getSessionIdentity } from "@/modules/auth/session";
+import {
+  listTenantContentEntries,
+  type ManagedContentEntry,
+} from "@/modules/content/management";
+import { listTenantMedia } from "@/modules/media/repository";
 import {
   findWebsiteSetupState,
   websiteSetupSteps,
@@ -60,23 +69,24 @@ export default async function CustomerSetupPage({
   const query = await searchParams;
   const state = await findWebsiteSetupState(membership.tenantId);
   const current: StepKey = isStep(query.schritt) ? query.schritt : "start";
-  const [classRows, fleet] = await Promise.all([
+  const [classRows, fleet, team, prices, mediaAssets] = await Promise.all([
     db
       .select()
       .from(licenseClasses)
       .where(eq(licenseClasses.tenantId, membership.tenantId))
       .orderBy(asc(licenseClasses.position)),
-    db
-      .select()
-      .from(vehicles)
-      .where(
-        and(
-          eq(vehicles.tenantId, membership.tenantId),
-          eq(vehicles.active, true),
-        ),
-      )
-      .orderBy(asc(vehicles.position)),
+    listTenantContentEntries(membership.tenantId, "fahrzeuge"),
+    listTenantContentEntries(membership.tenantId, "team"),
+    listTenantContentEntries(membership.tenantId, "preise"),
+    listTenantMedia(membership.tenantId),
   ]);
+  const activeClasses = classRows
+    .filter((entry) => entry.active)
+    .map((entry) => ({ key: entry.key, title: entry.title }));
+  const media = mediaAssets.map((asset) => ({
+    id: asset.id,
+    label: asset.altText || asset.originalName,
+  }));
   const progressIndex = Math.max(0, stepKeys.indexOf(current));
 
   return (
@@ -385,69 +395,81 @@ export default async function CustomerSetupPage({
                 Zeig euren Fuhrpark.
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Ein Fahrzeug reicht für den Start. Fotos kannst du anschließend
-                im Medienbereich ergänzen.
+                Ein Fahrzeug reicht für den Start. Wähle die zuvor festgelegten
+                Führerscheinklassen aus und ergänze direkt ein Foto – oder hole
+                das später an derselben Stelle nach.
               </p>
               {fleet.length ? (
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="mt-7 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="font-semibold text-slate-950">
+                      Gespeicherte Fahrzeuge
+                    </h3>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                      {fleet.length}
+                    </span>
+                  </div>
                   {fleet.map((item) => (
-                    <div
-                      className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"
+                    <details
+                      className="group rounded-2xl border border-slate-200 bg-white p-4 open:border-cyan-300"
                       key={item.id}
                     >
-                      <p className="font-semibold text-emerald-950">
-                        ✓ {item.name}
-                      </p>
-                      <p className="mt-1 text-sm text-emerald-800">
-                        {item.category} ·{" "}
-                        {item.transmission === "automatic"
-                          ? "Automatik"
-                          : "Schaltung"}
-                      </p>
-                    </div>
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                        <span className="min-w-0">
+                          <span className="block font-semibold text-slate-950">
+                            {item.title}
+                          </span>
+                          <span className="mt-1 block text-sm text-slate-500">
+                            {item.fields.category} ·{" "}
+                            {item.fields.transmission === "automatic"
+                              ? "Automatik"
+                              : "Schaltung"}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-sm font-semibold text-cyan-700 group-open:hidden">
+                          Bearbeiten
+                        </span>
+                        <span className="hidden shrink-0 text-sm font-semibold text-cyan-700 group-open:inline">
+                          Schließen
+                        </span>
+                      </summary>
+                      <div className="mt-5 border-t border-slate-100 pt-5">
+                        <VehicleSetupForm
+                          classes={activeClasses}
+                          media={media}
+                          vehicle={{
+                            id: item.id,
+                            name: item.title,
+                            category: item.fields.category ?? "",
+                            transmission: item.fields.transmission ?? "manual",
+                            description: item.fields.description ?? null,
+                            imageMediaId: item.fields.imageMediaId ?? null,
+                            imageUrl: item.imageUrl ?? undefined,
+                          }}
+                        />
+                        <div className="mt-3 flex justify-end">
+                          <DeleteContentEntryForm
+                            id={item.id}
+                            module="fahrzeuge"
+                            title={item.title}
+                          />
+                        </div>
+                      </div>
+                    </details>
                   ))}
                 </div>
               ) : null}
-              <form
-                action={addVehicleSetupAction}
-                className="mt-7 rounded-[1.5rem] bg-slate-50 p-4 sm:p-6"
-              >
-                <h3 className="font-semibold text-slate-950">
-                  {fleet.length ? "Weiteres Fahrzeug" : "Erstes Fahrzeug"}
-                </h3>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <Field
-                    label="Modell oder Bezeichnung"
-                    name="name"
-                    placeholder="z. B. VW Golf 8"
-                    required
-                  />
-                  <Field
-                    label="Klasse / Kategorie"
-                    name="category"
-                    placeholder="z. B. Klasse B"
-                    required
-                  />
-                  <label className="text-sm font-semibold text-slate-700">
-                    Getriebe
-                    <select
-                      className={`${inputClass} mt-2`}
-                      name="transmission"
-                    >
-                      <option value="manual">Schaltung</option>
-                      <option value="automatic">Automatik</option>
-                    </select>
-                  </label>
-                  <Field
-                    label="Kurze Beschreibung"
-                    name="description"
-                    placeholder="z. B. modern, kompakt und leicht zu fahren"
-                  />
-                </div>
-                <GuidedSubmitButton className="mt-5 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-800 sm:w-auto">
-                  + Fahrzeug speichern
-                </GuidedSubmitButton>
-              </form>
+              <div className="mt-7">
+                <VehicleSetupForm
+                  classes={activeClasses}
+                  heading={
+                    fleet.length
+                      ? "Weiteres Fahrzeug hinzufügen"
+                      : "Erstes Fahrzeug einrichten"
+                  }
+                  media={media}
+                />
+              </div>
               <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-between">
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold"
@@ -474,34 +496,25 @@ export default async function CustomerSetupPage({
                 Was schafft Vertrauen?
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                Team und Preise sind umfangreicher. Öffne die vorbereiteten
-                Bereiche, ergänze mindestens einen Eintrag und kehre hierher
-                zurück.
+                Ergänze Team und Preise direkt hier. Gespeicherte Einträge
+                kannst du aufklappen, bearbeiten oder wieder löschen, ohne den
+                Assistenten zu verlassen.
               </p>
-              <div className="mt-7 grid gap-4 sm:grid-cols-2">
-                <SetupLink
-                  done={state.counts.team > 0}
-                  href="/kunde/inhalte/team"
+              <div className="mt-7 grid gap-6 xl:grid-cols-2">
+                <InlineEntries
+                  entries={team}
+                  media={media}
+                  module="team"
+                  singular="Teammitglied"
                   title="Team vorstellen"
-                  text="Name, Rolle, Qualifikation und optional ein Foto."
+                  text="Name, Rolle, Qualifikationen und optional ein Foto."
                 />
-                <SetupLink
-                  done={state.counts.prices > 0}
-                  href="/kunde/inhalte/preise"
+                <InlineEntries
+                  entries={prices}
+                  module="preise"
+                  singular="Preisgruppe"
                   title="Preise erklären"
-                  text="Preisgruppen und Leistungen nachvollziehbar anlegen."
-                />
-                <SetupLink
-                  done={false}
-                  href="/kunde/rechtliches"
-                  title="Rechtliches prüfen"
-                  text="Impressum und Datenschutz vor Veröffentlichung freigeben."
-                />
-                <SetupLink
-                  done={false}
-                  href="/kunde/medien"
-                  title="Bilder hochladen"
-                  text="Logo, Team, Fahrzeuge und Standort sauber sortieren."
+                  text="Leistungen in verständliche Preisgruppen gliedern."
                 />
               </div>
               <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-between">
@@ -644,34 +657,73 @@ function WizardButtons({
   );
 }
 
-function SetupLink({
-  done,
-  href,
+function InlineEntries({
+  entries,
+  media = [],
+  module,
+  singular,
   title,
   text,
 }: {
-  done: boolean;
-  href: string;
+  entries: ManagedContentEntry[];
+  media?: { id: string; label: string }[];
+  module: "team" | "preise";
+  singular: string;
   title: string;
   text: string;
 }) {
   return (
-    <Link
-      className="group rounded-2xl border border-slate-200 p-5 transition hover:border-cyan-400 hover:shadow-md"
-      href={href}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="font-semibold text-slate-950">{title}</h3>
+    <section className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-slate-950">{title}</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
+        </div>
         <span
-          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${done ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${entries.length ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-500"}`}
         >
-          {done ? "Erledigt" : "Öffnen"}
+          {entries.length ? `${entries.length} gespeichert` : "Noch offen"}
         </span>
       </div>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{text}</p>
-      <span className="mt-4 block text-sm font-semibold text-cyan-700">
-        Bearbeiten →
-      </span>
-    </Link>
+
+      {entries.length ? (
+        <div className="mt-4 space-y-2">
+          {entries.map((entry) => (
+            <details
+              className="rounded-xl border border-slate-200 bg-white p-3"
+              key={entry.id}
+            >
+              <summary className="cursor-pointer text-sm font-semibold text-cyan-800">
+                {entry.title} bearbeiten
+              </summary>
+              <div className="mt-3 space-y-3">
+                <ContentEntryForm
+                  entry={entry}
+                  media={media}
+                  module={module}
+                  singular={singular}
+                />
+                <div className="flex justify-end">
+                  <DeleteContentEntryForm
+                    id={entry.id}
+                    module={module}
+                    title={entry.title}
+                  />
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="mt-4">
+        <ContentEntryForm
+          heading={`${singular} hinzufügen`}
+          media={media}
+          module={module}
+          singular={singular}
+        />
+      </div>
+    </section>
   );
 }

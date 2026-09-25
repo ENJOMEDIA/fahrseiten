@@ -131,7 +131,7 @@ export default async function ContentModulePage({
               {canWrite ? (
                 <a
                   className="mt-4 inline-flex rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white"
-                  href="#new-entry"
+                  href={`#new-${slug}`}
                 >
                   {moduleConfig.singular} hinzufügen
                 </a>

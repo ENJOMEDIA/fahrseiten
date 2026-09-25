@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
 import { db } from "@/db/client";
-import { licenseClasses, locations, openingHours, vehicles } from "@/db/schema";
+import { licenseClasses, locations, openingHours } from "@/db/schema";
 import { createId } from "@/lib/ids";
 import { hasTenantPermission } from "@/modules/auth/permissions";
 import { getSessionIdentity } from "@/modules/auth/session";
@@ -146,21 +146,6 @@ export async function saveLocationSetupAction(formData: FormData) {
   });
   revalidatePath("/kunde", "layout");
   redirect("/kunde/einrichtung?schritt=fahrzeuge&gespeichert=Standort");
-}
-
-export async function addVehicleSetupAction(formData: FormData) {
-  const { membership } = await writableMembership();
-  await db.insert(vehicles).values({
-    id: createId(),
-    tenantId: membership.tenantId,
-    name: required(formData, "name", "Fahrzeugname"),
-    category: required(formData, "category", "Führerscheinklasse"),
-    transmission:
-      value(formData, "transmission") === "automatic" ? "automatic" : "manual",
-    description: value(formData, "description") || null,
-  });
-  revalidatePath("/kunde", "layout");
-  redirect("/kunde/einrichtung?schritt=fahrzeuge&gespeichert=Fahrzeug");
 }
 
 export async function recordSetupReminderAction() {
