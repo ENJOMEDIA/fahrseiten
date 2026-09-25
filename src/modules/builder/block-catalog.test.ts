@@ -19,6 +19,6 @@ describe("builder block defaults", () => {
     if (first.type !== "benefits" || second.type !== "benefits") return;
 
     first.items[0].title = "Geändert";
-    expect(second.items[0].title).toBe("Vorteil");
+    expect(second.items[0].title).toBe("Persönliche Begleitung");
   });
 });

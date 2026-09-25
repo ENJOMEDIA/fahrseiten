@@ -19,6 +19,14 @@ import {
   type BuilderBlockType,
 } from "./block-catalog";
 import type { TenantBuilderPage } from "./tenant-pages";
+import { BuilderBlockFields } from "./block-fields";
+import {
+  builderPageTemplateKeys,
+  builderPageTemplates,
+  createPageTemplateBlocks,
+  normalizePageSlug,
+  type BuilderPageTemplateKey,
+} from "./page-templates";
 import {
   mediaCategoryLabels,
   tenantMediaCategoryValues,
@@ -232,6 +240,17 @@ export function BuilderDemo({
     "desktop",
   );
   const [message, setMessage] = useState("");
+  const [showPageCreator, setShowPageCreator] = useState(false);
+  const [pageTemplate, setPageTemplate] =
+    useState<BuilderPageTemplateKey>("services");
+  const [newPageTitle, setNewPageTitle] = useState(
+    builderPageTemplates.services.suggestedTitle,
+  );
+  const [newPageSlug, setNewPageSlug] = useState(
+    builderPageTemplates.services.suggestedSlug,
+  );
+  const [pageCreating, setPageCreating] = useState(false);
+  const [pageCreateError, setPageCreateError] = useState("");
   const [history, setHistory] = useState<
     { label: string; blocks: StoredBlock[] }[]
   >([]);
@@ -333,6 +352,77 @@ export function BuilderDemo({
     );
     setExpandedBlockId(id);
   }
+  function choosePageTemplate(template: BuilderPageTemplateKey) {
+    const preset = builderPageTemplates[template];
+    setPageTemplate(template);
+    setNewPageTitle(preset.suggestedTitle);
+    setNewPageSlug(preset.suggestedSlug);
+    setPageCreateError("");
+  }
+  async function createPage() {
+    const title = newPageTitle.trim();
+    const slug = normalizePageSlug(newPageSlug || title);
+    if (title.length < 2 || !slug) {
+      setPageCreateError(
+        "Bitte gib einen Seitennamen und eine gültige URL ein.",
+      );
+      return;
+    }
+    if (pages.some((page) => page.slug === slug)) {
+      setPageCreateError("Diese Seiten-URL ist bereits vergeben.");
+      return;
+    }
+    setPageCreating(true);
+    setPageCreateError("");
+    const templateBlocks = createPageTemplateBlocks(
+      pageTemplate,
+      contentPresets,
+    );
+    try {
+      let page: TenantBuilderPage;
+      if (tenantMode) {
+        const response = await fetch("/api/tenant/builder-pages", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ title, slug, blocks: templateBlocks }),
+        });
+        const result = (await response.json()) as {
+          page?: TenantBuilderPage;
+          error?: string;
+          message?: string;
+        };
+        if (!response.ok || !result.page)
+          throw new Error(
+            result.message ||
+              result.error ||
+              "Die Seite konnte nicht angelegt werden.",
+          );
+        page = result.page;
+      } else {
+        page = {
+          id: crypto.randomUUID(),
+          title,
+          slug,
+          blocks: templateBlocks,
+        };
+      }
+      setPages((current) => [...current, page]);
+      setSelectedPageId(page.id);
+      setExpandedBlockId(page.blocks[0]?.id ?? null);
+      setShowPageCreator(false);
+      setMessage(
+        `„${page.title}“ wurde als Entwurf angelegt. Sie erscheint nach der Veröffentlichung in der Navigation.`,
+      );
+    } catch (error) {
+      setPageCreateError(
+        error instanceof Error
+          ? error.message
+          : "Die Seite konnte nicht angelegt werden.",
+      );
+    } finally {
+      setPageCreating(false);
+    }
+  }
   async function publish() {
     try {
       const valid = validateDraft(blocks);
@@ -411,41 +501,137 @@ export function BuilderDemo({
                 automatisch als Entwurf gespeichert.
               </p>
             </div>
-            <label className="block text-sm font-semibold">
-              Seite
-              <select
-                className="mt-2 w-full rounded-xl border p-3"
-                value={selectedPageId}
-                onChange={(event) => setSelectedPageId(event.target.value)}
-              >
+            <section className="rounded-2xl border border-slate-200 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold">Deine Seiten</h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Wähle eine Seite aus oder lege eine neue mit Vorlage an.
+                  </p>
+                </div>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
+                  {pages.length} {pages.length === 1 ? "Seite" : "Seiten"}
+                </span>
+              </div>
+              <div className="mt-3 grid gap-2">
                 {pages.map((page) => (
-                  <option key={page.id} value={page.id}>
-                    {page.title}
-                  </option>
+                  <button
+                    aria-pressed={page.id === selectedPageId}
+                    className={`rounded-xl border p-3 text-left transition ${
+                      page.id === selectedPageId
+                        ? "border-cyan-500 bg-cyan-50 ring-2 ring-cyan-100"
+                        : "border-slate-200 bg-white hover:border-cyan-300"
+                    }`}
+                    key={page.id}
+                    onClick={() => {
+                      setSelectedPageId(page.id);
+                      setExpandedBlockId(page.blocks[0]?.id ?? null);
+                    }}
+                    type="button"
+                  >
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="font-semibold">{page.title}</span>
+                      <span className="text-xs text-slate-500">
+                        {page.blocks.length} Bereiche
+                      </span>
+                    </span>
+                    <span className="mt-1 block truncate text-xs text-slate-500">
+                      /{page.slug}
+                    </span>
+                  </button>
                 ))}
-              </select>
-            </label>
-            {!tenantMode ? (
+              </div>
               <button
-                className="w-full rounded-xl border px-4 py-3 font-semibold"
-                onClick={() => {
-                  const id = crypto.randomUUID();
-                  const name = `Neue Seite ${pages.length + 1}`;
-                  setPages((current) => [
-                    ...current,
-                    {
-                      id,
-                      title: name,
-                      slug: `seite-${pages.length + 1}`,
-                      blocks: [],
-                    },
-                  ]);
-                  setSelectedPageId(id);
-                }}
+                className="mt-3 w-full rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white"
+                onClick={() => setShowPageCreator((current) => !current)}
+                type="button"
               >
-                Seite anlegen
+                {showPageCreator ? "Abbrechen" : "＋ Neue Seite anlegen"}
               </button>
-            ) : null}
+              {showPageCreator ? (
+                <div className="mt-4 border-t border-slate-200 pt-4">
+                  <p className="text-sm font-semibold">
+                    1. Passende Vorlage wählen
+                  </p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {builderPageTemplateKeys.map((key) => {
+                      const preset = builderPageTemplates[key];
+                      return (
+                        <button
+                          aria-pressed={pageTemplate === key}
+                          className={`rounded-xl border p-3 text-left ${
+                            pageTemplate === key
+                              ? "border-cyan-500 bg-cyan-50"
+                              : "border-slate-200 bg-white"
+                          }`}
+                          key={key}
+                          onClick={() => choosePageTemplate(key)}
+                          type="button"
+                        >
+                          <span className="block text-sm font-semibold">
+                            {preset.name}
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-slate-500">
+                            {preset.description}
+                          </span>
+                          <span className="mt-2 block text-xs font-semibold text-cyan-800">
+                            {preset.blocks.length
+                              ? `${preset.blocks.length} fertige Bereiche`
+                              : "Ohne Bereiche"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-4 text-sm font-semibold">
+                    2. Name und Adresse festlegen
+                  </p>
+                  <label className="mt-2 block text-sm">
+                    Seitenname
+                    <input
+                      className="mt-1 w-full rounded-xl border p-3"
+                      value={newPageTitle}
+                      onChange={(event) => {
+                        setNewPageTitle(event.target.value);
+                        setNewPageSlug(normalizePageSlug(event.target.value));
+                      }}
+                    />
+                  </label>
+                  <label className="mt-3 block text-sm">
+                    Seiten-URL
+                    <span className="mt-1 flex overflow-hidden rounded-xl border bg-white">
+                      <span className="border-r bg-slate-100 px-3 py-3 text-slate-500">
+                        /
+                      </span>
+                      <input
+                        aria-label="Seiten-URL"
+                        className="min-w-0 flex-1 p-3"
+                        value={newPageSlug}
+                        onChange={(event) =>
+                          setNewPageSlug(normalizePageSlug(event.target.value))
+                        }
+                      />
+                    </span>
+                  </label>
+                  <button
+                    className="mt-4 w-full rounded-xl bg-cyan-600 px-4 py-3 font-semibold text-white disabled:opacity-60"
+                    disabled={pageCreating}
+                    onClick={createPage}
+                    type="button"
+                  >
+                    {pageCreating
+                      ? "Seite wird angelegt …"
+                      : "Seite als Entwurf anlegen"}
+                  </button>
+                  <p
+                    aria-live="polite"
+                    className="mt-2 text-sm font-semibold text-red-700"
+                  >
+                    {pageCreateError}
+                  </p>
+                </div>
+              ) : null}
+            </section>
             <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <h3 className="font-semibold">Bereich hinzufügen</h3>
               <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -473,8 +659,13 @@ export function BuilderDemo({
                           key={key}
                           onClick={() => addBlock(key)}
                         >
-                          <span className="mr-2 text-cyan-700">＋</span>
-                          {item.label}
+                          <span className="block">
+                            <span className="mr-2 text-cyan-700">＋</span>
+                            {item.label}
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 font-normal text-slate-500">
+                            {item.description}
+                          </span>
                         </button>
                       ))}
                   </div>
@@ -555,6 +746,10 @@ export function BuilderDemo({
                     />
                   </label>
                 ) : null}
+                <BuilderBlockFields
+                  properties={block.properties}
+                  onPatch={(patch) => patchProperties(block.id, patch)}
+                />
                 {block.properties.type === "hero" ||
                 block.properties.type === "text_image" ? (
                   <label className="mt-3 block text-sm font-semibold">

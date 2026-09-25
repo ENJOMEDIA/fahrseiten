@@ -4,7 +4,13 @@ import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, inArray, max } from "drizzle-orm";
 
 import { db } from "@/db/client";
-import { pageBlocks, pageVersions, sitePages } from "@/db/schema";
+import {
+  navigationItems,
+  pageBlocks,
+  pageVersions,
+  sitePages,
+  sites,
+} from "@/db/schema";
 import {
   parseStoredBlocks,
   type StoredBlock,
@@ -17,6 +23,13 @@ export type TenantBuilderPage = {
   slug: string;
   blocks: StoredBlock[];
 };
+
+export class BuilderPageConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BuilderPageConflictError";
+  }
+}
 
 export async function listTenantBuilderPages(
   tenantId: string,
@@ -75,6 +88,105 @@ export async function listTenantBuilderPages(
       ),
     })),
   );
+}
+
+export async function createTenantBuilderPage(input: {
+  tenantId: string;
+  userId: string;
+  title: string;
+  slug: string;
+  blocks: unknown;
+}): Promise<TenantBuilderPage> {
+  const blocks = parseStoredBlocks(input.blocks);
+  if (!input.slug)
+    throw new BuilderPageConflictError(
+      "Für eine zusätzliche Seite ist eine URL erforderlich.",
+    );
+  return db.transaction(async (tx) => {
+    const [site] = await tx
+      .select({ id: sites.id })
+      .from(sites)
+      .where(eq(sites.tenantId, input.tenantId))
+      .limit(1)
+      .for("update");
+    if (!site)
+      throw new Error("Für den Mandanten wurde keine Website gefunden.");
+    const [duplicate] = await tx
+      .select({ id: sitePages.id })
+      .from(sitePages)
+      .where(
+        and(
+          eq(sitePages.tenantId, input.tenantId),
+          eq(sitePages.slug, input.slug),
+        ),
+      )
+      .limit(1);
+    if (duplicate)
+      throw new BuilderPageConflictError(
+        "Diese URL wird bereits von einer anderen Seite verwendet.",
+      );
+
+    const pageId = randomUUID();
+    const versionId = randomUUID();
+    await tx.insert(sitePages).values({
+      id: pageId,
+      tenantId: input.tenantId,
+      siteId: site.id,
+      slug: input.slug,
+      title: input.title,
+      status: "draft",
+    });
+    await tx.insert(pageVersions).values({
+      id: versionId,
+      tenantId: input.tenantId,
+      pageId,
+      version: 1,
+      state: "draft",
+      title: input.title,
+      createdByUserId: input.userId,
+    });
+    const storedBlocks = blocks.map((block) => ({
+      ...block,
+      id: randomUUID(),
+    }));
+    if (storedBlocks.length)
+      await tx.insert(pageBlocks).values(
+        storedBlocks.map((block) => ({
+          id: block.id,
+          tenantId: input.tenantId,
+          versionId,
+          blockType: block.properties.type,
+          schemaVersion: block.schemaVersion,
+          position: block.position,
+          visible: block.visible,
+          properties: block.properties,
+        })),
+      );
+    const [lastNavigation] = await tx
+      .select({ position: max(navigationItems.position) })
+      .from(navigationItems)
+      .where(
+        and(
+          eq(navigationItems.tenantId, input.tenantId),
+          eq(navigationItems.siteId, site.id),
+        ),
+      );
+    await tx.insert(navigationItems).values({
+      id: randomUUID(),
+      tenantId: input.tenantId,
+      siteId: site.id,
+      pageId,
+      label: input.title,
+      position: (lastNavigation?.position ?? -1) + 1,
+      visible: false,
+    });
+    return {
+      id: pageId,
+      title: input.title,
+      slug: input.slug,
+      blocks: storedBlocks,
+    };
+  });
 }
 
 async function saveDraft(
@@ -220,6 +332,15 @@ export async function publishTenantBuilderDraft(input: {
         and(
           eq(sitePages.id, input.pageId),
           eq(sitePages.tenantId, input.tenantId),
+        ),
+      );
+    await tx
+      .update(navigationItems)
+      .set({ visible: true })
+      .where(
+        and(
+          eq(navigationItems.pageId, input.pageId),
+          eq(navigationItems.tenantId, input.tenantId),
         ),
       );
   });
