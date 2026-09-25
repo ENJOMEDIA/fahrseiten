@@ -7,13 +7,13 @@ const weekdays = ["", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 export function BlockRenderer({ blocks }: { blocks: readonly StoredBlock[] }) {
   return (
-    <>
+    <div className="@container">
       {blocks
         .filter((block) => block.visible)
         .map((block, index) => (
           <Block alternate={index % 2 === 1} block={block} key={block.id} />
         ))}
-    </>
+    </div>
   );
 }
 
@@ -28,7 +28,7 @@ function Block({
   switch (value.type) {
     case "hero":
       return (
-        <section className="tenant-hero relative isolate min-h-[calc(100svh-4rem)] overflow-hidden px-4 py-16 text-white sm:min-h-[calc(100svh-5rem)] sm:px-8 sm:py-24">
+        <section className="tenant-hero relative isolate min-h-[calc(100svh-4rem)] overflow-hidden px-4 py-16 text-white @[40rem]:min-h-[calc(100svh-5rem)] @[40rem]:px-8 @[40rem]:py-24">
           {value.imageUrl ? (
             <Image
               alt={value.imageAlt || ""}
@@ -42,7 +42,7 @@ function Block({
           ) : null}
           <div className="tenant-hero-overlay absolute inset-0 -z-20" />
           <div className="tenant-hero-glow absolute -top-36 -right-36 -z-10 h-[36rem] w-[36rem] rounded-full blur-3xl" />
-          <div className="mx-auto flex min-h-[calc(100svh-12rem)] max-w-7xl flex-col justify-end pb-4 sm:min-h-[calc(100svh-17rem)] sm:justify-center sm:pb-5">
+          <div className="mx-auto flex min-h-[calc(100svh-12rem)] max-w-7xl flex-col justify-end pb-4 @[40rem]:min-h-[calc(100svh-17rem)] @[40rem]:justify-center @[40rem]:pb-5">
             <div className="max-w-4xl">
               {value.eyebrow ? (
                 <p className="reveal-up inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black tracking-[0.2em] uppercase backdrop-blur-xl">
@@ -50,16 +50,16 @@ function Block({
                   {value.eyebrow}
                 </p>
               ) : null}
-              <h1 className="reveal-up animation-delay-1 mt-6 max-w-4xl text-[clamp(2.6rem,12vw,7.2rem)] leading-[0.94] font-black tracking-[-0.055em] text-balance sm:mt-7 sm:leading-[0.92] sm:tracking-[-0.065em]">
+              <h1 className="reveal-up animation-delay-1 mt-6 max-w-4xl text-[clamp(2.6rem,12vw,7.2rem)] leading-[0.94] font-black tracking-[-0.055em] text-balance @[40rem]:mt-7 @[40rem]:leading-[0.92] @[40rem]:tracking-[-0.065em]">
                 {value.heading}
               </h1>
-              <p className="reveal-up animation-delay-2 mt-5 max-w-2xl text-base leading-7 text-white/78 sm:mt-7 sm:text-xl sm:leading-8">
+              <p className="reveal-up animation-delay-2 mt-5 max-w-2xl text-base leading-7 text-white/78 @[40rem]:mt-7 @[40rem]:text-xl @[40rem]:leading-8">
                 {value.text}
               </p>
-              <div className="reveal-up animation-delay-3 mt-7 flex flex-wrap items-center gap-4 sm:mt-9">
+              <div className="reveal-up animation-delay-3 mt-7 flex flex-wrap items-center gap-4 @[40rem]:mt-9">
                 {value.actionLabel && value.actionHref ? (
                   <Link
-                    className="surface-lift inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full px-6 font-black text-white shadow-2xl sm:min-h-14 sm:w-auto sm:px-7"
+                    className="surface-lift inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full px-6 font-black text-white shadow-2xl @[40rem]:min-h-14 @[40rem]:w-auto @[40rem]:px-7"
                     href={value.actionHref}
                     style={{ backgroundColor: "var(--tenant-primary)" }}
                   >
@@ -73,7 +73,7 @@ function Block({
               </div>
             </div>
           </div>
-          <div className="absolute right-8 bottom-8 hidden items-center gap-3 rounded-2xl border border-white/15 bg-black/20 px-4 py-3 text-xs font-bold backdrop-blur-xl sm:flex">
+          <div className="absolute right-8 bottom-8 hidden items-center gap-3 rounded-2xl border border-white/15 bg-black/20 px-4 py-3 text-xs font-bold backdrop-blur-xl @[40rem]:flex">
             <span className="text-xl" aria-hidden="true">
               ↓
             </span>
@@ -84,15 +84,19 @@ function Block({
     case "text_image":
       return (
         <section
-          className={`tenant-section px-4 py-16 sm:px-8 sm:py-24 ${alternate ? "bg-slate-50" : "bg-white"}`}
+          className={`tenant-section px-4 py-16 @[40rem]:px-8 @[40rem]:py-24 ${alternate ? "bg-slate-50" : "bg-white"}`}
         >
-          <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            <div className={value.imagePosition === "left" ? "lg:order-2" : ""}>
+          <div className="mx-auto grid max-w-7xl items-center gap-12 @[64rem]:grid-cols-2 @[64rem]:gap-20">
+            <div
+              className={
+                value.imagePosition === "left" ? "@[64rem]:order-2" : ""
+              }
+            >
               <SectionIntro
                 eyebrow="Unsere Fahrschule"
                 heading={value.heading}
               />
-              <div className="mt-7 space-y-4 text-base leading-8 text-slate-600 sm:text-lg">
+              <div className="mt-7 space-y-4 text-base leading-8 text-slate-600 @[40rem]:text-lg">
                 {value.paragraphs.map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
@@ -112,7 +116,7 @@ function Block({
                 ))}
               </div>
             </div>
-            <div className="tenant-media-frame relative min-h-80 overflow-hidden rounded-[var(--radius-card)] bg-slate-200 shadow-2xl sm:min-h-[28rem]">
+            <div className="tenant-media-frame relative min-h-80 overflow-hidden rounded-[var(--radius-card)] bg-slate-200 shadow-2xl @[40rem]:min-h-[28rem]">
               {value.imageUrl ? (
                 <Image
                   alt={value.imageAlt}
@@ -137,13 +141,13 @@ function Block({
       );
     case "benefits":
       return (
-        <section className="tenant-section bg-white px-4 py-16 sm:px-8 sm:py-24">
+        <section className="tenant-section bg-white px-4 py-16 @[40rem]:px-8 @[40rem]:py-24">
           <div className="mx-auto max-w-7xl">
             <SectionIntro eyebrow="Deine Vorteile" heading={value.heading} />
-            <div className="mt-12 grid gap-5 md:grid-cols-3">
+            <div className="mt-12 grid gap-5 @[48rem]:grid-cols-3">
               {value.items.map((item, index) => (
                 <article
-                  className="tenant-feature-card surface-lift group rounded-[var(--radius-card)] border border-slate-200 bg-white p-5 shadow-sm sm:p-9"
+                  className="tenant-feature-card surface-lift group rounded-[var(--radius-card)] border border-slate-200 bg-white p-5 shadow-sm @[40rem]:p-9"
                   key={item.title}
                 >
                   <div className="flex items-center justify-between">
@@ -154,7 +158,7 @@ function Block({
                       0{index + 1}
                     </span>
                   </div>
-                  <h3 className="mt-7 text-2xl font-black tracking-tight sm:mt-10">
+                  <h3 className="mt-7 text-2xl font-black tracking-tight @[40rem]:mt-10">
                     {item.title}
                   </h3>
                   <p className="mt-3 leading-7 text-slate-600">{item.text}</p>
@@ -166,15 +170,15 @@ function Block({
       );
     case "cta":
       return (
-        <section className="bg-white px-4 py-12 sm:px-8 sm:py-16">
-          <div className="tenant-cta relative mx-auto max-w-7xl overflow-hidden rounded-[var(--radius-card)] px-7 py-14 text-white sm:px-14 sm:py-20">
+        <section className="bg-white px-4 py-12 @[40rem]:px-8 @[40rem]:py-16">
+          <div className="tenant-cta relative mx-auto max-w-7xl overflow-hidden rounded-[var(--radius-card)] px-7 py-14 text-white @[40rem]:px-14 @[40rem]:py-20">
             <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/15 blur-3xl" />
-            <div className="relative grid items-end gap-8 lg:grid-cols-[1fr_auto]">
+            <div className="relative grid items-end gap-8 @[64rem]:grid-cols-[1fr_auto]">
               <div>
                 <p className="text-xs font-black tracking-[0.2em] text-white/55 uppercase">
                   Bereit für den nächsten Schritt?
                 </p>
-                <h2 className="mt-4 max-w-3xl text-3xl font-black tracking-[-0.04em] text-balance sm:text-6xl sm:tracking-[-0.045em]">
+                <h2 className="mt-4 max-w-3xl text-3xl font-black tracking-[-0.04em] text-balance @[40rem]:text-6xl @[40rem]:tracking-[-0.045em]">
                   {value.heading}
                 </h2>
                 <p className="mt-5 max-w-2xl text-lg leading-8 text-white/70">
@@ -182,7 +186,7 @@ function Block({
                 </p>
               </div>
               <Link
-                className="surface-lift inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-white px-7 text-center font-black text-slate-950 sm:w-auto"
+                className="surface-lift inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-white px-7 text-center font-black text-slate-950 @[40rem]:w-auto"
                 href={value.actionHref}
               >
                 {value.actionLabel}
@@ -194,8 +198,8 @@ function Block({
       );
     case "faq":
       return (
-        <section className="tenant-section bg-white px-4 py-16 sm:px-8 sm:py-24">
-          <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[.7fr_1.3fr]">
+        <section className="tenant-section bg-white px-4 py-16 @[40rem]:px-8 @[40rem]:py-24">
+          <div className="mx-auto grid max-w-7xl gap-12 @[64rem]:grid-cols-[.7fr_1.3fr]">
             <SectionIntro eyebrow="Gut zu wissen" heading={value.heading} />
             <div className="space-y-3">
               {value.items.map((item, index) => (
@@ -226,13 +230,13 @@ function Block({
       );
     case "contact_teaser":
       return (
-        <section className="tenant-contact px-4 py-16 text-white sm:px-8 sm:py-24">
-          <div className="mx-auto grid max-w-7xl items-end gap-10 lg:grid-cols-[1fr_auto]">
+        <section className="tenant-contact px-4 py-16 text-white @[40rem]:px-8 @[40rem]:py-24">
+          <div className="mx-auto grid max-w-7xl items-end gap-10 @[64rem]:grid-cols-[1fr_auto]">
             <div>
               <p className="text-xs font-black tracking-[0.2em] text-white/45 uppercase">
                 Wir sind für dich da
               </p>
-              <h2 className="mt-4 max-w-3xl text-3xl font-black tracking-[-0.04em] text-balance sm:text-6xl sm:tracking-[-0.045em]">
+              <h2 className="mt-4 max-w-3xl text-3xl font-black tracking-[-0.04em] text-balance @[40rem]:text-6xl @[40rem]:tracking-[-0.045em]">
                 {value.heading}
               </h2>
               <p className="mt-5 max-w-2xl text-lg text-white/65">
@@ -242,7 +246,7 @@ function Block({
             <div className="grid gap-3 text-sm font-black">
               {value.phone ? (
                 <a
-                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-5 py-4 break-all backdrop-blur hover:bg-white/15 sm:w-auto sm:rounded-full sm:px-6"
+                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-5 py-4 break-all backdrop-blur hover:bg-white/15 @[40rem]:w-auto @[40rem]:rounded-full @[40rem]:px-6"
                   href={`tel:${value.phone}`}
                 >
                   ↗ {value.phone}
@@ -250,7 +254,7 @@ function Block({
               ) : null}
               {value.email ? (
                 <a
-                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-5 py-4 break-all backdrop-blur hover:bg-white/15 sm:w-auto sm:rounded-full sm:px-6"
+                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-5 py-4 break-all backdrop-blur hover:bg-white/15 @[40rem]:w-auto @[40rem]:rounded-full @[40rem]:px-6"
                   href={`mailto:${value.email}`}
                 >
                   ↗ {value.email}
@@ -309,7 +313,7 @@ function Block({
                 className="tenant-content-card rounded-[var(--radius-card)] border border-slate-200 bg-white p-7 shadow-sm"
                 key={group.id}
               >
-                <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="flex flex-col items-start gap-3 @[40rem]:flex-row @[40rem]:items-center @[40rem]:justify-between @[40rem]:gap-4">
                   <h3 className="text-2xl font-black">{group.title}</h3>
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">
                     Beispiel
@@ -499,7 +503,7 @@ function Block({
             <div className="relative col-span-full min-h-72 overflow-hidden rounded-[var(--radius-card)] border border-slate-200 bg-slate-900 shadow-xl">
               <div className="absolute inset-0 [background-image:linear-gradient(35deg,transparent_47%,rgba(255,255,255,.16)_48%,transparent_50%),linear-gradient(145deg,transparent_47%,rgba(255,255,255,.12)_48%,transparent_50%)] [background-size:95px_95px] opacity-35" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,var(--tenant-primary),transparent_24%),radial-gradient(circle_at_78%_70%,var(--tenant-primary),transparent_20%)] opacity-35" />
-              <div className="relative flex min-h-72 flex-col justify-between p-6 text-white sm:p-8">
+              <div className="relative flex min-h-72 flex-col justify-between p-6 text-white @[40rem]:p-8">
                 <div>
                   <p className="text-xs font-black tracking-[.18em] text-white/55 uppercase">
                     Standortübersicht
@@ -515,7 +519,7 @@ function Block({
                     const address = `${item.street}, ${item.postalCode} ${item.city}`;
                     return (
                       <a
-                        className="group flex w-full min-w-0 items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur hover:bg-white/20 sm:w-auto"
+                        className="group flex w-full min-w-0 items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur hover:bg-white/20 @[40rem]:w-auto"
                         href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`}
                         key={item.id}
                         rel="noreferrer"
@@ -633,7 +637,7 @@ function SectionIntro({
       <p className="text-xs font-black tracking-[0.2em] text-[var(--tenant-primary)] uppercase">
         {eyebrow}
       </p>
-      <h2 className="mt-4 max-w-4xl text-3xl leading-[1.05] font-black tracking-[-0.04em] text-balance sm:text-6xl sm:leading-[1.02] sm:tracking-[-0.045em]">
+      <h2 className="mt-4 max-w-4xl text-3xl leading-[1.05] font-black tracking-[-0.04em] text-balance @[40rem]:text-6xl @[40rem]:leading-[1.02] @[40rem]:tracking-[-0.045em]">
         {heading}
       </h2>
     </div>
@@ -653,11 +657,11 @@ function ContentSection({
 }) {
   return (
     <section
-      className={`tenant-section px-4 py-16 sm:px-8 sm:py-24 ${alternate ? "bg-slate-50" : "bg-white"}`}
+      className={`tenant-section px-4 py-16 @[40rem]:px-8 @[40rem]:py-24 ${alternate ? "bg-slate-50" : "bg-white"}`}
     >
       <div className="mx-auto max-w-7xl">
         <SectionIntro eyebrow={eyebrow} heading={heading} />
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-5 @[48rem]:grid-cols-2 @[64rem]:grid-cols-3">
           {children}
         </div>
       </div>
