@@ -18,6 +18,7 @@ export const marketingPlans = [
 ] as const;
 export const availableMarketingFeatures = [
   "Mandantenfähige Fahrschulwebsite",
+  "Geführte Einrichtung mit verständlicher Fortschrittsanzeige",
   "Kontrollierter Block-Builder",
   "Führerscheinklassen, Preise, Kurse, Team, Fahrzeuge und Standorte",
   "Eigene Domain mit DNS- und SSL-Begleitung",
