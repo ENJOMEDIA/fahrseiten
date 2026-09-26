@@ -154,6 +154,10 @@ export default async function SalesLeadDetailPage({
             lead={{
               id: lead.id,
               companyName: lead.companyName,
+              contactName: lead.contactName,
+              email: lead.email,
+              phone: lead.phone,
+              website: lead.website,
               status: lead.status as LeadStatus,
               nextTaskAt: lead.nextTaskAt,
               emailPermission: lead.emailPermission,

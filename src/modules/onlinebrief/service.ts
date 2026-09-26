@@ -237,7 +237,7 @@ export async function preparePostalDispatch(input: {
       content.imageMediaId || null,
       {
         width: 1_100,
-        height: 240,
+        height: 150,
       },
       "cover",
     ),

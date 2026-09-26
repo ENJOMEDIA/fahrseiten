@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import Link from "next/link";
+import { useActionState, useState, useTransition } from "react";
 
 import {
   salesStageLabels,
@@ -10,6 +11,7 @@ import {
 
 import {
   createLeadAction,
+  deleteLeadBatchAction,
   deleteLeadAction,
   importSalesCsvAction,
   saveSalesTemplateAction,
@@ -154,6 +156,32 @@ export function OutreachForm({
     startOutreachAction,
     initialState,
   );
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleteState, setDeleteState] = useState(initialState);
+  const [deletePending, startDeleteTransition] = useTransition();
+  const selectedLeads = leads.filter((lead) => selectedIds.includes(lead.id));
+  const selectedForEmail = selectedLeads.every(
+    (lead) =>
+      Boolean(lead.email) &&
+      ["consent", "existing_customer"].includes(lead.emailPermission) &&
+      !lead.emailOptOutAt,
+  );
+  const deleteContacts = (ids: string[], label: string) => {
+    if (
+      !window.confirm(
+        `${label} endgültig löschen? Verknüpfte Kundeninstanzen oder bereits übertragene Briefe werden nicht gelöscht und stattdessen gemeldet.`,
+      )
+    )
+      return;
+    const formData = new FormData();
+    ids.forEach((id) => formData.append("leadIds", id));
+    formData.set("confirmation", "AUSWAHL LÖSCHEN");
+    startDeleteTransition(async () => {
+      const result = await deleteLeadBatchAction(initialState, formData);
+      setDeleteState(result);
+      setSelectedIds([]);
+    });
+  };
   return (
     <form action={action}>
       <div className="sticky top-4 z-10 mb-4 grid gap-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur lg:grid-cols-[minmax(16rem,1fr)_minmax(20rem,1.4fr)_auto] lg:items-end">
@@ -184,13 +212,57 @@ export function OutreachForm({
         </label>
         <button
           className="premium-button disabled:opacity-50"
-          disabled={pending}
+          disabled={pending || !selectedIds.length || !selectedForEmail}
           type="submit"
         >
           {pending ? "Plant Versand …" : "Akquise für Auswahl starten"}
         </button>
         <div className="lg:col-span-3">
           <Result state={state} />
+          {selectedIds.length && !selectedForEmail ? (
+            <p className="mt-2 text-xs font-semibold text-amber-700">
+              Die Auswahl enthält Kontakte ohne dokumentierte
+              E-Mail-Versandfreigabe. Löschen und Bearbeiten bleiben möglich;
+              der E-Mail-Versand ist für diese Auswahl gesperrt.
+            </p>
+          ) : null}
+        </div>
+      </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <button
+          className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white"
+          onClick={() => setSelectedIds(leads.map((lead) => lead.id))}
+          type="button"
+        >
+          Alle markieren
+        </button>
+        <button
+          className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700"
+          onClick={() => setSelectedIds([])}
+          type="button"
+        >
+          Auswahl aufheben
+        </button>
+        <button
+          className="rounded-xl bg-red-700 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={!selectedIds.length || deletePending}
+          onClick={() =>
+            deleteContacts(
+              selectedIds,
+              `${selectedIds.length} ausgewählte Kontakte`,
+            )
+          }
+          type="button"
+        >
+          {deletePending
+            ? "Auswahl wird gelöscht …"
+            : `${selectedIds.length || 0} Kontakte löschen`}
+        </button>
+        <span className="ml-auto text-xs font-semibold text-slate-500">
+          {selectedIds.length} von {leads.length} markiert
+        </span>
+        <div className="w-full">
+          <Result state={deleteState} />
         </div>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
@@ -203,6 +275,7 @@ export function OutreachForm({
               <th className="p-4">Webseite</th>
               <th className="p-4">Status</th>
               <th className="p-4">E-Mail</th>
+              <th className="p-4">Aktionen</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -211,14 +284,15 @@ export function OutreachForm({
                 <td className="p-4" data-label="Auswahl">
                   <input
                     aria-label={`${lead.companyName} auswählen`}
-                    disabled={
-                      !lead.email ||
-                      !["consent", "existing_customer"].includes(
-                        lead.emailPermission,
-                      ) ||
-                      Boolean(lead.emailOptOutAt)
-                    }
+                    checked={selectedIds.includes(lead.id)}
                     name="leadIds"
+                    onChange={(event) =>
+                      setSelectedIds((current) =>
+                        event.target.checked
+                          ? [...current, lead.id]
+                          : current.filter((id) => id !== lead.id),
+                      )
+                    }
                     type="checkbox"
                     value={lead.id}
                   />
@@ -268,6 +342,26 @@ export function OutreachForm({
                       : lead.latestOutreach.status === "failed"
                         ? `Fehler${lead.latestOutreach.lastErrorCode ? `: ${lead.latestOutreach.lastErrorCode}` : ""}`
                         : "Versand wartet"}
+                </td>
+                <td className="p-4" data-label="Aktionen">
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      className="inline-flex rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-cyan-400 hover:text-cyan-900"
+                      href={`/admin/akquise/${lead.id}`}
+                    >
+                      Bearbeiten
+                    </Link>
+                    <button
+                      className="inline-flex rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-40"
+                      disabled={deletePending}
+                      onClick={() =>
+                        deleteContacts([lead.id], `„${lead.companyName}“`)
+                      }
+                      type="button"
+                    >
+                      Löschen
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -420,6 +514,10 @@ export function LeadControls({
   lead: {
     id: string;
     companyName: string;
+    contactName: string | null;
+    email: string | null;
+    phone: string | null;
+    website: string | null;
     status: LeadStatus;
     nextTaskAt: Date | null;
     emailPermission: string;
@@ -452,6 +550,53 @@ export function LeadControls({
       </summary>
       <form action={action} className="mt-3 space-y-3">
         <input name="id" type="hidden" value={lead.id} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="text-xs font-semibold text-slate-700 sm:col-span-2">
+            Fahrschule / Firma
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.companyName}
+              name="companyName"
+              required
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">
+            Ansprechperson
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.contactName ?? ""}
+              name="contactName"
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">
+            E-Mail
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.email ?? ""}
+              name="email"
+              type="email"
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">
+            Telefon
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.phone ?? ""}
+              name="phone"
+              type="tel"
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">
+            Website
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={lead.website ?? ""}
+              name="website"
+              placeholder="https://"
+              type="url"
+            />
+          </label>
+        </div>
         <select
           className="min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm"
           defaultValue={lead.status}

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import {
   createManualLead,
   deleteSalesLead,
+  deleteSalesLeadsBatch,
   importSalesLeads,
   updateLead,
 } from "@/modules/platform/sales-crm";
@@ -189,6 +190,11 @@ export async function updateLeadAction(
   try {
     await updateLead({
       id: String(formData.get("id")),
+      companyName: String(formData.get("companyName") ?? ""),
+      contactName: String(formData.get("contactName") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      phone: String(formData.get("phone") ?? ""),
+      website: String(formData.get("website") ?? ""),
       status: String(formData.get("status")) as LeadStatus,
       nextTaskAt: String(formData.get("nextTaskAt") ?? ""),
       note: String(formData.get("note") ?? ""),
@@ -203,6 +209,8 @@ export async function updateLeadAction(
       country: String(formData.get("country") ?? "Deutschland"),
     });
     revalidatePath("/admin/akquise");
+    revalidatePath("/admin/akquise/kontakte");
+    revalidatePath(`/admin/akquise/${String(formData.get("id"))}`);
     return { message: "Akquise-Stand wurde gespeichert.", error: false };
   } catch (error) {
     return {
@@ -210,6 +218,41 @@ export async function updateLeadAction(
         error instanceof Error
           ? error.message
           : "Änderung konnte nicht gespeichert werden.",
+      error: true,
+    };
+  }
+}
+
+export async function deleteLeadBatchAction(
+  _state: SalesActionState,
+  formData: FormData,
+): Promise<SalesActionState> {
+  await requirePlatformPermission("platform.sales.manage");
+  try {
+    const result = await deleteSalesLeadsBatch({
+      ids: formData.getAll("leadIds").map(String),
+      confirmation: String(formData.get("confirmation") ?? ""),
+    });
+    revalidatePath("/admin/akquise");
+    revalidatePath("/admin/akquise/kontakte");
+    const missingMessage = result.missing
+      ? ` ${result.missing} Einträge waren bereits nicht mehr vorhanden.`
+      : "";
+    return {
+      message: result.failed.length
+        ? `${result.deleted.length} Kontakte gelöscht. ${result.failed.length} konnten nicht gelöscht werden: ${result.failed
+            .slice(0, 3)
+            .map((item) => `${item.companyName}: ${item.reason}`)
+            .join(" · ")}${missingMessage}`
+        : `${result.deleted.length} Kontakte wurden vollständig gelöscht.${missingMessage}`,
+      error: result.failed.length > 0 || result.missing > 0,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Die ausgewählten Kontakte konnten nicht gelöscht werden.",
       error: true,
     };
   }

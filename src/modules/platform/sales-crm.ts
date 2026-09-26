@@ -164,6 +164,11 @@ export async function createManualLead(raw: unknown, actorUserId: string) {
 
 export async function updateLead(input: {
   id: string;
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  website: string;
   status: LeadStatus;
   nextTaskAt: string;
   note: string;
@@ -175,6 +180,15 @@ export async function updateLead(input: {
   city: string;
   country: string;
 }) {
+  const contact = z
+    .object({
+      companyName: z.string().trim().min(2).max(180),
+      contactName: z.string().trim().max(160),
+      email: z.union([z.literal(""), z.email()]),
+      phone: z.string().trim().max(40),
+      website: z.union([z.literal(""), z.url()]),
+    })
+    .parse(input);
   const status = z.enum(salesStages).parse(input.status);
   const note = z.string().trim().max(3_000).parse(input.note);
   const emailPermission = emailPermissionSchema.parse(input.emailPermission);
@@ -215,6 +229,11 @@ export async function updateLead(input: {
     await tx
       .update(salesLeads)
       .set({
+        companyName: contact.companyName,
+        contactName: contact.contactName || null,
+        email: contact.email || null,
+        phone: contact.phone || null,
+        website: contact.website || null,
         status,
         nextTaskAt: parseTaskDate(input.nextTaskAt),
         emailPermission,
@@ -340,6 +359,39 @@ export async function deleteSalesLead(input: {
     mediaCleanupFailed: cleanup.filter((item) => item.status === "rejected")
       .length,
   };
+}
+
+export async function deleteSalesLeadsBatch(input: {
+  ids: string[];
+  confirmation: string;
+}) {
+  if (input.confirmation !== "AUSWAHL LÖSCHEN")
+    throw new Error("Bitte die Sammellöschung ausdrücklich bestätigen.");
+  const ids = [...new Set(z.array(z.uuid()).min(1).max(200).parse(input.ids))];
+  const leads = await db
+    .select({ id: salesLeads.id, companyName: salesLeads.companyName })
+    .from(salesLeads)
+    .where(inArray(salesLeads.id, ids));
+  const deleted: string[] = [];
+  const failed: { companyName: string; reason: string }[] = [];
+  for (const lead of leads) {
+    try {
+      await deleteSalesLead({
+        id: lead.id,
+        confirmation: lead.companyName,
+      });
+      deleted.push(lead.companyName);
+    } catch (error) {
+      failed.push({
+        companyName: lead.companyName,
+        reason:
+          error instanceof Error
+            ? error.message
+            : "Die Kundenakte konnte nicht gelöscht werden.",
+      });
+    }
+  }
+  return { deleted, failed, missing: ids.length - leads.length };
 }
 
 export async function importSalesLeads(
