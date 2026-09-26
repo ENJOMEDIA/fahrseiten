@@ -398,44 +398,129 @@ export function PreparePostalForm({
 
 export function SubmitPostalForm({
   dispatchId,
-  leadId,
+  companyName,
   mode,
+  recipientAddress,
 }: {
   dispatchId: string;
-  leadId: string;
+  companyName: string;
   mode: "test" | "live";
+  recipientAddress: string;
 }) {
   const [state, action, pending] = useActionState(
     submitPostalDispatchAction,
     initialState,
   );
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [approved, setApproved] = useState(false);
+  const live = mode === "live";
   return (
     <form action={action} className="mt-3">
       <input name="dispatchId" type="hidden" value={dispatchId} />
-      {mode === "live" ? (
-        <label className="block text-xs font-semibold text-red-900">
-          Kostenpflichtigen Versand mit Lead-ID bestätigen
-          <input
-            className="mt-1 min-h-10 w-full rounded-xl border border-red-200 px-3 font-mono font-normal"
-            name="liveConfirmation"
-            placeholder={leadId}
-            required
-          />
-        </label>
-      ) : (
-        <input name="liveConfirmation" type="hidden" value="" />
-      )}
       <button
-        className={`mt-3 rounded-xl px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 ${mode === "test" ? "bg-cyan-700" : "bg-red-700"}`}
+        className={`mt-3 rounded-xl px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 ${live ? "bg-red-700" : "bg-cyan-700"}`}
         disabled={pending}
-        type="submit"
+        onClick={() => {
+          setApproved(false);
+          setConfirmationOpen(true);
+        }}
+        type="button"
       >
-        {pending
-          ? "Wird übertragen …"
-          : mode === "test"
-            ? "An OnlineBrief24-Testwarenkorb senden"
-            : "Kostenpflichtig live versenden"}
+        {live ? "Liveversand prüfen" : "Testübertragung prüfen"}
       </button>
+      {confirmationOpen ? (
+        <div
+          aria-labelledby={`postal-confirmation-${dispatchId}`}
+          aria-modal="true"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/65 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          role="dialog"
+        >
+          <div className="w-full max-w-lg rounded-[1.75rem] border border-white/20 bg-white p-5 shadow-2xl sm:p-7">
+            <p
+              className={`text-xs font-bold tracking-[.16em] uppercase ${live ? "text-red-700" : "text-cyan-700"}`}
+            >
+              Letzter Versandcheck
+            </p>
+            <h3
+              className="mt-2 text-2xl font-semibold text-slate-950"
+              id={`postal-confirmation-${dispatchId}`}
+            >
+              {live
+                ? "Brief kostenpflichtig versenden?"
+                : "Brief an den Testwarenkorb übertragen?"}
+            </h3>
+            <dl className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm">
+              <div>
+                <dt className="text-xs font-semibold text-slate-500">
+                  Empfänger
+                </dt>
+                <dd className="mt-1 font-semibold text-slate-950">
+                  {companyName}
+                </dd>
+                <dd className="mt-0.5 text-slate-600">{recipientAddress}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold text-slate-500">Modus</dt>
+                <dd
+                  className={`mt-1 font-semibold ${live ? "text-red-700" : "text-cyan-800"}`}
+                >
+                  {live ? "Live · kostenpflichtig" : "Testwarenkorb"}
+                </dd>
+              </div>
+            </dl>
+            <p className="mt-4 text-sm leading-6 text-slate-600">
+              Lead-ID und persönlicher QR-Link werden automatisch aus der
+              Kundenakte übernommen. Du musst keine ID eintragen.
+            </p>
+            <a
+              className="mt-3 inline-flex text-sm font-semibold text-cyan-800 underline"
+              href={`/api/admin/akquise/briefe/${dispatchId}`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              PDF vor dem Versand noch einmal öffnen
+            </a>
+            <label
+              className={`mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-sm leading-6 font-semibold ${live ? "border-red-200 bg-red-50 text-red-950" : "border-cyan-200 bg-cyan-50 text-cyan-950"}`}
+            >
+              <input
+                checked={approved}
+                className="mt-1 size-5 shrink-0"
+                name="sendApproved"
+                onChange={(event) => setApproved(event.target.checked)}
+                required
+                type="checkbox"
+                value="yes"
+              />
+              Ich habe Empfänger, Anschrift und PDF geprüft und bestätige
+              {live
+                ? " den kostenpflichtigen Versand."
+                : " die Übertragung in den Testwarenkorb."}
+            </label>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700"
+                disabled={pending}
+                onClick={() => setConfirmationOpen(false)}
+                type="button"
+              >
+                Abbrechen
+              </button>
+              <button
+                className={`rounded-xl px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40 ${live ? "bg-red-700" : "bg-cyan-700"}`}
+                disabled={!approved || pending}
+                type="submit"
+              >
+                {pending
+                  ? "Wird übertragen …"
+                  : live
+                    ? "Jetzt kostenpflichtig versenden"
+                    : "Jetzt an Testwarenkorb senden"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <Result state={state} />
     </form>
   );

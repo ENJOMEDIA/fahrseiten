@@ -67,9 +67,10 @@ Der technische Adapter erzeugt den von Onlinebrief24 dokumentierten
 JSON-Request mit PDF als Base64, MD5-Prüfsumme, Lead-ID im Hinweisfeld und der
 Kostenstelle `FahrSeiten Akquise`. Der Adapter akzeptiert PDFs bis 50 MB und
 trennt Test- und Live-Modus. Im Testmodus landen Aufträge laut Anbieter im
-Warenkorb und werden nicht unmittelbar produziert. Der Live-Modus ist
-kostenpflichtig und verlangt deshalb im Anwendungscode zusätzlich die erneute
-Bestätigung der festen Lead-ID.
+Warenkorb und werden nicht unmittelbar produziert. Vor jeder Übertragung zeigt
+FahrSeiten Empfänger und Modus in einem Bestätigungsdialog. Der Pflicht-Haken
+bestätigt die Prüfung von Anschrift und PDF. Die feste Lead-ID wird intern aus
+dem Briefvorgang übernommen und muss nicht manuell eingegeben werden.
 
 API-Key und API-Secret werden nur als Plesk-Umgebungsvariablen gesetzt. Das
 Repository enthält keine Zugangsdaten. Vor dem ersten echten Versand bleiben
@@ -138,8 +139,8 @@ Für den ersten echten Probelauf in Plesk:
 4. Ein neues Brief-PDF erzeugen. Bereits erzeugte Testvorgänge wechseln ihren
    Modus nicht nachträglich.
 5. Empfänger, Absender, Logo, Text und QR-Ziel im PDF prüfen.
-6. Zur kostenpflichtigen Bestätigung die angezeigte Lead-ID eingeben und nur
-   diesen einzelnen Auftrag übertragen.
+6. Im Bestätigungsdialog Empfänger und Modus kontrollieren, den Prüf-Haken
+   setzen und nur diesen einzelnen Auftrag übertragen.
 7. Status und Warenkorb bei OnlineBrief24 kontrollieren.
 
 Nach dem Probelauf kann `ONLINEBRIEF_MODE` für weitere technische Tests wieder

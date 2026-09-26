@@ -28,6 +28,7 @@ import { postalCampaignUrl } from "@/modules/platform/postal-campaign";
 
 import { deleteOnlinebrief, getOnlinebrief, submitOnlinebrief } from "./client";
 import { createAcquisitionLetterPdf } from "./letter-pdf";
+import { requirePostalSendConfirmation } from "./send-confirmation";
 import { inferFederalState } from "./postal-region";
 import { personalizePostalTemplate } from "./templates";
 
@@ -130,6 +131,9 @@ export async function listPostalDispatches(leadId?: string) {
     .select({
       dispatch: postalDispatches,
       companyName: salesLeads.companyName,
+      street: salesLeads.street,
+      postalCode: salesLeads.postalCode,
+      city: salesLeads.city,
     })
     .from(postalDispatches)
     .innerJoin(salesLeads, eq(salesLeads.id, postalDispatches.leadId));
@@ -138,7 +142,13 @@ export async function listPostalDispatches(leadId?: string) {
         .where(eq(postalDispatches.leadId, z.uuid().parse(leadId)))
         .orderBy(desc(postalDispatches.createdAt))
     : await query.orderBy(desc(postalDispatches.createdAt)).limit(200);
-  return rows.map((row) => ({ ...row.dispatch, companyName: row.companyName }));
+  return rows.map((row) => ({
+    ...row.dispatch,
+    companyName: row.companyName,
+    street: row.street,
+    postalCode: row.postalCode,
+    city: row.city,
+  }));
 }
 
 export async function getPostalCampaignAnalytics() {
@@ -351,8 +361,9 @@ export async function preparePostalDispatchBatch(input: {
 export async function submitPreparedPostalDispatch(input: {
   dispatchId: string;
   actorUserId: string;
-  liveConfirmation: string;
+  confirmed: boolean;
 }) {
+  requirePostalSendConfirmation(input.confirmed);
   const id = z.uuid().parse(input.dispatchId);
   const [dispatch] = await db
     .select()
@@ -381,7 +392,7 @@ export async function submitPreparedPostalDispatch(input: {
       filename: dispatch.originalName,
       leadId: dispatch.leadId,
       color: dispatch.color,
-      liveConfirmation: input.liveConfirmation,
+      liveConfirmation: dispatch.mode === "live" ? dispatch.leadId : undefined,
     });
     await db.transaction(async (tx) => {
       await tx

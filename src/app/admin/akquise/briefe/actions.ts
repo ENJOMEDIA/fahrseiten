@@ -89,7 +89,7 @@ export async function submitPostalDispatchAction(
     const jobId = await submitPreparedPostalDispatch({
       dispatchId: String(formData.get("dispatchId") ?? ""),
       actorUserId: identity.id,
-      liveConfirmation: String(formData.get("liveConfirmation") ?? ""),
+      confirmed: formData.get("sendApproved") === "yes",
     });
     revalidatePath("/admin/akquise/briefe");
     revalidatePath("/admin/akquise");

@@ -365,9 +365,10 @@ export default async function PostalAcquisitionPage({
                   ) : null}
                   {dispatch.status === "prepared" ? (
                     <SubmitPostalForm
+                      companyName={dispatch.companyName}
                       dispatchId={dispatch.id}
-                      leadId={dispatch.leadId}
                       mode={dispatch.mode}
+                      recipientAddress={`${dispatch.street ?? ""}, ${dispatch.postalCode ?? ""} ${dispatch.city ?? ""}`}
                     />
                   ) : null}
                   <DeletePostalForm
