@@ -24,7 +24,7 @@ CREATE TABLE `sales_newsletter_recipients` (
 );
 --> statement-breakpoint
 ALTER TABLE `sales_newsletter_campaigns` ADD CONSTRAINT `sales_newsletter_campaigns_created_by_user_id_users_id_fk` FOREIGN KEY (`created_by_user_id`) REFERENCES `users`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `sales_newsletter_recipients` ADD CONSTRAINT `sales_newsletter_recipients_campaign_id_sales_newsletter_campaigns_id_fk` FOREIGN KEY (`campaign_id`) REFERENCES `sales_newsletter_campaigns`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `sales_newsletter_recipients` ADD CONSTRAINT `sales_newsletter_recipients_campaign_fk` FOREIGN KEY (`campaign_id`) REFERENCES `sales_newsletter_campaigns`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `sales_newsletter_recipients` ADD CONSTRAINT `sales_newsletter_recipients_lead_id_sales_leads_id_fk` FOREIGN KEY (`lead_id`) REFERENCES `sales_leads`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `sales_newsletter_recipients` ADD CONSTRAINT `sales_newsletter_recipients_job_id_background_jobs_id_fk` FOREIGN KEY (`job_id`) REFERENCES `background_jobs`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX `sales_newsletter_campaigns_queued_idx` ON `sales_newsletter_campaigns` (`queued_at`);--> statement-breakpoint

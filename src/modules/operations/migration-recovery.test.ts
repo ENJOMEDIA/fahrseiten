@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import {
   interruptedMigrationRecoveryDecision,
@@ -47,5 +49,17 @@ describe("interrupted newsletter migration recovery", () => {
     expect(
       isNewsletterMigrationConflict(new Error("Verbindung fehlgeschlagen")),
     ).toBe(false);
+  });
+
+  it("verwendet MariaDB-kompatible Bezeichner in der Newsletter-Migration", () => {
+    const sql = readFileSync(
+      resolve(process.cwd(), "drizzle/0039_amused_madrox.sql"),
+      "utf8",
+    );
+    const identifiers = [
+      ...sql.matchAll(/(?:CONSTRAINT|INDEX) `([^`]+)`/g),
+    ].map((match) => match[1]);
+    expect(identifiers.length).toBeGreaterThan(0);
+    expect(identifiers.filter((name) => name.length > 64)).toEqual([]);
   });
 });
