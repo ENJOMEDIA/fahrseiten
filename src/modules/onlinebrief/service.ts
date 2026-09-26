@@ -57,6 +57,47 @@ async function loadPlatformImage(
   );
 }
 
+async function loadPlatformLogo(mediaId: string) {
+  const asset = await findPublicMedia(mediaId);
+  if (!asset || asset.tenantId)
+    throw new Error(
+      "Das ausgewählte Logo gehört nicht zu den Plattformmedien.",
+    );
+  const source = await getMediaStorage().read(asset.storageKey);
+  const png = await sharp(source)
+    .trim()
+    .resize({
+      width: 900,
+      height: 220,
+      fit: "inside",
+      withoutEnlargement: true,
+    })
+    .png()
+    .toBuffer();
+  const { data, info } = await sharp(png)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let luminance = 0;
+  let weight = 0;
+  for (let offset = 0; offset < data.length; offset += info.channels) {
+    const alpha = data[offset + 3] / 255;
+    if (alpha < 0.08) continue;
+    luminance +=
+      (data[offset] * 0.2126 +
+        data[offset + 1] * 0.7152 +
+        data[offset + 2] * 0.0722) *
+      alpha;
+    weight += alpha;
+  }
+  if (!weight)
+    throw new Error("Das ausgewählte Logo enthält keine sichtbaren Pixel.");
+  return {
+    png: new Uint8Array(png),
+    surface: luminance / weight > 180 ? ("dark" as const) : ("light" as const),
+  };
+}
+
 async function findPostalLead(leadId: string) {
   const id = z.uuid().parse(leadId);
   const [lead] = await db
@@ -188,10 +229,10 @@ export async function preparePostalDispatch(input: {
     throw new Error(
       "Bitte wähle ein Briefkopf-Logo. Plattformlogos verwaltest du unter Medien.",
     );
-  const [lead, sender, brandLogoPng, heroImagePng] = await Promise.all([
+  const [lead, sender, brandLogo, heroImagePng] = await Promise.all([
     findPostalLead(input.leadId),
     findPlatformLegalProfile(),
-    loadPlatformImage(logoId, { width: 620, height: 168 }),
+    loadPlatformLogo(logoId),
     loadPlatformImage(
       content.imageMediaId || null,
       {
@@ -207,7 +248,8 @@ export async function preparePostalDispatch(input: {
     );
   const dispatchId = createId();
   const bytes = await createAcquisitionLetterPdf({
-    brandLogoPng,
+    brandLogoPng: brandLogo.png,
+    brandLogoSurface: brandLogo.surface,
     heroImagePng,
     createdAt: new Date(),
     kicker: personalizePostalTemplate(content.kicker, lead),

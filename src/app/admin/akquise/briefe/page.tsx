@@ -13,6 +13,7 @@ import {
   findPlatformLogoId,
   listPlatformMedia,
 } from "@/modules/media/repository";
+import { mediaPublicUrl } from "@/modules/media/public-url";
 import { listSalesPipeline } from "@/modules/platform/sales-crm";
 
 import {
@@ -242,6 +243,7 @@ export default async function PostalAcquisitionPage({
                 .map((asset) => ({
                   id: asset.id,
                   label: `${asset.description || asset.originalName} · ${asset.width}×${asset.height}`,
+                  url: mediaPublicUrl(asset.id),
                 }))}
               media={media
                 .filter(

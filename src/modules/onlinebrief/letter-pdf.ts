@@ -67,6 +67,7 @@ export function parseLetterBody(value: string): LetterBodySegment[] {
 
 export type AcquisitionLetterInput = {
   brandLogoPng?: Uint8Array;
+  brandLogoSurface?: "light" | "dark";
   heroImagePng?: Uint8Array;
   createdAt: Date;
   kicker: string;
@@ -201,6 +202,15 @@ export async function createAcquisitionLetterPdf(
   );
 
   if (brandLogo) {
+    if (input.brandLogoSurface === "dark") {
+      page.drawRectangle({
+        x: 42,
+        y: 770,
+        width: 250,
+        height: 50,
+        color: rgb(0.025, 0.08, 0.14),
+      });
+    }
     const dimensions = brandLogo.scaleToFit(225, 48);
     page.drawImage(brandLogo, {
       x: 55,

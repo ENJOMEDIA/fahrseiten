@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState, useState } from "react";
 
 import {
@@ -121,7 +122,7 @@ export function PreparePostalForm({
   templates,
 }: {
   leads: { id: string; companyName: string; addressComplete: boolean }[];
-  logos: { id: string; label: string }[];
+  logos: { id: string; label: string; url: string }[];
   defaultLogoId: string;
   media: { id: string; label: string }[];
   templates: {
@@ -152,6 +153,12 @@ export function PreparePostalForm({
     .filter((lead) => lead.addressComplete)
     .map((lead) => lead.id);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [selectedLogoId, setSelectedLogoId] = useState(
+    logos.some((logo) => logo.id === defaultLogoId)
+      ? defaultLogoId
+      : (logos[0]?.id ?? ""),
+  );
+  const selectedLogo = logos.find((logo) => logo.id === selectedLogoId);
   return (
     <form action={action} className="space-y-4">
       <fieldset className="rounded-2xl border border-slate-200 p-4">
@@ -218,9 +225,10 @@ export function PreparePostalForm({
         Briefkopf-Logo
         <select
           className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
-          defaultValue={defaultLogoId}
           name="logoMediaId"
+          onChange={(event) => setSelectedLogoId(event.target.value)}
           required
+          value={selectedLogoId}
         >
           <option value="" disabled>
             Logo aus dem Plattform-Medienbereich auswählen
@@ -235,6 +243,17 @@ export function PreparePostalForm({
           Dieses Bild wird verbindlich in den Briefkopf eingebettet. Fehlt die
           Auswahl, wird kein PDF erstellt.
         </span>
+        {selectedLogo ? (
+          <span className="mt-3 flex min-h-20 items-center rounded-xl border border-slate-200 bg-[linear-gradient(135deg,#fff_0_50%,#07111f_50%)] p-3">
+            <Image
+              alt="Ausgewähltes Briefkopf-Logo"
+              className="h-14 w-auto max-w-full object-contain p-2"
+              height={80}
+              src={selectedLogo.url}
+              width={280}
+            />
+          </span>
+        ) : null}
       </label>
       <label className="block text-sm font-semibold">
         Briefvorlage
@@ -314,7 +333,7 @@ export function PreparePostalForm({
       </label>
       <button
         className="premium-button"
-        disabled={pending || selectedLeadIds.length === 0 || logos.length === 0}
+        disabled={pending || selectedLeadIds.length === 0 || !selectedLogoId}
         type="submit"
       >
         {pending
