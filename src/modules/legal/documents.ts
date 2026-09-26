@@ -320,7 +320,9 @@ Für gezielt ausgewählte Geschäftskontakte verarbeiten wir Firmenanschrift, Na
 
 Für Druck, Kuvertierung und Versand übermitteln wir den Brief einschließlich Empfängeranschrift und Lead-Referenz an die letterei.de Postdienste GmbH, Maybachstraße 9, 21423 Winsen (Luhe), die den Dienst Onlinebrief24 bereitstellt. Die Verarbeitung erfolgt als Auftragsverarbeitung nach Art. 28 DSGVO auf Grundlage einer gesonderten Vereinbarung. Briefdaten werden nur so lange gespeichert, wie dies für Produktion, Versand, Nachweis und gesetzliche Pflichten erforderlich ist; zusätzliche Archivfunktionen beim Anbieter werden nicht ohne festgelegtes Löschkonzept genutzt. Für die postalische Zustellung erhält das beauftragte Postunternehmen die erforderlichen Adress- und Sendungsdaten.
 
-Über den persönlichen Rückmeldelink kann Interesse erklärt oder jeder weitere Werbekontakt abgelehnt werden. Eine freiwillige Einwilligung in E-Mail-Informationen wird getrennt erfasst und per Double-Opt-in bestätigt; Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Ein Widerruf oder Werbewiderspruch wird in einer Sperrliste berücksichtigt, damit keine weitere werbliche Ansprache erfolgt.`;
+Über den persönlichen Rückmeldelink kann Interesse erklärt oder jeder weitere Werbekontakt abgelehnt werden. Zur Erfolgsmessung speichern wir leadbezogen Zeitpunkt des ersten und letzten Aufrufs sowie die Anzahl der QR-Link-Aufrufe. Wir speichern dafür keine IP-Adresse und erstellen keinen Gerätefingerabdruck. Die Auswertung nach Bundesland beruht ausschließlich auf der bereits in der Kundenakte hinterlegten Postleitzahl. Rechtsgrundlage ist unser berechtigtes Interesse an einer datensparsamen Erfolgsmessung gemäß Art. 6 Abs. 1 lit. f DSGVO.
+
+Eine freiwillige Einwilligung in E-Mail-Informationen wird getrennt erfasst und per Double-Opt-in bestätigt; Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Ein Widerruf oder Werbewiderspruch wird in einer Sperrliste berücksichtigt, damit keine weitere werbliche Ansprache erfolgt.`;
 }
 
 export function parseLegalProfileForm(formData: FormData) {

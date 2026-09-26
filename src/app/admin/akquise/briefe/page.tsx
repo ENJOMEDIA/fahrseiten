@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CustomerPage } from "@/components/customer/customer-page";
 import { Card, StatusBadge } from "@/components/ui/card";
 import {
+  getPostalCampaignAnalytics,
   listPostalDispatches,
   onlinebriefConfiguration,
 } from "@/modules/onlinebrief/service";
@@ -45,13 +46,15 @@ export default async function PostalAcquisitionPage({
   searchParams: Promise<{ view?: string }>;
 }) {
   await requirePlatformPermission("platform.sales.manage");
-  const [query, leads, allDispatches, media, templates] = await Promise.all([
-    searchParams,
-    listSalesPipeline(),
-    listPostalDispatches(),
-    listPlatformMedia(),
-    listPostalLetterTemplates(),
-  ]);
+  const [query, leads, allDispatches, media, templates, analytics] =
+    await Promise.all([
+      searchParams,
+      listSalesPipeline(),
+      listPostalDispatches(),
+      listPlatformMedia(),
+      listPostalLetterTemplates(),
+      getPostalCampaignAnalytics(),
+    ]);
   const showArchived = query.view === "archiv";
   const activeCount = allDispatches.filter((item) => !item.archivedAt).length;
   const archivedCount = allDispatches.length - activeCount;
@@ -65,6 +68,94 @@ export default async function PostalAcquisitionPage({
       description="Personalisierte PDF-Briefe mit festem Lead-Link erzeugen und kontrolliert an OnlineBrief24 übertragen."
     >
       <SalesNav />
+      <section className="mb-6 overflow-hidden rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl sm:p-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold tracking-[.18em] text-cyan-300 uppercase">
+              Kampagnenwirkung
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+              Vom Brief bis zum Kunden
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+              Jeder QR-Link bleibt mit seiner Kundenakte verbunden. Gezählt
+              werden nur Linkaufrufe und Antworten – keine IP-Adressen oder
+              Gerätefingerabdrücke.
+            </p>
+          </div>
+          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300">
+            {analytics.liveRecipients} live · {analytics.testRecipients} Test
+          </span>
+        </div>
+        <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            [
+              "Übertragene Kontakte",
+              analytics.recipients,
+              "Basis der Auswertung",
+            ],
+            [
+              "QR geöffnet",
+              `${analytics.viewRate} %`,
+              `${analytics.viewed} Kontakte`,
+            ],
+            [
+              "Reagiert",
+              `${analytics.responseRate} %`,
+              `${analytics.responded} Antworten`,
+            ],
+            ["Gewonnen", `${analytics.winRate} %`, `${analytics.won} Kunden`],
+          ].map(([label, value, detail]) => (
+            <article
+              className="rounded-2xl border border-white/10 bg-white/[.06] p-4"
+              key={label}
+            >
+              <p className="text-xs font-semibold text-slate-400">{label}</p>
+              <p className="mt-2 text-3xl font-semibold text-white">{value}</p>
+              <p className="mt-1 text-xs text-cyan-200">{detail}</p>
+            </article>
+          ))}
+        </div>
+        {analytics.regions.length ? (
+          <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10">
+            <table className="min-w-full text-left text-xs">
+              <thead className="bg-white/[.06] text-slate-300">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Bundesland</th>
+                  <th className="px-4 py-3 font-semibold">Briefe</th>
+                  <th className="px-4 py-3 font-semibold">Aufrufe</th>
+                  <th className="px-4 py-3 font-semibold">Antworten</th>
+                  <th className="px-4 py-3 font-semibold">Gewonnen</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {analytics.regions.map((region) => (
+                  <tr key={region.name}>
+                    <td className="px-4 py-3 font-semibold text-white">
+                      {region.name}
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">
+                      {region.recipients}
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">
+                      {region.viewed}
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">
+                      {region.responded}
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">{region.won}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+        <p className="mt-3 text-[11px] leading-5 text-slate-500">
+          Das Bundesland wird näherungsweise aus der in der Kundenakte
+          gespeicherten deutschen PLZ abgeleitet. Grenzbereiche werden als nicht
+          eindeutig ausgewiesen.
+        </p>
+      </section>
       <div
         className={`mb-6 rounded-2xl border p-4 text-sm ${configuration.configured ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-amber-200 bg-amber-50 text-amber-950"}`}
       >

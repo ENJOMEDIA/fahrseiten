@@ -28,6 +28,7 @@ import { postalCampaignUrl } from "@/modules/platform/postal-campaign";
 
 import { deleteOnlinebrief, getOnlinebrief, submitOnlinebrief } from "./client";
 import { createAcquisitionLetterPdf } from "./letter-pdf";
+import { inferFederalState } from "./postal-region";
 import { personalizePostalTemplate } from "./templates";
 
 async function loadPlatformImage(
@@ -44,6 +45,7 @@ async function loadPlatformImage(
   const source = await getMediaStorage().read(asset.storageKey);
   return new Uint8Array(
     await sharp(source)
+      .trim()
       .resize({
         width: size.width,
         height: size.height,
@@ -98,6 +100,70 @@ export async function listPostalDispatches(leadId?: string) {
   return rows.map((row) => ({ ...row.dispatch, companyName: row.companyName }));
 }
 
+export async function getPostalCampaignAnalytics() {
+  const rows = await db
+    .select({
+      leadId: salesLeads.id,
+      companyName: salesLeads.companyName,
+      postalCode: salesLeads.postalCode,
+      status: salesLeads.status,
+      response: salesLeads.postalResponse,
+      firstViewedAt: salesLeads.postalLandingFirstViewedAt,
+      viewCount: salesLeads.postalLandingViewCount,
+      mode: postalDispatches.mode,
+    })
+    .from(postalDispatches)
+    .innerJoin(salesLeads, eq(salesLeads.id, postalDispatches.leadId))
+    .where(eq(postalDispatches.status, "submitted"));
+  const leads = new Map<string, (typeof rows)[number]>();
+  for (const row of rows) {
+    const current = leads.get(row.leadId);
+    if (!current || (current.mode === "test" && row.mode === "live"))
+      leads.set(row.leadId, row);
+  }
+  const recipients = [...leads.values()];
+  const viewed = recipients.filter((row) => row.firstViewedAt).length;
+  const responded = recipients.filter((row) => row.response).length;
+  const won = recipients.filter((row) => row.status === "won").length;
+  const regions = new Map<
+    string,
+    { recipients: number; viewed: number; responded: number; won: number }
+  >();
+  for (const row of recipients) {
+    const region = inferFederalState(row.postalCode) ?? "Nicht eindeutig";
+    const current = regions.get(region) ?? {
+      recipients: 0,
+      viewed: 0,
+      responded: 0,
+      won: 0,
+    };
+    current.recipients += 1;
+    if (row.firstViewedAt) current.viewed += 1;
+    if (row.response) current.responded += 1;
+    if (row.status === "won") current.won += 1;
+    regions.set(region, current);
+  }
+  const total = recipients.length;
+  const rate = (value: number) =>
+    total ? Math.round((value / total) * 100) : 0;
+  return {
+    recipients: total,
+    liveRecipients: recipients.filter((row) => row.mode === "live").length,
+    testRecipients: recipients.filter((row) => row.mode === "test").length,
+    viewed,
+    responded,
+    won,
+    viewRate: rate(viewed),
+    responseRate: rate(responded),
+    winRate: rate(won),
+    regions: [...regions.entries()]
+      .map(([name, values]) => ({ name, ...values }))
+      .sort(
+        (a, b) => b.recipients - a.recipients || a.name.localeCompare(b.name),
+      ),
+  };
+}
+
 export async function preparePostalDispatch(input: {
   leadId: string;
   actorUserId: string;
@@ -119,9 +185,7 @@ export async function preparePostalDispatch(input: {
   const [lead, sender, brandLogoPng, heroImagePng] = await Promise.all([
     findPostalLead(input.leadId),
     findPlatformLegalProfile(),
-    loadPlatformImage(logoId, { width: 620, height: 168 }).catch(
-      () => undefined,
-    ),
+    loadPlatformImage(logoId, { width: 620, height: 168 }),
     loadPlatformImage(
       content.imageMediaId || null,
       {

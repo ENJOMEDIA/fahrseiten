@@ -534,6 +534,31 @@ textarea {
   color: rgb(226 232 240 / 0.72);
 }
 
+[data-theme="urban_night"] .tenant-section .tenant-section-eyebrow,
+[data-theme="urban_night"] .tenant-section .tenant-card-eyebrow {
+  color: #60a5fa;
+}
+
+[data-theme="urban_night"] .tenant-section .tenant-chip {
+  border: 1px solid rgb(148 163 184 / 0.28);
+  background: rgb(226 232 240 / 0.96);
+  color: #0f172a;
+}
+
+[data-theme="urban_night"] .tenant-section .tenant-rating-card {
+  border: 1px solid rgb(255 255 255 / 0.5);
+  background: rgb(248 250 252 / 0.96);
+  color: #0f172a;
+}
+
+[data-theme="urban_night"] .tenant-section .tenant-rating-card p {
+  color: #475569;
+}
+
+[data-theme="urban_night"] .tenant-section .tenant-rating-card p:first-child {
+  color: #0f172a;
+}
+
 [data-theme="urban_night"] .tenant-content-card,
 [data-theme="urban_night"] .tenant-feature-card {
   border-color: rgb(255 255 255 / 0.1);

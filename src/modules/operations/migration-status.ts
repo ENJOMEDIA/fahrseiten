@@ -12,6 +12,7 @@ import type { RowDataPacket } from "mysql2/promise";
 import { env } from "@/config/env";
 import { runtimeConfigPath } from "@/config/runtime-config";
 import { compareMigrationState } from "./migration-state";
+import { repairInterruptedNewsletterMigration } from "./migration-recovery";
 
 export type MigrationStatus = {
   status: "ready" | "pending" | "error";
@@ -29,9 +30,23 @@ function statusPath() {
 }
 
 function safeError(error: unknown) {
-  const message =
-    error instanceof Error ? error.message : "Unbekannter Migrationsfehler";
-  return message
+  const details: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; current && depth < 3; depth += 1) {
+    if (current instanceof Error && current.message)
+      details.push(current.message);
+    if (typeof current === "object" && current && "code" in current)
+      details.push(String(current.code));
+    current =
+      typeof current === "object" && current && "cause" in current
+        ? current.cause
+        : null;
+  }
+  return (
+    details
+      .filter((detail, index) => details.indexOf(detail) === index)
+      .join(" · ") || "Unbekannter Migrationsfehler"
+  )
     .replace(/mysql:\/\/[^@\s]+@/giu, "mysql://[ZUGANGSDATEN]@")
     .slice(0, 2_000);
 }
@@ -110,6 +125,7 @@ export async function runDatabaseMigrations(): Promise<MigrationStatus> {
       uri: env.DATABASE_URL,
       connectTimeout: 10_000,
     });
+    await repairInterruptedNewsletterMigration(connection, migrationsFolder);
     await migrate(drizzle({ client: connection }), {
       migrationsFolder,
     });

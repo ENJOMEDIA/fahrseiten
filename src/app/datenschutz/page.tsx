@@ -12,6 +12,8 @@ const referralPrivacyNotice = `Empfehlungsprogramm\nWenn ein Interessent einen p
 
 const newsletterPrivacyNotice = `Newsletter und Produktinformationen\nWenn eine ausdrückliche Einwilligung erteilt wurde, verarbeiten wir E-Mail-Adresse, Name, Unternehmen, Einwilligungszeitpunkt und Einwilligungsnachweis zum Versand von FahrSeiten-Newslettern und Produktinformationen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Die Einwilligung kann jederzeit über den persönlichen Abmeldelink in jeder Nachricht mit Wirkung für die Zukunft widerrufen werden. Nach einem Widerruf wird die Adresse für weitere Werbe-E-Mails gesperrt; erforderliche Nachweise über Einwilligung und Widerruf werden nur so lange gespeichert, wie sie zur Erfüllung gesetzlicher Pflichten oder zur Rechtsverteidigung benötigt werden.`;
 
+const postalTrackingPrivacyNotice = `Erfolgsmessung persönlicher Akquisebriefe\nZur Erfolgsmessung speichern wir leadbezogen Zeitpunkt des ersten und letzten Aufrufs sowie die Anzahl der QR-Link-Aufrufe. Wir speichern dafür keine IP-Adresse und erstellen keinen Gerätefingerabdruck. Die Auswertung nach Bundesland beruht ausschließlich auf der bereits in der Kundenakte hinterlegten Postleitzahl. Rechtsgrundlage ist unser berechtigtes Interesse an einer datensparsamen Erfolgsmessung gemäß Art. 6 Abs. 1 lit. f DSGVO. Der Verarbeitung kann jederzeit widersprochen werden.`;
+
 export default async function PrivacyPage() {
   await connection();
   const [document, services] = await Promise.all([
@@ -24,6 +26,9 @@ export default async function PrivacyPage() {
         document.content.includes("Onlinebrief24")
           ? null
           : createOnlinebriefPrivacyNotice(),
+        document.content.includes("QR-Link-Aufrufe")
+          ? null
+          : postalTrackingPrivacyNotice,
         document.content.includes("Newsletter und Produktinformationen")
           ? null
           : newsletterPrivacyNotice,

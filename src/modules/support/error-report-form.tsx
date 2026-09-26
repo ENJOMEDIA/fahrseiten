@@ -4,8 +4,12 @@ import { useState } from "react";
 
 export function ErrorReportForm({
   surface,
+  initialReferenceId = "",
+  initialSummary = "",
 }: {
   surface: "marketing" | "customer_backend";
+  initialReferenceId?: string;
+  initialSummary?: string;
 }) {
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
@@ -42,13 +46,16 @@ export function ErrorReportForm({
         Referenz-ID, falls vorhanden
         <input
           className="mt-2 w-full rounded-xl border p-3"
+          defaultValue={initialReferenceId}
           name="referenceId"
+          readOnly={Boolean(initialReferenceId)}
         />
       </label>
       <label className="mt-4 block text-sm font-semibold">
         Kurztitel
         <input
           className="mt-2 w-full rounded-xl border p-3"
+          defaultValue={initialSummary}
           name="summary"
           required
         />

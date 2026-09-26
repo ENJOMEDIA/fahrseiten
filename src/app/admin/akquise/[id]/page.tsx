@@ -35,6 +35,7 @@ const activityLabels: Record<string, string> = {
   csv_import_note: "CSV-Import",
   postal_letter_prepared: "Brief vorbereitet",
   postal_letter_submitted: "Brief übertragen",
+  postal_landing_opened: "QR-Link geöffnet",
   postal_response_pending: "Brief-Rückmeldung",
   postal_response_declined: "Weitere Ansprache abgelehnt",
   postal_email_confirmed: "E-Mail bestätigt",
@@ -127,6 +128,28 @@ export default async function SalesLeadDetailPage({
               </dd>
             </div>
           </dl>
+          <div className="mt-5 grid gap-3 rounded-2xl bg-slate-950 p-4 text-white sm:grid-cols-3">
+            <div>
+              <p className="text-xs text-slate-400">QR-Aufrufe</p>
+              <p className="mt-1 text-2xl font-semibold">
+                {lead.postalLandingViewCount}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Erster Aufruf</p>
+              <p className="mt-1 text-sm font-semibold">
+                {lead.postalLandingFirstViewedAt
+                  ? formatter.format(lead.postalLandingFirstViewedAt)
+                  : "Noch keiner"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Reaktion</p>
+              <p className="mt-1 text-sm font-semibold">
+                {lead.postalResponse || "Noch keine"}
+              </p>
+            </div>
+          </div>
           <LeadControls
             lead={{
               id: lead.id,

@@ -148,7 +148,7 @@ function Block({
               ) : (
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,.95),transparent_32%),linear-gradient(135deg,var(--tenant-primary),var(--tenant-accent))]" />
               )}
-              <div className="absolute right-5 bottom-5 rounded-2xl bg-white/92 px-5 py-4 shadow-xl backdrop-blur-xl">
+              <div className="tenant-rating-card absolute right-5 bottom-5 rounded-2xl bg-white/92 px-5 py-4 text-slate-950 shadow-xl backdrop-blur-xl">
                 <p className="text-2xl font-black">4,9 / 5</p>
                 <p className="text-xs font-bold text-slate-500">
                   fiktive Beispielbewertung
@@ -303,7 +303,7 @@ function Block({
                 <span className="absolute top-5 right-5 text-6xl font-black text-slate-100">
                   {item.key}
                 </span>
-                <p className="relative text-xs font-black tracking-[0.18em] text-[var(--tenant-primary)] uppercase">
+                <p className="tenant-card-eyebrow relative text-xs font-black tracking-[0.18em] text-[var(--tenant-primary)] uppercase">
                   Klasse {item.key}
                 </p>
                 <h3 className="relative mt-12 text-2xl font-black">
@@ -337,7 +337,7 @@ function Block({
               >
                 <div className="flex flex-col items-start gap-3 @[40rem]:flex-row @[40rem]:items-center @[40rem]:justify-between @[40rem]:gap-4">
                   <h3 className="text-2xl font-black">{group.title}</h3>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">
+                  <span className="tenant-chip rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
                     Beispiel
                   </span>
                 </div>
@@ -382,7 +382,7 @@ function Block({
                 className="tenant-content-card rounded-[var(--radius-card)] border border-slate-200 bg-white p-7 shadow-sm"
                 key={item.id}
               >
-                <p className="text-xs font-black tracking-[0.18em] text-[var(--tenant-primary)] uppercase">
+                <p className="tenant-card-eyebrow text-xs font-black tracking-[0.18em] text-[var(--tenant-primary)] uppercase">
                   Kurs
                 </p>
                 <h3 className="mt-3 text-2xl font-black">{item.title}</h3>
@@ -392,7 +392,7 @@ function Block({
                 <div className="mt-6 space-y-2">
                   {item.dates.map((date) => (
                     <time
-                      className="block rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold"
+                      className="tenant-chip block rounded-xl bg-slate-100 px-4 py-3 text-sm font-bold text-slate-700"
                       dateTime={date.startsAt}
                       key={date.id}
                     >
@@ -446,7 +446,7 @@ function Block({
                   </span>
                 </div>
                 <div className="p-7">
-                  <p className="text-xs font-black tracking-[0.16em] text-[var(--tenant-primary)] uppercase">
+                  <p className="tenant-card-eyebrow text-xs font-black tracking-[0.16em] text-[var(--tenant-primary)] uppercase">
                     {item.role}
                   </p>
                   <h3 className="mt-2 text-2xl font-black">{item.name}</h3>
@@ -454,7 +454,7 @@ function Block({
                   <div className="mt-5 flex flex-wrap gap-2">
                     {item.qualifications.map((qualification) => (
                       <span
-                        className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold"
+                        className="tenant-chip rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700"
                         key={qualification}
                       >
                         {qualification}
@@ -495,10 +495,10 @@ function Block({
                 ) : null}
                 <div className="p-7">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs font-black tracking-[0.16em] text-[var(--tenant-primary)] uppercase">
+                    <p className="tenant-card-eyebrow text-xs font-black tracking-[0.16em] text-[var(--tenant-primary)] uppercase">
                       {item.category}
                     </p>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">
+                    <span className="tenant-chip rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
                       {item.transmission === "automatic"
                         ? "Automatik"
                         : "Schaltung"}
@@ -666,7 +666,7 @@ function SectionIntro({
 }) {
   return (
     <div>
-      <p className="text-xs font-black tracking-[0.2em] text-[var(--tenant-primary)] uppercase">
+      <p className="tenant-section-eyebrow text-xs font-black tracking-[0.2em] text-[var(--tenant-primary)] uppercase">
         {eyebrow}
       </p>
       <h2 className="mt-4 max-w-4xl text-3xl leading-[1.05] font-black tracking-[-0.04em] text-balance @[40rem]:text-6xl @[40rem]:leading-[1.02] @[40rem]:tracking-[-0.045em]">

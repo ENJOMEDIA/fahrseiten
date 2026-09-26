@@ -106,7 +106,9 @@ export async function createAcquisitionLetterPdf(
     errorCorrectionLevel: "M",
     color: { dark: "#07111f", light: "#ffffff" },
   });
-  const qr = await document.embedPng(qrBytes);
+  // pdf-lib performs a realm-sensitive type check. Normalizing Node Buffers to
+  // a plain Uint8Array also keeps PDF creation stable in tests and workers.
+  const qr = await document.embedPng(Uint8Array.from(qrBytes));
   const brandLogo = input.brandLogoPng
     ? await document.embedPng(input.brandLogoPng)
     : null;
@@ -116,15 +118,50 @@ export async function createAcquisitionLetterPdf(
 
   page.drawRectangle({
     x: 0,
-    y: PAGE_HEIGHT - 13,
+    y: PAGE_HEIGHT - 9,
     width: PAGE_WIDTH,
-    height: 13,
+    height: 9,
     color: rgb(0.03, 0.67, 0.76),
+  });
+  page.drawRectangle({
+    x: 8,
+    y: 756,
+    width: PAGE_WIDTH - 8,
+    height: 77,
+    color: rgb(0.95, 0.985, 0.99),
+  });
+  page.drawRectangle({
+    x: 8,
+    y: 756,
+    width: 252,
+    height: 77,
+    color: rgb(0.025, 0.075, 0.13),
+  });
+  page.drawCircle({
+    x: 244,
+    y: 817,
+    size: 46,
+    color: rgb(0.03, 0.67, 0.76),
+    opacity: 0.2,
+  });
+  page.drawText("DIGITALER VORSPRUNG", {
+    x: 40,
+    y: 800,
+    size: 7.2,
+    font: bold,
+    color: rgb(0.22, 0.83, 0.88),
+  });
+  page.drawText("FÜR FAHRSCHULEN", {
+    x: 40,
+    y: 777,
+    size: 17,
+    font: bold,
+    color: rgb(1, 1, 1),
   });
   page.drawRectangle({
     x: 0,
     y: 0,
-    width: 18,
+    width: 8,
     height: PAGE_HEIGHT,
     color: rgb(0.03, 0.67, 0.76),
   });
@@ -158,10 +195,10 @@ export async function createAcquisitionLetterPdf(
   );
 
   if (brandLogo) {
-    const dimensions = brandLogo.scaleToFit(150, 46);
+    const dimensions = brandLogo.scaleToFit(190, 55);
     page.drawImage(brandLogo, {
-      x: 534 - dimensions.width,
-      y: 802 - dimensions.height,
+      x: 540 - dimensions.width,
+      y: 794 - dimensions.height / 2,
       width: dimensions.width,
       height: dimensions.height,
     });
@@ -191,8 +228,9 @@ export async function createAcquisitionLetterPdf(
     year: "numeric",
     timeZone: "Europe/Berlin",
   }).format(input.createdAt);
-  page.drawText(weekday + ", den " + numericDate, {
-    x: 390,
+  const dateLabel = weekday + ", den " + numericDate;
+  page.drawText(dateLabel, {
+    x: 540 - regular.widthOfTextAtSize(dateLabel, 8),
     y: 646,
     size: 8,
     font: regular,
@@ -357,9 +395,10 @@ export async function createAcquisitionLetterPdf(
       "Der Brieftext ist für das einseitige Layout zu lang. Bitte kürze ihn oder entferne das Bild.",
     );
 
+  const responsePanelY = Math.max(92, Math.min(180, y - 158));
   page.drawRectangle({
     x: 55,
-    y: 92,
+    y: responsePanelY,
     width: 485,
     height: 142,
     color: rgb(0.955, 0.985, 0.99),
@@ -368,15 +407,20 @@ export async function createAcquisitionLetterPdf(
   });
   page.drawRectangle({
     x: 68,
-    y: 103,
+    y: responsePanelY + 11,
     width: 120,
     height: 120,
     color: rgb(1, 1, 1),
   });
-  page.drawImage(qr, { x: 75, y: 110, width: 106, height: 106 });
+  page.drawImage(qr, {
+    x: 75,
+    y: responsePanelY + 18,
+    width: 106,
+    height: 106,
+  });
   page.drawText("Ein Scan. Drei klare Möglichkeiten.", {
     x: 207,
-    y: 207,
+    y: responsePanelY + 115,
     size: 12.5,
     font: bold,
     color: rgb(0.03, 0.18, 0.27),
@@ -388,32 +432,63 @@ export async function createAcquisitionLetterPdf(
   ].forEach((line, index) =>
     page.drawText(line, {
       x: 207,
-      y: 184 - index * 13,
+      y: responsePanelY + 92 - index * 13,
       size: 8.2,
       font: regular,
       color: rgb(0.16, 0.23, 0.3),
     }),
   );
-  page.drawText("Persönlich. Unverbindlich. Ohne Login.", {
-    x: 207,
-    y: 139,
-    size: 8.2,
-    font: bold,
-    color: rgb(0.03, 0.55, 0.63),
-  });
-  page.drawText(
-    "QR-Code scannen und in weniger als einer Minute entscheiden.",
+  const responseOptions = [
     {
+      label: "INTERESSE",
       x: 207,
-      y: 122,
-      size: 7,
-      font: regular,
-      color: rgb(0.34, 0.39, 0.45),
+      width: 69,
+      color: rgb(0.03, 0.55, 0.63),
+      text: rgb(1, 1, 1),
     },
-  );
+    {
+      label: "MEHR INFOS",
+      x: 282,
+      width: 78,
+      color: rgb(0.87, 0.96, 0.98),
+      text: rgb(0.03, 0.28, 0.34),
+    },
+    {
+      label: "KEIN INTERESSE",
+      x: 366,
+      width: 98,
+      color: rgb(0.9, 0.92, 0.94),
+      text: rgb(0.2, 0.24, 0.29),
+    },
+  ];
+  responseOptions.forEach((option) => {
+    page.drawRectangle({
+      x: option.x,
+      y: responsePanelY + 34,
+      width: option.width,
+      height: 17,
+      color: option.color,
+    });
+    page.drawText(option.label, {
+      x:
+        option.x +
+        (option.width - bold.widthOfTextAtSize(option.label, 5.8)) / 2,
+      y: responsePanelY + 40,
+      size: 5.8,
+      font: bold,
+      color: option.text,
+    });
+  });
+  page.drawText("Persönlich, unverbindlich und ohne Login antworten.", {
+    x: 207,
+    y: responsePanelY + 19,
+    size: 7,
+    font: regular,
+    color: rgb(0.34, 0.39, 0.45),
+  });
   page.drawText("Referenz " + input.leadId, {
     x: 207,
-    y: 105,
+    y: responsePanelY + 7,
     size: 5.5,
     font: regular,
     color: rgb(0.68, 0.71, 0.75),

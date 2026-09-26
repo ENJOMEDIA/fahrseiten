@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 
-import { and, eq, gt, like, ne } from "drizzle-orm";
+import { and, eq, gt, like, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { env } from "@/config/env";
@@ -40,11 +40,32 @@ export async function findPostalCampaignLead(leadId: string, token: string) {
       id: salesLeads.id,
       companyName: salesLeads.companyName,
       response: salesLeads.postalResponse,
+      firstViewedAt: salesLeads.postalLandingFirstViewedAt,
     })
     .from(salesLeads)
     .where(eq(salesLeads.id, leadId))
     .limit(1);
-  return lead ?? null;
+  if (!lead) return null;
+  const viewedAt = new Date();
+  await db.transaction(async (tx) => {
+    await tx
+      .update(salesLeads)
+      .set({
+        postalLandingFirstViewedAt: lead.firstViewedAt ?? viewedAt,
+        postalLandingLastViewedAt: viewedAt,
+        postalLandingViewCount: sql`${salesLeads.postalLandingViewCount} + 1`,
+      })
+      .where(eq(salesLeads.id, lead.id));
+    if (!lead.firstViewedAt) {
+      await tx.insert(salesActivities).values({
+        id: createId(),
+        leadId: lead.id,
+        activityType: "postal_landing_opened",
+        note: "Der persönliche QR-Link des Akquisebriefs wurde erstmals geöffnet. Es wurden weder IP-Adresse noch Gerätefingerabdruck gespeichert.",
+      });
+    }
+  });
+  return lead;
 }
 
 const responseSchema = z

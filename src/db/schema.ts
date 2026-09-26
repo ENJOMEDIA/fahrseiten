@@ -885,6 +885,17 @@ export const salesLeads = mysqlTable(
       mode: "date",
       fsp: 3,
     }),
+    postalLandingFirstViewedAt: timestamp("postal_landing_first_viewed_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    postalLandingLastViewedAt: timestamp("postal_landing_last_viewed_at", {
+      mode: "date",
+      fsp: 3,
+    }),
+    postalLandingViewCount: int("postal_landing_view_count")
+      .default(0)
+      .notNull(),
     status: mysqlEnum("status", leadStatusValues).default("new").notNull(),
     ownerUserId: id("owner_user_id").references(() => users.id, {
       onDelete: "set null",

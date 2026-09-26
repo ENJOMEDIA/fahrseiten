@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { TenantSite, resolveTenantContactHref } from "./tenant-site";
+import { demoWebsite, findDemoPage } from "./demo-content";
 import type { PublishedPage, TenantWebsite } from "./types";
 
 const website: TenantWebsite = {
@@ -80,5 +81,28 @@ describe("TenantSite contact link", () => {
         ],
       }),
     ).toBe("/kontakt");
+  });
+
+  it("marks light Urban Drive labels with contrast-safe theme hooks", () => {
+    const aboutPage = findDemoPage("ueber-uns");
+    expect(aboutPage).not.toBeNull();
+    render(<TenantSite page={aboutPage!} website={demoWebsite} />);
+
+    expect(screen.getByText("Automatik")).toHaveClass("tenant-chip");
+    expect(screen.getByText("Menschen mit Geduld")).toHaveClass(
+      "tenant-section-eyebrow",
+    );
+  });
+
+  it("keeps the fiktive hero rating readable in Urban Drive", () => {
+    const homePage = findDemoPage("");
+    expect(homePage).not.toBeNull();
+    const { container } = render(
+      <TenantSite page={homePage!} website={demoWebsite} />,
+    );
+
+    expect(container.querySelector(".tenant-rating-card")).toHaveTextContent(
+      "fiktive Beispielbewertung",
+    );
   });
 });
