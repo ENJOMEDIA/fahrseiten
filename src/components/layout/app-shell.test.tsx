@@ -29,13 +29,22 @@ describe("AppShell desktop navigation", () => {
       screen.getByRole("button", { name: "Seitenmenü ausblenden" }),
     );
 
-    expect(container.querySelector(".app-sidebar")).not.toHaveClass("lg:flex");
+    expect(container.querySelector(".app-sidebar")).toHaveClass("lg:opacity-0");
     expect(window.localStorage.getItem("fahrseiten:sidebar-hidden")).toBe(
       "true",
     );
-    expect(
-      screen.getByRole("button", { name: "Seitenmenü einblenden" }),
-    ).toBeVisible();
+    const showButton = screen.getByRole("button", {
+      name: "Seitenmenü einblenden",
+    });
+    expect(showButton).toBeVisible();
+
+    await user.click(showButton);
+    expect(container.querySelector(".app-sidebar")).toHaveClass(
+      "lg:opacity-100",
+    );
+    expect(window.localStorage.getItem("fahrseiten:sidebar-hidden")).toBe(
+      "false",
+    );
 
     await waitFor(() => expect(screen.getByText("Inhalt")).toBeVisible());
   });

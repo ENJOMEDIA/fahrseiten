@@ -171,45 +171,61 @@ export function AppShell({
   return (
     <div
       className={cn(
-        "min-h-screen bg-[#f3f6f8] lg:grid",
+        "min-h-screen bg-[#f3f6f8] motion-reduce:transition-none lg:grid lg:transition-[grid-template-columns] lg:duration-300 lg:ease-out",
         desktopNavigationHidden
-          ? "lg:grid-cols-[1fr]"
+          ? "lg:grid-cols-[0rem_1fr]"
           : "lg:grid-cols-[19rem_1fr]",
       )}
     >
       <AutoSaveIndicator />
       <aside
+        id="desktop-dashboard-navigation"
         className={cn(
-          "app-sidebar sticky top-0 hidden h-screen overflow-hidden border-r border-white/5 bg-[#080d16] px-5 py-6 text-white",
-          !desktopNavigationHidden && "lg:flex lg:flex-col",
+          "app-sidebar sticky top-0 hidden h-screen w-[19rem] min-w-0 overflow-hidden border-r border-white/5 bg-[#080d16] px-5 py-6 text-white motion-reduce:transition-none lg:flex lg:flex-col lg:transition-[opacity,transform] lg:duration-300 lg:ease-out",
+          desktopNavigationHidden
+            ? "lg:pointer-events-none lg:-translate-x-4 lg:opacity-0"
+            : "lg:translate-x-0 lg:opacity-100",
         )}
       >
-        <Link className="flex items-center gap-3" href="/">
-          {logoUrl ? (
-            <span className="grid h-11 min-w-14 place-items-center rounded-2xl bg-white px-2 shadow-lg">
-              <Image
-                alt="Logo"
-                className="h-7 w-auto object-contain"
-                height={28}
-                src={logoUrl}
-                unoptimized
-                width={120}
-              />
+        <div className="flex items-center justify-between gap-3">
+          <Link className="flex min-w-0 items-center gap-3" href="/">
+            {logoUrl ? (
+              <span className="grid h-11 min-w-14 place-items-center rounded-2xl bg-white px-2 shadow-lg">
+                <Image
+                  alt="Logo"
+                  className="h-7 w-auto object-contain"
+                  height={28}
+                  src={logoUrl}
+                  unoptimized
+                  width={120}
+                />
+              </span>
+            ) : (
+              <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-cyan-300 to-sky-500 text-lg font-bold text-slate-950 shadow-lg shadow-cyan-500/20">
+                F
+              </span>
+            )}
+            <span className="min-w-0">
+              <span className="block truncate font-semibold tracking-tight">
+                FahrSeiten
+              </span>
+              <span className="block truncate text-[10px] tracking-[.16em] text-slate-500 uppercase">
+                by ENJO MEDIA
+              </span>
             </span>
-          ) : (
-            <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-cyan-300 to-sky-500 text-lg font-bold text-slate-950 shadow-lg shadow-cyan-500/20">
-              F
-            </span>
-          )}
-          <span>
-            <span className="block font-semibold tracking-tight">
-              FahrSeiten
-            </span>
-            <span className="block text-[10px] tracking-[.16em] text-slate-500 uppercase">
-              by ENJO MEDIA
-            </span>
-          </span>
-        </Link>
+          </Link>
+          <button
+            aria-controls="desktop-dashboard-navigation"
+            aria-expanded="true"
+            aria-label="Seitenmenü ausblenden"
+            className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-slate-300 transition hover:border-cyan-300/40 hover:bg-white/10 hover:text-white"
+            onClick={toggleDesktopNavigation}
+            title="Seitenmenü ausblenden"
+            type="button"
+          >
+            <SidebarIcon collapsed={false} />
+          </button>
+        </div>
         <div className="mt-7 rounded-2xl border border-white/8 bg-white/[0.04] p-4">
           <p className="text-[10px] font-semibold tracking-[.16em] text-cyan-300 uppercase">
             Arbeitsbereich
@@ -238,6 +254,22 @@ export function AppShell({
           </form>
         </div>
       </aside>
+      <button
+        aria-controls="desktop-dashboard-navigation"
+        aria-expanded="false"
+        aria-label="Seitenmenü einblenden"
+        className={cn(
+          "fixed top-4 left-3 z-[60] hidden size-11 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition-[opacity,transform] duration-300 hover:border-cyan-300 hover:text-cyan-800 motion-reduce:transition-none lg:grid",
+          desktopNavigationHidden
+            ? "translate-x-0 opacity-100"
+            : "pointer-events-none -translate-x-3 opacity-0",
+        )}
+        onClick={toggleDesktopNavigation}
+        title="Seitenmenü einblenden"
+        type="button"
+      >
+        <SidebarIcon collapsed />
+      </button>
       <div className="min-w-0">
         {mobileNavigationOpen ? (
           <div className="fixed inset-0 z-[70] lg:hidden">
@@ -369,33 +401,11 @@ export function AppShell({
             </button>
           </div>
           <div className="hidden items-center justify-between lg:flex">
-            <div className="flex items-center gap-3">
-              <button
-                aria-expanded={!desktopNavigationHidden}
-                aria-label={
-                  desktopNavigationHidden
-                    ? "Seitenmenü einblenden"
-                    : "Seitenmenü ausblenden"
-                }
-                className="grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-cyan-300 hover:text-cyan-800"
-                onClick={toggleDesktopNavigation}
-                title={
-                  desktopNavigationHidden
-                    ? "Seitenmenü einblenden"
-                    : "Seitenmenü ausblenden"
-                }
-                type="button"
-              >
-                <span aria-hidden="true" className="text-lg">
-                  {desktopNavigationHidden ? "☰" : "←"}
-                </span>
-              </button>
-              <div>
-                <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
-                  {eyebrow}
-                </p>
-                <p className="mt-0.5 font-semibold text-slate-950">{title}</p>
-              </div>
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
+                {eyebrow}
+              </p>
+              <p className="mt-0.5 font-semibold text-slate-950">{title}</p>
             </div>
             <div className="flex items-center gap-3">
               <details className="group relative">
@@ -477,6 +487,25 @@ export function AppShell({
         </main>
       </div>
     </div>
+  );
+}
+
+function SidebarIcon({ collapsed }: { collapsed: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      viewBox="0 0 24 24"
+    >
+      <rect height="18" rx="3" width="18" x="3" y="3" />
+      <path d="M9 3v18" />
+      <path d={collapsed ? "m13 9 3 3-3 3" : "m16 9-3 3 3 3"} />
+    </svg>
   );
 }
 

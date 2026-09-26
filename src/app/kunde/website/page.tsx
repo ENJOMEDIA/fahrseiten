@@ -6,19 +6,19 @@ import { isTenantFeatureEnabled } from "@/modules/features/access";
 import { redirect } from "next/navigation";
 const tasks = [
   [
-    "Seiten & Blöcke",
-    "Startseite, Unterseiten, Vorschau und Veröffentlichung",
+    "Website-Builder",
+    "Theme wählen, Seiten anlegen, Inhaltsblöcke sortieren und die Darstellung auf allen Geräten prüfen. Veröffentlichte Seiten bilden automatisch das Menü.",
     "/kunde/website/builder",
   ],
   [
-    "Navigation",
-    "Reihenfolge und sichtbare Menüpunkte bearbeiten",
-    "/kunde/website/builder",
+    "Inhalte",
+    "Klassen, Preise, Kurse, Team, Fahrzeuge, Standorte und Bewertungen zentral pflegen",
+    "/kunde/inhalte",
   ],
   [
-    "Theme",
-    "Freigegebene Farben, Schriftvariante und Logo wählen",
-    "/kunde/website/builder",
+    "Medien & Branding",
+    "Logo, Favicon und Bilder hochladen, kategorisieren und wiederverwenden",
+    "/kunde/medien",
   ],
   ["Domainstatus", "Verifikation und SSL-Hinweise prüfen", "/kunde/domain"],
   [
