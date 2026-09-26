@@ -30,8 +30,10 @@ ein hervorgehobener Einstieg und die kompakte QR-Fläche bilden eine feste
 visuelle Hierarchie. Dadurch bleiben eigene Vorlagen kontrolliert einseitig,
 ohne freien HTML-Code in den Brief einzuschleusen.
 
-Der CSV-Import übernimmt neben den Kontaktdaten auch Tags und einen dauerhaften
-Recherche-Kommentar. Mehrere Tags werden in der CSV mit `|` getrennt, etwa
+Der CSV-Import übernimmt neben den Kontaktdaten eine Wiedervorlage, eine Notiz
+für die Historie, Tags und einen dauerhaften Recherche-Kommentar. Die
+Standardreihenfolge lautet `Wiedervorlage;Notiz;Tags;Kommentare`. Mehrere Tags
+werden in der CSV mit `|` getrennt, etwa
 `Rechtlich veraltet|Aktuelle Wartungen`. Importierte Beobachtungen müssen vor
 dem Briefversand manuell geprüft werden; die Vorlage darf keine ungeprüfte
 rechtliche Tatsachenbehauptung erzeugen.

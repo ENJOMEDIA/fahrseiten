@@ -52,8 +52,8 @@ export function CsvImportForm() {
       <p className="mt-2 text-sm text-slate-600">
         Die Kopfzeile wird geprüft. Kontakte mit bereits vorhandener
         E-Mail-Adresse werden übersprungen. Tags werden mit <strong>|</strong>
-        getrennt; der Kommentar bleibt als dauerhafte Recherche-Notiz in der
-        Kundenakte erhalten.
+        getrennt. Die Notiz erscheint in der Historie; Kommentare bleiben als
+        dauerhafter Recherchehinweis in der Kundenakte erhalten.
       </p>
       <input
         accept=".csv,text/csv"

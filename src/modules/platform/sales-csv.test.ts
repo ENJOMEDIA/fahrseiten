@@ -11,6 +11,7 @@ describe("Akquise-CSV", () => {
     expect(row.nextTaskAt).toBeInstanceOf(Date);
     expect(row.tags).toEqual(["Rechtlich veraltet", "Aktuelle Wartungen"]);
     expect(row.researchNote).toContain("Im Impressum");
+    expect(row.note).toContain("Vor dem Erstkontakt");
   });
 
   it("unterstützt maskierte Trennzeichen", () => {
@@ -24,11 +25,21 @@ describe("Akquise-CSV", () => {
 
   it("übernimmt Tags und Kommentare aus der aktuellen Importstruktur", () => {
     const source =
-      "Fahrschule;Ansprechpartner;E-Mail;Telefon;Webseite;Straße;PLZ;Ort;Land;Tags;Kommentar;Wiedervorlage\nFahrschule Nord;;;;;Nordweg 1;12345;Musterstadt;Deutschland;Rechtlich veraltet|Aktuelle Wartungen;Rechtstexte vor Versand prüfen;";
+      "Fahrschule;Ansprechpartner;E-Mail;Telefon;Webseite;Straße;PLZ;Ort;Land;Wiedervorlage;Notiz;Tags;Kommentare\nFahrschule Nord;;;;;Nordweg 1;12345;Musterstadt;Deutschland;;Rückfrage vorbereiten;Rechtlich veraltet|Aktuelle Wartungen;Rechtstexte vor Versand prüfen";
     expect(parseSalesCsv(source)[0]).toMatchObject({
       tags: ["Rechtlich veraltet", "Aktuelle Wartungen"],
       researchNote: "Rechtstexte vor Versand prüfen",
-      note: "Rechtstexte vor Versand prüfen",
+      note: "Rückfrage vorbereiten",
+    });
+  });
+
+  it("liest weiterhin die bisherige Tags-Kommentar-Struktur", () => {
+    const source =
+      "Fahrschule;Ansprechpartner;E-Mail;Telefon;Webseite;Straße;PLZ;Ort;Land;Tags;Kommentar;Wiedervorlage\nFahrschule Süd;;;;;Südweg 2;54321;Beispielstadt;Deutschland;Aktuelle Wartungen;Website erneut prüfen;";
+    expect(parseSalesCsv(source)[0]).toMatchObject({
+      tags: ["Aktuelle Wartungen"],
+      researchNote: "Website erneut prüfen",
+      note: "Website erneut prüfen",
     });
   });
 });
