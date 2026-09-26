@@ -115,10 +115,14 @@ export function DeletePostalForm({
 
 export function PreparePostalForm({
   leads,
+  logos,
+  defaultLogoId,
   media,
   templates,
 }: {
   leads: { id: string; companyName: string; addressComplete: boolean }[];
+  logos: { id: string; label: string }[];
+  defaultLogoId: string;
   media: { id: string; label: string }[];
   templates: {
     id: string;
@@ -144,27 +148,93 @@ export function PreparePostalForm({
     firstTemplate?.bodyTemplate ??
       "FahrSeiten verbindet einen modernen Webauftritt mit einem übersichtlichen Arbeitsbereich.",
   );
+  const availableLeadIds = leads
+    .filter((lead) => lead.addressComplete)
+    .map((lead) => lead.id);
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   return (
     <form action={action} className="space-y-4">
+      <fieldset className="rounded-2xl border border-slate-200 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <legend className="text-sm font-semibold">
+              Empfänger auswählen
+            </legend>
+            <p className="mt-1 text-xs text-slate-500">
+              {selectedLeadIds.length} von maximal 50 ausgewählt
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
+              onClick={() => setSelectedLeadIds(availableLeadIds.slice(0, 50))}
+              type="button"
+            >
+              Alle mit Anschrift
+            </button>
+            <button
+              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600"
+              onClick={() => setSelectedLeadIds([])}
+              type="button"
+            >
+              Auswahl leeren
+            </button>
+          </div>
+        </div>
+        <div className="mt-4 max-h-64 space-y-2 overflow-y-auto pr-1">
+          {leads.map((lead) => {
+            const checked = selectedLeadIds.includes(lead.id);
+            return (
+              <label
+                className={`flex items-center gap-3 rounded-xl border p-3 text-sm ${lead.addressComplete ? "cursor-pointer border-slate-200 hover:border-cyan-300" : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"}`}
+                key={lead.id}
+              >
+                <input
+                  checked={checked}
+                  disabled={!lead.addressComplete}
+                  name="leadIds"
+                  onChange={(event) =>
+                    setSelectedLeadIds((current) =>
+                      event.target.checked
+                        ? current.length < 50
+                          ? [...current, lead.id]
+                          : current
+                        : current.filter((id) => id !== lead.id),
+                    )
+                  }
+                  type="checkbox"
+                  value={lead.id}
+                />
+                <span className="font-semibold">
+                  {lead.companyName}
+                  {lead.addressComplete ? "" : " – Anschrift fehlt"}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
       <label className="block text-sm font-semibold">
-        Kundenakte
+        Briefkopf-Logo
         <select
           className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
-          name="leadId"
+          defaultValue={defaultLogoId}
+          name="logoMediaId"
           required
         >
-          <option value="">Bitte auswählen</option>
-          {leads.map((lead) => (
-            <option
-              disabled={!lead.addressComplete}
-              key={lead.id}
-              value={lead.id}
-            >
-              {lead.companyName}
-              {lead.addressComplete ? "" : " – Anschrift fehlt"}
+          <option value="" disabled>
+            Logo aus dem Plattform-Medienbereich auswählen
+          </option>
+          {logos.map((asset) => (
+            <option key={asset.id} value={asset.id}>
+              {asset.label}
             </option>
           ))}
         </select>
+        <span className="mt-1 block text-xs font-normal text-slate-500">
+          Dieses Bild wird verbindlich in den Briefkopf eingebettet. Fehlt die
+          Auswahl, wird kein PDF erstellt.
+        </span>
       </label>
       <label className="block text-sm font-semibold">
         Briefvorlage
@@ -242,8 +312,14 @@ export function PreparePostalForm({
         <input defaultChecked name="color" type="checkbox" value="yes" />
         Farbdruck verwenden
       </label>
-      <button className="premium-button" disabled={pending} type="submit">
-        {pending ? "PDF wird erstellt …" : "Akquisebrief vorbereiten"}
+      <button
+        className="premium-button"
+        disabled={pending || selectedLeadIds.length === 0 || logos.length === 0}
+        type="submit"
+      >
+        {pending
+          ? `${selectedLeadIds.length} PDF${selectedLeadIds.length === 1 ? "" : "s"} werden erstellt …`
+          : `${selectedLeadIds.length || "Keine"} Akquisebrief${selectedLeadIds.length === 1 ? "" : "e"} vorbereiten`}
       </button>
       <Result state={state} />
     </form>

@@ -171,6 +171,7 @@ export async function preparePostalDispatch(input: {
   kicker: string;
   headline: string;
   bodyText: string;
+  logoMediaId: string;
   imageMediaId: string;
 }) {
   const content = z
@@ -178,10 +179,15 @@ export async function preparePostalDispatch(input: {
       headline: z.string().trim().min(10).max(160),
       kicker: z.string().trim().min(3).max(120),
       bodyText: z.string().trim().min(80).max(1_200),
+      logoMediaId: z.union([z.literal(""), z.uuid()]),
       imageMediaId: z.union([z.literal(""), z.uuid()]),
     })
     .parse(input);
-  const logoId = await findPlatformLogoId();
+  const logoId = content.logoMediaId || (await findPlatformLogoId());
+  if (!logoId)
+    throw new Error(
+      "Bitte wähle ein Briefkopf-Logo. Plattformlogos verwaltest du unter Medien.",
+    );
   const [lead, sender, brandLogoPng, heroImagePng] = await Promise.all([
     findPostalLead(input.leadId),
     findPlatformLegalProfile(),
@@ -263,6 +269,41 @@ export async function preparePostalDispatch(input: {
     throw error;
   }
   return dispatchId;
+}
+
+export async function preparePostalDispatchBatch(input: {
+  leadIds: string[];
+  actorUserId: string;
+  color: boolean;
+  kicker: string;
+  headline: string;
+  bodyText: string;
+  logoMediaId: string;
+  imageMediaId: string;
+}) {
+  const leadIds = z.array(z.uuid()).min(1).max(50).parse(input.leadIds);
+  const uniqueLeadIds = [...new Set(leadIds)];
+  const prepared: string[] = [];
+  const failed: { leadId: string; reason: string }[] = [];
+  for (const leadId of uniqueLeadIds) {
+    try {
+      prepared.push(
+        await preparePostalDispatch({
+          ...input,
+          leadId,
+        }),
+      );
+    } catch (error) {
+      failed.push({
+        leadId,
+        reason:
+          error instanceof Error
+            ? error.message
+            : "Der Brief konnte nicht vorbereitet werden.",
+      });
+    }
+  }
+  return { prepared, failed };
 }
 
 export async function submitPreparedPostalDispatch(input: {

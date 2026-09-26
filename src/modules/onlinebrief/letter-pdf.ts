@@ -128,35 +128,35 @@ export async function createAcquisitionLetterPdf(
     y: 756,
     width: PAGE_WIDTH - 8,
     height: 77,
-    color: rgb(0.95, 0.985, 0.99),
-  });
-  page.drawRectangle({
-    x: 8,
-    y: 756,
-    width: 252,
-    height: 77,
     color: rgb(0.025, 0.075, 0.13),
   });
   page.drawCircle({
-    x: 244,
+    x: 535,
     y: 817,
-    size: 46,
+    size: 62,
     color: rgb(0.03, 0.67, 0.76),
-    opacity: 0.2,
+    opacity: 0.32,
   });
-  page.drawText("DIGITALER VORSPRUNG", {
-    x: 40,
-    y: 800,
-    size: 7.2,
-    font: bold,
-    color: rgb(0.22, 0.83, 0.88),
+  page.drawCircle({
+    x: 482,
+    y: 757,
+    size: 36,
+    color: rgb(0.1, 0.4, 0.56),
+    opacity: 0.38,
   });
-  page.drawText("FÜR FAHRSCHULEN", {
-    x: 40,
-    y: 777,
-    size: 17,
+  page.drawText("WEBSITES, DIE MITFAHREN.", {
+    x: 340,
+    y: 793,
+    size: 10.5,
     font: bold,
     color: rgb(1, 1, 1),
+  });
+  page.drawText("Für Fahrschulen. Einfach gepflegt.", {
+    x: 340,
+    y: 775,
+    size: 7,
+    font: regular,
+    color: rgb(0.65, 0.81, 0.86),
   });
   page.drawRectangle({
     x: 0,
@@ -165,10 +165,23 @@ export async function createAcquisitionLetterPdf(
     height: PAGE_HEIGHT,
     color: rgb(0.03, 0.67, 0.76),
   });
-  page.drawText(
-    `${input.sender.companyName} · ${input.sender.street} · ${input.sender.postalCode} ${input.sender.city}`,
-    { x: 56, y: 746, size: 6.8, font: regular, color: rgb(0.35, 0.4, 0.47) },
-  );
+  const senderLine = `${input.sender.companyName} · ${input.sender.street} · ${input.sender.postalCode} ${input.sender.city}`;
+  page.drawText(senderLine, {
+    x: 62,
+    y: 711,
+    size: 6.3,
+    font: regular,
+    color: rgb(0.35, 0.4, 0.47),
+  });
+  page.drawLine({
+    start: { x: 62, y: 707 },
+    end: {
+      x: Math.min(270, 62 + regular.widthOfTextAtSize(senderLine, 6.3)),
+      y: 707,
+    },
+    thickness: 0.35,
+    color: rgb(0.55, 0.59, 0.64),
+  });
   const recipientLines = [
     input.recipient.companyName,
     input.recipient.contactName
@@ -187,7 +200,7 @@ export async function createAcquisitionLetterPdf(
   recipientLines.forEach((line, index) =>
     page.drawText(line, {
       x: 62,
-      y: 678 - index * 14,
+      y: 687 - index * 14,
       size: 9.5,
       font: regular,
       color: rgb(0.06, 0.09, 0.14),
@@ -195,27 +208,35 @@ export async function createAcquisitionLetterPdf(
   );
 
   if (brandLogo) {
-    const dimensions = brandLogo.scaleToFit(190, 55);
+    page.drawRectangle({
+      x: 30,
+      y: 770,
+      width: 270,
+      height: 49,
+      color: rgb(1, 1, 1),
+      opacity: 0.98,
+    });
+    const dimensions = brandLogo.scaleToFit(244, 37);
     page.drawImage(brandLogo, {
-      x: 540 - dimensions.width,
-      y: 794 - dimensions.height / 2,
+      x: 43,
+      y: 776 + (37 - dimensions.height) / 2,
       width: dimensions.width,
       height: dimensions.height,
     });
   } else {
     page.drawText("FAHRSEITEN", {
-      x: 387,
-      y: 782,
+      x: 45,
+      y: 792,
       size: 17,
       font: bold,
-      color: rgb(0.03, 0.18, 0.27),
+      color: rgb(1, 1, 1),
     });
     page.drawText("by ENJO MEDIA", {
-      x: 449,
-      y: 766,
+      x: 46,
+      y: 775,
       size: 7.5,
       font: bold,
-      color: rgb(0.03, 0.55, 0.63),
+      color: rgb(0.22, 0.83, 0.88),
     });
   }
   const weekday = new Intl.DateTimeFormat("de-DE", {
@@ -335,24 +356,44 @@ export async function createAcquisitionLetterPdf(
       return;
     }
     if (segment.type === "bullets") {
-      segment.items.forEach((item) => {
-        page.drawCircle({
-          x: 63,
-          y: y + 3,
-          size: 3.2,
-          color: rgb(0.03, 0.65, 0.7),
+      segment.items.forEach((item, itemIndex) => {
+        const lines = wrapText(item, bold, 9.2, 414);
+        const itemHeight = Math.max(23, lines.length * 12.5 + 8);
+        page.drawRectangle({
+          x: 55,
+          y: y - itemHeight + 7,
+          width: 485,
+          height: itemHeight,
+          color:
+            itemIndex % 2 === 0
+              ? rgb(0.965, 0.98, 0.985)
+              : rgb(0.94, 0.975, 0.98),
         });
-        const lines = wrapText(item, bold, 9.4, 448);
+        page.drawRectangle({
+          x: 63,
+          y: y - 13,
+          width: 20,
+          height: 20,
+          color: rgb(0.03, 0.58, 0.65),
+        });
+        const number = String(itemIndex + 1).padStart(2, "0");
+        page.drawText(number, {
+          x: 67,
+          y: y - 6,
+          size: 6.4,
+          font: bold,
+          color: rgb(1, 1, 1),
+        });
         lines.forEach((item, index) =>
           page.drawText(item, {
-            x: 76,
-            y: y - index * 13.5,
-            size: 9.4,
+            x: 96,
+            y: y - 5 - index * 12.5,
+            size: 9.2,
             font: bold,
             color: rgb(0.06, 0.13, 0.2),
           }),
         );
-        y -= lines.length * 13.5 + 5;
+        y -= itemHeight + 4;
       });
       y -= 3;
       return;

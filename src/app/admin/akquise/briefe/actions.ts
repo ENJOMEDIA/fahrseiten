@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import {
   deletePostalDispatch,
-  preparePostalDispatch,
+  preparePostalDispatchBatch,
   setPostalDispatchArchived,
   submitPreparedPostalDispatch,
   syncPostalDispatchStatuses,
@@ -19,20 +19,26 @@ export async function preparePostalDispatchAction(
 ): Promise<PostalActionState> {
   const identity = await requirePlatformPermission("platform.sales.manage");
   try {
-    await preparePostalDispatch({
-      leadId: String(formData.get("leadId") ?? ""),
+    const result = await preparePostalDispatchBatch({
+      leadIds: formData.getAll("leadIds").map(String),
       actorUserId: identity.id,
       color: formData.get("color") === "yes",
       kicker: String(formData.get("kicker") ?? ""),
       headline: String(formData.get("headline") ?? ""),
       bodyText: String(formData.get("bodyText") ?? ""),
+      logoMediaId: String(formData.get("logoMediaId") ?? ""),
       imageMediaId: String(formData.get("imageMediaId") ?? ""),
     });
     revalidatePath("/admin/akquise/briefe");
     revalidatePath("/admin/akquise");
     return {
-      message: "Der personalisierte Brief wurde als PDF vorbereitet.",
-      error: false,
+      message: result.failed.length
+        ? `${result.prepared.length} Brief-PDFs vorbereitet. ${result.failed.length} fehlgeschlagen: ${result.failed
+            .slice(0, 3)
+            .map((item) => item.reason)
+            .join(" · ")}`
+        : `${result.prepared.length} personalisierte Brief-PDF${result.prepared.length === 1 ? "" : "s"} vorbereitet. Bitte jedes PDF vor der Übertragung prüfen.`,
+      error: result.failed.length > 0,
     };
   } catch (error) {
     return {

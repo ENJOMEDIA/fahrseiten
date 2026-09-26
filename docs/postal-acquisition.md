@@ -106,3 +106,28 @@ Der AGB-Entwurf ersetzt keine rechtliche Prüfung. E-Mail-Werbeeinwilligungen we
 7. Den Link bestätigen, Cronjob erneut ausführen und Informationsmail, `/demo`-Link und Abmeldelink prüfen.
 8. Einen zweiten fiktiven Lead ablehnen und kontrollieren, dass keine E-Mail-Einwilligung entsteht und keine offenen Akquise-Jobs verbleiben.
 9. Dieselbe Rückmeldeseite erneut absenden; eine zweite Antwort muss verhindert werden.
+
+## Stapelerstellung und erster echter Probelauf
+
+Im Bereich **Briefakquise** können bis zu 50 Kundenakten mit vollständiger
+Postanschrift gleichzeitig ausgewählt werden. Für jede Kundenakte entsteht ein
+eigenes PDF mit eigener Lead-ID und eigenem QR-Code. Die Stapelerstellung
+überträgt noch keinen Brief an OnlineBrief24; jedes PDF bleibt zunächst einzeln
+prüfbar. Die anschließende Übertragung wird pro Brief bewusst separat
+bestätigt, damit ein falscher Massenversand nicht durch einen einzigen Klick
+ausgelöst werden kann.
+
+Für den ersten echten Probelauf in Plesk:
+
+1. `ONLINEBRIEF_MODE` von `test` auf `live` setzen.
+2. Die Node.js-Anwendung in Plesk neu starten.
+3. Genau eine eigene oder anderweitig autorisierte Testanschrift auswählen.
+4. Ein neues Brief-PDF erzeugen. Bereits erzeugte Testvorgänge wechseln ihren
+   Modus nicht nachträglich.
+5. Empfänger, Absender, Logo, Text und QR-Ziel im PDF prüfen.
+6. Zur kostenpflichtigen Bestätigung die angezeigte Lead-ID eingeben und nur
+   diesen einzelnen Auftrag übertragen.
+7. Status und Warenkorb bei OnlineBrief24 kontrollieren.
+
+Nach dem Probelauf kann `ONLINEBRIEF_MODE` für weitere technische Tests wieder
+auf `test` gesetzt und die Anwendung erneut gestartet werden.

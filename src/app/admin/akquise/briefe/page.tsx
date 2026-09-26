@@ -9,7 +9,10 @@ import {
 } from "@/modules/onlinebrief/service";
 import { listPostalLetterTemplates } from "@/modules/onlinebrief/templates";
 import { requirePlatformPermission } from "@/modules/platform/access";
-import { listPlatformMedia } from "@/modules/media/repository";
+import {
+  findPlatformLogoId,
+  listPlatformMedia,
+} from "@/modules/media/repository";
 import { listSalesPipeline } from "@/modules/platform/sales-crm";
 
 import {
@@ -46,15 +49,23 @@ export default async function PostalAcquisitionPage({
   searchParams: Promise<{ view?: string }>;
 }) {
   await requirePlatformPermission("platform.sales.manage");
-  const [query, leads, allDispatches, media, templates, analytics] =
-    await Promise.all([
-      searchParams,
-      listSalesPipeline(),
-      listPostalDispatches(),
-      listPlatformMedia(),
-      listPostalLetterTemplates(),
-      getPostalCampaignAnalytics(),
-    ]);
+  const [
+    query,
+    leads,
+    allDispatches,
+    media,
+    templates,
+    analytics,
+    platformLogoId,
+  ] = await Promise.all([
+    searchParams,
+    listSalesPipeline(),
+    listPostalDispatches(),
+    listPlatformMedia(),
+    listPostalLetterTemplates(),
+    getPostalCampaignAnalytics(),
+    findPlatformLogoId(),
+  ]);
   const showArchived = query.view === "archiv";
   const activeCount = allDispatches.filter((item) => !item.archivedAt).length;
   const archivedCount = allDispatches.length - activeCount;
@@ -177,6 +188,28 @@ export default async function PostalAcquisitionPage({
           automatisch mit OnlineBrief24 ab. Du kannst den Abgleich zusätzlich
           jederzeit manuell starten.
         </p>
+        <p className="mt-2 font-semibold">
+          Briefkopf-Logo:{" "}
+          {platformLogoId ? "ausgewählt" : "noch nicht festgelegt"}
+        </p>
+        {configuration.mode === "test" ? (
+          <p className="mt-2 rounded-xl border border-amber-300 bg-white/60 p-3 leading-6">
+            Für einen echten einzelnen Testbrief in Plesk
+            <code className="mx-1 rounded bg-amber-100 px-1.5 py-0.5">
+              ONLINEBRIEF_MODE=live
+            </code>
+            setzen und die Node.js-Anwendung neu starten. Danach ein neues PDF
+            erzeugen. Bereits im Testmodus erstellte Vorgänge bleiben sicher im
+            Testmodus.
+          </p>
+        ) : (
+          <p className="mt-2 rounded-xl border border-red-300 bg-red-50 p-3 leading-6 font-semibold text-red-900">
+            Livemodus ist aktiv. Jede Übertragung kann kostenpflichtig gedruckt
+            und postalisch versendet werden. Für den ersten Probelauf genau
+            einen Empfänger auswählen und PDF sowie Anschrift vor dem Versand
+            prüfen.
+          </p>
+        )}
       </div>
       <section className="grid gap-6 xl:grid-cols-[.75fr_1.25fr]">
         <Card>
@@ -192,6 +225,7 @@ export default async function PostalAcquisitionPage({
           </p>
           <div className="mt-5">
             <PreparePostalForm
+              defaultLogoId={platformLogoId ?? ""}
               leads={leads.map((lead) => ({
                 id: lead.id,
                 companyName: lead.companyName,
@@ -199,6 +233,16 @@ export default async function PostalAcquisitionPage({
                   lead.street && lead.postalCode && lead.city,
                 ),
               }))}
+              logos={media
+                .filter(
+                  (asset) =>
+                    asset.mimeType.startsWith("image/") &&
+                    asset.category === "branding",
+                )
+                .map((asset) => ({
+                  id: asset.id,
+                  label: `${asset.description || asset.originalName} · ${asset.width}×${asset.height}`,
+                }))}
               media={media
                 .filter(
                   (asset) =>
