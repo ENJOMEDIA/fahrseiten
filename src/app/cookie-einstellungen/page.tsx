@@ -1,6 +1,6 @@
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
-import { OpenConsentSettingsButton } from "@/modules/consent/consent-manager";
 import { getRequestOptionalServiceConfig } from "@/modules/consent/config";
+import { CookieSettingsOverview } from "@/modules/legal/public-document";
 export default async function CookieSettingsPage() {
   const optionalServiceConfig = await getRequestOptionalServiceConfig();
   return (
@@ -10,31 +10,8 @@ export default async function CookieSettingsPage() {
       title="Cookie-Einstellungen"
       text="Optionale Kategorien lassen sich jederzeit anpassen oder widerrufen."
     >
-      <div className="rounded-3xl border bg-white p-8">
-        <h2 className="text-xl font-semibold">Notwendige Funktionen</h2>
-        <p className="mt-3 text-slate-600">
-          Sitzung und Sicherheitsfunktionen sind für den Betrieb erforderlich.
-        </p>
-        <h2 className="mt-8 text-xl font-semibold">Optionale Dienste</h2>
-        <p className="mt-3 text-slate-600">
-          {optionalServiceConfig.length === 0
-            ? "Derzeit sind keine optionalen Analyse-, Karten- oder Marketingdienste aktiv. Deshalb wird auch keine unnötige Einwilligung abgefragt."
-            : "Die nachfolgend aufgeführten Dienste werden erst nach einer passenden Einwilligung geladen."}
-        </p>
-        {optionalServiceConfig.length > 0 ? (
-          <ul className="mt-5 list-disc pl-6">
-            {optionalServiceConfig.map((item) => (
-              <li key={item.category}>
-                <strong>{item.label}:</strong> {item.services}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {optionalServiceConfig.length > 0 ? (
-          <div className="mt-8">
-            <OpenConsentSettingsButton />
-          </div>
-        ) : null}
+      <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
+        <CookieSettingsOverview optionalServices={optionalServiceConfig} />
       </div>
     </SimpleMarketingPage>
   );

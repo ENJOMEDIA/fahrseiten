@@ -2,7 +2,10 @@ import { connection } from "next/server";
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
 import { findPublishedPlatformLegalDocument } from "@/modules/legal/repository";
 import { getOptionalServiceConfig } from "@/modules/consent/config";
-import { PrivacyServiceNotice } from "@/modules/legal/public-document";
+import {
+  LegalContent,
+  PrivacyServiceNotice,
+} from "@/modules/legal/public-document";
 import { createOnlinebriefPrivacyNotice } from "@/modules/legal/documents";
 
 const referralPrivacyNotice = `Empfehlungsprogramm\nWenn ein Interessent einen persönlichen Empfehlungslink verwendet, verarbeiten wir die zufällige Empfehlungskennung, die Zuordnung zum werbenden Kunden, den Zeitpunkt der Bestätigung, den Bearbeitungsstatus sowie – nach einem Vertragsschluss – die Kunden-, Vertrags-, Zahlungs- und Rechnungszuordnung. Der werbende Kunde erhält keine Kontaktdaten der empfohlenen Person. Die Verarbeitung dient der Bearbeitung der Anfrage, der Durchführung des Empfehlungsprogramms, der Missbrauchsvermeidung und der nachvollziehbaren Abrechnung. Rechtsgrundlagen sind Art. 6 Abs. 1 lit. b und lit. f DSGVO. Abrechnungsrelevante Nachweise werden entsprechend den gesetzlichen Aufbewahrungspflichten gespeichert; nicht zustande gekommene Empfehlungen werden gelöscht, sobald keine Nachweis- oder Abwehrinteressen mehr bestehen.`;
@@ -37,8 +40,8 @@ export default async function PrivacyPage() {
       text="Informationen zur Verarbeitung personenbezogener Daten auf der FahrSeiten-Plattform."
     >
       {privacyContent ? (
-        <article className="rounded-3xl border bg-white p-8 leading-7 whitespace-pre-wrap text-slate-700">
-          {privacyContent}
+        <article className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
+          <LegalContent content={privacyContent} title="Datenschutz" />
           <PrivacyServiceNotice services={services} />
         </article>
       ) : (

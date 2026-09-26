@@ -8,8 +8,8 @@ export default function ReferralTermsPage() {
       title="Bedingungen für das FahrSeiten Empfehlungsprogramm"
       text="Klare Regeln für Fahrschulen, die FahrSeiten aus eigener Überzeugung weiterempfehlen."
     >
-      <article className="prose prose-slate max-w-none rounded-3xl border border-slate-200 bg-white p-7 sm:p-10">
-        <p className="rounded-2xl bg-cyan-50 p-4 text-sm leading-6">
+      <article className="max-w-none rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10 [&>h2]:mt-4 [&>h2]:rounded-t-2xl [&>h2]:border [&>h2]:border-b-0 [&>h2]:border-slate-200 [&>h2]:bg-slate-50/70 [&>h2]:px-5 [&>h2]:pt-5 [&>h2]:text-xl [&>h2]:font-semibold [&>h2]:tracking-tight [&>h2]:text-slate-950 [&>h2]:first-of-type:mt-8 sm:[&>h2]:px-6 [&>p:not(:first-child)]:rounded-b-2xl [&>p:not(:first-child)]:border [&>p:not(:first-child)]:border-t-0 [&>p:not(:first-child)]:border-slate-200 [&>p:not(:first-child)]:bg-slate-50/70 [&>p:not(:first-child)]:px-5 [&>p:not(:first-child)]:pt-3 [&>p:not(:first-child)]:pb-5 [&>p:not(:first-child)]:leading-7 [&>p:not(:first-child)]:text-slate-700 sm:[&>p:not(:first-child)]:px-6 sm:[&>p:not(:first-child)]:leading-8">
+        <p className="rounded-2xl border border-cyan-100 bg-cyan-50 p-5 text-sm leading-6 text-cyan-950">
           <strong>
             Stand: 23. September 2026 · Version recommendation-v1.
           </strong>{" "}

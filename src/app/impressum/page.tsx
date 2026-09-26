@@ -18,11 +18,11 @@ export default async function ImprintPage() {
       text="Anbieterkennzeichnung und Kontaktinformationen der FahrSeiten-Plattform."
     >
       {document ? (
-        <article className="rounded-3xl border bg-white p-8">
+        <article className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
           <LegalContent content={document.content} title="Impressum" />
         </article>
       ) : settings ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 leading-7">
+        <div className="rounded-[2rem] border border-slate-200 bg-white p-5 leading-7 shadow-sm sm:p-8 lg:p-10">
           <section>
             <h2 className="text-lg font-semibold text-slate-950">Anbieter</h2>
             <p className="mt-2 text-slate-700">{settings.companyName}</p>

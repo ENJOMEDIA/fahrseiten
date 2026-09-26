@@ -17,7 +17,7 @@ export default async function TermsPage() {
       text="Vertragsbedingungen für die Nutzung und Betreuung von FahrSeiten."
     >
       {document ? (
-        <article className="rounded-3xl border bg-white p-8">
+        <article className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
           <LegalContent
             content={document.content}
             title="Allgemeine Geschäftsbedingungen"
