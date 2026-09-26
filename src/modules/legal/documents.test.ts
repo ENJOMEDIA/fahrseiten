@@ -161,6 +161,8 @@ describe("legal document publication", () => {
     expect(platform.privacy).toContain("Postalische Akquise");
     expect(platform.privacy).toContain("letterei.de Postdienste GmbH");
     expect(platform.privacy).toContain("Art. 28 DSGVO");
+    expect(platform.privacy).toContain("Newsletter und Produktinformationen");
+    expect(platform.privacy).toContain("Art. 6 Abs. 1 lit. a DSGVO");
     expect(tenant.privacy).not.toContain("Postalische Akquise");
     expect(createPlatformTermsDraft(data)).toContain("[Festlegen:");
     const liveTerms = createPlatformTerms(data);

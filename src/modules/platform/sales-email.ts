@@ -88,7 +88,10 @@ export async function saveSalesEmailTemplate(
   return id;
 }
 
-function replaceTokens(value: string, lead: typeof salesLeads.$inferSelect) {
+export function personalizeSalesText(
+  value: string,
+  lead: typeof salesLeads.$inferSelect,
+) {
   const tokens: Record<string, string> = {
     "{{Fahrschule}}": lead.companyName,
     "{{Ansprechpartner}}": lead.contactName || "Fahrschul-Team",
@@ -113,11 +116,12 @@ function escapeHtml(value: string) {
   );
 }
 
-function renderHtml(
+export function renderSalesEmailHtml(
   text: string,
   styleKey: "cyan" | "midnight" | "sunrise" = "cyan",
   unsubscribeUrl: string,
   logoUrl?: string,
+  messageKind: "outreach" | "newsletter" = "outreach",
 ) {
   const styles = {
     cyan: { background: "#ecfeff", accent: "#0891b2", ink: "#0f172a" },
@@ -137,7 +141,15 @@ function renderHtml(
   const logo = logoUrl
     ? `<img alt="FahrSeiten by ENJO MEDIA" src="${escapeHtml(logoUrl)}" style="display:block;max-width:180px;max-height:52px;width:auto;height:auto">`
     : `<div style="font-size:20px;font-weight:800;color:${styles.accent}">FahrSeiten <span style="font-size:12px;color:#64748b">by ENJO MEDIA</span></div>`;
-  return `<div style="background:${styles.background};padding:42px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:${styles.ink}"><div style="max-width:640px;margin:auto;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 24px 70px rgba(15,23,42,.12)"><div style="height:8px;background:linear-gradient(90deg,${styles.accent},#67e8f9)"></div><div style="padding:38px 38px 18px"><div style="margin-bottom:30px">${logo}<div style="margin-top:12px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#64748b">Websites für Fahrschulen. Einfach im Alltag.</div></div>${paragraphs}<div style="margin:30px 0 4px;padding:18px 20px;border-radius:18px;background:#f8fafc;font-size:13px;line-height:1.6;color:#334155"><strong style="color:${styles.accent}">Persönlich statt anonym:</strong> Bei Fragen sprechen Sie direkt mit ENJO MEDIA – von der ersten Idee bis zur laufenden Seite.</div><div style="font-size:12px;line-height:1.6;color:#64748b;border-top:1px solid #e2e8f0;padding-top:20px;margin-top:28px"><p>Sie erhalten diese Nachricht auf Grundlage einer dokumentierten Kontaktfreigabe.</p><p style="margin:14px 0 0"><a href="${escapeHtml(unsubscribeUrl)}" style="display:inline-block;color:#991b1b;font-weight:700;text-decoration:underline">Keine weiteren Akquise-E-Mails erhalten</a></p></div></div><div style="padding:15px 38px 22px;color:#94a3b8;font-size:11px">FahrSeiten · ein Produkt von ENJO MEDIA</div></div></div>`;
+  const permissionText =
+    messageKind === "newsletter"
+      ? "Sie erhalten diesen FahrSeiten-Newsletter aufgrund Ihrer dokumentierten ausdrücklichen Einwilligung."
+      : "Sie erhalten diese Nachricht auf Grundlage einer dokumentierten Kontaktfreigabe.";
+  const unsubscribeLabel =
+    messageKind === "newsletter"
+      ? "Newsletter und weitere Werbe-E-Mails abbestellen"
+      : "Keine weiteren Akquise-E-Mails erhalten";
+  return `<div style="background:${styles.background};padding:42px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:${styles.ink}"><div style="max-width:640px;margin:auto;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 24px 70px rgba(15,23,42,.12)"><div style="height:8px;background:linear-gradient(90deg,${styles.accent},#67e8f9)"></div><div style="padding:38px 38px 18px"><div style="margin-bottom:30px">${logo}<div style="margin-top:12px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#64748b">Websites für Fahrschulen. Einfach im Alltag.</div></div>${paragraphs}<div style="margin:30px 0 4px;padding:18px 20px;border-radius:18px;background:#f8fafc;font-size:13px;line-height:1.6;color:#334155"><strong style="color:${styles.accent}">Persönlich statt anonym:</strong> Bei Fragen sprechen Sie direkt mit ENJO MEDIA – von der ersten Idee bis zur laufenden Seite.</div><div style="font-size:12px;line-height:1.6;color:#64748b;border-top:1px solid #e2e8f0;padding-top:20px;margin-top:28px"><p>${permissionText}</p><p style="margin:14px 0 0"><a href="${escapeHtml(unsubscribeUrl)}" style="display:inline-block;color:#991b1b;font-weight:700;text-decoration:underline">${unsubscribeLabel}</a></p></div></div><div style="padding:15px 38px 22px;color:#94a3b8;font-size:11px">FahrSeiten · ein Produkt von ENJO MEDIA</div></div></div>`;
 }
 
 export async function queueSalesOutreach(input: {
@@ -196,8 +208,8 @@ export async function queueSalesOutreach(input: {
   await db.transaction(async (tx) => {
     for (const lead of leads) {
       const id = createId();
-      const subject = replaceTokens(template.subjectTemplate, lead);
-      const text = replaceTokens(template.bodyTemplate, lead);
+      const subject = personalizeSalesText(template.subjectTemplate, lead);
+      const text = personalizeSalesText(template.bodyTemplate, lead);
       const unsubscribeUrl = salesUnsubscribeUrl(lead.id);
       await tx.insert(backgroundJobs).values({
         id,
@@ -213,7 +225,7 @@ export async function queueSalesOutreach(input: {
           values: {
             subject,
             text: `${text}\n\nWeitere Akquise-E-Mails abbestellen: ${unsubscribeUrl}`,
-            html: renderHtml(
+            html: renderSalesEmailHtml(
               text,
               builtinTemplate?.styleKey ?? "cyan",
               unsubscribeUrl,

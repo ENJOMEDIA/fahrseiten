@@ -15,6 +15,7 @@ import {
   queueSalesOutreach,
   saveSalesEmailTemplate,
 } from "@/modules/platform/sales-email";
+import { queueSalesNewsletter } from "@/modules/platform/sales-newsletter";
 
 export type SalesActionState = { message: string; error: boolean };
 
@@ -140,6 +141,41 @@ export async function startOutreachAction(
         error instanceof Error
           ? error.message
           : "Akquise konnte nicht gestartet werden.",
+      error: true,
+    };
+  }
+}
+
+export async function queueNewsletterAction(
+  _state: SalesActionState,
+  formData: FormData,
+): Promise<SalesActionState> {
+  const identity = await requirePlatformPermission("platform.sales.manage");
+  try {
+    if (formData.get("newsletterPermissionConfirmed") !== "yes")
+      throw new Error(
+        "Bitte bestätige die dokumentierte Newsletter-Einwilligung aller ausgewählten Empfänger.",
+      );
+    const result = await queueSalesNewsletter({
+      name: formData.get("name"),
+      subjectTemplate: formData.get("subjectTemplate"),
+      bodyTemplate: formData.get("bodyTemplate"),
+      styleKey: formData.get("styleKey"),
+      leadIds: formData.getAll("leadIds").map(String),
+      actorUserId: identity.id,
+    });
+    revalidatePath("/admin/akquise/newsletter");
+    revalidatePath("/admin/akquise");
+    return {
+      message: `Newsletter wurde für ${result.recipientCount} Empfänger zum Versand eingeplant. Der Cronjob verarbeitet die Warteschlange.`,
+      error: false,
+    };
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Newsletter konnte nicht eingeplant werden.",
       error: true,
     };
   }

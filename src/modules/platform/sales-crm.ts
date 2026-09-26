@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq, isNull, like } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, like } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db/client";
@@ -9,6 +9,7 @@ import {
   postalDispatches,
   salesActivities,
   salesLeads,
+  salesNewsletterRecipients,
   tenantOnboardingTokens,
 } from "@/db/schema";
 import { createId } from "@/lib/ids";
@@ -229,6 +230,36 @@ export async function updateLead(input: {
         country: address.country,
       })
       .where(eq(salesLeads.id, input.id));
+    if (emailPermission === "withdrawn") {
+      const queuedNewsletterJobs = await tx
+        .select({ jobId: salesNewsletterRecipients.jobId })
+        .from(salesNewsletterRecipients)
+        .innerJoin(
+          backgroundJobs,
+          eq(backgroundJobs.id, salesNewsletterRecipients.jobId),
+        )
+        .where(
+          and(
+            eq(salesNewsletterRecipients.leadId, input.id),
+            inArray(backgroundJobs.status, ["pending", "retry"]),
+          ),
+        );
+      if (queuedNewsletterJobs.length) {
+        await tx
+          .update(backgroundJobs)
+          .set({
+            status: "failed",
+            lastErrorCode: "recipient_opted_out",
+            lockedAt: null,
+          })
+          .where(
+            inArray(
+              backgroundJobs.id,
+              queuedNewsletterJobs.map((job) => job.jobId),
+            ),
+          );
+      }
+    }
     if (note) {
       await tx.insert(salesActivities).values({
         id: createId(),

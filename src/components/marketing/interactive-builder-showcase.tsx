@@ -80,8 +80,8 @@ export function InteractiveBuilderShowcase() {
           </span>
         </div>
 
-        <div className="grid gap-0 lg:grid-cols-[1fr_.9fr]">
-          <div className="border-b border-slate-100 p-4 sm:p-6 lg:border-r lg:border-b-0">
+        <div className="grid items-stretch gap-0 lg:grid-cols-[1fr_.9fr]">
+          <div className="min-h-[34rem] border-b border-slate-100 p-4 sm:p-6 lg:border-r lg:border-b-0">
             <p className="mb-3 text-xs leading-5 text-slate-500">
               Block auswählen, verschieben oder ausblenden. Die Vorschau rechts
               reagiert direkt.
@@ -90,7 +90,7 @@ export function InteractiveBuilderShowcase() {
               {blocks.map((block, index) => (
                 <button
                   aria-pressed={selectedId === block.id}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 p-3 text-left transition hover:border-cyan-300 aria-pressed:border-cyan-400 aria-pressed:bg-cyan-50"
+                  className="flex min-h-[4.25rem] w-full items-center gap-3 rounded-2xl border border-slate-200 p-3 text-left transition-colors hover:border-cyan-300 aria-pressed:border-cyan-400 aria-pressed:bg-cyan-50"
                   key={block.id}
                   onClick={() => setSelectedId(block.id)}
                   type="button"
@@ -146,7 +146,7 @@ export function InteractiveBuilderShowcase() {
             </div>
           </div>
 
-          <div className="bg-slate-100 p-4 sm:p-6">
+          <div className="min-h-[34rem] bg-slate-100 p-4 sm:p-6">
             <div className="mb-4 flex justify-center gap-1 rounded-xl bg-white p-1 shadow-sm">
               {(["desktop", "tablet", "mobile"] as const).map((item) => (
                 <button
@@ -164,29 +164,35 @@ export function InteractiveBuilderShowcase() {
                 </button>
               ))}
             </div>
-            <div
-              aria-label="Live-Vorschau der sichtbaren Blöcke"
-              className={`mx-auto min-h-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg transition-[width] ${deviceWidths[device]}`}
-            >
-              <div className="h-5 bg-slate-950" />
-              <div className="space-y-2 p-3">
-                {blocks
-                  .filter((block) => block.visible)
-                  .map((block, index) => (
+            <div className="flex h-80 items-start justify-center overflow-hidden">
+              <div
+                aria-label="Live-Vorschau der sichtbaren Blöcke"
+                className={`h-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg transition-[width] duration-200 ease-out motion-reduce:transition-none ${deviceWidths[device]}`}
+              >
+                <div className="h-5 bg-slate-950" />
+                <div className="space-y-2 p-3">
+                  {blocks.map((block, index) => (
                     <div
-                      className={
-                        index === 0
-                          ? "rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 p-4 text-white"
-                          : "rounded-xl border border-slate-100 bg-slate-50 p-3"
-                      }
+                      className={`h-[3.35rem] overflow-hidden rounded-xl p-3 transition-[opacity,background-color,border-color] duration-200 motion-reduce:transition-none ${
+                        !block.visible
+                          ? "border border-dashed border-slate-200 bg-white opacity-45"
+                          : index === 0
+                            ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white"
+                            : "border border-slate-100 bg-slate-50"
+                      }`}
                       key={block.id}
                     >
                       <p className="text-[10px] font-bold uppercase opacity-60">
                         {block.title}
                       </p>
-                      <p className="mt-1 text-xs font-semibold">{block.text}</p>
+                      <p className="mt-0.5 truncate text-xs font-semibold">
+                        {block.visible
+                          ? block.text
+                          : "Wird nicht veröffentlicht"}
+                      </p>
                     </div>
                   ))}
+                </div>
               </div>
             </div>
             <p className="mt-3 text-center text-[10px] text-slate-500">

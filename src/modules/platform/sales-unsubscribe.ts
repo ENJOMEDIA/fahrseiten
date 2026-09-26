@@ -1,10 +1,15 @@
 import "server-only";
 
-import { and, eq, like, ne } from "drizzle-orm";
+import { and, eq, inArray, like, ne } from "drizzle-orm";
 
 import { env } from "@/config/env";
 import { db } from "@/db/client";
-import { backgroundJobs, salesActivities, salesLeads } from "@/db/schema";
+import {
+  backgroundJobs,
+  salesActivities,
+  salesLeads,
+  salesNewsletterRecipients,
+} from "@/db/schema";
 import { createId } from "@/lib/ids";
 import {
   createSalesUnsubscribeUrl,
@@ -56,6 +61,34 @@ export async function unsubscribeSalesLead(leadId: string, token: string) {
           ne(backgroundJobs.status, "completed"),
         ),
       );
+    const queuedNewsletterJobs = await tx
+      .select({ jobId: salesNewsletterRecipients.jobId })
+      .from(salesNewsletterRecipients)
+      .innerJoin(
+        backgroundJobs,
+        eq(backgroundJobs.id, salesNewsletterRecipients.jobId),
+      )
+      .where(
+        and(
+          eq(salesNewsletterRecipients.leadId, leadId),
+          inArray(backgroundJobs.status, ["pending", "retry"]),
+        ),
+      );
+    if (queuedNewsletterJobs.length) {
+      await tx
+        .update(backgroundJobs)
+        .set({
+          status: "failed",
+          lastErrorCode: "recipient_opted_out",
+          lockedAt: null,
+        })
+        .where(
+          inArray(
+            backgroundJobs.id,
+            queuedNewsletterJobs.map((job) => job.jobId),
+          ),
+        );
+    }
     await tx.insert(salesActivities).values({
       id: createId(),
       leadId,

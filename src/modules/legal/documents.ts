@@ -425,6 +425,9 @@ export function createStructuredLegalDocuments(input: {
     privacySections.push(
       `${privacySections.length + 1}. ${createOnlinebriefPrivacyNotice()}`,
     );
+    privacySections.push(
+      `${privacySections.length + 1}. Newsletter und Produktinformationen\nWenn eine ausdrückliche Einwilligung erteilt wurde, verarbeiten wir E-Mail-Adresse, Name, Unternehmen, Einwilligungszeitpunkt und Einwilligungsnachweis zum Versand von FahrSeiten-Newslettern und Produktinformationen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Die Einwilligung kann jederzeit über den persönlichen Abmeldelink in jeder Nachricht mit Wirkung für die Zukunft widerrufen werden. Nach einem Widerruf wird die Adresse für weitere Werbe-E-Mails gesperrt; erforderliche Nachweise über Einwilligung und Widerruf werden nur so lange gespeichert, wie sie zur Erfüllung gesetzlicher Pflichten oder zur Rechtsverteidigung benötigt werden.`,
+    );
   }
   const optionalModules: Array<[keyof LegalModuleSettings, string, string]> = [
     ["maps", "Kartendienste", "interaktive Karten und Standortdarstellungen"],

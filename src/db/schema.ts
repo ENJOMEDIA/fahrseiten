@@ -1199,6 +1199,55 @@ export const notificationDeliveries = mysqlTable(
   ],
 );
 
+export const salesNewsletterCampaigns = mysqlTable(
+  "sales_newsletter_campaigns",
+  {
+    id: id("id").primaryKey(),
+    name: varchar("name", { length: 160 }).notNull(),
+    subjectTemplate: varchar("subject_template", { length: 240 }).notNull(),
+    bodyTemplate: text("body_template").notNull(),
+    styleKey: varchar("style_key", { length: 40 }).default("cyan").notNull(),
+    recipientCount: int("recipient_count").notNull(),
+    createdByUserId: id("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    queuedAt: timestamp("queued_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("sales_newsletter_campaigns_queued_idx").on(table.queuedAt),
+  ],
+);
+
+export const salesNewsletterRecipients = mysqlTable(
+  "sales_newsletter_recipients",
+  {
+    id: id("id").primaryKey(),
+    campaignId: id("campaign_id")
+      .notNull()
+      .references(() => salesNewsletterCampaigns.id, { onDelete: "cascade" }),
+    leadId: id("lead_id")
+      .notNull()
+      .references(() => salesLeads.id, { onDelete: "cascade" }),
+    jobId: id("job_id")
+      .notNull()
+      .references(() => backgroundJobs.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date", fsp: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("sales_newsletter_campaign_lead_unique").on(
+      table.campaignId,
+      table.leadId,
+    ),
+    uniqueIndex("sales_newsletter_job_unique").on(table.jobId),
+    index("sales_newsletter_recipients_lead_idx").on(table.leadId),
+  ],
+);
+
 export const plans = mysqlTable(
   "plans",
   {

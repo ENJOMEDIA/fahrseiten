@@ -171,7 +171,7 @@ export function AppShell({
   return (
     <div
       className={cn(
-        "min-h-screen bg-[#f3f6f8] motion-reduce:transition-none lg:grid lg:transition-[grid-template-columns] lg:duration-300 lg:ease-out",
+        "min-h-screen bg-[#f3f6f8] lg:grid",
         desktopNavigationHidden
           ? "lg:grid-cols-[0rem_1fr]"
           : "lg:grid-cols-[19rem_1fr]",
@@ -181,7 +181,7 @@ export function AppShell({
       <aside
         id="desktop-dashboard-navigation"
         className={cn(
-          "app-sidebar sticky top-0 hidden h-screen w-[19rem] min-w-0 overflow-hidden border-r border-white/5 bg-[#080d16] px-5 py-6 text-white motion-reduce:transition-none lg:flex lg:flex-col lg:transition-[opacity,transform] lg:duration-300 lg:ease-out",
+          "app-sidebar sticky top-0 hidden h-screen w-[19rem] min-w-0 overflow-hidden border-r border-white/5 bg-[#080d16] px-5 py-6 text-white motion-reduce:transition-none lg:flex lg:transform-gpu lg:flex-col lg:transition-[opacity,transform] lg:duration-150 lg:ease-out lg:[contain:layout_paint]",
           desktopNavigationHidden
             ? "lg:pointer-events-none lg:-translate-x-4 lg:opacity-0"
             : "lg:translate-x-0 lg:opacity-100",
@@ -259,7 +259,7 @@ export function AppShell({
         aria-expanded="false"
         aria-label="Seitenmenü einblenden"
         className={cn(
-          "fixed top-4 left-3 z-[60] hidden size-11 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition-[opacity,transform] duration-300 hover:border-cyan-300 hover:text-cyan-800 motion-reduce:transition-none lg:grid",
+          "fixed top-4 left-3 z-[60] hidden size-11 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition-[opacity,transform] duration-150 hover:border-cyan-300 hover:text-cyan-800 motion-reduce:transition-none lg:grid lg:transform-gpu",
           desktopNavigationHidden
             ? "translate-x-0 opacity-100"
             : "pointer-events-none -translate-x-3 opacity-0",

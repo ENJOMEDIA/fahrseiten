@@ -12,6 +12,7 @@ export function SalesNav() {
         ["/admin/akquise/briefe", "Briefakquise"],
         ["/admin/akquise/briefvorlagen", "Briefvorlagen"],
         ["/admin/akquise/vorlagen", "E-Mail-Vorlagen"],
+        ["/admin/akquise/newsletter", "Newsletter"],
       ].map(([href, label]) => (
         <Link
           className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-cyan-50 hover:text-cyan-900"

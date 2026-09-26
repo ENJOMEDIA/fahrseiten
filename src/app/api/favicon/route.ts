@@ -5,7 +5,7 @@ import { selectRequestHostname } from "@/modules/domains/hostname";
 import { findActiveTenantByDomain } from "@/modules/domains/repository";
 import { resolveRequestContext } from "@/modules/domains/request-context";
 import { findTenantBrandingIds } from "@/modules/media/repository";
-import { mediaPublicUrl } from "@/modules/media/public-url";
+import { faviconMediaPath } from "@/modules/media/favicon-url";
 import { findPlatformSettings } from "@/modules/setup/platform-settings";
 
 const fallback = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0f172a"/><path d="M20 16h28v9H30v9h15v9H30v15H20z" fill="#67e8f9"/></svg>`;
@@ -30,10 +30,10 @@ export async function GET(request: Request) {
           ? (await findPlatformSettings())?.faviconMediaId
           : null;
     if (faviconId) {
-      const response = NextResponse.redirect(
-        new URL(mediaPublicUrl(faviconId), request.url),
-        307,
-      );
+      const response = new NextResponse(null, {
+        status: 307,
+        headers: { Location: faviconMediaPath(faviconId) },
+      });
       response.headers.set(
         "Cache-Control",
         "private, no-store, max-age=0, must-revalidate",

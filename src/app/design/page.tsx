@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SimpleMarketingPage } from "@/components/marketing/simple-page";
+import { InteractiveBuilderShowcase } from "@/components/marketing/interactive-builder-showcase";
 
 export default function DesignPage() {
   return (
@@ -67,6 +68,22 @@ export default function DesignPage() {
           ))}
         </div>
       </div>
+      <section className="mt-16">
+        <div className="mx-auto mb-8 max-w-3xl text-center">
+          <p className="section-kicker">Website-Builder erleben</p>
+          <h2 className="section-title mt-4">
+            Seiten aufbauen, während die Vorschau mitdenkt.
+          </h2>
+          <p className="mt-5 text-lg leading-8 text-slate-600">
+            Die Darstellung zeigt echte Funktionen des kontrollierten
+            FahrSeiten-Builders: Bereiche auswählen, sortieren, ausblenden und
+            für unterschiedliche Geräte prüfen.
+          </p>
+        </div>
+        <div className="mx-auto max-w-6xl">
+          <InteractiveBuilderShowcase />
+        </div>
+      </section>
       <div className="mt-10 text-center">
         <Link
           className="inline-flex rounded-full bg-slate-950 px-6 py-3 font-semibold text-white"
