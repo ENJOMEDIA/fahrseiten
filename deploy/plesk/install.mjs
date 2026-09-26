@@ -1,11 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
-import { drizzle } from "drizzle-orm/mysql2";
-import { migrate } from "drizzle-orm/mysql2/migrator";
 import mysql from "mysql2/promise";
 
 import { hashInstallerPassword } from "./password.mjs";
+import { runMigrations } from "./migration-runner.mjs";
 import { resolveDatabaseUrl } from "./runtime-config.mjs";
 
 export function validateBootstrapInput(source) {
@@ -36,12 +35,10 @@ export async function installPlatform(source = process.env) {
     throw new Error("DATABASE_URL muss das mysql-Protokoll verwenden.");
   }
 
+  await runMigrations(databaseUrl);
+
   const connection = await mysql.createConnection(databaseUrl);
   try {
-    await migrate(drizzle({ client: connection }), {
-      migrationsFolder: "./drizzle",
-    });
-
     const [ownerRows] = await connection.execute(
       "SELECT COUNT(*) AS owner_count FROM users WHERE platform_role = 'platform_owner' AND active = true",
     );

@@ -198,52 +198,65 @@ export function OutreachForm({
     });
   };
   return (
-    <form action={action}>
-      <div className="sticky top-4 z-10 mb-4 grid gap-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur lg:grid-cols-[minmax(16rem,1fr)_minmax(20rem,1.4fr)_auto] lg:items-end">
-        <label className="min-w-0 flex-1 text-sm font-semibold">
-          E-Mail-Vorlage
-          <select
-            className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
-            name="templateId"
-            required
+    <div>
+      <form action={action}>
+        {selectedIds.map((id) => (
+          <input key={id} name="leadIds" type="hidden" value={id} />
+        ))}
+        <div className="sticky top-4 z-10 mb-4 grid gap-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur lg:grid-cols-[minmax(16rem,1fr)_minmax(20rem,1.4fr)_auto] lg:items-end">
+          <label className="min-w-0 flex-1 text-sm font-semibold">
+            E-Mail-Vorlage
+            <select
+              className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-normal"
+              name="templateId"
+              required
+            >
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex min-h-11 items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 font-semibold text-amber-950">
+            <input
+              className="mt-0.5 size-4 shrink-0"
+              name="contactPermissionConfirmed"
+              required
+              type="checkbox"
+              value="yes"
+            />
+            Ich habe für alle ausgewählten Kontakte geprüft und dokumentiert,
+            dass diese konkrete E-Mail zulässig ist.
+          </label>
+          <button
+            className="premium-button disabled:opacity-50"
+            disabled={pending || !selectedIds.length || !selectedForEmail}
+            type="submit"
           >
-            {templates.map((template) => (
-              <option key={template.id} value={template.id}>
-                {template.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-h-11 items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 font-semibold text-amber-950">
-          <input
-            className="mt-0.5 size-4 shrink-0"
-            name="contactPermissionConfirmed"
-            required
-            type="checkbox"
-            value="yes"
-          />
-          Ich habe für alle ausgewählten Kontakte geprüft und dokumentiert, dass
-          diese konkrete E-Mail zulässig ist.
-        </label>
-        <button
-          className="premium-button disabled:opacity-50"
-          disabled={pending || !selectedIds.length || !selectedForEmail}
-          type="submit"
-        >
-          {pending ? "Plant Versand …" : "Akquise für Auswahl starten"}
-        </button>
-        <div className="lg:col-span-3">
-          <Result state={state} />
-          {selectedIds.length && !selectedForEmail ? (
-            <p className="mt-2 text-xs font-semibold text-amber-700">
-              Die Auswahl enthält Kontakte ohne dokumentierte
-              E-Mail-Versandfreigabe. Löschen und Bearbeiten bleiben möglich;
-              der E-Mail-Versand ist für diese Auswahl gesperrt.
-            </p>
-          ) : null}
+            {pending ? "Plant Versand …" : "Akquise für Auswahl starten"}
+          </button>
+          <div className="lg:col-span-3">
+            <Result state={state} />
+            {selectedIds.length && !selectedForEmail ? (
+              <p className="mt-2 text-xs font-semibold text-amber-700">
+                Die Auswahl enthält Kontakte ohne dokumentierte
+                E-Mail-Versandfreigabe. Löschen und Bearbeiten bleiben möglich;
+                der E-Mail-Versand ist für diese Auswahl gesperrt.
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      </form>
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-red-100 bg-[linear-gradient(135deg,#fff_0%,#fff7f7_100%)] p-4">
+        <div className="mr-auto min-w-full sm:min-w-0">
+          <p className="text-xs font-bold tracking-[.14em] text-red-700 uppercase">
+            Massenbearbeitung
+          </p>
+          <p className="mt-1 text-xs text-slate-600">
+            Kontakte auswählen und gemeinsam endgültig löschen.
+          </p>
+        </div>
         <label className="mr-2 text-xs font-semibold text-slate-600">
           Nach Tag filtern
           <select
@@ -289,9 +302,9 @@ export function OutreachForm({
         >
           {deletePending
             ? "Auswahl wird gelöscht …"
-            : `${selectedIds.length || 0} Kontakte löschen`}
+            : `${selectedIds.length || 0} ${selectedIds.length === 1 ? "Kontakt" : "Kontakte"} löschen`}
         </button>
-        <span className="ml-auto text-xs font-semibold text-slate-500">
+        <span className="text-xs font-semibold text-slate-500">
           {selectedIds.length} markiert · {visibleLeads.length} von{" "}
           {leads.length} sichtbar
         </span>
@@ -303,7 +316,29 @@ export function OutreachForm({
         <table className="mobile-stack-table w-full min-w-[1050px] text-left text-sm">
           <thead className="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
             <tr>
-              <th className="p-4">Auswahl</th>
+              <th className="p-4">
+                <label className="flex cursor-pointer items-center gap-2">
+                  <input
+                    aria-label="Alle sichtbaren Kontakte auswählen"
+                    checked={
+                      visibleLeads.length > 0 &&
+                      visibleLeads.every((lead) =>
+                        selectedIds.includes(lead.id),
+                      )
+                    }
+                    className="size-5 cursor-pointer accent-cyan-700"
+                    onChange={(event) =>
+                      setSelectedIds(
+                        event.target.checked
+                          ? visibleLeads.map((lead) => lead.id)
+                          : [],
+                      )
+                    }
+                    type="checkbox"
+                  />
+                  Alle
+                </label>
+              </th>
               <th className="p-4">Fahrschule</th>
               <th className="p-4">Kontakt</th>
               <th className="p-4">Webseite</th>
@@ -320,7 +355,7 @@ export function OutreachForm({
                   <input
                     aria-label={`${lead.companyName} auswählen`}
                     checked={selectedIds.includes(lead.id)}
-                    name="leadIds"
+                    className="size-5 cursor-pointer accent-cyan-700"
                     onChange={(event) =>
                       setSelectedIds((current) =>
                         event.target.checked
@@ -329,7 +364,6 @@ export function OutreachForm({
                       )
                     }
                     type="checkbox"
-                    value={lead.id}
                   />
                 </td>
                 <td className="p-4 font-semibold" data-label="Fahrschule">
@@ -424,7 +458,7 @@ export function OutreachForm({
           </tbody>
         </table>
       </div>
-    </form>
+    </div>
   );
 }
 

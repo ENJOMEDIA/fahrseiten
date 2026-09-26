@@ -22,6 +22,10 @@ import {
 } from "@/db/schema";
 import { hashPassword } from "@/modules/auth/password";
 import {
+  isNewsletterMigrationConflict,
+  repairInterruptedNewsletterMigration,
+} from "@/modules/operations/migration-recovery";
+import {
   createInitialLegalProfile,
   createLegalDrafts,
 } from "@/modules/legal/documents";
@@ -90,7 +94,20 @@ export async function completePlatformSetup(input: unknown) {
 
   try {
     try {
-      await migrate(setupDb, { migrationsFolder: "./drizzle" });
+      const migrationsFolder = "./drizzle";
+      await repairInterruptedNewsletterMigration(connection, migrationsFolder);
+      try {
+        await migrate(setupDb, { migrationsFolder });
+      } catch (error) {
+        if (!isNewsletterMigrationConflict(error)) throw error;
+        const repaired = await repairInterruptedNewsletterMigration(
+          connection,
+          migrationsFolder,
+          { forceUnrecordedCheck: true },
+        );
+        if (!repaired) throw error;
+        await migrate(setupDb, { migrationsFolder });
+      }
     } catch {
       throw new SetupInputError(
         "Das Datenbankschema konnte nicht angelegt werden. Bitte Datenbankrechte und Serverversion prüfen.",

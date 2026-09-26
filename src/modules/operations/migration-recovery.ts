@@ -18,6 +18,26 @@ export function interruptedMigrationRecoveryDecision(input: {
   return "reset" as const;
 }
 
+export function isNewsletterMigrationConflict(error: unknown) {
+  const details: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; current && depth < 4; depth += 1) {
+    if (current instanceof Error) details.push(current.message);
+    if (typeof current === "object" && current && "code" in current)
+      details.push(String(current.code));
+    current =
+      typeof current === "object" && current && "cause" in current
+        ? current.cause
+        : null;
+  }
+  const detail = details.join(" ");
+  return (
+    detail.includes("sales_newsletter_campaigns") &&
+    (detail.includes("CREATE TABLE") ||
+      detail.includes("ER_TABLE_EXISTS_ERROR"))
+  );
+}
+
 async function findTables(connection: Connection, names: readonly string[]) {
   const [rows] = await connection.query<
     Array<RowDataPacket & { tableName: string }>
@@ -31,6 +51,7 @@ async function findTables(connection: Connection, names: readonly string[]) {
 export async function repairInterruptedNewsletterMigration(
   connection: Connection,
   migrationsFolder: string,
+  options: { forceUnrecordedCheck?: boolean } = {},
 ) {
   const target = readMigrationFiles({ migrationsFolder }).find((migration) =>
     migration.sql.some((statement) =>
@@ -44,7 +65,10 @@ export async function repairInterruptedNewsletterMigration(
     foundTables.includes(table),
   );
   let migrationApplied = false;
-  if (foundTables.includes("__drizzle_migrations")) {
+  if (
+    !options.forceUnrecordedCheck &&
+    foundTables.includes("__drizzle_migrations")
+  ) {
     const [rows] = await connection.query<
       Array<RowDataPacket & { applied: number }>
     >(

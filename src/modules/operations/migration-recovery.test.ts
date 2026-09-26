@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { interruptedMigrationRecoveryDecision } from "./migration-recovery";
+import {
+  interruptedMigrationRecoveryDecision,
+  isNewsletterMigrationConflict,
+} from "./migration-recovery";
 
 describe("interrupted newsletter migration recovery", () => {
   it("resets only empty tables from an unrecorded migration", () => {
@@ -31,5 +34,18 @@ describe("interrupted newsletter migration recovery", () => {
         rowCounts: { sales_newsletter_campaigns: 0 },
       }),
     ).toBe("none");
+  });
+
+  it("erkennt den von Drizzle verpackten Newsletter-Tabellenkonflikt", () => {
+    expect(
+      isNewsletterMigrationConflict(
+        new Error(
+          "Failed query: CREATE TABLE `sales_newsletter_campaigns` (...) ",
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      isNewsletterMigrationConflict(new Error("Verbindung fehlgeschlagen")),
+    ).toBe(false);
   });
 });

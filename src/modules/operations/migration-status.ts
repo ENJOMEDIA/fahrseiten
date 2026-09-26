@@ -12,7 +12,10 @@ import type { RowDataPacket } from "mysql2/promise";
 import { env } from "@/config/env";
 import { runtimeConfigPath } from "@/config/runtime-config";
 import { compareMigrationState } from "./migration-state";
-import { repairInterruptedNewsletterMigration } from "./migration-recovery";
+import {
+  isNewsletterMigrationConflict,
+  repairInterruptedNewsletterMigration,
+} from "./migration-recovery";
 
 export type MigrationStatus = {
   status: "ready" | "pending" | "error";
@@ -126,9 +129,18 @@ export async function runDatabaseMigrations(): Promise<MigrationStatus> {
       connectTimeout: 10_000,
     });
     await repairInterruptedNewsletterMigration(connection, migrationsFolder);
-    await migrate(drizzle({ client: connection }), {
-      migrationsFolder,
-    });
+    try {
+      await migrate(drizzle({ client: connection }), { migrationsFolder });
+    } catch (error) {
+      if (!isNewsletterMigrationConflict(error)) throw error;
+      const repaired = await repairInterruptedNewsletterMigration(
+        connection,
+        migrationsFolder,
+        { forceUnrecordedCheck: true },
+      );
+      if (!repaired) throw error;
+      await migrate(drizzle({ client: connection }), { migrationsFolder });
+    }
     const status = await inspectMigrationStatus(connection);
     await writeMigrationStatus(status);
     return status;

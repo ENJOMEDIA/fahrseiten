@@ -30,9 +30,19 @@ function migrationErrorDetail(error) {
   );
 }
 
+function isNewsletterMigrationConflict(error) {
+  const detail = migrationErrorDetail(error);
+  return (
+    detail.includes("sales_newsletter_campaigns") &&
+    (detail.includes("CREATE TABLE") ||
+      detail.includes("ER_TABLE_EXISTS_ERROR"))
+  );
+}
+
 async function repairInterruptedNewsletterMigration(
   connection,
   migrationsFolder,
+  { forceUnrecordedCheck = false } = {},
 ) {
   const target = readMigrationFiles({ migrationsFolder }).find((migration) =>
     migration.sql.some((statement) =>
@@ -49,7 +59,7 @@ async function repairInterruptedNewsletterMigration(
     foundTables.includes(table),
   );
   let migrationApplied = false;
-  if (foundTables.includes("__drizzle_migrations")) {
+  if (!forceUnrecordedCheck && foundTables.includes("__drizzle_migrations")) {
     const [rows] = await connection.query(
       "SELECT COUNT(*) AS `applied` FROM `__drizzle_migrations` WHERE `hash` = ? OR `created_at` >= ?",
       [target.hash, target.folderMillis],
@@ -97,7 +107,19 @@ export async function runMigrations(databaseUrl) {
     try {
       await migrate(drizzle({ client: connection }), { migrationsFolder });
     } catch (error) {
-      throw new Error(migrationErrorDetail(error), { cause: error });
+      if (!isNewsletterMigrationConflict(error))
+        throw new Error(migrationErrorDetail(error), { cause: error });
+      const retryRepair = await repairInterruptedNewsletterMigration(
+        connection,
+        migrationsFolder,
+        { forceUnrecordedCheck: true },
+      );
+      if (!retryRepair)
+        throw new Error(migrationErrorDetail(error), { cause: error });
+      console.info(
+        "Der erkannte Newsletter-Tabellenkonflikt wurde sicher zurückgesetzt; die Migration wird einmal wiederholt.",
+      );
+      await migrate(drizzle({ client: connection }), { migrationsFolder });
     }
   } finally {
     await connection.end();
