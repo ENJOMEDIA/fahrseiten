@@ -65,6 +65,18 @@ export const builtinPostalTemplates = [
     updatedAt: new Date(0),
     createdByUserId: null,
   },
+  {
+    id: "builtin-website-nicht-erreichbar",
+    name: "Website nicht erreichbar",
+    kickerTemplate: "WER ONLINE NICHT ANKOMMT, FÄHRT ZUR NÄCHSTEN FAHRSCHULE.",
+    headlineTemplate: "Ihre Fahrschule ist da. Ihre Website gerade nicht.",
+    bodyTemplate:
+      "Bei unserer Recherche nach Fahrschulen in Ihrer Region konnten wir den öffentlichen Webauftritt von {{Fahrschule}} zum Prüfzeitpunkt nicht zuverlässig erreichen. Das kann eine vorübergehende Störung sein. Für einen Interessenten zählt trotzdem genau dieser eine Moment: Entweder er findet Sie – oder er sucht weiter.\n\n## Machen Sie aus dem ersten Klick einen klaren Startpunkt\n• Auf Ihrer eigenen Domain zuverlässig erreichbar bleiben\n• Klassen, Preise, Fuhrpark und Standorte überzeugend präsentieren\n• Inhalte selbst ändern, ohne auf Technik oder Agenturtermine zu warten\n\nFahrSeiten verbindet einen hochwertigen Auftritt mit einer Oberfläche, die im Fahrschulalltag wirklich bedienbar bleibt. Scannen Sie Ihren persönlichen QR-Code. In weniger als einer Minute sehen Sie, wie {{Fahrschule}} wieder sichtbar, aktuell und anfragebereit auftreten kann.",
+    active: true,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+    createdByUserId: null,
+  },
 ] as const;
 
 export async function listPostalLetterTemplates() {

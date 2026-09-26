@@ -212,8 +212,8 @@ export default async function PostalAcquisitionPage({
           </p>
         )}
       </div>
-      <section className="grid gap-6 xl:grid-cols-[.75fr_1.25fr]">
-        <Card>
+      <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,.75fr)_minmax(0,1.25fr)]">
+        <Card className="min-w-0 overflow-hidden">
           <p className="text-xs font-bold tracking-[.16em] text-cyan-700 uppercase">
             Schritt 1
           </p>
@@ -271,7 +271,7 @@ export default async function PostalAcquisitionPage({
             />
           </div>
         </Card>
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-bold tracking-[.16em] text-cyan-700 uppercase">
@@ -299,7 +299,7 @@ export default async function PostalAcquisitionPage({
             {dispatches.length ? (
               dispatches.map((dispatch) => (
                 <article
-                  className="rounded-2xl border border-slate-200 p-4"
+                  className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 p-4"
                   key={dispatch.id}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">

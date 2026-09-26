@@ -174,10 +174,10 @@ export function PreparePostalForm({
   );
   const selectedLogo = logos.find((logo) => logo.id === selectedLogoId);
   return (
-    <form action={action} className="space-y-4">
-      <fieldset className="rounded-2xl border border-slate-200 p-4">
+    <form action={action} className="min-w-0 space-y-4">
+      <fieldset className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <legend className="text-sm font-semibold">
               Empfänger auswählen
             </legend>
@@ -185,10 +185,10 @@ export function PreparePostalForm({
               {selectedLeadIds.length} von maximal 50 ausgewählt
             </p>
           </div>
-          <label className="text-xs font-semibold text-slate-600">
+          <label className="max-w-full min-w-0 text-xs font-semibold text-slate-600">
             Tag
             <select
-              className="ml-2 min-h-9 rounded-lg border border-slate-300 bg-white px-3 font-normal text-slate-800"
+              className="mt-1 min-h-9 max-w-full rounded-lg border border-slate-300 bg-white px-3 font-normal text-slate-800 sm:mt-0 sm:ml-2"
               onChange={(event) => {
                 setTagFilter(event.target.value);
                 setSelectedLeadIds([]);
@@ -203,7 +203,7 @@ export function PreparePostalForm({
               ))}
             </select>
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
               onClick={() => setSelectedLeadIds(availableLeadIds.slice(0, 50))}
@@ -220,16 +220,17 @@ export function PreparePostalForm({
             </button>
           </div>
         </div>
-        <div className="mt-4 max-h-64 space-y-2 overflow-y-auto pr-1">
+        <div className="mt-4 max-h-64 max-w-full space-y-2 overflow-x-hidden overflow-y-auto pr-1">
           {visibleLeads.map((lead) => {
             const checked = selectedLeadIds.includes(lead.id);
             return (
               <label
-                className={`flex items-center gap-3 rounded-xl border p-3 text-sm ${lead.addressComplete ? "cursor-pointer border-slate-200 hover:border-cyan-300" : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"}`}
+                className={`flex max-w-full min-w-0 items-start gap-3 overflow-hidden rounded-xl border p-3 text-sm ${lead.addressComplete ? "cursor-pointer border-slate-200 hover:border-cyan-300" : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"}`}
                 key={lead.id}
               >
                 <input
                   checked={checked}
+                  className="mt-0.5 shrink-0"
                   disabled={!lead.addressComplete}
                   name="leadIds"
                   onChange={(event) =>
@@ -245,15 +246,15 @@ export function PreparePostalForm({
                   value={lead.id}
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="font-semibold">
+                  <span className="block font-semibold [overflow-wrap:anywhere] break-words">
                     {lead.companyName}
                     {lead.addressComplete ? "" : " – Anschrift fehlt"}
                   </span>
                   {parseSalesLeadTags(lead.tags).length ? (
-                    <span className="mt-1 flex flex-wrap gap-1">
+                    <span className="mt-1 flex max-w-full min-w-0 flex-wrap gap-1">
                       {parseSalesLeadTags(lead.tags).map((tag) => (
                         <span
-                          className="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold text-cyan-900"
+                          className="max-w-full rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold [overflow-wrap:anywhere] break-words text-cyan-900"
                           key={tag}
                         >
                           {tag}
@@ -262,7 +263,7 @@ export function PreparePostalForm({
                     </span>
                   ) : null}
                   {lead.researchNote ? (
-                    <span className="mt-1 block truncate text-xs font-normal text-slate-500">
+                    <span className="mt-1 line-clamp-2 max-w-full text-xs leading-5 font-normal [overflow-wrap:anywhere] break-words text-slate-500">
                       {lead.researchNote}
                     </span>
                   ) : null}

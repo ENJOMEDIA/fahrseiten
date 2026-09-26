@@ -13,11 +13,13 @@ und anschließend kontrolliert an OnlineBrief24 übertragen werden. Jeder Vorgan
 wird mit Modus, Prüfsumme, Anbieter-Auftragsnummer, Status und Fehlercode in der
 Kundenhistorie gespeichert.
 
-Unter **Briefvorlagen** stehen vier mitgelieferte Vertriebstexte bereit. Die
+Unter **Briefvorlagen** stehen fünf mitgelieferte Vertriebstexte bereit. Die
 Vorlage **Website-Check: Aktualität & Rechtstexte** formuliert dokumentierte
 Beobachtungen bewusst als möglichen Prüfbedarf und enthält den ausdrücklichen
 Hinweis, dass die Ansprache keine Rechtsberatung oder abschließende rechtliche
-Bewertung darstellt.
+Bewertung darstellt. Die Vorlage **Website nicht erreichbar** spricht einen nur
+zum dokumentierten Prüfzeitpunkt nicht zuverlässig erreichbaren Webauftritt an,
+ohne eine dauerhafte Nichterreichbarkeit zu behaupten.
 Zusätzliche Vorlagen werden mit Catcher-Zeile, Überschrift, Text und den Platzhaltern
 `{{Fahrschule}}`, `{{Ansprechpartner}}`, `{{Tags}}` und `{{Kommentar}}`
 gespeichert. Tags und Kommentar werden aus der Kundenakte personalisiert. Bei der
@@ -38,7 +40,7 @@ werden in der CSV mit `|` getrennt, etwa
 dem Briefversand manuell geprüft werden; die Vorlage darf keine ungeprüfte
 rechtliche Tatsachenbehauptung erzeugen.
 
-Der sichere Ausgangswert ist `ONLINEBRIEF_MODE=test`. Laut Anbieter landen diese Aufträge nur im OnlineBrief24-Warenkorb und werden nicht unmittelbar produziert. Ein kostenpflichtiger Liveversand ist nur mit `ONLINEBRIEF_MODE=live` möglich und verlangt in der Oberfläche zusätzlich die erneute Eingabe der festen Lead-ID. Auftragsverarbeitungsvertrag, Kosten, Adressquelle und rechtliche Freigabe bleiben vor dem ersten echten Versand zu prüfen.
+Der sichere Ausgangswert ist `ONLINEBRIEF_MODE=test`. Laut Anbieter landen diese Aufträge nur im OnlineBrief24-Warenkorb und werden nicht unmittelbar produziert. Ein kostenpflichtiger Liveversand ist nur mit `ONLINEBRIEF_MODE=live` möglich und verlangt in der Oberfläche den bestätigten letzten Versandcheck. Auftragsverarbeitungsvertrag, Kosten, Adressquelle und rechtliche Freigabe bleiben vor dem ersten echten Versand zu prüfen.
 
 ## Ablauf
 
