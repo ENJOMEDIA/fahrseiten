@@ -121,49 +121,42 @@ export async function createAcquisitionLetterPdf(
     y: PAGE_HEIGHT - 9,
     width: PAGE_WIDTH,
     height: 9,
-    color: rgb(0.03, 0.67, 0.76),
+    color: rgb(0.02, 0.55, 0.63),
   });
   page.drawRectangle({
-    x: 8,
-    y: 756,
-    width: PAGE_WIDTH - 8,
-    height: 77,
-    color: rgb(0.025, 0.075, 0.13),
+    x: 330,
+    y: 768,
+    width: 210,
+    height: 49,
+    color: rgb(0.025, 0.08, 0.14),
   });
   page.drawCircle({
-    x: 535,
-    y: 817,
-    size: 62,
+    x: 523,
+    y: 816,
+    size: 34,
     color: rgb(0.03, 0.67, 0.76),
-    opacity: 0.32,
+    opacity: 0.42,
   });
   page.drawCircle({
-    x: 482,
-    y: 757,
-    size: 36,
-    color: rgb(0.1, 0.4, 0.56),
-    opacity: 0.38,
+    x: 335,
+    y: 766,
+    size: 22,
+    color: rgb(0.16, 0.78, 0.82),
+    opacity: 0.24,
   });
-  page.drawText("WEBSITES, DIE MITFAHREN.", {
-    x: 340,
-    y: 793,
-    size: 10.5,
+  page.drawText("WEBSITES, DIE", {
+    x: 355,
+    y: 797,
+    size: 8.8,
     font: bold,
     color: rgb(1, 1, 1),
   });
-  page.drawText("Für Fahrschulen. Einfach gepflegt.", {
-    x: 340,
-    y: 775,
-    size: 7,
-    font: regular,
-    color: rgb(0.65, 0.81, 0.86),
-  });
-  page.drawRectangle({
-    x: 0,
-    y: 0,
-    width: 8,
-    height: PAGE_HEIGHT,
-    color: rgb(0.03, 0.67, 0.76),
+  page.drawText("MITFAHREN.", {
+    x: 355,
+    y: 780,
+    size: 13.5,
+    font: bold,
+    color: rgb(0.25, 0.86, 0.89),
   });
   const senderLine = `${input.sender.companyName} · ${input.sender.street} · ${input.sender.postalCode} ${input.sender.city}`;
   page.drawText(senderLine, {
@@ -208,35 +201,27 @@ export async function createAcquisitionLetterPdf(
   );
 
   if (brandLogo) {
-    page.drawRectangle({
-      x: 30,
-      y: 770,
-      width: 270,
-      height: 49,
-      color: rgb(1, 1, 1),
-      opacity: 0.98,
-    });
-    const dimensions = brandLogo.scaleToFit(244, 37);
+    const dimensions = brandLogo.scaleToFit(225, 48);
     page.drawImage(brandLogo, {
-      x: 43,
-      y: 776 + (37 - dimensions.height) / 2,
+      x: 55,
+      y: 777 + (40 - dimensions.height) / 2,
       width: dimensions.width,
       height: dimensions.height,
     });
   } else {
     page.drawText("FAHRSEITEN", {
-      x: 45,
-      y: 792,
-      size: 17,
+      x: 55,
+      y: 794,
+      size: 21,
       font: bold,
-      color: rgb(1, 1, 1),
+      color: rgb(0.025, 0.08, 0.14),
     });
     page.drawText("by ENJO MEDIA", {
-      x: 46,
+      x: 57,
       y: 775,
       size: 7.5,
       font: bold,
-      color: rgb(0.22, 0.83, 0.88),
+      color: rgb(0.02, 0.55, 0.63),
     });
   }
   const weekday = new Intl.DateTimeFormat("de-DE", {
@@ -292,35 +277,28 @@ export async function createAcquisitionLetterPdf(
     font: bold,
     color: rgb(0.02, 0.53, 0.6),
   });
-  y -= 13;
-  const headlineLines = wrapText(input.headline, bold, 16.5, 445);
+  y -= 18;
+  page.drawRectangle({
+    x: 56,
+    y: y + 3,
+    width: 42,
+    height: 4,
+    color: rgb(0.02, 0.6, 0.68),
+  });
+  y -= 17;
+  const headlineLines = wrapText(input.headline, bold, 22, 468);
   if (headlineLines.length > 2)
     throw new Error("Die Briefüberschrift darf höchstens zwei Zeilen belegen.");
-  const headlineHeight = headlineLines.length === 1 ? 56 : 72;
-  for (let index = 0; index < 48; index += 1) {
-    const progress = index / 47;
-    page.drawRectangle({
-      x: 55 + (485 / 48) * index,
-      y: y - headlineHeight,
-      width: 485 / 48 + 0.5,
-      height: headlineHeight,
-      color: rgb(
-        0.02 + progress * 0.01,
-        0.63 - progress * 0.47,
-        0.67 - progress * 0.47,
-      ),
-    });
-  }
   headlineLines.forEach((line, index) =>
     page.drawText(line, {
-      x: 73,
-      y: y - 25 - index * 21,
-      size: 16.5,
+      x: 56,
+      y: y - index * 27,
+      size: 22,
       font: bold,
-      color: rgb(1, 1, 1),
+      color: rgb(0.025, 0.08, 0.14),
     }),
   );
-  y -= headlineHeight + 12;
+  y -= headlineLines.length * 27 + 14;
   if (heroImage) {
     const dimensions = heroImage.scaleToFit(470, 46);
     page.drawRectangle({
@@ -399,52 +377,50 @@ export async function createAcquisitionLetterPdf(
       return;
     }
     if (paragraphIndex === 0) {
-      const lines = wrapText(segment.text, regular, 10.2, 438);
-      const height = lines.length * 15 + 20;
+      const lines = wrapText(segment.text, regular, 10.6, 438);
+      const height = lines.length * 15.5 + 9;
       page.drawRectangle({
         x: 55,
-        y: y - height + 5,
-        width: 485,
-        height,
-        color: rgb(0.95, 0.985, 0.99),
-      });
-      page.drawRectangle({
-        x: 55,
-        y: y - height + 5,
-        width: 5,
-        height,
-        color: rgb(0.03, 0.65, 0.7),
+        y: y - height + 8,
+        width: 3,
+        height: height - 2,
+        color: rgb(0.02, 0.6, 0.68),
       });
       lines.forEach((line, index) =>
         page.drawText(line, {
-          x: 72,
-          y: y - 8 - index * 15,
-          size: 10.2,
+          x: 70,
+          y: y - index * 15.5,
+          size: 10.6,
           font: regular,
           color: rgb(0.08, 0.16, 0.23),
         }),
       );
-      y -= height + 7;
+      y -= height + 9;
       paragraphIndex += 1;
       return;
     }
     drawParagraph(segment.text, { size: 9.6 });
     paragraphIndex += 1;
   });
-  if (y < 248)
+  if (y < 225)
     throw new Error(
       "Der Brieftext ist für das einseitige Layout zu lang. Bitte kürze ihn oder entferne das Bild.",
     );
 
-  const responsePanelY = Math.max(92, Math.min(180, y - 158));
+  const responsePanelY = Math.max(88, Math.min(170, y - 150));
   page.drawRectangle({
     x: 55,
     y: responsePanelY,
     width: 485,
     height: 142,
-    color: rgb(0.955, 0.985, 0.99),
-    borderColor: rgb(0.55, 0.84, 0.88),
-    borderWidth: 1,
+    color: rgb(0.025, 0.075, 0.13),
+  });
+  page.drawCircle({
+    x: 526,
+    y: responsePanelY + 130,
+    size: 33,
+    color: rgb(0.02, 0.6, 0.68),
+    opacity: 0.34,
   });
   page.drawRectangle({
     x: 68,
@@ -464,7 +440,7 @@ export async function createAcquisitionLetterPdf(
     y: responsePanelY + 115,
     size: 12.5,
     font: bold,
-    color: rgb(0.03, 0.18, 0.27),
+    color: rgb(1, 1, 1),
   });
   [
     "Sehen Sie, was für Ihre Fahrschule möglich ist.",
@@ -476,7 +452,7 @@ export async function createAcquisitionLetterPdf(
       y: responsePanelY + 92 - index * 13,
       size: 8.2,
       font: regular,
-      color: rgb(0.16, 0.23, 0.3),
+      color: rgb(0.72, 0.79, 0.84),
     }),
   );
   const responseOptions = [
@@ -484,22 +460,22 @@ export async function createAcquisitionLetterPdf(
       label: "INTERESSE",
       x: 207,
       width: 69,
-      color: rgb(0.03, 0.55, 0.63),
-      text: rgb(1, 1, 1),
+      color: rgb(0.16, 0.78, 0.82),
+      text: rgb(0.025, 0.075, 0.13),
     },
     {
       label: "MEHR INFOS",
       x: 282,
       width: 78,
-      color: rgb(0.87, 0.96, 0.98),
-      text: rgb(0.03, 0.28, 0.34),
+      color: rgb(0.14, 0.24, 0.32),
+      text: rgb(0.82, 0.91, 0.94),
     },
     {
       label: "KEIN INTERESSE",
       x: 366,
       width: 98,
-      color: rgb(0.9, 0.92, 0.94),
-      text: rgb(0.2, 0.24, 0.29),
+      color: rgb(0.11, 0.17, 0.23),
+      text: rgb(0.67, 0.73, 0.78),
     },
   ];
   responseOptions.forEach((option) => {
@@ -525,14 +501,14 @@ export async function createAcquisitionLetterPdf(
     y: responsePanelY + 19,
     size: 7,
     font: regular,
-    color: rgb(0.34, 0.39, 0.45),
+    color: rgb(0.63, 0.71, 0.77),
   });
   page.drawText("Referenz " + input.leadId, {
     x: 207,
     y: responsePanelY + 7,
     size: 5.5,
     font: regular,
-    color: rgb(0.68, 0.71, 0.75),
+    color: rgb(0.38, 0.49, 0.57),
   });
 
   page.drawLine({
