@@ -59,6 +59,10 @@ const serverEnvSchema = z.object({
   CONSENT_FUNCTIONAL_SERVICES: z.string().default(""),
   CONSENT_STATISTICS_SERVICES: z.string().default(""),
   CONSENT_MARKETING_SERVICES: z.string().default(""),
+  ANALYTICS_GEOIP_DATABASE_PATH: z.string().trim().default(""),
+  ANALYTICS_CLIENT_IP_HEADER: z
+    .enum(["none", "x-real-ip", "x-forwarded-for"])
+    .default("none"),
   ONLINEBRIEF_API_KEY: z.string().min(1).optional(),
   ONLINEBRIEF_API_SECRET: z.string().min(1).optional(),
   ONLINEBRIEF_MODE: z.enum(["test", "live"]).default("test"),

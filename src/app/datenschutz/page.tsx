@@ -6,7 +6,10 @@ import {
   LegalContent,
   PrivacyServiceNotice,
 } from "@/modules/legal/public-document";
-import { createOnlinebriefPrivacyNotice } from "@/modules/legal/documents";
+import {
+  createOnlinebriefPrivacyNotice,
+  createTrafficAnalyticsPrivacyNotice,
+} from "@/modules/legal/documents";
 
 const referralPrivacyNotice = `Empfehlungsprogramm\nWenn ein Interessent einen persönlichen Empfehlungslink verwendet, verarbeiten wir die zufällige Empfehlungskennung, die Zuordnung zum werbenden Kunden, den Zeitpunkt der Bestätigung, den Bearbeitungsstatus sowie – nach einem Vertragsschluss – die Kunden-, Vertrags-, Zahlungs- und Rechnungszuordnung. Der werbende Kunde erhält keine Kontaktdaten der empfohlenen Person. Die Verarbeitung dient der Bearbeitung der Anfrage, der Durchführung des Empfehlungsprogramms, der Missbrauchsvermeidung und der nachvollziehbaren Abrechnung. Rechtsgrundlagen sind Art. 6 Abs. 1 lit. b und lit. f DSGVO. Abrechnungsrelevante Nachweise werden entsprechend den gesetzlichen Aufbewahrungspflichten gespeichert; nicht zustande gekommene Empfehlungen werden gelöscht, sobald keine Nachweis- oder Abwehrinteressen mehr bestehen.`;
 
@@ -14,24 +17,36 @@ const newsletterPrivacyNotice = `Newsletter und Produktinformationen\nWenn eine 
 
 const postalTrackingPrivacyNotice = `Erfolgsmessung persönlicher Akquisebriefe\nZur Erfolgsmessung speichern wir leadbezogen Zeitpunkt des ersten und letzten Aufrufs sowie die Anzahl der QR-Link-Aufrufe. Wir speichern dafür keine IP-Adresse und erstellen keinen Gerätefingerabdruck. Die Auswertung nach Bundesland beruht ausschließlich auf der bereits in der Kundenakte hinterlegten Postleitzahl. Rechtsgrundlage ist unser berechtigtes Interesse an einer datensparsamen Erfolgsmessung gemäß Art. 6 Abs. 1 lit. f DSGVO. Der Verarbeitung kann jederzeit widersprochen werden.`;
 
+const legacyAnalyticsPrivacyNotice = `Reichweitenmessung\nNach Einwilligung erfassen wir aufgerufenen Pfad, Hostname und Stunde des Aufrufs. IP-Adressen, vollständige User-Agents und dauerhafte Besucherprofile werden dabei nicht gespeichert. Die Werte werden nur stündlich zusammengefasst und nach 90 Tagen automatisch gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO in Verbindung mit § 25 Abs. 1 TDDDG. Die Einwilligung kann jederzeit über die Cookie-Einstellungen widerrufen werden.`;
+
 export default async function PrivacyPage() {
   await connection();
   const [document, services] = await Promise.all([
     findPublishedPlatformLegalDocument("privacy").catch(() => null),
     getOptionalServiceConfig(),
   ]);
+  const analyticsPrivacyNotice = createTrafficAnalyticsPrivacyNotice();
+  const currentDocumentContent = document?.content.replace(
+    legacyAnalyticsPrivacyNotice,
+    analyticsPrivacyNotice,
+  );
   const privacyContent = document
     ? [
-        document.content,
-        document.content.includes("Onlinebrief24")
+        currentDocumentContent,
+        currentDocumentContent?.includes("Onlinebrief24")
           ? null
           : createOnlinebriefPrivacyNotice(),
-        document.content.includes("QR-Link-Aufrufe")
+        currentDocumentContent?.includes("QR-Link-Aufrufe")
           ? null
           : postalTrackingPrivacyNotice,
-        document.content.includes("Newsletter und Produktinformationen")
+        currentDocumentContent?.includes("Newsletter und Produktinformationen")
           ? null
           : newsletterPrivacyNotice,
+        currentDocumentContent?.includes(
+          "lokal auf unserem Server gespeicherten GeoIP-Datenbank",
+        )
+          ? null
+          : analyticsPrivacyNotice,
         referralPrivacyNotice,
       ]
         .filter(Boolean)

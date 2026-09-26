@@ -21,7 +21,11 @@ export function TrafficTracker({ enabled }: { enabled: boolean }) {
     void fetch("/api/analytics/page-view", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ path: pathname }),
+      body: JSON.stringify({
+        path: pathname,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        utcOffsetMinutes: new Date().getTimezoneOffset(),
+      }),
       keepalive: true,
     });
   }, [enabled, pathname]);

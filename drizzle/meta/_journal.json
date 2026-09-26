@@ -295,6 +295,13 @@
       "when": 1790443350857,
       "tag": "0041_salty_power_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "5",
+      "when": 1790447324490,
+      "tag": "0042_sad_moonstone",
+      "breakpoints": true
     }
   ]
 }

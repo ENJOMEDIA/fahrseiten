@@ -67,36 +67,38 @@ Die Plesk-Startdatei muss direkt im Application Root liegen. `plesk-start.mjs` l
 
 Mindestens diese Variablen werden in Plesk hinterlegt:
 
-| Variable                      | Vorgesehener Inhalt                                                             |
-| ----------------------------- | ------------------------------------------------------------------------------- |
-| `NODE_ENV`                    | `production`                                                                    |
-| `APP_BASE_URL`                | `https://fahrseiten.de`                                                         |
-| `PUBLIC_DNS_TARGET_HOST`      | `fahrseiten.de` – öffentliches Ziel für Kundendomain-Anweisungen und Prüfung    |
-| `DASHBOARD_BASE_URL`          | Leer: Login unter `fahrseiten.de/login`; später optional eigene App-Domain      |
-| `FAHRSEITEN_CONFIG_FILE`      | Absoluter persistenter Pfad außerhalb des Release- und Document-Root            |
-| `DEMO_DATA_MODE`              | `database`                                                                      |
-| `MARKETING_HOSTS`             | `fahrseiten.de,www.fahrseiten.de`                                               |
-| `APP_HOSTS`                   | Leer, solange keine eigene Verwaltungs-Subdomain eingerichtet ist               |
-| `DEMO_HOSTS`                  | Nur tatsächlich eingerichtete Testhosts oder ein bewusst leerer Wert            |
-| `TRUST_PROXY_HEADERS`         | Zunächst `false`; nur nach dokumentierter Proxy-Prüfung auf `true` setzen       |
-| `SMTP_MODE`                   | `smtp`                                                                          |
-| `SMTP_HOST`                   | Host des freigegebenen SMTP-Anbieters                                           |
-| `SMTP_PORT`                   | Port des freigegebenen SMTP-Anbieters                                           |
-| `SMTP_SECURE`                 | `true` für implizites TLS, andernfalls `false` für STARTTLS                     |
-| `SMTP_USER`                   | SMTP-Benutzer, falls benötigt                                                   |
-| `SMTP_PASSWORD`               | SMTP-Passwort, falls benötigt                                                   |
-| `SMTP_FROM`                   | Freigegebener Absender, beispielsweise `FahrSeiten <noreply@fahrseiten.de>`     |
-| `CRON_SECRET`                 | Kryptografisch zufälliger Wert mit mindestens 24 Zeichen                        |
-| `CRON_TRIGGER_TOKEN`          | Davon verschiedener Zufallswert für Plesks URL-Scheduler, mindestens 32 Zeichen |
-| `INSTALL_TOKEN`               | Nur zur Erstinstallation: zufälliger Wert mit mindestens 32 Zeichen             |
-| `CONSENT_FUNCTIONAL_SERVICES` | Namen tatsächlich aktiver funktionaler Dienste oder leer                        |
-| `CONSENT_STATISTICS_SERVICES` | Namen tatsächlich aktiver Statistikdienste oder leer                            |
-| `CONSENT_MARKETING_SERVICES`  | Namen tatsächlich aktiver Marketingdienste oder leer                            |
-| `ONLINEBRIEF_MODE`            | Zunächst `test`; `live` erst nach dokumentierter Versandfreigabe                |
-| `ONLINEBRIEF_API_KEY`         | API-Key aus dem Onlinebrief24-Kundencenter                                      |
-| `ONLINEBRIEF_API_SECRET`      | API-Secret aus dem Onlinebrief24-Kundencenter                                   |
-| `SIGNATURE_PROVIDER`          | Bis zur geprüften Anbieteranbindung `disabled`                                  |
-| `SIGNATURE_LEVEL`             | Vorgesehener Ausgangswert `advanced`; vor Livebetrieb rechtlich bestätigen      |
+| Variable                        | Vorgesehener Inhalt                                                                                            |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                      | `production`                                                                                                   |
+| `APP_BASE_URL`                  | `https://fahrseiten.de`                                                                                        |
+| `PUBLIC_DNS_TARGET_HOST`        | `fahrseiten.de` – öffentliches Ziel für Kundendomain-Anweisungen und Prüfung                                   |
+| `DASHBOARD_BASE_URL`            | Leer: Login unter `fahrseiten.de/login`; später optional eigene App-Domain                                     |
+| `FAHRSEITEN_CONFIG_FILE`        | Absoluter persistenter Pfad außerhalb des Release- und Document-Root                                           |
+| `DEMO_DATA_MODE`                | `database`                                                                                                     |
+| `MARKETING_HOSTS`               | `fahrseiten.de,www.fahrseiten.de`                                                                              |
+| `APP_HOSTS`                     | Leer, solange keine eigene Verwaltungs-Subdomain eingerichtet ist                                              |
+| `DEMO_HOSTS`                    | Nur tatsächlich eingerichtete Testhosts oder ein bewusst leerer Wert                                           |
+| `TRUST_PROXY_HEADERS`           | Zunächst `false`; nur nach dokumentierter Proxy-Prüfung auf `true` setzen                                      |
+| `SMTP_MODE`                     | `smtp`                                                                                                         |
+| `SMTP_HOST`                     | Host des freigegebenen SMTP-Anbieters                                                                          |
+| `SMTP_PORT`                     | Port des freigegebenen SMTP-Anbieters                                                                          |
+| `SMTP_SECURE`                   | `true` für implizites TLS, andernfalls `false` für STARTTLS                                                    |
+| `SMTP_USER`                     | SMTP-Benutzer, falls benötigt                                                                                  |
+| `SMTP_PASSWORD`                 | SMTP-Passwort, falls benötigt                                                                                  |
+| `SMTP_FROM`                     | Freigegebener Absender, beispielsweise `FahrSeiten <noreply@fahrseiten.de>`                                    |
+| `CRON_SECRET`                   | Kryptografisch zufälliger Wert mit mindestens 24 Zeichen                                                       |
+| `CRON_TRIGGER_TOKEN`            | Davon verschiedener Zufallswert für Plesks URL-Scheduler, mindestens 32 Zeichen                                |
+| `INSTALL_TOKEN`                 | Nur zur Erstinstallation: zufälliger Wert mit mindestens 32 Zeichen                                            |
+| `CONSENT_FUNCTIONAL_SERVICES`   | Namen tatsächlich aktiver funktionaler Dienste oder leer                                                       |
+| `CONSENT_STATISTICS_SERVICES`   | Namen tatsächlich aktiver Statistikdienste oder leer                                                           |
+| `ANALYTICS_GEOIP_DATABASE_PATH` | Absoluter Pfad zu einer lokalen GeoLite2-City-MMDB außerhalb des Releases; optional                            |
+| `ANALYTICS_CLIENT_IP_HEADER`    | `none`, bis der von Plesk zuverlässig gesetzte Header geprüft wurde; danach `x-real-ip` oder `x-forwarded-for` |
+| `CONSENT_MARKETING_SERVICES`    | Namen tatsächlich aktiver Marketingdienste oder leer                                                           |
+| `ONLINEBRIEF_MODE`              | Zunächst `test`; `live` erst nach dokumentierter Versandfreigabe                                               |
+| `ONLINEBRIEF_API_KEY`           | API-Key aus dem Onlinebrief24-Kundencenter                                                                     |
+| `ONLINEBRIEF_API_SECRET`        | API-Secret aus dem Onlinebrief24-Kundencenter                                                                  |
+| `SIGNATURE_PROVIDER`            | Bis zur geprüften Anbieteranbindung `disabled`                                                                 |
+| `SIGNATURE_LEVEL`               | Vorgesehener Ausgangswert `advanced`; vor Livebetrieb rechtlich bestätigen                                     |
 
 `DATABASE_URL` wird bei der normalen Browserinstallation nicht vorab gesetzt. Host, Port, Datenbankname, Benutzer und Passwort werden in `/setup` erfasst. `PORT` und gegebenenfalls `HOSTNAME` werden von Plesk beziehungsweise seiner Node.js-Laufzeit verwaltet. Sie dürfen nicht hart im Repository eingetragen werden. Die Startvalidierung nennt ausschließlich fehlerhafte Variablennamen oder Regeln und gibt keine Secret-Werte aus.
 
@@ -105,9 +107,9 @@ Für die optionale Onlinebrief24-Anbindung werden `ONLINEBRIEF_API_KEY` und
 hinterlegt. `ONLINEBRIEF_MODE=test` ist die sichere Voreinstellung und legt
 übertragene Briefe nur in den Onlinebrief24-Warenkorb. Erst nach einer
 kontrollierten Abnahme darf `ONLINEBRIEF_MODE=live` gesetzt werden. Der
-Anwendungscode verlangt im Live-Modus zusätzlich die erneute Bestätigung der
-zugehörigen Lead-ID; Zugangsdaten werden weder in Git noch in der Datenbank
-gespeichert.
+Anwendungscode verlangt im Live-Modus zusätzlich einen letzten Versandcheck
+mit Pflicht-Haken; die Lead-ID wird intern aus dem vorbereiteten Briefvorgang
+übernommen. Zugangsdaten werden weder in Git noch in der Datenbank gespeichert.
 
 Die Signaturvariablen aktivieren derzeit bewusst keinen externen Versand. Die
 Anwendung kann Vertragsstände bereits unveränderlich vorbereiten und verwalten.
@@ -127,6 +129,38 @@ HTTP-Weiterleitung auf `fahrseiten.de` umgebogen werden, weil die
 Tenant-Auflösung den ursprünglichen Host benötigt.
 
 Nach dem ersten isolierten Stagingstart sind `Host` und `X-Forwarded-Host` mit einer Testdomain zu prüfen. `TRUST_PROXY_HEADERS=false` bleibt die sichere Voreinstellung. Eine Umstellung auf `true` ist nur zulässig, wenn Plesk eingehende Forwarded-Header überschreibt und ausschließlich den verifizierten öffentlichen Host weitergibt.
+
+## Optionale lokale Standortstatistik
+
+Stadt, Region und Land werden ausschließlich nach einer Zustimmung zur
+Statistik-Kategorie ermittelt. Dafür verwendet FahrSeiten keine externe
+GeoIP-API. Benötigt wird eine lokal gespeicherte MaxMind-GeoLite2-City-Datei im
+MMDB-Format. Sie wird außerhalb des Git-Checkouts und außerhalb des Document
+Roots abgelegt, beispielsweise unter:
+
+```text
+/var/www/vhosts/hosting177968.ae89a.netcup.net/.fahrseiten/GeoLite2-City.mmdb
+```
+
+Die Datei darf nicht ins Repository aufgenommen werden; `*.mmdb` ist deshalb
+in `.gitignore` ausgeschlossen. Nach Download über ein eigenes MaxMind-Konto
+wird sie per Plesk-Dateimanager hochgeladen und nur für den Systembenutzer der
+Anwendung lesbar gemacht. Anschließend werden gesetzt:
+
+```text
+ANALYTICS_GEOIP_DATABASE_PATH=/var/www/vhosts/hosting177968.ae89a.netcup.net/.fahrseiten/GeoLite2-City.mmdb
+ANALYTICS_CLIENT_IP_HEADER=x-real-ip
+```
+
+`ANALYTICS_CLIENT_IP_HEADER` bleibt zunächst `none`. Vor der Aktivierung muss
+geprüft werden, welchen Header Plesk selbst zuverlässig überschreibt. Wenn
+`x-real-ip` nicht gesetzt wird, kann nach derselben Prüfung
+`x-forwarded-for` verwendet werden. Ein ungeprüfter, vom Internet übernehmbarer
+Header darf nicht aktiviert werden, weil Besucher sonst falsche Ortswerte
+einspeisen könnten. Nach jeder Änderung ist die Node.js-Anwendung neu zu
+starten. Die GeoLite2-Datei muss entsprechend der MaxMind-Lizenz regelmäßig
+aktualisiert werden; ein Git-Deployment überschreibt sie am persistenten Pfad
+nicht.
 
 ## Erstinstallation der Plattform im Browser
 

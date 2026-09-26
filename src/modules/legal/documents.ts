@@ -325,6 +325,13 @@ Für Druck, Kuvertierung und Versand übermitteln wir den Brief einschließlich 
 Eine freiwillige Einwilligung in E-Mail-Informationen wird getrennt erfasst und per Double-Opt-in bestätigt; Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Ein Widerruf oder Werbewiderspruch wird in einer Sperrliste berücksichtigt, damit keine weitere werbliche Ansprache erfolgt.`;
 }
 
+export function createTrafficAnalyticsPrivacyNotice() {
+  return `Einwilligungsbasierte Reichweitenmessung
+Nach Ihrer Einwilligung erfassen wir den aufgerufenen Pfad, den Hostnamen, die Stunde des Aufrufs, die vom Browser gemeldete Zeitzone und die Abweichung zur koordinierten Weltzeit. Sofern die lokale Standortauswertung konfiguriert ist, wird die beim Aufruf technisch anfallende IP-Adresse ausschließlich im Arbeitsspeicher mit einer lokal auf unserem Server gespeicherten GeoIP-Datenbank abgeglichen. Die IP-Adresse wird weder in der Statistik gespeichert noch dafür an einen externen Ortungsdienst übermittelt. Gespeichert werden nur die daraus näherungsweise ermittelten Angaben Stadt, Region und Land. Diese Zuordnung kann technisch ungenau sein und gibt keinen exakten Aufenthaltsort wieder.
+
+Die Daten werden unmittelbar in stündlichen Summen ohne dauerhafte Besucherkennung, vollständigen User-Agent oder geräteübergreifendes Besucherprofil gespeichert und nach 90 Tagen automatisch gelöscht. Rechtsgrundlage ist Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO in Verbindung mit § 25 Abs. 1 TDDDG. Sie können die Einwilligung jederzeit über die Cookie-Einstellungen mit Wirkung für die Zukunft widerrufen.`;
+}
+
 export function parseLegalProfileForm(formData: FormData) {
   const checked = (name: keyof LegalModuleSettings) =>
     formData.get(`module_${name}`) === "on";
@@ -451,7 +458,7 @@ export function createStructuredLegalDocuments(input: {
     if (!modules[key]) continue;
     if (key === "analytics") {
       privacySections.push(
-        `${privacySections.length + 1}. Reichweitenmessung\nNach Einwilligung erfassen wir aufgerufenen Pfad, Hostname und Stunde des Aufrufs. IP-Adressen, vollständige User-Agents und dauerhafte Besucherprofile werden dabei nicht gespeichert. Die Werte werden nur stündlich zusammengefasst und nach 90 Tagen automatisch gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO in Verbindung mit § 25 Abs. 1 TDDDG. Die Einwilligung kann jederzeit über die Cookie-Einstellungen widerrufen werden.`,
+        `${privacySections.length + 1}. ${createTrafficAnalyticsPrivacyNotice()}`,
       );
       continue;
     }

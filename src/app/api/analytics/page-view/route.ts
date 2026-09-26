@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { recordPageView } from "@/modules/analytics/repository";
+import { resolveAnalyticsLocation } from "@/modules/analytics/geoip";
 import { CONSENT_COOKIE, parseConsentCookie } from "@/modules/consent/model";
 import { domainConfig } from "@/modules/domains/config";
 import { selectRequestHostname } from "@/modules/domains/hostname";
@@ -18,8 +19,12 @@ export async function POST(request: Request) {
   if (!consent?.choices.statistics)
     return new NextResponse(null, { status: 204 });
   try {
-    const { path } = z
-      .object({ path: z.string().startsWith("/").max(300) })
+    const { path, timeZone, utcOffsetMinutes } = z
+      .object({
+        path: z.string().startsWith("/").max(300),
+        timeZone: z.string().trim().max(64).catch(""),
+        utcOffsetMinutes: z.number().int().min(-840).max(840).catch(0),
+      })
       .parse(await request.json());
     const hostname = selectRequestHostname({
       host: request.headers.get("host"),
@@ -33,6 +38,7 @@ export async function POST(request: Request) {
     });
     if (context.kind === "unknown" || context.kind === "app")
       return new NextResponse(null, { status: 204 });
+    const location = await resolveAnalyticsLocation(request.headers);
     await recordPageView({
       tenantId: context.kind === "tenant" ? context.tenantId : null,
       scope:
@@ -43,6 +49,9 @@ export async function POST(request: Request) {
             : "platform",
       hostname,
       path,
+      ...location,
+      timeZone: timeZone || null,
+      utcOffsetMinutes,
     });
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch {

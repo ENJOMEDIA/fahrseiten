@@ -52,7 +52,7 @@ export async function getOptionalServiceConfig(
       category: "statistics",
       label: "Datenschutzfreundliche Statistik",
       services:
-        "FahrSeiten Reichweitenmessung (nur nach Einwilligung, stündlich aggregiert, ohne IP-Adresse oder Besucherprofil)",
+        "FahrSeiten Reichweitenmessung (nur nach Einwilligung; Pfad, Host, Zugriffszeit und Browser-Zeitzone; bei konfigurierter lokaler GeoIP-Datenbank grobe Stadt, Region und Land; keine Speicherung oder externe Übermittlung der IP-Adresse; kein Besucherprofil)",
     });
   if (modules.maps)
     services.push({

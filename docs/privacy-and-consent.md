@@ -10,6 +10,15 @@ Für Mandanten werden Kontaktformular, E-Mail und Consent technisch vorausgesetz
 
 Die Consent-Steuerung kennt notwendig, funktional, Statistik und Marketing. Notwendig ist immer aktiv. Ohne gültiges Cookie der aktuellen, aus den aktiven Diensten berechneten Hinweisversion liefert `mayLoadOptional` für jede optionale Kategorie `false`. `OptionalContent` rendert deshalb zunächst nur einen lokalen Platzhalter und löst keinen externen Request aus. Ein Banner erscheint nur, wenn durch ein aktives Modul oder über die `CONSENT_*_SERVICES`-Konfiguration tatsächlich mindestens ein optionaler Dienst benannt ist. Ändert sich diese Diensteliste, wird die Auswahl erneut abgefragt. Ohne optionalen Dienst wird keine Einwilligung ins Blaue hinein abgefragt.
 
+Die interne Reichweitenmessung startet ausschließlich nach Zustimmung zur
+Kategorie Statistik. Sie speichert Host, Pfad, stündlichen Zeitpunkt,
+Browser-Zeitzone und UTC-Abweichung. Ist eine lokale GeoIP-Datenbank
+konfiguriert, wird die technisch anfallende IP-Adresse nur im Arbeitsspeicher
+gegen diese lokale Datei geprüft und anschließend verworfen. Persistiert werden
+ausschließlich grobe Angaben zu Stadt, Region und Land in stündlichen Summen;
+eine externe GeoIP-API, genaue Koordinaten und dauerhafte Besucherkennungen
+werden nicht verwendet. Die Summen werden nach 90 Tagen gelöscht.
+
 Der Browser speichert die Auswahl für höchstens 180 Tage. Änderungen am Versionsschlüssel machen alte Auswahlwerte ungültig. Auswahl und Widerruf sind auf der Seite Cookie-Einstellungen erneut erreichbar. Der API-Nachweis speichert einen SHA-256-Hash einer zufälligen Browserkennung, Hinweisversion, Kategorien, Host und Zeitpunkte; rohe IP-Adresse, User-Agent und Browserkennung werden nicht gespeichert.
 
 ## Vorbereitete Prozesse
