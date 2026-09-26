@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useState } from "react";
+import { parseSalesLeadTags } from "@/modules/platform/sales-tags";
 
 import {
   archivePostalDispatchAction,
@@ -121,7 +122,13 @@ export function PreparePostalForm({
   media,
   templates,
 }: {
-  leads: { id: string; companyName: string; addressComplete: boolean }[];
+  leads: {
+    id: string;
+    companyName: string;
+    addressComplete: boolean;
+    tags: string | null;
+    researchNote: string | null;
+  }[];
   logos: { id: string; label: string; url: string }[];
   defaultLogoId: string;
   media: { id: string; label: string }[];
@@ -138,6 +145,7 @@ export function PreparePostalForm({
     initialState,
   );
   const firstTemplate = templates[0];
+  const [tagFilter, setTagFilter] = useState("");
   const [kicker, setKicker] = useState(
     firstTemplate?.kickerTemplate ?? "FAHRSEITEN FÜR FAHRSCHULEN",
   );
@@ -149,7 +157,13 @@ export function PreparePostalForm({
     firstTemplate?.bodyTemplate ??
       "FahrSeiten verbindet einen modernen Webauftritt mit einem übersichtlichen Arbeitsbereich.",
   );
-  const availableLeadIds = leads
+  const availableTags = [
+    ...new Set(leads.flatMap((lead) => parseSalesLeadTags(lead.tags))),
+  ].sort((a, b) => a.localeCompare(b, "de"));
+  const visibleLeads = tagFilter
+    ? leads.filter((lead) => parseSalesLeadTags(lead.tags).includes(tagFilter))
+    : leads;
+  const availableLeadIds = visibleLeads
     .filter((lead) => lead.addressComplete)
     .map((lead) => lead.id);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
@@ -171,6 +185,24 @@ export function PreparePostalForm({
               {selectedLeadIds.length} von maximal 50 ausgewählt
             </p>
           </div>
+          <label className="text-xs font-semibold text-slate-600">
+            Tag
+            <select
+              className="ml-2 min-h-9 rounded-lg border border-slate-300 bg-white px-3 font-normal text-slate-800"
+              onChange={(event) => {
+                setTagFilter(event.target.value);
+                setSelectedLeadIds([]);
+              }}
+              value={tagFilter}
+            >
+              <option value="">Alle</option>
+              {availableTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="flex gap-2">
             <button
               className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
@@ -189,7 +221,7 @@ export function PreparePostalForm({
           </div>
         </div>
         <div className="mt-4 max-h-64 space-y-2 overflow-y-auto pr-1">
-          {leads.map((lead) => {
+          {visibleLeads.map((lead) => {
             const checked = selectedLeadIds.includes(lead.id);
             return (
               <label
@@ -212,9 +244,28 @@ export function PreparePostalForm({
                   type="checkbox"
                   value={lead.id}
                 />
-                <span className="font-semibold">
-                  {lead.companyName}
-                  {lead.addressComplete ? "" : " – Anschrift fehlt"}
+                <span className="min-w-0 flex-1">
+                  <span className="font-semibold">
+                    {lead.companyName}
+                    {lead.addressComplete ? "" : " – Anschrift fehlt"}
+                  </span>
+                  {parseSalesLeadTags(lead.tags).length ? (
+                    <span className="mt-1 flex flex-wrap gap-1">
+                      {parseSalesLeadTags(lead.tags).map((tag) => (
+                        <span
+                          className="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold text-cyan-900"
+                          key={tag}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </span>
+                  ) : null}
+                  {lead.researchNote ? (
+                    <span className="mt-1 block truncate text-xs font-normal text-slate-500">
+                      {lead.researchNote}
+                    </span>
+                  ) : null}
                 </span>
               </label>
             );

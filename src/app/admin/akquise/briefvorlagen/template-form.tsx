@@ -24,8 +24,9 @@ export function LetterTemplateForm() {
       </p>
       <h2 className="mt-2 text-2xl font-semibold">Briefvorlage erstellen</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        Verfügbar sind die Platzhalter {"{{Fahrschule}}"} und{" "}
-        {"{{Ansprechpartner}}"}.
+        Verfügbar sind die Platzhalter {"{{Fahrschule}}"},{" "}
+        {"{{Ansprechpartner}}"}, {"{{Tags}}"} und {"{{Kommentar}}"}. Tags und
+        Recherche-Kommentar stammen aus der jeweiligen Kundenakte.
       </p>
       <div className="mt-5 space-y-4">
         <label className="block text-sm font-semibold">

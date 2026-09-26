@@ -8,6 +8,10 @@ import {
   salesStages,
   type LeadStatus,
 } from "@/modules/platform/sales-stages";
+import {
+  parseSalesLeadTags,
+  salesLeadTagSuggestions,
+} from "@/modules/platform/sales-tags";
 
 import {
   createLeadAction,
@@ -47,7 +51,9 @@ export function CsvImportForm() {
       <h2 className="text-xl font-semibold">Kontakte aus CSV übernehmen</h2>
       <p className="mt-2 text-sm text-slate-600">
         Die Kopfzeile wird geprüft. Kontakte mit bereits vorhandener
-        E-Mail-Adresse werden übersprungen.
+        E-Mail-Adresse werden übersprungen. Tags werden mit <strong>|</strong>
+        getrennt; der Kommentar bleibt als dauerhafte Recherche-Notiz in der
+        Kundenakte erhalten.
       </p>
       <input
         accept=".csv,text/csv"
@@ -141,6 +147,8 @@ export function OutreachForm({
     email: string | null;
     phone: string | null;
     website: string | null;
+    tags: string | null;
+    researchNote: string | null;
     status: string;
     emailPermission: string;
     emailOptOutAt: Date | null;
@@ -159,6 +167,13 @@ export function OutreachForm({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleteState, setDeleteState] = useState(initialState);
   const [deletePending, startDeleteTransition] = useTransition();
+  const [tagFilter, setTagFilter] = useState("");
+  const availableTags = [
+    ...new Set(leads.flatMap((lead) => parseSalesLeadTags(lead.tags))),
+  ].sort((a, b) => a.localeCompare(b, "de"));
+  const visibleLeads = tagFilter
+    ? leads.filter((lead) => parseSalesLeadTags(lead.tags).includes(tagFilter))
+    : leads;
   const selectedLeads = leads.filter((lead) => selectedIds.includes(lead.id));
   const selectedForEmail = selectedLeads.every(
     (lead) =>
@@ -229,9 +244,27 @@ export function OutreachForm({
         </div>
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <label className="mr-2 text-xs font-semibold text-slate-600">
+          Nach Tag filtern
+          <select
+            className="ml-2 min-h-9 rounded-lg border border-slate-300 bg-white px-3 font-normal text-slate-800"
+            onChange={(event) => {
+              setTagFilter(event.target.value);
+              setSelectedIds([]);
+            }}
+            value={tagFilter}
+          >
+            <option value="">Alle Tags</option>
+            {availableTags.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
+            ))}
+          </select>
+        </label>
         <button
           className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white"
-          onClick={() => setSelectedIds(leads.map((lead) => lead.id))}
+          onClick={() => setSelectedIds(visibleLeads.map((lead) => lead.id))}
           type="button"
         >
           Alle markieren
@@ -259,27 +292,29 @@ export function OutreachForm({
             : `${selectedIds.length || 0} Kontakte löschen`}
         </button>
         <span className="ml-auto text-xs font-semibold text-slate-500">
-          {selectedIds.length} von {leads.length} markiert
+          {selectedIds.length} markiert · {visibleLeads.length} von{" "}
+          {leads.length} sichtbar
         </span>
         <div className="w-full">
           <Result state={deleteState} />
         </div>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-        <table className="mobile-stack-table w-full min-w-[850px] text-left text-sm">
+        <table className="mobile-stack-table w-full min-w-[1050px] text-left text-sm">
           <thead className="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
             <tr>
               <th className="p-4">Auswahl</th>
               <th className="p-4">Fahrschule</th>
               <th className="p-4">Kontakt</th>
               <th className="p-4">Webseite</th>
+              <th className="p-4">Tags & Hinweis</th>
               <th className="p-4">Status</th>
               <th className="p-4">E-Mail</th>
               <th className="p-4">Aktionen</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {leads.map((lead) => (
+            {visibleLeads.map((lead) => (
               <tr key={lead.id}>
                 <td className="p-4" data-label="Auswahl">
                   <input
@@ -319,6 +354,27 @@ export function OutreachForm({
                   ) : (
                     "–"
                   )}
+                </td>
+                <td className="p-4" data-label="Tags & Hinweis">
+                  <div className="flex max-w-64 flex-wrap gap-1.5">
+                    {parseSalesLeadTags(lead.tags).length ? (
+                      parseSalesLeadTags(lead.tags).map((tag) => (
+                        <span
+                          className="rounded-full bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-900"
+                          key={tag}
+                        >
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400">Keine Tags</span>
+                    )}
+                  </div>
+                  {lead.researchNote ? (
+                    <p className="mt-2 max-w-64 text-xs leading-5 text-slate-500">
+                      {lead.researchNote}
+                    </p>
+                  ) : null}
                 </td>
                 <td className="p-4" data-label="Status">
                   {lead.status}
@@ -465,6 +521,31 @@ export function CreateLeadForm() {
           />
         </label>
         <label className="text-sm font-semibold sm:col-span-2 lg:col-span-3">
+          Tags
+          <input
+            className="mt-2 min-h-11 w-full rounded-xl border border-cyan-200 bg-white px-3 font-normal"
+            list="sales-tag-suggestions-create"
+            name="tags"
+            placeholder="Rechtlich veraltet, Aktuelle Wartungen"
+          />
+          <datalist id="sales-tag-suggestions-create">
+            {salesLeadTagSuggestions.map((tag) => (
+              <option key={tag} value={tag} />
+            ))}
+          </datalist>
+          <span className="mt-1 block text-xs font-normal text-slate-500">
+            Mehrere Tags mit Komma trennen.
+          </span>
+        </label>
+        <label className="text-sm font-semibold sm:col-span-2 lg:col-span-3">
+          Recherche-Kommentar
+          <textarea
+            className="mt-2 min-h-24 w-full rounded-xl border border-cyan-200 bg-white p-3 font-normal"
+            name="researchNote"
+            placeholder="Konkrete Beobachtung zur Website; vor der Ansprache manuell prüfen."
+          />
+        </label>
+        <label className="text-sm font-semibold sm:col-span-2 lg:col-span-3">
           Erste Notiz
           <textarea
             className="mt-2 min-h-24 w-full rounded-xl border border-cyan-200 bg-white p-3 font-normal"
@@ -518,6 +599,8 @@ export function LeadControls({
     email: string | null;
     phone: string | null;
     website: string | null;
+    tags: string | null;
+    researchNote: string | null;
     status: LeadStatus;
     nextTaskAt: Date | null;
     emailPermission: string;
@@ -558,6 +641,30 @@ export function LeadControls({
               defaultValue={lead.companyName}
               name="companyName"
               required
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700 sm:col-span-2">
+            Tags
+            <input
+              className="mt-1 min-h-10 w-full rounded-xl border border-slate-300 px-3 text-sm font-normal"
+              defaultValue={parseSalesLeadTags(lead.tags).join(", ")}
+              list={`sales-tag-suggestions-${lead.id}`}
+              name="tags"
+              placeholder="Rechtlich veraltet, Aktuelle Wartungen"
+            />
+            <datalist id={`sales-tag-suggestions-${lead.id}`}>
+              {salesLeadTagSuggestions.map((tag) => (
+                <option key={tag} value={tag} />
+              ))}
+            </datalist>
+          </label>
+          <label className="text-xs font-semibold text-slate-700 sm:col-span-2">
+            Recherche-Kommentar
+            <textarea
+              className="mt-1 min-h-20 w-full rounded-xl border border-slate-300 p-3 text-sm font-normal"
+              defaultValue={lead.researchNote ?? ""}
+              name="researchNote"
+              placeholder="Beobachtung sachlich dokumentieren und vor dem Briefversand prüfen"
             />
           </label>
           <label className="text-xs font-semibold text-slate-700">

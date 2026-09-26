@@ -9,6 +9,8 @@ describe("Akquise-CSV", () => {
       contactName: "Erika Muster",
     });
     expect(row.nextTaskAt).toBeInstanceOf(Date);
+    expect(row.tags).toEqual(["Rechtlich veraltet", "Aktuelle Wartungen"]);
+    expect(row.researchNote).toContain("Im Impressum");
   });
 
   it("unterstützt maskierte Trennzeichen", () => {
@@ -17,6 +19,16 @@ describe("Akquise-CSV", () => {
     expect(parseSalesCsv(source)[0]).toMatchObject({
       companyName: "Fahrschule A, B",
       note: "Rückruf, später",
+    });
+  });
+
+  it("übernimmt Tags und Kommentare aus der aktuellen Importstruktur", () => {
+    const source =
+      "Fahrschule;Ansprechpartner;E-Mail;Telefon;Webseite;Straße;PLZ;Ort;Land;Tags;Kommentar;Wiedervorlage\nFahrschule Nord;;;;;Nordweg 1;12345;Musterstadt;Deutschland;Rechtlich veraltet|Aktuelle Wartungen;Rechtstexte vor Versand prüfen;";
+    expect(parseSalesCsv(source)[0]).toMatchObject({
+      tags: ["Rechtlich veraltet", "Aktuelle Wartungen"],
+      researchNote: "Rechtstexte vor Versand prüfen",
+      note: "Rechtstexte vor Versand prüfen",
     });
   });
 });

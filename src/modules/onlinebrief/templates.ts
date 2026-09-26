@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/db/client";
 import { postalLetterTemplates } from "@/db/schema";
 import { createId } from "@/lib/ids";
+import { parseSalesLeadTags } from "@/modules/platform/sales-tags";
 
 const letterTemplateSchema = z.object({
   name: z.string().trim().min(2).max(160),
@@ -52,6 +53,18 @@ export const builtinPostalTemplates = [
     updatedAt: new Date(0),
     createdByUserId: null,
   },
+  {
+    id: "builtin-website-check",
+    name: "Website-Check: Aktualität & Rechtstexte",
+    kickerTemplate: "EIN KURZER BLICK VON AUSSEN.",
+    headlineTemplate: "Bei {{Fahrschule}} ist uns etwas aufgefallen.",
+    bodyTemplate:
+      "Bei einer kurzen Sichtprüfung Ihres öffentlich erreichbaren Webauftritts ist uns folgender Punkt aufgefallen: {{Kommentar}}\n\nDas ist ausdrücklich keine Rechtsberatung und keine abschließende rechtliche Bewertung. Wir weisen lediglich auf einen möglichen Prüf- und Aktualisierungsbedarf hin.\n\n## Damit Ihre Website einfacher aktuell bleibt\n• Inhalte, Hinweise und Kontaktdaten zentral selbst pflegen\n• Wartungsinformationen ohne technische Umwege veröffentlichen\n• Rechtstexte strukturiert verwalten und Änderungen leichter nachhalten\n\nÜber den persönlichen QR-Code sehen Sie unverbindlich, wie FahrSeiten den laufenden Webaufwand für {{Fahrschule}} reduzieren kann. Wenn das aktuell kein Thema ist, genügt ein Klick – dann melden wir uns dazu nicht weiter.",
+    active: true,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+    createdByUserId: null,
+  },
 ] as const;
 
 export async function listPostalLetterTemplates() {
@@ -78,12 +91,28 @@ export async function savePostalLetterTemplate(
 
 export function personalizePostalTemplate(
   value: string,
-  lead: { companyName: string; contactName: string | null },
+  lead: {
+    companyName: string;
+    contactName: string | null;
+    tags?: string | null;
+    researchNote?: string | null;
+  },
 ) {
+  const tags = parseSalesLeadTags(lead.tags);
+  const fullObservation =
+    lead.researchNote?.trim() ||
+    tags.join(", ") ||
+    "ein möglicher Aktualisierungsbedarf bei einzelnen Inhalten";
+  const observation =
+    fullObservation.length > 320
+      ? `${fullObservation.slice(0, 317).trimEnd()}…`
+      : fullObservation;
   return value
     .replaceAll("{{Fahrschule}}", lead.companyName)
     .replaceAll(
       "{{Ansprechpartner}}",
       lead.contactName || "liebes Fahrschul-Team",
-    );
+    )
+    .replaceAll("{{Tags}}", tags.join(", ") || "ohne Zuordnung")
+    .replaceAll("{{Kommentar}}", observation);
 }

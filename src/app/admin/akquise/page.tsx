@@ -271,6 +271,8 @@ export default async function SalesPage() {
                       email: lead.email,
                       phone: lead.phone,
                       website: lead.website,
+                      tags: lead.tags,
+                      researchNote: lead.researchNote,
                       status: lead.status as LeadStatus,
                       nextTaskAt: lead.nextTaskAt,
                       emailPermission: lead.emailPermission,

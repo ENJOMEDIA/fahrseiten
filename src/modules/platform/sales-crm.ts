@@ -16,6 +16,7 @@ import { createId } from "@/lib/ids";
 import { getMediaStorage } from "@/modules/media/runtime-storage";
 import { salesStages, type LeadStatus } from "./sales-stages";
 import type { SalesCsvRow } from "./sales-csv";
+import { serializeSalesLeadTags } from "./sales-tags";
 
 const createLeadSchema = z.object({
   companyName: z.string().trim().min(2).max(180),
@@ -27,6 +28,8 @@ const createLeadSchema = z.object({
   postalCode: z.string().trim().max(20),
   city: z.string().trim().max(120),
   country: z.string().trim().min(2).max(120),
+  tags: z.string().trim().max(1_000),
+  researchNote: z.string().trim().max(3_000),
   note: z.string().trim().max(3_000),
   nextTaskAt: z.string().trim(),
   emailPermission: z.enum(["unknown", "consent", "existing_customer"]),
@@ -140,6 +143,8 @@ export async function createManualLead(raw: unknown, actorUserId: string) {
       postalCode: input.postalCode || null,
       city: input.city || null,
       country: input.country,
+      tags: serializeSalesLeadTags(input.tags),
+      researchNote: input.researchNote || null,
       source: "manual",
       status: "new",
       ownerUserId: actorUserId,
@@ -169,6 +174,8 @@ export async function updateLead(input: {
   email: string;
   phone: string;
   website: string;
+  tags: string;
+  researchNote: string;
   status: LeadStatus;
   nextTaskAt: string;
   note: string;
@@ -187,6 +194,8 @@ export async function updateLead(input: {
       email: z.union([z.literal(""), z.email()]),
       phone: z.string().trim().max(40),
       website: z.union([z.literal(""), z.url()]),
+      tags: z.string().trim().max(1_000),
+      researchNote: z.string().trim().max(3_000),
     })
     .parse(input);
   const status = z.enum(salesStages).parse(input.status);
@@ -234,6 +243,8 @@ export async function updateLead(input: {
         email: contact.email || null,
         phone: contact.phone || null,
         website: contact.website || null,
+        tags: serializeSalesLeadTags(contact.tags),
+        researchNote: contact.researchNote || null,
         status,
         nextTaskAt: parseTaskDate(input.nextTaskAt),
         emailPermission,
@@ -425,6 +436,8 @@ export async function importSalesLeads(
         postalCode: row.postalCode || null,
         city: row.city || null,
         country: row.country,
+        tags: serializeSalesLeadTags(row.tags),
+        researchNote: row.researchNote || null,
         source: "csv_import",
         status: "new",
         ownerUserId: actorUserId,

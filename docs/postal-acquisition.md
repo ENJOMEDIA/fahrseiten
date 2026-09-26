@@ -13,9 +13,14 @@ und anschließend kontrolliert an OnlineBrief24 übertragen werden. Jeder Vorgan
 wird mit Modus, Prüfsumme, Anbieter-Auftragsnummer, Status und Fehlercode in der
 Kundenhistorie gespeichert.
 
-Unter **Briefvorlagen** stehen drei mitgelieferte Vertriebstexte bereit.
+Unter **Briefvorlagen** stehen vier mitgelieferte Vertriebstexte bereit. Die
+Vorlage **Website-Check: Aktualität & Rechtstexte** formuliert dokumentierte
+Beobachtungen bewusst als möglichen Prüfbedarf und enthält den ausdrücklichen
+Hinweis, dass die Ansprache keine Rechtsberatung oder abschließende rechtliche
+Bewertung darstellt.
 Zusätzliche Vorlagen werden mit Catcher-Zeile, Überschrift, Text und den Platzhaltern
-`{{Fahrschule}}` und `{{Ansprechpartner}}` gespeichert. Bei der
+`{{Fahrschule}}`, `{{Ansprechpartner}}`, `{{Tags}}` und `{{Kommentar}}`
+gespeichert. Tags und Kommentar werden aus der Kundenakte personalisiert. Bei der
 PDF-Erstellung füllt eine Auswahl Catcher, Überschrift und Brieftext; die
 konkrete Fassung bleibt vor dem Erzeugen bearbeitbar.
 
@@ -24,6 +29,12 @@ gestaltete Nutzenliste. Die Catcher-Zeile, die Überschrift auf einem Farbverlau
 ein hervorgehobener Einstieg und die kompakte QR-Fläche bilden eine feste
 visuelle Hierarchie. Dadurch bleiben eigene Vorlagen kontrolliert einseitig,
 ohne freien HTML-Code in den Brief einzuschleusen.
+
+Der CSV-Import übernimmt neben den Kontaktdaten auch Tags und einen dauerhaften
+Recherche-Kommentar. Mehrere Tags werden in der CSV mit `|` getrennt, etwa
+`Rechtlich veraltet|Aktuelle Wartungen`. Importierte Beobachtungen müssen vor
+dem Briefversand manuell geprüft werden; die Vorlage darf keine ungeprüfte
+rechtliche Tatsachenbehauptung erzeugen.
 
 Der sichere Ausgangswert ist `ONLINEBRIEF_MODE=test`. Laut Anbieter landen diese Aufträge nur im OnlineBrief24-Warenkorb und werden nicht unmittelbar produziert. Ein kostenpflichtiger Liveversand ist nur mit `ONLINEBRIEF_MODE=live` möglich und verlangt in der Oberfläche zusätzlich die erneute Eingabe der festen Lead-ID. Auftragsverarbeitungsvertrag, Kosten, Adressquelle und rechtliche Freigabe bleiben vor dem ersten echten Versand zu prüfen.
 

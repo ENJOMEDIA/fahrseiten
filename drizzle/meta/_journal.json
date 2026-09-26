@@ -288,6 +288,13 @@
       "when": 1790424589284,
       "tag": "0040_tired_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1790443350857,
+      "tag": "0041_salty_power_pack",
+      "breakpoints": true
     }
   ]
 }

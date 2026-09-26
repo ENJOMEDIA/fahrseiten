@@ -230,6 +230,8 @@ export default async function PostalAcquisitionPage({
               leads={leads.map((lead) => ({
                 id: lead.id,
                 companyName: lead.companyName,
+                tags: lead.tags,
+                researchNote: lead.researchNote,
                 addressComplete: Boolean(
                   lead.street && lead.postalCode && lead.city,
                 ),

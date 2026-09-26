@@ -854,6 +854,8 @@ export const salesLeads = mysqlTable(
     country: varchar("country", { length: 120 })
       .default("Deutschland")
       .notNull(),
+    tags: text("tags"),
+    researchNote: text("research_note"),
     source: varchar("source", { length: 100 }),
     privacyTextVersion: varchar("privacy_text_version", { length: 80 }),
     emailPermission: varchar("email_permission", { length: 40 })

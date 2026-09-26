@@ -1,6 +1,22 @@
 import { z } from "zod";
+import { parseSalesLeadTags } from "./sales-tags";
 
 export const salesCsvHeaders = [
+  "Fahrschule",
+  "Ansprechpartner",
+  "E-Mail",
+  "Telefon",
+  "Webseite",
+  "Straße",
+  "PLZ",
+  "Ort",
+  "Land",
+  "Tags",
+  "Kommentar",
+  "Wiedervorlage",
+] as const;
+
+const previousSalesCsvHeaders = [
   "Fahrschule",
   "Ansprechpartner",
   "E-Mail",
@@ -34,6 +50,8 @@ export type SalesCsvRow = {
   postalCode: string;
   city: string;
   country: string;
+  tags: string[];
+  researchNote: string;
   nextTaskAt: Date | null;
   note: string;
 };
@@ -91,11 +109,19 @@ export function parseSalesCsv(source: string): SalesCsvRow[] {
   const headers = parseLine(lines[0], separator);
   const current =
     headers.length === salesCsvHeaders.length &&
-    headers.every((header, index) => header === salesCsvHeaders[index]);
+    headers.every(
+      (header, index) =>
+        header === salesCsvHeaders[index] ||
+        (index === 10 && header === "Kommentare"),
+    );
+  const previous =
+    headers.every(
+      (header, index) => header === previousSalesCsvHeaders[index],
+    ) && headers.length === previousSalesCsvHeaders.length;
   const legacy =
     headers.length === legacySalesCsvHeaders.length &&
     headers.every((header, index) => header === legacySalesCsvHeaders[index]);
-  if (!current && !legacy)
+  if (!current && !previous && !legacy)
     throw new Error(
       `Die Kopfzeile muss exakt lauten: ${salesCsvHeaders.join(separator)}`,
     );
@@ -109,29 +135,32 @@ export function parseSalesCsv(source: string): SalesCsvRow[] {
     const companyName = z.string().trim().min(2).max(180).parse(cells[0]);
     const email = cells[2] ? z.email().parse(cells[2]) : "";
     const website = cells[4] ? z.url().parse(cells[4]) : "";
-    const offset = current ? 4 : 0;
+    const addressOffset = current || previous ? 4 : 0;
+    const researchNote = current ? cells[10] : cells[6 + addressOffset];
     return {
       companyName,
       contactName: z.string().trim().max(160).parse(cells[1]),
       email,
       phone: z.string().trim().max(40).parse(cells[3]),
       website,
-      street: current ? z.string().trim().max(180).parse(cells[5]) : "",
-      postalCode: current ? z.string().trim().max(20).parse(cells[6]) : "",
-      city: current ? z.string().trim().max(120).parse(cells[7]) : "",
-      country: current
-        ? z.string().trim().max(120).parse(cells[8]) || "Deutschland"
-        : "Deutschland",
-      nextTaskAt: parseDate(cells[5 + offset]),
-      note: z
-        .string()
-        .trim()
-        .max(3_000)
-        .parse(cells[6 + offset]),
+      street:
+        current || previous ? z.string().trim().max(180).parse(cells[5]) : "",
+      postalCode:
+        current || previous ? z.string().trim().max(20).parse(cells[6]) : "",
+      city:
+        current || previous ? z.string().trim().max(120).parse(cells[7]) : "",
+      country:
+        current || previous
+          ? z.string().trim().max(120).parse(cells[8]) || "Deutschland"
+          : "Deutschland",
+      tags: current ? parseSalesLeadTags(cells[9]) : [],
+      researchNote: z.string().trim().max(3_000).parse(researchNote),
+      nextTaskAt: parseDate(current ? cells[11] : cells[5 + addressOffset]),
+      note: z.string().trim().max(3_000).parse(researchNote),
     };
   });
 }
 
 export function salesCsvTemplate() {
-  return `${salesCsvHeaders.join(";")}\nBeispiel Fahrschule;Erika Muster;erika@example.invalid;+49 000 000000;https://example.invalid;Musterstraße 1;12345;Musterstadt;Deutschland;30.09.2026 09:00;Erstkontakt vorbereiten\n`;
+  return `${salesCsvHeaders.join(";")}\nBeispiel Fahrschule;Erika Muster;erika@example.invalid;+49 000 000000;https://example.invalid;Musterstraße 1;12345;Musterstadt;Deutschland;Rechtlich veraltet|Aktuelle Wartungen;Im Impressum wirken einzelne Angaben nicht mehr aktuell. Bitte vor einer Ansprache nochmals manuell prüfen.;30.09.2026 09:00\n`;
 }

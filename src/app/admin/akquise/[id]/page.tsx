@@ -16,6 +16,7 @@ import {
   salesStageLabels,
   type LeadStatus,
 } from "@/modules/platform/sales-stages";
+import { parseSalesLeadTags } from "@/modules/platform/sales-tags";
 
 import { LeadControls, LeadDeletePanel } from "../sales-forms";
 import { SalesNav } from "../sales-nav";
@@ -120,6 +121,27 @@ export default async function SalesLeadDetailPage({
               </dd>
             </div>
             <div className="sm:col-span-2">
+              <dt className="text-slate-500">Tags</dt>
+              <dd className="mt-2 flex flex-wrap gap-2 font-semibold">
+                {parseSalesLeadTags(lead.tags).length
+                  ? parseSalesLeadTags(lead.tags).map((tag) => (
+                      <span
+                        className="rounded-full bg-cyan-50 px-2.5 py-1 text-xs text-cyan-900"
+                        key={tag}
+                      >
+                        {tag}
+                      </span>
+                    ))
+                  : "Noch keine Tags"}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-slate-500">Recherche-Kommentar</dt>
+              <dd className="mt-1 font-semibold whitespace-pre-wrap">
+                {lead.researchNote || "Noch keine Beobachtung dokumentiert"}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
               <dt className="text-slate-500">Postanschrift</dt>
               <dd className="mt-1 font-semibold">
                 {lead.street && lead.postalCode && lead.city
@@ -158,6 +180,8 @@ export default async function SalesLeadDetailPage({
               email: lead.email,
               phone: lead.phone,
               website: lead.website,
+              tags: lead.tags,
+              researchNote: lead.researchNote,
               status: lead.status as LeadStatus,
               nextTaskAt: lead.nextTaskAt,
               emailPermission: lead.emailPermission,
